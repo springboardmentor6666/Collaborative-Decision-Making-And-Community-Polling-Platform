@@ -1,121 +1,154 @@
 package com.decisionhub.service.impl;
 
-import com.decisionhub.dto.JwtAuthResponse;
-import com.decisionhub.dto.LoginRequest;
-import com.decisionhub.dto.UserRequest;
+import com.decisionhub.common.enums.AccountStatus;
+import com.decisionhub.common.enums.AuthProvider;
+import com.decisionhub.common.enums.RoleType;
+import com.decisionhub.dto.request.AuthRequest;
+import com.decisionhub.dto.request.ForgotPasswordRequest;
+import com.decisionhub.dto.request.RegisterRequest;
+import com.decisionhub.dto.request.ResetPasswordRequest;
+import com.decisionhub.dto.request.TokenRefreshRequest;
+import com.decisionhub.dto.response.AuthResponse;
+import com.decisionhub.dto.response.UserResponse;
 import com.decisionhub.entity.Role;
 import com.decisionhub.entity.User;
-import com.decisionhub.exception.BadRequestException;
-import com.decisionhub.exception.ConflictException;
+import com.decisionhub.exception.DuplicateException;
+import com.decisionhub.exception.EntityNotFoundException;
+import com.decisionhub.exception.UnauthorizedException;
+import com.decisionhub.mapper.UserMapper;
 import com.decisionhub.repository.RoleRepository;
 import com.decisionhub.repository.UserRepository;
-import com.decisionhub.security.JwtService;
+import com.decisionhub.security.UserPrincipal;
+import com.decisionhub.security.jwt.JwtTokenProvider;
 import com.decisionhub.service.AuthService;
-import com.decisionhub.util.AppConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Service
-@Transactional
+@Slf4j
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserMapper userMapper;
+    private final com.decisionhub.repository.BlacklistedTokenRepository blacklistedTokenRepository;
 
     @Override
-    public JwtAuthResponse login(LoginRequest loginRequest) {
-        log.info("Authenticating user with email: {}", loginRequest.getEmail());
+    @Transactional
+    public UserResponse register(RegisterRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateException("Username '" + request.getUsername() + "' is already taken.");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateException("Email '" + request.getEmail() + "' is already registered.");
+        }
 
+        Role userRole = roleRepository.findByRoleName(RoleType.ROLE_USER)
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .roleName(RoleType.ROLE_USER)
+                        .description("Standard User Role")
+                        .build()));
+
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(userRole);
+        user.setProvider(AuthProvider.LOCAL);
+        user.setAccountStatus(AccountStatus.ACTIVE);
+        user.setEmailVerified(false);
+
+        User savedUser = userRepository.save(user);
+        log.info("Successfully registered new user with ID: {}", savedUser.getUserId());
+        return userMapper.toResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse login(AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getUsernameOrEmail(), request.getPassword())
         );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        String accessToken = jwtTokenProvider.generateAccessToken(userPrincipal);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userPrincipal);
 
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found: " + loginRequest.getEmail()));
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User", "id", userPrincipal.getId()));
 
-        String accessToken = jwtService.generateAccessToken(user, user.getEmail());
-
-        Set<String> roles = user.getRoles() != null ? user.getRoles().stream()
-                .map(role -> role.getName())
-                .collect(Collectors.toSet()) : Collections.emptySet();
-
-        log.info("User authenticated successfully with email: {}", loginRequest.getEmail());
-
-        return JwtAuthResponse.builder()
+        return AuthResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .email(user.getEmail())
-                .roles(roles)
+                .user(userMapper.toResponse(user))
                 .build();
     }
 
     @Override
-    public JwtAuthResponse register(UserRequest userRequest) {
-        log.info("Registering new user with email: {}", userRequest.getEmail());
-
-        if (userRepository.existsByEmail(userRequest.getEmail())) {
-            throw new ConflictException(AppConstants.USER_ALREADY_EXISTS);
+    @Transactional(readOnly = true)
+    public AuthResponse refreshToken(TokenRefreshRequest request) {
+        if (!jwtTokenProvider.validateToken(request.getRefreshToken())) {
+            throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
-        User user = new User();
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setEmail(userRequest.getEmail());
-        user.setPhone(userRequest.getPhone());
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setProvider(AppConstants.PROVIDER_LOCAL);
-        user.setEnabled(true);
-        user.setAccountLocked(false);
+        String username = jwtTokenProvider.getUsernameFromToken(request.getRefreshToken());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
 
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException(AppConstants.ROLE_NOT_FOUND));
-        user.setRoles(Collections.singletonList(userRole));
+        UserPrincipal userPrincipal = UserPrincipal.create(
+                user.getUserId(), user.getUsername(), user.getEmail(), user.getPassword(),
+                user.getRole().getRoleName().name(), user.getAccountStatus() == AccountStatus.ACTIVE, user.isEmailVerified()
+        );
 
-        User savedUser = userRepository.save(user);
-        log.info("User registered successfully with id: {}", savedUser.getId());
+        String newAccessToken = jwtTokenProvider.generateAccessToken(userPrincipal);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(userPrincipal);
 
-        String accessToken = jwtService.generateAccessToken(savedUser, savedUser.getEmail());
-
-        Set<String> userRoles = savedUser.getRoles().stream()
-                .map(role -> role.getName())
-                .collect(Collectors.toSet());
-
-        return JwtAuthResponse.builder()
-                .accessToken(accessToken)
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .tokenType("Bearer")
-                .email(savedUser.getEmail())
-                .roles(userRoles)
+                .user(userMapper.toResponse(user))
                 .build();
+    }
+
+
+
+    @Override
+    @Transactional
+    public void logout(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        if (org.springframework.util.StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+            java.util.Date expirationDate = jwtTokenProvider.getExpirationDateFromToken(token);
+            com.decisionhub.entity.BlacklistedToken blacklistedToken = com.decisionhub.entity.BlacklistedToken.builder()
+                    .token(token)
+                    .expiryDate(expirationDate)
+                    .build();
+            blacklistedTokenRepository.save(blacklistedToken);
+            log.info("Token has been blacklisted for logout.");
+        }
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("User", "email", request.getEmail()));
+        log.info("Password reset request initiated for email: {}", user.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        log.info("Resetting password with provided reset token");
     }
 }

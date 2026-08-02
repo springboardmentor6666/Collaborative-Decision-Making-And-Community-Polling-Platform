@@ -1,22 +1,31 @@
 package com.decisionhub.service;
 
-import com.decisionhub.dto.UpdateUserRequest;
-import com.decisionhub.dto.UserRequest;
-import com.decisionhub.dto.UserResponse;
-import org.springframework.data.domain.Page;
+import com.decisionhub.common.response.PagedResponse;
+import com.decisionhub.dto.request.UserRequest;
+
+import com.decisionhub.dto.response.DecisionResponse;
+import com.decisionhub.dto.response.UserResponse;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
+import java.util.List;
 
 public interface UserService {
 
-    UserResponse createUser(UserRequest userRequest);
+    UserResponse getUserById(Long id);
 
-    UserResponse getUserById(UUID id);
+    UserResponse getUserByUsername(String username);
 
-    Page<UserResponse> getAllUsers(Pageable pageable, String firstName, String lastName, String email);
+    UserResponse updateProfile(Long userId, UserRequest request);
 
-    UserResponse updateUser(UUID id, UpdateUserRequest updateUserRequest);
+    void deleteUser(Long userId);
 
-    void deleteUser(UUID id);
+    PagedResponse<UserResponse> getAllUsers(Pageable pageable);
+
+
+
+    void saveDecision(Long userId, Long decisionId);
+
+    void unsaveDecision(Long userId, Long decisionId);
+
+    PagedResponse<DecisionResponse> getSavedDecisions(Long userId, Pageable pageable);
 }

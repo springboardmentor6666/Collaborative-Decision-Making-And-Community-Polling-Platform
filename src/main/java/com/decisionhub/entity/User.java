@@ -1,84 +1,101 @@
 package com.decisionhub.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.decisionhub.common.enums.AccountStatus;
+import com.decisionhub.common.enums.AuthProvider;
+import com.decisionhub.entity.base.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 
 @Entity
-@Table(name = "users")
-@Data
-@Builder
+@Table(
+        name = "app_user",
+        indexes = {
+                @Index(name = "idx_user_username", columnList = "username"),
+                @Index(name = "idx_user_email", columnList = "email")
+        }
+)
+@SQLDelete(sql = "UPDATE app_user SET deleted = true WHERE user_id = ?")
+@SQLRestriction("deleted = false")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Builder
+public class User extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long userId;
 
-    @NotBlank(message = "First name is required")
-    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
-    @Column(name = "first_name", nullable = false, length = 50)
-    private String firstName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
-    @NotBlank(message = "Last name is required")
-    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
-    @Column(name = "last_name", nullable = false, length = 50)
-    private String lastName;
+    @Column(name = "full_name", nullable = false, length = 100)
+    private String fullName;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
+
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Pattern(regexp = "^(\\+\\d{1,3})?\\d{10}$", message = "Phone number should be valid")
-    @Column(name = "phone", length = 20)
-    private String phone;
-
-    @Size(max = 255, message = "Password must not exceed 255 characters")
-    @Column(name = "password", length = 255)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "enabled", nullable = false)
-    private Boolean enabled = true;
+    @Column(name = "phone", length = 15)
+    private String phone;
 
-    @Column(name = "account_locked", nullable = false)
-    private Boolean accountLocked = false;
+    @Column(name = "profile_image", length = 255)
+    private String profileImage;
 
-    @Size(max = 20, message = "Provider must not exceed 20 characters")
-    @Column(name = "provider", length = 20)
-    private String provider;
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
 
-    @Size(max = 100, message = "Provider ID must not exceed 100 characters")
-    @Column(name = "provider_id", length = 100)
-    private String providerId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider", nullable = false, length = 20)
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.LOCAL;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false, length = 20)
+    @Builder.Default
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private boolean emailVerified = false;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId != null && Objects.equals(userId, user.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
