@@ -13,5 +13,4 @@ public class BackendApplication {
         System.out.println("🌐 Server: http://localhost:8080");
         System.out.println("==========================================");
     }
-
 }
