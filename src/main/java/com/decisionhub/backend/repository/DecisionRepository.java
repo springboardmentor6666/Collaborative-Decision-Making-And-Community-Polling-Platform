@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface DecisionRepository extends JpaRepository<Decision, Long> {
-    List<Decision> findByIsPublicTrue();
-    List<Decision> findByCreatorId(Long creatorId);
+    List<Decision> findByVisibility(String visibility);
+    List<Decision> findByUserId(Long userId);
 }

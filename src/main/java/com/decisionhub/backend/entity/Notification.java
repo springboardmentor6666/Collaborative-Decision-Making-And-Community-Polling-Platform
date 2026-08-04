@@ -12,18 +12,30 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "notification_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "decision_id")
+    private Decision decision;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
+    private Community community;
+
     @NotBlank
-    @Lob
+    @Column(name = "notification_type", nullable = false, length = 100)
+    private String notificationType;
+
+    @NotBlank
     @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
-    @Column(name = "is_read", nullable = false)
+    @Column(name = "is_read")
     private Boolean isRead = false;
 
     @CreationTimestamp
@@ -34,53 +46,23 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(User user, String message, Boolean isRead) {
+    public Notification(User user, Decision decision, Community community, String notificationType, String message, Boolean isRead) {
         this.user = user;
+        this.decision = decision;
+        this.community = community;
+        this.notificationType = notificationType;
         this.message = message;
         this.isRead = isRead;
     }
 
-    public Notification(Long id, User user, String message, Boolean isRead) {
+    public Notification(Long id, User user, Decision decision, Community community, String notificationType, String message, Boolean isRead) {
         this.id = id;
         this.user = user;
+        this.decision = decision;
+        this.community = community;
+        this.notificationType = notificationType;
         this.message = message;
         this.isRead = isRead;
-    }
-
-    // Custom Builder
-    public static NotificationBuilder builder() {
-        return new NotificationBuilder();
-    }
-
-    public static class NotificationBuilder {
-        private Long id;
-        private User user;
-        private String message;
-        private Boolean isRead = false;
-
-        public NotificationBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public NotificationBuilder user(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public NotificationBuilder message(String message) {
-            this.message = message;
-            return this;
-        }
-
-        public NotificationBuilder isRead(Boolean isRead) {
-            this.isRead = isRead;
-            return this;
-        }
-
-        public Notification build() {
-            return new Notification(id, user, message, isRead);
-        }
     }
 
     // Getters and Setters
@@ -98,6 +80,30 @@ public class Notification {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Decision getDecision() {
+        return decision;
+    }
+
+    public void setDecision(Decision decision) {
+        this.decision = decision;
+    }
+
+    public Community getCommunity() {
+        return community;
+    }
+
+    public void setCommunity(Community community) {
+        this.community = community;
+    }
+
+    public String getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(String notificationType) {
+        this.notificationType = notificationType;
     }
 
     public String getMessage() {

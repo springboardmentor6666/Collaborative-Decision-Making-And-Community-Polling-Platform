@@ -12,75 +12,56 @@ public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "report_id")
     private Long id;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "generated_by_id")
-    private User generatedBy;
+    @JoinColumn(name = "decision_id")
+    private Decision decision;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String data;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
+    private Community community;
+
+    @NotBlank
+    @Column(name = "report_type", nullable = false, length = 100)
+    private String reportType;
+
+    @Column(name = "file_format", length = 20)
+    private String fileFormat;
+
+    @Column(name = "file_path", length = 255)
+    private String filePath;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "generated_at", updatable = false)
+    private LocalDateTime generatedAt;
 
     // Constructors
     public Report() {
     }
 
-    public Report(String title, User generatedBy, String data) {
-        this.title = title;
-        this.generatedBy = generatedBy;
-        this.data = data;
+    public Report(User user, Decision decision, Community community, String reportType, String fileFormat, String filePath) {
+        this.user = user;
+        this.decision = decision;
+        this.community = community;
+        this.reportType = reportType;
+        this.fileFormat = fileFormat;
+        this.filePath = filePath;
     }
 
-    public Report(Long id, String title, User generatedBy, String data) {
+    public Report(Long id, User user, Decision decision, Community community, String reportType, String fileFormat, String filePath) {
         this.id = id;
-        this.title = title;
-        this.generatedBy = generatedBy;
-        this.data = data;
-    }
-
-    // Custom Builder
-    public static ReportBuilder builder() {
-        return new ReportBuilder();
-    }
-
-    public static class ReportBuilder {
-        private Long id;
-        private String title;
-        private User generatedBy;
-        private String data;
-
-        public ReportBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public ReportBuilder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public ReportBuilder generatedBy(User generatedBy) {
-            this.generatedBy = generatedBy;
-            return this;
-        }
-
-        public ReportBuilder data(String data) {
-            this.data = data;
-            return this;
-        }
-
-        public Report build() {
-            return new Report(id, title, generatedBy, data);
-        }
+        this.user = user;
+        this.decision = decision;
+        this.community = community;
+        this.reportType = reportType;
+        this.fileFormat = fileFormat;
+        this.filePath = filePath;
     }
 
     // Getters and Setters
@@ -92,35 +73,59 @@ public class Report {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public User getUser() {
+        return user;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public User getGeneratedBy() {
-        return generatedBy;
+    public Decision getDecision() {
+        return decision;
     }
 
-    public void setGeneratedBy(User generatedBy) {
-        this.generatedBy = generatedBy;
+    public void setDecision(Decision decision) {
+        this.decision = decision;
     }
 
-    public String getData() {
-        return data;
+    public Community getCommunity() {
+        return community;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public void setCommunity(Community community) {
+        this.community = community;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getReportType() {
+        return reportType;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setReportType(String reportType) {
+        this.reportType = reportType;
+    }
+
+    public String getFileFormat() {
+        return fileFormat;
+    }
+
+    public void setFileFormat(String fileFormat) {
+        this.fileFormat = fileFormat;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public LocalDateTime getGeneratedAt() {
+        return generatedAt;
+    }
+
+    public void setGeneratedAt(LocalDateTime generatedAt) {
+        this.generatedAt = generatedAt;
     }
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,10 +28,11 @@ function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          username,
           fullName,
           email,
           password,
-          roles: ["user"] // Default role
+          role: "USER" // Default role
         }),
       });
 
@@ -43,7 +45,7 @@ function Register() {
             .join(" | ");
           throw new Error(detail);
         }
-        throw new Error(data.message || "Registration failed. Check if email is already in use.");
+        throw new Error(data.message || "Registration failed. Check if username or email is already in use.");
       }
 
       setSuccess("Account created successfully! Redirecting to sign in...");
@@ -66,6 +68,14 @@ function Register() {
         {success && <div style={{ color: "#2ecc71", fontSize: "14px", margin: "10px 0", fontWeight: "bold" }}>{success}</div>}
 
         <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+          />
           <input
             type="text"
             placeholder="Full Name"

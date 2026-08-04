@@ -3,6 +3,7 @@ package com.decisionhub.backend.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,66 +24,39 @@ public class Comment {
     @JoinColumn(name = "decision_id", nullable = false)
     private Decision decision;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
     @NotBlank
-    @Lob
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @Column(name = "comment_text", columnDefinition = "TEXT", nullable = false)
+    private String commentText;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     // Constructors
     public Comment() {
     }
 
-    public Comment(User user, Decision decision, String content) {
+    public Comment(User user, Decision decision, Comment parentComment, String commentText) {
         this.user = user;
         this.decision = decision;
-        this.content = content;
+        this.parentComment = parentComment;
+        this.commentText = commentText;
     }
 
-    public Comment(Long id, User user, Decision decision, String content) {
+    public Comment(Long id, User user, Decision decision, Comment parentComment, String commentText) {
         this.id = id;
         this.user = user;
         this.decision = decision;
-        this.content = content;
-    }
-
-    // Custom Builder
-    public static CommentBuilder builder() {
-        return new CommentBuilder();
-    }
-
-    public static class CommentBuilder {
-        private Long id;
-        private User user;
-        private Decision decision;
-        private String content;
-
-        public CommentBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public CommentBuilder user(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public CommentBuilder decision(Decision decision) {
-            this.decision = decision;
-            return this;
-        }
-
-        public CommentBuilder content(String content) {
-            this.content = content;
-            return this;
-        }
-
-        public Comment build() {
-            return new Comment(id, user, decision, content);
-        }
+        this.parentComment = parentComment;
+        this.commentText = commentText;
     }
 
     // Getters and Setters
@@ -109,12 +84,20 @@ public class Comment {
         this.decision = decision;
     }
 
-    public String getContent() {
-        return content;
+    public Comment getParentComment() {
+        return parentComment;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setParentComment(Comment parentComment) {
+        this.parentComment = parentComment;
+    }
+
+    public String getCommentText() {
+        return commentText;
+    }
+
+    public void setCommentText(String commentText) {
+        this.commentText = commentText;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -123,5 +106,13 @@ public class Comment {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

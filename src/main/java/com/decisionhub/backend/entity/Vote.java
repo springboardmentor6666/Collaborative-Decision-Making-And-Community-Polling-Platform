@@ -6,14 +6,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-    name = "votes",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "decision_id"})
-)
+@Table(name = "votes")
 public class Vote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "vote_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,61 +26,30 @@ public class Vote {
     @JoinColumn(name = "option_id", nullable = false)
     private Option option;
 
+    @Column(name = "vote_type", length = 50)
+    private String voteType;
+
     @CreationTimestamp
-    @Column(name = "voted_at", updatable = false)
-    private LocalDateTime votedAt;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     // Constructors
     public Vote() {
     }
 
-    public Vote(User user, Decision decision, Option option) {
+    public Vote(User user, Decision decision, Option option, String voteType) {
         this.user = user;
         this.decision = decision;
         this.option = option;
+        this.voteType = voteType;
     }
 
-    public Vote(Long id, User user, Decision decision, Option option) {
+    public Vote(Long id, User user, Decision decision, Option option, String voteType) {
         this.id = id;
         this.user = user;
         this.decision = decision;
         this.option = option;
-    }
-
-    // Custom Builder
-    public static VoteBuilder builder() {
-        return new VoteBuilder();
-    }
-
-    public static class VoteBuilder {
-        private Long id;
-        private User user;
-        private Decision decision;
-        private Option option;
-
-        public VoteBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public VoteBuilder user(User user) {
-            this.user = user;
-            return this;
-        }
-
-        public VoteBuilder decision(Decision decision) {
-            this.decision = decision;
-            return this;
-        }
-
-        public VoteBuilder option(Option option) {
-            this.option = option;
-            return this;
-        }
-
-        public Vote build() {
-            return new Vote(id, user, decision, option);
-        }
+        this.voteType = voteType;
     }
 
     // Getters and Setters
@@ -118,11 +85,19 @@ public class Vote {
         this.option = option;
     }
 
-    public LocalDateTime getVotedAt() {
-        return votedAt;
+    public String getVoteType() {
+        return voteType;
     }
 
-    public void setVotedAt(LocalDateTime votedAt) {
-        this.votedAt = votedAt;
+    public void setVoteType(String voteType) {
+        this.voteType = voteType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

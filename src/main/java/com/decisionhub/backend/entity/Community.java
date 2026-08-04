@@ -13,23 +13,26 @@ public class Community {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "community_id")
     private Long id;
 
     @NotBlank
-    @Size(max = 255)
-    @Column(nullable = false, unique = true)
-    private String name;
+    @Size(max = 100)
+    @Column(name = "community_name", nullable = false)
+    private String communityName;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
 
     @Size(max = 100)
     private String category;
 
+    @Column(name = "member_count")
+    private Integer memberCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private User creator;
+    @JoinColumn(name = "moderator_id", nullable = false)
+    private User moderator;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -39,61 +42,21 @@ public class Community {
     public Community() {
     }
 
-    public Community(String name, String description, String category, User creator) {
-        this.name = name;
+    public Community(String communityName, String description, String category, User moderator) {
+        this.communityName = communityName;
         this.description = description;
         this.category = category;
-        this.creator = creator;
+        this.moderator = moderator;
+        this.memberCount = 0;
     }
 
-    public Community(Long id, String name, String description, String category, User creator) {
+    public Community(Long id, String communityName, String description, String category, Integer memberCount, User moderator) {
         this.id = id;
-        this.name = name;
+        this.communityName = communityName;
         this.description = description;
         this.category = category;
-        this.creator = creator;
-    }
-
-    // Custom Builder
-    public static CommunityBuilder builder() {
-        return new CommunityBuilder();
-    }
-
-    public static class CommunityBuilder {
-        private Long id;
-        private String name;
-        private String description;
-        private String category;
-        private User creator;
-
-        public CommunityBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public CommunityBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public CommunityBuilder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public CommunityBuilder category(String category) {
-            this.category = category;
-            return this;
-        }
-
-        public CommunityBuilder creator(User creator) {
-            this.creator = creator;
-            return this;
-        }
-
-        public Community build() {
-            return new Community(id, name, description, category, creator);
-        }
+        this.memberCount = memberCount;
+        this.moderator = moderator;
     }
 
     // Getters and Setters
@@ -105,12 +68,12 @@ public class Community {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getCommunityName() {
+        return communityName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 
     public String getDescription() {
@@ -129,12 +92,20 @@ public class Community {
         this.category = category;
     }
 
-    public User getCreator() {
-        return creator;
+    public Integer getMemberCount() {
+        return memberCount;
     }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
+    public void setMemberCount(Integer memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public User getModerator() {
+        return moderator;
+    }
+
+    public void setModerator(User moderator) {
+        this.moderator = moderator;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -3,7 +3,6 @@ package com.decisionhub.backend.service;
 import com.decisionhub.backend.dto.AuthResponse;
 import com.decisionhub.backend.dto.LoginRequest;
 import com.decisionhub.backend.dto.RegisterRequest;
-import com.decisionhub.backend.entity.Role;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.exception.CustomException;
 import com.decisionhub.backend.config.JwtUtils;
@@ -19,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,41 +38,41 @@ public class AuthService {
 
     @Transactional
     public void registerUser(RegisterRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            throw new CustomException("Error: Username is already taken!", HttpStatus.BAD_REQUEST);
+        }
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             throw new CustomException("Error: Email is already in use!", HttpStatus.BAD_REQUEST);
         }
 
-        // Create new user's account
-        User user = User.builder()
-                .fullName(signUpRequest.getFullName())
-                .email(signUpRequest.getEmail())
-                .password(encoder.encode(signUpRequest.getPassword()))
-                .build();
+        // Create new user's account using standard constructor
+        User user = new User(
+                signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getFullName()
+        );
 
-        Set<String> strRoles = signUpRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null || strRoles.isEmpty()) {
-            roles.add(Role.ROLE_USER);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role.toLowerCase()) {
-                    case "admin":
-                    case "administrator":
-                        roles.add(Role.ROLE_ADMIN);
-                        break;
-                    case "mod":
-                    case "moderator":
-                    case "community moderator":
-                        roles.add(Role.ROLE_MODERATOR);
-                        break;
-                    default:
-                        roles.add(Role.ROLE_USER);
-                }
-            });
+        String strRole = signUpRequest.getRole();
+        String role = "USER";
+        
+        if (strRole != null) {
+            switch (strRole.toLowerCase()) {
+                case "admin":
+                case "administrator":
+                    role = "ADMIN";
+                    break;
+                case "mod":
+                case "moderator":
+                case "community moderator":
+                    role = "MODERATOR";
+                    break;
+                default:
+                    role = "USER";
+            }
         }
 
-        user.setRoles(roles);
+        user.setRole(role);
         userRepository.save(user);
     }
 

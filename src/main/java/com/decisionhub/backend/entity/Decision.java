@@ -14,26 +14,29 @@ public class Decision {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "decision_id")
     private Long id;
 
     @NotBlank
-    @Size(max = 255)
+    @Size(max = 200)
     @Column(nullable = false)
     private String title;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "is_public", nullable = false)
-    private Boolean isPublic = true;
 
     @Size(max = 100)
     private String category;
 
+    @Column(name = "status", length = 30)
+    private String status = "ACTIVE";
+
+    @Column(name = "visibility", length = 30)
+    private String visibility = "PUBLIC";
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private User creator;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -47,69 +50,23 @@ public class Decision {
     public Decision() {
     }
 
-    public Decision(String title, String description, Boolean isPublic, String category, User creator) {
+    public Decision(String title, String description, String category, User user) {
         this.title = title;
         this.description = description;
-        this.isPublic = isPublic;
         this.category = category;
-        this.creator = creator;
+        this.user = user;
+        this.status = "ACTIVE";
+        this.visibility = "PUBLIC";
     }
 
-    public Decision(Long id, String title, String description, Boolean isPublic, String category, User creator) {
+    public Decision(Long id, String title, String description, String category, String status, String visibility, User user) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.isPublic = isPublic;
         this.category = category;
-        this.creator = creator;
-    }
-
-    // Custom Builder
-    public static DecisionBuilder builder() {
-        return new DecisionBuilder();
-    }
-
-    public static class DecisionBuilder {
-        private Long id;
-        private String title;
-        private String description;
-        private Boolean isPublic = true;
-        private String category;
-        private User creator;
-
-        public DecisionBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public DecisionBuilder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public DecisionBuilder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public DecisionBuilder isPublic(Boolean isPublic) {
-            this.isPublic = isPublic;
-            return this;
-        }
-
-        public DecisionBuilder category(String category) {
-            this.category = category;
-            return this;
-        }
-
-        public DecisionBuilder creator(User creator) {
-            this.creator = creator;
-            return this;
-        }
-
-        public Decision build() {
-            return new Decision(id, title, description, isPublic, category, creator);
-        }
+        this.status = status;
+        this.visibility = visibility;
+        this.user = user;
     }
 
     // Getters and Setters
@@ -137,14 +94,6 @@ public class Decision {
         this.description = description;
     }
 
-    public Boolean getIsPublic() {
-        return isPublic;
-    }
-
-    public void setIsPublic(Boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -153,12 +102,28 @@ public class Decision {
         this.category = category;
     }
 
-    public User getCreator() {
-        return creator;
+    public String getStatus() {
+        return status;
     }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDateTime getCreatedAt() {

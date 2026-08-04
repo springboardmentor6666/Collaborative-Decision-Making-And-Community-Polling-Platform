@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -17,29 +15,38 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @NotBlank
     @Size(max = 100)
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(nullable = false, unique = true)
+    private String username;
 
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 150)
     @Email
     @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank
-    @Size(max = 120)
-    @Column(nullable = false)
+    @Size(max = 255)
+    @Column(name = "password_hash", nullable = false)
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private Set<Role> roles = new HashSet<>();
+    @Size(max = 150)
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Size(max = 255)
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
+    @Column(name = "role", length = 30)
+    private String role = "USER";
+
+    @Column(columnDefinition = "TEXT")
+    private String interests;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -53,61 +60,21 @@ public class User {
     public User() {
     }
 
-    public User(String fullName, String email, String password) {
-        this.fullName = fullName;
+    public User(String username, String email, String password, String fullName) {
+        this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = new HashSet<>();
+        this.fullName = fullName;
+        this.role = "USER";
     }
 
-    public User(Long id, String fullName, String email, String password, Set<Role> roles) {
+    public User(Long id, String username, String email, String password, String fullName, String role) {
         this.id = id;
-        this.fullName = fullName;
+        this.username = username;
         this.email = email;
         this.password = password;
-        this.roles = roles;
-    }
-
-    // Custom Builder pattern for compatibility
-    public static UserBuilder builder() {
-        return new UserBuilder();
-    }
-
-    public static class UserBuilder {
-        private Long id;
-        private String fullName;
-        private String email;
-        private String password;
-        private Set<Role> roles = new HashSet<>();
-
-        public UserBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public UserBuilder fullName(String fullName) {
-            this.fullName = fullName;
-            return this;
-        }
-
-        public UserBuilder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public UserBuilder password(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public UserBuilder roles(Set<Role> roles) {
-            this.roles = roles;
-            return this;
-        }
-
-        public User build() {
-            return new User(id, fullName, email, password, roles);
-        }
+        this.fullName = fullName;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -119,12 +86,12 @@ public class User {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -143,12 +110,36 @@ public class User {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getInterests() {
+        return interests;
+    }
+
+    public void setInterests(String interests) {
+        this.interests = interests;
     }
 
     public LocalDateTime getCreatedAt() {

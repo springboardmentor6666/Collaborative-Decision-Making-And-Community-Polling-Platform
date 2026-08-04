@@ -1,100 +1,159 @@
--- Create Database if not exists
-CREATE DATABASE IF NOT EXISTS decisionhub;
-USE decisionhub;
+-- DecisionHub Database Schema
+-- PostgreSQL
+-- Order is important because of foreign keys
 
--- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    full_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    user_id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(150),
+    profile_picture VARCHAR(255),
+    role VARCHAR(30) DEFAULT 'USER',
+    interests TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- User Roles table (Set of roles per user)
-CREATE TABLE IF NOT EXISTS user_roles (
-    user_id BIGINT NOT NULL,
-    role VARCHAR(50) NOT NULL,
-    PRIMARY KEY (user_id, role),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Communities table
-CREATE TABLE IF NOT EXISTS communities (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    category VARCHAR(100),
-    creator_id BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL
-);
-
--- Decisions table
 CREATE TABLE IF NOT EXISTS decisions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    decision_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
     description TEXT,
-    is_public BOOLEAN DEFAULT TRUE,
     category VARCHAR(100),
-    creator_id BIGINT,
+    status VARCHAR(30) DEFAULT 'ACTIVE',
+    visibility VARCHAR(30) DEFAULT 'PUBLIC',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_decisions_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE
 );
 
--- Options table (choices associated with a decision board)
 CREATE TABLE IF NOT EXISTS options (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    option_id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    option_title VARCHAR(200) NOT NULL,
     description TEXT,
-    pros TEXT, -- Store pros as comma-separated or text block
-    cons TEXT, -- Store cons as comma-separated or text block
-    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
+    pros TEXT,
+    cons TEXT,
+    score INT DEFAULT 0,
+    ranking INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_options_decision
+        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id)
+        ON DELETE CASCADE
 );
 
--- Votes table (one vote per user per decision)
 CREATE TABLE IF NOT EXISTS votes (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vote_id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     decision_id BIGINT NOT NULL,
     option_id BIGINT NOT NULL,
-    voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_decision (user_id, decision_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
-    FOREIGN KEY (option_id) REFERENCES options(id) ON DELETE CASCADE
+    vote_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_votes_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_votes_decision
+        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_votes_option
+        FOREIGN KEY (option_id) REFERENCES options(option_id)
+        ON DELETE CASCADE
 );
 
--- Comments table
+CREATE TABLE IF NOT EXISTS communities (
+    community_id BIGSERIAL PRIMARY KEY,
+    moderator_id BIGINT NOT NULL,
+    community_name VARCHAR(100) NOT NULL,
+    category VARCHAR(100),
+    description TEXT,
+    member_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_communities_moderator
+        FOREIGN KEY (moderator_id) REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS community_members (
+    member_id BIGSERIAL PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    member_role VARCHAR(50) DEFAULT 'MEMBER',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_community_members_community
+        FOREIGN KEY (community_id) REFERENCES communities(community_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_community_members_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT unique_community_user UNIQUE (community_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS comments (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    comment_id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     decision_id BIGINT NOT NULL,
-    content TEXT NOT NULL,
+    parent_comment_id BIGINT NULL,
+    comment_text TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_comments_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_comments_decision
+        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_comments_parent
+        FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id)
+        ON DELETE CASCADE
 );
 
--- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    notification_id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    decision_id BIGINT NULL,
+    community_id BIGINT NULL,
+    notification_type VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+    CONSTRAINT fk_notifications_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_notifications_decision
+        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_notifications_community
+        FOREIGN KEY (community_id) REFERENCES communities(community_id)
+        ON DELETE SET NULL
 );
 
--- Reports table
 CREATE TABLE IF NOT EXISTS reports (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    generated_by_id BIGINT,
-    data TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (generated_by_id) REFERENCES users(id) ON DELETE SET NULL
+    report_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    decision_id BIGINT NULL,
+    community_id BIGINT NULL,
+    report_type VARCHAR(100) NOT NULL,
+    file_format VARCHAR(20),
+    file_path VARCHAR(255),
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_reports_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_reports_decision
+        FOREIGN KEY (decision_id) REFERENCES decisions(decision_id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_reports_community
+        FOREIGN KEY (community_id) REFERENCES communities(community_id)
+        ON DELETE SET NULL
 );
