@@ -7,6 +7,7 @@ import About from "./components/About";
 import Services from "./components/Services";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import DatabaseOverview from "./components/DatabaseOverview";
 import "./App.css";
 
 
@@ -32,6 +33,8 @@ return (
       <Route path="/login" element={<Login />} />
 
       <Route path="/register" element={<Register />} />
+
+      <Route path="/database" element={<><Navbar /><DatabaseOverview /></>} />
 
     </Routes>
   </BrowserRouter>

@@ -26,6 +26,7 @@ function Navbar() {
 
       <ul>
         <li><Link to="/">Home</Link></li>
+        <li><Link to="/database">Database</Link></li>
         <li><a href="#about">About</a></li>
         <li><a href="#services">Services</a></li>
         <li><a href="#contact">Contact</a></li>

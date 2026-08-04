@@ -23,7 +23,7 @@
    mvn spring-boot:run
    ```
 
-   The backend listens on `http://localhost:8081`. It initializes `users`, `decisions`, `options`, `votes`, communities, comments, notifications, and reports using the supplied PostgreSQL schema, then Hibernate validates the mappings.
+   The backend listens on `http://localhost:8081`. For a new database, it initializes users, decisions, options, votes, communities, comments, notifications, and reports using the supplied PostgreSQL schema. Existing tables are not changed automatically.
 
 3. In a second terminal, start the frontend:
 
@@ -34,5 +34,7 @@
    ```
 
    The Vite development server forwards `/api/*` requests to `http://localhost:8081`, so the register and login pages use the PostgreSQL-backed backend with no hard-coded host in the UI.
+
+4. Open `http://localhost:5173/database` to view the live PostgreSQL users, decisions, options, and record counts inside the application. The page is read-only and does not expose password hashes.
 
 For deployment, set `VITE_API_BASE_URL` to the public backend API URL (including `/api`) when building the frontend, and add its web origin to `CORS_ALLOWED_ORIGINS` for the backend.
