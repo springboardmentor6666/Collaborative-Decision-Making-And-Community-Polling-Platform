@@ -12,3 +12,8 @@ target/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment files may contain database credentials
+.env
+.env.*
+!.env.example
