@@ -60,6 +60,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/test/all").permitAll()
+                .requestMatchers("/api/dashboard/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll() // Allow H2 Console
                 .requestMatchers("/api/test/user").hasAnyRole("USER", "MODERATOR", "ADMIN")
                 .requestMatchers("/api/test/mod").hasAnyRole("MODERATOR", "ADMIN")

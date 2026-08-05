@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+
 function Register() {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
@@ -22,7 +26,7 @@ function Register() {
     }
 
     try {
-      const response = await fetch("http://localhost:8081/api/auth/register", {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +66,9 @@ function Register() {
     <section className="login">
       <div className="login-box">
         <h1>DecisionHub</h1>
-        <h2>Create Account</h2>
+        <p className="subtitle">
+          Create your account and start making smarter decisions.
+        </p>
 
         {error && <div style={{ color: "#ff4d4d", fontSize: "14px", margin: "10px 0", fontWeight: "bold" }}>{error}</div>}
         {success && <div style={{ color: "#2ecc71", fontSize: "14px", margin: "10px 0", fontWeight: "bold" }}>{success}</div>}
@@ -70,51 +76,79 @@ function Register() {
         <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <input
             type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-          <input
-            type="text"
-            placeholder="Full Name"
+            placeholder="Enter your full name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
           />
+
+          <input
+            type="text"
+            placeholder="Enter your username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+
           <input
             type="email"
-            placeholder="Email Address"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
           />
 
-          <button type="submit" style={{ width: "100%", padding: "10px", borderRadius: "5px", backgroundColor: "#3498db", color: "white", border: "none", cursor: "pointer", fontWeight: "bold" }}>
+          <div className="password-box">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <span
+              className="eye-icon"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ userSelect: "none" }}
+            >
+              👁️
+            </span>
+          </div>
+
+          <div className="password-box">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+            <span
+              className="eye-icon"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{ userSelect: "none" }}
+            >
+              👁️
+            </span>
+          </div>
+
+          <div className="remember">
+            <div className="remember-left">
+              <input type="checkbox" id="terms" required />
+              <label htmlFor="terms">
+                I agree to the Terms & Conditions
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" className="login-btn">
             Create Account
           </button>
         </form>
 
-        <p>Already have an account? <a href="/login">Sign In</a></p>
+        <p className="register-link">
+          Already have an account? <a href="/login">Sign In</a>
+        </p>
       </div>
     </section>
   );
