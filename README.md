@@ -197,7 +197,7 @@ cd frontend
 npm install
 npm run dev
 ```
-Frontend development server starts on [http://localhost:5173](http://localhost:5173).
+Frontend development server starts on [http://localhost:5173](http://localhost:5173) (or [http://localhost:3000](http://localhost:3000) when running via Docker).
 
 ---
 
@@ -226,3 +226,4 @@ All seed and test accounts in the database are configured with password: **`Pass
 * **Milestone 2 (Weeks 3 & 4)**: Decision board management, option comparison module, polling & voting workflows.
 * **Milestone 3 (Weeks 5 & 6)**: Discussion threads, community categorization, notifications, and analytics API.
 * **Milestone 4 (Weeks 7 & 8)**: Decision analysis dashboards, creator metrics reporting, containerization & deployment.
+
