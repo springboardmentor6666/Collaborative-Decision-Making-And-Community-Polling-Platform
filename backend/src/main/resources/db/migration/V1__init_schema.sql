@@ -120,6 +120,42 @@ CREATE TABLE option (
 
 CREATE INDEX idx_option_decision ON option(decision_id);
 
+-- 8a. OPTION_COMPARISON Table
+CREATE TABLE option_comparison (
+    option_id BIGINT PRIMARY KEY REFERENCES option(option_id) ON DELETE CASCADE,
+    cost_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    benefits_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    risk_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    time_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    convenience_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    custom_criteria_name VARCHAR(100),
+    custom_criteria_score NUMERIC(5,2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8b. OPTION_PRO_CON Table
+CREATE TABLE option_pro_con (
+    pro_con_id BIGSERIAL PRIMARY KEY,
+    option_id BIGINT NOT NULL REFERENCES option(option_id) ON DELETE CASCADE,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('PRO', 'CON')),
+    statement TEXT NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_option_pro_con_option ON option_pro_con(option_id);
+
+CREATE TRIGGER trg_update_option_comparison_updated_at
+BEFORE UPDATE ON option_comparison
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER trg_update_option_pro_con_updated_at
+BEFORE UPDATE ON option_pro_con
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
 
 
 -- 10. VOTE Table
@@ -138,6 +174,7 @@ CREATE TABLE vote (
 CREATE INDEX idx_vote_decision ON vote(decision_id);
 CREATE INDEX idx_vote_option ON vote(option_id);
 CREATE INDEX idx_vote_user ON vote(user_id);
+CREATE UNIQUE INDEX uk_vote_user_decision_option ON vote(user_id, decision_id, option_id) WHERE user_id IS NOT NULL;
 
 -- 11. COMMENT Table
 CREATE TABLE comment (
@@ -224,6 +261,29 @@ CREATE TABLE report (
 
 CREATE INDEX idx_report_decision ON report(decision_id);
 CREATE INDEX idx_report_generator ON report(generated_by);
+
+-- 16a. ABUSE_REPORT Table
+CREATE TABLE abuse_report (
+    report_id BIGSERIAL PRIMARY KEY,
+    decision_id BIGINT NOT NULL REFERENCES decision(decision_id) ON DELETE CASCADE,
+    reported_by BIGINT NOT NULL REFERENCES app_user(user_id) ON DELETE CASCADE,
+    reason VARCHAR(30) NOT NULL,
+    description TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    resolved_by BIGINT REFERENCES app_user(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by_user VARCHAR(255),
+    deleted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE INDEX idx_abuse_report_decision ON abuse_report(decision_id);
+CREATE INDEX idx_abuse_report_status ON abuse_report(status);
+
+CREATE TRIGGER trg_update_abuse_report_updated_at
+BEFORE UPDATE ON abuse_report
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- 17. AUDIT_LOG Table
 CREATE TABLE audit_log (
