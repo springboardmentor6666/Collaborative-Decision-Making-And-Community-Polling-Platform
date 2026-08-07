@@ -10,6 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +28,40 @@ public class JwtUtil {
     private long expiration;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = decodeSigningKey(secret);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private byte[] decodeSigningKey(String configuredSecret) {
+        if (configuredSecret == null || configuredSecret.isBlank()) {
+            configuredSecret = "decisionhub-default-secret";
+        }
+
+        try {
+            byte[] decoded = Decoders.BASE64.decode(configuredSecret);
+            if (decoded.length > 0) {
+                return normalizeKeyBytes(decoded);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // Fall back to a UTF-8 based key for plain-text secrets.
+        }
+
+        try {
+            return normalizeKeyBytes(java.util.HexFormat.of().parseHex(configuredSecret));
+        } catch (IllegalArgumentException ignored) {
+            // Fall back to the raw secret bytes.
+        }
+
+        return normalizeKeyBytes(configuredSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private byte[] normalizeKeyBytes(byte[] keyBytes) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(keyBytes);
+        } catch (NoSuchAlgorithmException e) {
+            return keyBytes;
+        }
     }
 
     public String extractUsername(String token) {

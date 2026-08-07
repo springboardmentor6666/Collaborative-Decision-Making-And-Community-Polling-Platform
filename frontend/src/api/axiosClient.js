@@ -1,5 +1,12 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
+const normalizeEndpoint = (endpoint) => {
+  if (!endpoint.startsWith('/')) {
+    return `/${endpoint}`;
+  }
+  return endpoint;
+};
+
 // Storage key for simulated refresh token cookie fallback when backend is not live
 const REFRESH_TOKEN_KEY = 'dh_refresh_token';
 
@@ -29,7 +36,7 @@ async function request(endpoint, options = {}) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const response = await fetch(`${API_BASE_URL}${normalizeEndpoint(endpoint)}`, config);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Request failed with status ${response.status}`);
