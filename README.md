@@ -17,6 +17,7 @@
 2. Copy the values from `.env.example` into the environment that starts Spring Boot. For the supplied Docker database, use `decisionhub` as the password:
 
    ```powershell
+   cd backend
    $env:DB_URL = "jdbc:postgresql://localhost:5432/decisionhub"
    $env:DB_USERNAME = "postgres"
    $env:DB_PASSWORD = "decisionhub"
@@ -28,7 +29,7 @@
 3. In a second terminal, start the frontend:
 
    ```powershell
-   cd decisionhub-frontend
+   cd frontend
    npm install
    npm run dev
    ```
