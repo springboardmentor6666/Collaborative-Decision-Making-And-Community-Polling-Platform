@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -81,6 +83,65 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+    }
+
+    @Transactional
+    public AuthResponse processOAuthLogin(String provider, String providerId, String email, String fullName, String profileImage) {
+        String normalizedProvider = provider == null ? "LOCAL" : provider.toUpperCase(Locale.ROOT);
+        String normalizedEmail = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+
+        if (normalizedEmail == null || normalizedEmail.isBlank()) {
+            throw new IllegalArgumentException("Email not available from provider: " + normalizedProvider);
+        }
+
+        User user = userRepository.findByProviderAndProviderId(normalizedProvider, providerId)
+                .orElseGet(() -> userRepository.findByEmail(normalizedEmail).orElse(null));
+
+        if (user == null) {
+            user = new User();
+            user.setEmail(normalizedEmail);
+            user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setRole("USER");
+            user.setProvider(normalizedProvider);
+        }
+
+        if (user.getProvider() == null || user.getProvider().isBlank()) {
+            user.setProvider(normalizedProvider);
+        }
+
+        if (user.getProviderId() == null || user.getProviderId().isBlank()) {
+            user.setProviderId(providerId);
+        } else if (!user.getProviderId().equals(providerId)) {
+            user.setProviderId(providerId);
+        }
+
+        if (user.getProvider().equalsIgnoreCase("LOCAL") && !normalizedProvider.equalsIgnoreCase("LOCAL")) {
+            user.setProvider(normalizedProvider);
+        }
+
+        if (user.getFullName() == null || user.getFullName().isBlank()) {
+            user.setFullName(fullName);
+        }
+
+        if (fullName != null && !fullName.isBlank() && (user.getFullName() == null || user.getFullName().isBlank())) {
+            user.setFullName(fullName);
+        }
+
+        if (profileImage != null && !profileImage.isBlank()) {
+            user.setProfileImage(profileImage);
+        }
+
+        if (user.getRole() == null || user.getRole().isBlank()) {
+            user.setRole("USER");
+        }
+
+        if (user.getIsActive() == null) {
+            user.setIsActive(true);
+        }
+
+        User savedUser = userRepository.save(user);
+        String token = jwtUtil.generateToken(savedUser.getEmail());
+        return new AuthResponse(token, mapToUserResponse(savedUser));
     }
 
     public UserResponse mapToUserResponse(User user) {

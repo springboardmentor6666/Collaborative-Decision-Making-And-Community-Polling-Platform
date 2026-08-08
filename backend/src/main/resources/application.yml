@@ -7,6 +7,24 @@ server:
 spring:
   application:
     name: decisionhub-backend
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid,profile,email
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            scope: read:user,user:email
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/decisionhub_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:root}
@@ -26,6 +44,9 @@ spring:
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
   expiration: 86400000
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
 
 springdoc:
   api-docs:

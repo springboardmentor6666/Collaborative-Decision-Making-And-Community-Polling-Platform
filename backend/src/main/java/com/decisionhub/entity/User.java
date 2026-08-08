@@ -30,6 +30,12 @@ public class User {
     @Column(length = 20)
     private String provider = "LOCAL";
 
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
+
+    @Column(name = "profile_image", length = 500)
+    private String profileImage;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -108,6 +114,22 @@ public class User {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public LocalDateTime getCreatedAt() {

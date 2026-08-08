@@ -1,6 +1,8 @@
 package com.decisionhub.config;
 
 import com.decisionhub.security.JwtFilter;
+import com.decisionhub.security.oauth.OAuth2AuthenticationFailureHandler;
+import com.decisionhub.security.oauth.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,9 +24,15 @@ import com.decisionhub.security.LegacyPasswordEncoder;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final OAuth2AuthenticationSuccessHandler oauth2SuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oauth2FailureHandler;
 
-    public SecurityConfig(JwtFilter jwtFilter) {
+    public SecurityConfig(JwtFilter jwtFilter,
+                          OAuth2AuthenticationSuccessHandler oauth2SuccessHandler,
+                          OAuth2AuthenticationFailureHandler oauth2FailureHandler) {
         this.jwtFilter = jwtFilter;
+        this.oauth2SuccessHandler = oauth2SuccessHandler;
+        this.oauth2FailureHandler = oauth2FailureHandler;
     }
 
     @Bean
@@ -34,9 +42,13 @@ public class SecurityConfig {
             .cors(cors -> {})
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler(oauth2SuccessHandler)
+                .failureHandler(oauth2FailureHandler)
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

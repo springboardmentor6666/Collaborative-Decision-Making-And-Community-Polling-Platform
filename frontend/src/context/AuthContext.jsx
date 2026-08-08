@@ -18,6 +18,34 @@ export function AuthProvider({ children }) {
 
     async function initAuth() {
       try {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromQuery = params.get('token');
+        const providerFromQuery = params.get('provider');
+        const emailFromQuery = params.get('email');
+        const nameFromQuery = params.get('name');
+        const avatarFromQuery = params.get('avatar');
+
+        if (tokenFromQuery) {
+          const userData = {
+            id: params.get('id') || `${providerFromQuery || 'oauth'}_user`,
+            email: emailFromQuery || 'oauth@example.com',
+            name: nameFromQuery || emailFromQuery || 'OAuth User',
+            avatar: avatarFromQuery || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emailFromQuery || 'oauth')}`,
+          };
+
+          if (isMounted) {
+            setAccessToken(tokenFromQuery);
+            setUser(userData);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('decisionhub_token', tokenFromQuery);
+              localStorage.setItem('decisionhub_user', JSON.stringify(userData));
+            }
+            window.history.replaceState({}, '', '/dashboard');
+            window.location.assign('/dashboard');
+          }
+          return;
+        }
+
         const { accessToken: newToken, user: userData } = await refreshSessionApi();
         if (isMounted) {
           setAccessToken(newToken);
@@ -105,6 +133,10 @@ export function AuthProvider({ children }) {
     } finally {
       setAccessToken(null);
       setUser(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('decisionhub_token');
+        localStorage.removeItem('decisionhub_user');
+      }
     }
   }, []);
 

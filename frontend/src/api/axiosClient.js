@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const OAUTH_BASE_URL = (import.meta.env.VITE_OAUTH_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/api\/?$/, '');
 
 const normalizeEndpoint = (endpoint) => {
   if (!endpoint.startsWith('/')) {
@@ -66,6 +67,11 @@ export async function loginApi(email, password) {
     avatar: data.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
   };
 
+  if (typeof window !== 'undefined' && accessToken) {
+    localStorage.setItem('decisionhub_token', accessToken);
+    localStorage.setItem('decisionhub_user', JSON.stringify(user));
+  }
+
   return { accessToken, user };
 }
 
@@ -90,6 +96,11 @@ export async function registerApi(name, email, password) {
     avatar: data.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`,
   };
 
+  if (typeof window !== 'undefined' && accessToken) {
+    localStorage.setItem('decisionhub_token', accessToken);
+    localStorage.setItem('decisionhub_user', JSON.stringify(user));
+  }
+
   return { accessToken, user };
 }
 
@@ -108,22 +119,17 @@ export async function resetPasswordApi(email) {
 }
 
 export async function googleLoginApi() {
-  const data = await request('/api/auth/google', {
-    method: 'POST',
-  });
-  
-  const accessToken = data.token;
-  const refreshToken = data.refreshToken;
-  if (refreshToken) sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  if (typeof window !== 'undefined') {
+    window.location.assign(`${OAUTH_BASE_URL}/oauth2/authorization/google`);
+  }
+  return { accessToken: null, user: null };
+}
 
-  const user = {
-    id: data.user?.id || 'google_user_1',
-    email: data.user?.email || 'google.user@example.com',
-    name: data.user?.name || 'Google User',
-    avatar: data.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=google',
-  };
-
-  return { accessToken, user };
+export async function githubLoginApi() {
+  if (typeof window !== 'undefined') {
+    window.location.assign(`${OAUTH_BASE_URL}/oauth2/authorization/github`);
+  }
+  return { accessToken: null, user: null };
 }
 
 export async function refreshSessionApi() {
@@ -156,6 +162,10 @@ export async function logoutApi() {
     // Ignore backend offline errors during logout
   } finally {
     sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('decisionhub_token');
+      localStorage.removeItem('decisionhub_user');
+    }
   }
 }
 
