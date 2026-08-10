@@ -1,42 +1,47 @@
 package com.decisionhub.backend.controller;
 
 import com.decisionhub.backend.dto.DecisionRequest;
-import com.decisionhub.backend.entity.Decision;
+import com.decisionhub.backend.dto.DecisionResponse;
 import com.decisionhub.backend.service.DecisionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/decisions")
+@RequestMapping("/api/decisions")
 public class DecisionController {
 
-    @Autowired
-    private DecisionService decisionService;
+    private final DecisionService decisionService;
 
-    // Create Decision
+    public DecisionController(DecisionService decisionService) {
+        this.decisionService = decisionService;
+    }
+
     @PostMapping
-    public String createDecision(@RequestBody DecisionRequest request) {
+    public DecisionResponse createDecision(@Valid @RequestBody DecisionRequest request) {
         return decisionService.createDecision(request);
     }
 
-    // Get All Decisions
     @GetMapping
-    public List<Decision> getAllDecisions() {
+    public List<DecisionResponse> getAllDecisions() {
         return decisionService.getAllDecisions();
     }
 
-    // Get Decision By Id
     @GetMapping("/{id}")
-    public Decision getDecisionById(@PathVariable Long id) {
+    public DecisionResponse getDecisionById(@PathVariable Long id) {
         return decisionService.getDecisionById(id);
     }
 
-    // Delete Decision
-    @DeleteMapping("/{id}")
-    public String deleteDecision(@PathVariable Long id) {
-        return decisionService.deleteDecision(id);
+    @PutMapping("/{id}")
+    public DecisionResponse updateDecision(@PathVariable Long id,
+                                           @Valid @RequestBody DecisionRequest request) {
+        return decisionService.updateDecision(id, request);
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteDecision(@PathVariable Long id) {
+        decisionService.deleteDecision(id);
+        return "Decision Deleted Successfully";
+    }
 }

@@ -1,5 +1,6 @@
-package com.decisionhub.backend.security;
+package com.decisionhub.backend.config;
 
+import com.decisionhub.backend.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
