@@ -8,6 +8,7 @@ import Polls from "./pages/Polls";
 import Communities from "./pages/Communities";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import Profile from "./pages/Profile";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
 
@@ -17,7 +18,9 @@ function App() {
 
       <Routes>
 
-        <Route path="/" element={<Login />} />
+         <Route path="/" element={<LandingPage />} />
+
+    <Route path="/login" element={<Login />} />
 
         <Route path="/signup" element={<Signup />} />
 
