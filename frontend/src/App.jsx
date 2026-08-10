@@ -8,6 +8,8 @@ import Polls from "./pages/Polls";
 import Communities from "./pages/Communities";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
+import "./index.css";
 
 function App() {
 
@@ -29,6 +31,9 @@ function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/profile" element={<Profile />} />
 
+
+
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
 
     </BrowserRouter>
