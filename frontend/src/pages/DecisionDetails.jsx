@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchDecisionById, deleteDecisionApi, getVoteResultsApi } from '../api/axiosClient';
-import { getUserVoteForDecision } from '../services/decisionStorage';
+import { fetchDecisionById, deleteDecisionApi, getVoteResultsApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -31,9 +30,21 @@ export default function DecisionDetails() {
       const dec = await fetchDecisionById(id, accessToken);
       setDecision(dec);
 
+      // Record a view impression
+      await recordImpressionApi(id, 'VIEW', accessToken);
+
       // Check if current user has already voted
-      const vote = getUserVoteForDecision(id);
-      setUserVote(vote);
+      if (accessToken) {
+        try {
+          const votesAnalysis = await getMyVotesAnalysisApi(accessToken);
+          const vote = votesAnalysis.find(v => String(v.decisionId) === String(id));
+          if (vote) {
+            setUserVote({ optionId: vote.userChoice?.optionId, optionText: vote.userChoice?.optionText });
+          }
+        } catch (e) {
+          // ignore error fetching votes
+        }
+      }
 
       if (dec.poll) {
         try {

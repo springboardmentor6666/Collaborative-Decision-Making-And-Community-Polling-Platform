@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchDecisionById, castVoteApi, getVoteResultsApi } from '../api/axiosClient';
-import { getUserVoteForDecision } from '../services/decisionStorage';
+import { fetchDecisionById, castVoteApi, getVoteResultsApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -34,11 +33,21 @@ export default function VotePage() {
       const dec = await fetchDecisionById(id, accessToken);
       setDecision(dec);
 
+      // Record a view impression
+      await recordImpressionApi(id, 'VIEW', accessToken);
+
       // Check if user has already voted
-      const existingVote = getUserVoteForDecision(id);
-      if (existingVote) {
-        setSelectedOptionId(existingVote.optionId);
-        setHasVoted(true);
+      if (accessToken) {
+        try {
+          const votesAnalysis = await getMyVotesAnalysisApi(accessToken);
+          const existingVote = votesAnalysis.find(v => String(v.decisionId) === String(id));
+          if (existingVote) {
+            setSelectedOptionId(existingVote.userChoice?.optionId);
+            setHasVoted(true);
+          }
+        } catch (e) {
+          // ignore
+        }
       }
 
       try {
@@ -66,7 +75,7 @@ export default function VotePage() {
 
     try {
       await castVoteApi(
-        { decisionId: Number(id), optionId: Number(selectedOptionId) },
+        { decisionId: Number(id), pollId: Number(decision.poll?.id || id), optionId: Number(selectedOptionId) },
         accessToken,
         {
           optionText,

@@ -46,6 +46,17 @@ export function AuthProvider({ children }) {
           return;
         }
 
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('decisionhub_token') : null;
+        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('decisionhub_user') : null;
+
+        if (storedToken && storedUser) {
+          if (isMounted) {
+            setAccessToken(storedToken);
+            setUser(JSON.parse(storedUser));
+          }
+          return;
+        }
+
         const { accessToken: newToken, user: userData } = await refreshSessionApi();
         if (isMounted) {
           setAccessToken(newToken);

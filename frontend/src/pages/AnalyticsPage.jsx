@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { getCreatorAnalytics } from '../services/decisionStorage';
+import { getCreatorAnalyticsApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -28,11 +28,33 @@ export default function AnalyticsPage() {
     loadData();
   }, [user?.email]);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = getCreatorAnalytics(user?.email);
-      setAnalyticsData(data);
+      const data = await getCreatorAnalyticsApi(localStorage.getItem('decisionhub_token'));
+      const mapped = {
+        totalDecisions: data.totalDecisionsPublished || 0,
+        totalViews: data.totalViews || 0,
+        totalReach: data.totalReach || 0,
+        totalVotes: data.totalVotes || 0,
+        conversionRate: Math.round(data.overallConversionRate || 0),
+        activeDecisions: (data.decisions || []).filter(d => d.status === 'OPEN').length,
+        closedDecisions: (data.decisions || []).filter(d => d.status === 'CLOSED').length,
+        avgVotesPerPoll: data.totalDecisionsPublished > 0 ? (data.totalVotes / data.totalDecisionsPublished).toFixed(1) : '0.0',
+        decisions: (data.decisions || []).map(d => ({
+          ...d,
+          createdAt: d.createdAt || new Date().toISOString(),
+          poll: {
+            question: d.pollQuestion,
+            options: d.optionsDistribution?.map(o => ({
+              id: o.optionId,
+              optionText: o.optionText,
+              voteCount: o.voteCount
+            })) || []
+          }
+        }))
+      };
+      setAnalyticsData(mapped);
     } catch (err) {
       console.error('Failed to load creator analytics:', err);
     } finally {

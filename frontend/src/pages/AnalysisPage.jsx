@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { getVotedDecisionsList } from '../services/decisionStorage';
+import { getMyVotesAnalysisApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -28,11 +28,52 @@ export default function AnalysisPage() {
     loadData();
   }, [user?.email]);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = getVotedDecisionsList(user?.email);
-      setVotedDecisions(data);
+      const data = await getMyVotesAnalysisApi(localStorage.getItem('decisionhub_token'));
+      const mapped = data.map(dto => {
+        const userOptionData = dto.optionsBreakdown.find(o => o.optionId === dto.userChoice?.optionId);
+        const userVoteCount = userOptionData?.voteCount || 0;
+        const userVotePct = dto.totalVotes > 0 ? Math.round((userVoteCount / dto.totalVotes) * 100) : 0;
+        const winningVotePct = dto.totalVotes > 0 && dto.winningChoice ? Math.round((dto.winningChoice.voteCount / dto.totalVotes) * 100) : 0;
+        
+        const badgeColor = dto.isWinning 
+          ? 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' 
+          : 'text-amber-600 bg-amber-500/10 border-amber-500/30';
+        const badgeLabel = dto.status === 'CLOSED'
+          ? (dto.isWinning ? 'Won Decision' : 'Lost Decision')
+          : (dto.isWinning ? 'Choice Leading' : 'Choice Trailing');
+
+        return {
+          id: dto.decisionId,
+          title: dto.decisionTitle,
+          status: dto.status,
+          poll: {
+            question: dto.pollQuestion,
+            options: dto.optionsBreakdown.map(o => ({
+              id: o.optionId,
+              optionText: o.optionText,
+              voteCount: o.voteCount
+            }))
+          },
+          userVote: {
+            optionId: dto.userChoice?.optionId,
+            optionText: dto.userChoice?.optionText,
+            votedAt: new Date().toISOString()
+          },
+          outcome: {
+            isWinning: dto.isWinning,
+            totalVotes: dto.totalVotes,
+            userVotePct: userVotePct,
+            winningVotePct: winningVotePct,
+            winningOption: dto.winningChoice ? { id: dto.winningChoice.optionId, optionText: dto.winningChoice.optionText } : null,
+            badgeColor,
+            badgeLabel
+          }
+        };
+      });
+      setVotedDecisions(mapped);
     } catch (err) {
       console.error('Failed to load analysis data:', err);
     } finally {

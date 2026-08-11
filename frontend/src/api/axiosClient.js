@@ -169,134 +169,84 @@ export async function logoutApi() {
   }
 }
 
-import {
-  getAllDecisionsMerged,
-  getStoredDecisionById,
-  saveCreatedDecision,
-  recordUserVote,
-  hasUserVoted,
-  getUserVoteForDecision,
-} from '../services/decisionStorage';
-
 /**
- * Fetch decisions list (merging backend + local created decisions).
+ * Fetch decisions list from backend.
  */
 export async function fetchDecisions(token) {
-  let backendDecisions = [];
-  try {
-    const data = await request('/api/decisions', { token });
-    if (Array.isArray(data) && data.length > 0) {
-      backendDecisions = data.map((d) => ({
-        id: d.id,
-        title: d.title,
-        description: d.description,
-        status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
-        votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
-        optionsCount: d.polls?.[0]?.options?.length || (d.polls?.[0]?.optionLabels?.length) || 0,
-        createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_demo', name: 'Demo User' },
-        createdAt: d.createdAt || new Date().toISOString(),
-        poll: d.polls?.[0]
-          ? {
-              id: d.polls[0].id,
-              question: d.polls[0].question || d.title,
-              options: d.polls[0].options?.map((o, idx) => ({
-                id: o.id || idx + 1,
-                optionText: o.label || o.optionText || `Option ${idx + 1}`,
-                voteCount: o.voteCount || 0,
-              })) || [],
-            }
-          : null,
-      }));
-    }
-  } catch (error) {
-    // Backend offline or fallback
+  const data = await request('/api/decisions', { token });
+  if (Array.isArray(data)) {
+    return data.map((d) => ({
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+      votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
+      optionsCount: d.polls?.[0]?.options?.length || (d.polls?.[0]?.optionLabels?.length) || 0,
+      createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
+      createdAt: d.createdAt || new Date().toISOString(),
+      poll: d.polls?.[0]
+        ? {
+            id: d.polls[0].id,
+            question: d.polls[0].question || d.title,
+            options: d.polls[0].options?.map((o, idx) => ({
+              id: o.id || idx + 1,
+              optionText: o.label || o.optionText || `Option ${idx + 1}`,
+              voteCount: o.voteCount || 0,
+            })) || [],
+          }
+        : null,
+    }));
   }
-
-  const merged = getAllDecisionsMerged();
-  if (backendDecisions.length > 0) {
-    // Merge unique by ID
-    const map = new Map();
-    merged.forEach((item) => map.set(String(item.id), item));
-    backendDecisions.forEach((item) => {
-      if (!map.has(String(item.id))) map.set(String(item.id), item);
-    });
-    return Array.from(map.values());
-  }
-
-  return merged;
+  return [];
 }
 
+/**
+ * Fetch a decision by ID from backend.
+ */
 export async function fetchDecisionById(id, token) {
-  // First check local stored decisions (with exact question & options)
-  const local = getStoredDecisionById(id);
-  if (local) {
-    return local;
-  }
-
-  try {
-    const d = await request(`/api/decisions/${id}`, { token });
-    if (d) {
-      return {
-        id: d.id,
-        title: d.title,
-        description: d.description,
-        status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
-        createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_demo', name: 'Demo User' },
-        createdAt: d.createdAt || new Date().toISOString(),
-        views: 24,
-        reach: 55,
-        votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
-        poll: d.polls?.[0]
-          ? {
-              id: d.polls[0].id,
-              question: d.polls[0].question || d.title,
-              options: d.polls[0].options?.map((o, idx) => ({
-                id: o.id || idx + 1,
-                optionText: o.label || o.optionText || `Option ${idx + 1}`,
-                voteCount: o.voteCount || 0,
-              })) || [],
-            }
-          : null,
-      };
-    }
-  } catch (error) {
-    // Fallback if not found in backend
-  }
-
-  const fallback = getStoredDecisionById(id);
-  if (fallback) return fallback;
-
-  throw new Error(`Decision #${id} not found.`);
+  const d = await request(`/api/decisions/${id}`, { token });
+  return {
+    id: d.id,
+    title: d.title,
+    description: d.description,
+    status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+    createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
+    createdAt: d.createdAt || new Date().toISOString(),
+    views: d.views || 0,
+    reach: d.reach || 0,
+    votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
+    poll: d.polls?.[0]
+      ? {
+          id: d.polls[0].id,
+          question: d.polls[0].question || d.title,
+          options: d.polls[0].options?.map((o, idx) => ({
+            id: o.id || idx + 1,
+            optionText: o.label || o.optionText || `Option ${idx + 1}`,
+            voteCount: o.voteCount || 0,
+          })) || [],
+        }
+      : null,
+  };
 }
 
 /**
  * Create a new decision (with optional embedded poll).
  */
 export async function createDecisionApi(decisionData, token, currentUser) {
-  // Save to persistent storage first
-  const saved = saveCreatedDecision(decisionData, currentUser);
-
-  // Send to backend in compatible format
-  try {
-    const backendPayload = {
-      title: decisionData.title,
-      description: decisionData.description,
-      visibility: decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC',
-      pollType: decisionData.pollQuestion ? 'SINGLE_CHOICE' : null,
-      isAnonymous: false,
-      optionLabels: decisionData.pollOptions || [],
-    };
-    await request('/api/decisions', {
-      method: 'POST',
-      body: backendPayload,
-      token,
-    });
-  } catch (err) {
-    // Log backend offline warning, client-side decision is already persisted
-    console.warn('[createDecisionApi] Backend request failed, stored locally:', err);
-  }
-
-  return saved;
+  const backendPayload = {
+    title: decisionData.title,
+    description: decisionData.description,
+    visibility: decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC',
+    pollType: decisionData.pollQuestion ? 'SINGLE_CHOICE' : null,
+    pollQuestion: decisionData.pollQuestion || null,
+    isAnonymous: false,
+    optionLabels: decisionData.pollOptions || [],
+  };
+  return await request('/api/decisions', {
+    method: 'POST',
+    body: backendPayload,
+    token,
+  });
 }
 
 /**
@@ -314,82 +264,57 @@ export async function updateDecisionApi(id, decisionData, token) {
  * Delete a decision by ID.
  */
 export async function deleteDecisionApi(id, token) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  try {
-    await fetch(`${API_BASE_URL}/api/decisions/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers,
-    });
-  } catch (e) {
-    // Ignore backend offline
-  }
-  return true;
+  return await request(`/api/decisions/${id}`, {
+    method: 'DELETE',
+    token,
+  });
 }
 
 /**
  * Cast a vote on a decision poll.
  */
 export async function castVoteApi(voteData, token, extraData = {}) {
-  // Record vote in persistent storage
-  recordUserVote({
-    decisionId: voteData.decisionId,
-    optionId: voteData.optionId,
-    optionText: extraData.optionText,
-    decisionTitle: extraData.decisionTitle,
-    pollQuestion: extraData.pollQuestion,
-    userEmail: extraData.userEmail,
+  await request('/api/votes', {
+    method: 'POST',
+    body: { pollId: voteData.pollId || voteData.decisionId, pollOptionId: voteData.optionId },
+    token,
   });
-
-  try {
-    await request('/api/votes', {
-      method: 'POST',
-      body: { decisionId: voteData.decisionId, optionId: voteData.optionId },
-      token,
-    });
-  } catch (err) {
-    console.warn('[castVoteApi] Backend vote sync skipped, saved locally:', err);
-  }
-
   return { success: true };
 }
 
+/**
+ * Get voting results.
+ */
 export async function getVoteResultsApi(decisionId, token) {
-  const dec = getStoredDecisionById(decisionId);
-  if (dec && dec.poll && Array.isArray(dec.poll.options)) {
-    const totalVotes = dec.poll.options.reduce((s, o) => s + (o.voteCount || 0), 0);
-    let winningOption = dec.poll.options[0]?.optionText || 'Option A';
-    let winningVoteCount = dec.poll.options[0]?.voteCount || 0;
+  return await request(`/api/votes/result/${decisionId}`, { token });
+}
 
-    dec.poll.options.forEach((opt) => {
-      if ((opt.voteCount || 0) > winningVoteCount) {
-        winningVoteCount = opt.voteCount || 0;
-        winningOption = opt.optionText;
-      }
-    });
+/**
+ * Get My Votes Analysis
+ */
+export async function getMyVotesAnalysisApi(token) {
+  return await request('/api/analysis/my-votes', { token });
+}
 
-    return {
-      decisionTitle: dec.title,
-      pollQuestion: dec.poll.question || dec.title,
-      totalVotes,
-      winningOption,
-      winningVoteCount,
-      options: dec.poll.options,
-    };
-  }
+/**
+ * Get Creator Analytics
+ */
+export async function getCreatorAnalyticsApi(token) {
+  return await request('/api/analytics/my-decisions', { token });
+}
 
+/**
+ * Record Impression
+ */
+export async function recordImpressionApi(decisionId, type = 'VIEW', token = null) {
   try {
-    return await request(`/api/votes/result/${decisionId}`, { token });
-  } catch (error) {
-    return {
-      decisionTitle: `Decision #${decisionId}`,
-      pollQuestion: 'What is your choice?',
-      totalVotes: 0,
-      winningOption: '',
-      winningVoteCount: 0,
-      options: [],
-    };
+    await request(`/api/decisions/${decisionId}/impressions`, {
+      method: 'POST',
+      body: { type },
+      token,
+    });
+  } catch (e) {
+    // Ignore impression failures
   }
 }
 
@@ -399,5 +324,3 @@ export async function getVoteResultsApi(decisionId, token) {
 export async function getCurrentUserApi(token) {
   return await request('/api/users/me', { token });
 }
-
-
