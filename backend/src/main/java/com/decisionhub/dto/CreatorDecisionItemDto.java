@@ -10,13 +10,17 @@ public class CreatorDecisionItemDto {
     private long views;
     private long votesCount;
     private double conversionRate;
+    private String status;
+    private String createdAt;
+    private String pollQuestion;
     private List<OptionBreakdownDto> optionsDistribution;
 
     public CreatorDecisionItemDto() {
     }
 
     public CreatorDecisionItemDto(Long decisionId, String title, long reach, long views,
-                                  long votesCount, double conversionRate,
+                                  long votesCount, double conversionRate, String status, 
+                                  String createdAt, String pollQuestion,
                                   List<OptionBreakdownDto> optionsDistribution) {
         this.decisionId = decisionId;
         this.title = title;
@@ -24,6 +28,9 @@ public class CreatorDecisionItemDto {
         this.views = views;
         this.votesCount = votesCount;
         this.conversionRate = conversionRate;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.pollQuestion = pollQuestion;
         this.optionsDistribution = optionsDistribution;
     }
 
@@ -81,5 +88,29 @@ public class CreatorDecisionItemDto {
 
     public void setOptionsDistribution(List<OptionBreakdownDto> optionsDistribution) {
         this.optionsDistribution = optionsDistribution;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getPollQuestion() {
+        return pollQuestion;
+    }
+
+    public void setPollQuestion(String pollQuestion) {
+        this.pollQuestion = pollQuestion;
     }
 }

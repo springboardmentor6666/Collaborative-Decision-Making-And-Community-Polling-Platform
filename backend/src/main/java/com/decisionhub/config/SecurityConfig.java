@@ -5,6 +5,7 @@ import com.decisionhub.security.oauth.OAuth2AuthenticationFailureHandler;
 import com.decisionhub.security.oauth.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -28,7 +29,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oauth2FailureHandler;
 
     public SecurityConfig(JwtFilter jwtFilter,
-                          OAuth2AuthenticationSuccessHandler oauth2SuccessHandler,
+                          @Lazy OAuth2AuthenticationSuccessHandler oauth2SuccessHandler,
                           OAuth2AuthenticationFailureHandler oauth2FailureHandler) {
         this.jwtFilter = jwtFilter;
         this.oauth2SuccessHandler = oauth2SuccessHandler;

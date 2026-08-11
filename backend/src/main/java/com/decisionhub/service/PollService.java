@@ -114,6 +114,7 @@ public class PollService {
                 poll.getId(),
                 poll.getDecision() != null ? poll.getDecision().getId() : null,
                 poll.getPollType(),
+                poll.getQuestion(),
                 poll.getIsAnonymous(),
                 poll.getEndsAt(),
                 optionDtos

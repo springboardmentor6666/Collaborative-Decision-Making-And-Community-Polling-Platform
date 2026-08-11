@@ -182,6 +182,9 @@ public class AnalyticsService {
                     views,
                     decisionVotesCount,
                     conversionRate,
+                    decision.getStatus() != null ? decision.getStatus() : "OPEN",
+                    decision.getCreatedAt() != null ? decision.getCreatedAt().toString() : "",
+                    polls.isEmpty() ? decision.getTitle() : polls.get(0).getQuestion(),
                     optionsDistribution
             ));
         }

@@ -8,6 +8,7 @@ import com.decisionhub.entity.User;
 import com.decisionhub.exception.UserNotFoundException;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.security.JwtUtil;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,7 @@ public class UserService {
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager,
+                       @Lazy AuthenticationManager authenticationManager,
                        JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;

@@ -16,6 +16,7 @@ public class DecisionRequest {
 
     // Embedded poll creation fields (optional)
     private String pollType;
+    private String pollQuestion;
     private Boolean isAnonymous;
     private List<String> optionLabels;
 
@@ -71,6 +72,14 @@ public class DecisionRequest {
 
     public void setPollType(String pollType) {
         this.pollType = pollType;
+    }
+
+    public String getPollQuestion() {
+        return pollQuestion;
+    }
+
+    public void setPollQuestion(String pollQuestion) {
+        this.pollQuestion = pollQuestion;
     }
 
     public Boolean getIsAnonymous() {

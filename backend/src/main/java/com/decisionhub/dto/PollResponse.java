@@ -8,6 +8,7 @@ public class PollResponse {
     private Long id;
     private Long decisionId;
     private String pollType;
+    private String question;
     private Boolean isAnonymous;
     private LocalDateTime endsAt;
     private List<OptionDto> options;
@@ -15,11 +16,12 @@ public class PollResponse {
     public PollResponse() {
     }
 
-    public PollResponse(Long id, Long decisionId, String pollType, Boolean isAnonymous,
+    public PollResponse(Long id, Long decisionId, String pollType, String question, Boolean isAnonymous,
                         LocalDateTime endsAt, List<OptionDto> options) {
         this.id = id;
         this.decisionId = decisionId;
         this.pollType = pollType;
+        this.question = question;
         this.isAnonymous = isAnonymous;
         this.endsAt = endsAt;
         this.options = options;
@@ -47,6 +49,14 @@ public class PollResponse {
 
     public void setPollType(String pollType) {
         this.pollType = pollType;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
 
     public Boolean getIsAnonymous() {

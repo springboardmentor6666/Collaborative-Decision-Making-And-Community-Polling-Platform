@@ -20,6 +20,9 @@ public class Poll {
     @Column(name = "poll_type", length = 20)
     private String pollType = "SINGLE";
 
+    @Column(name = "question")
+    private String question;
+
     @Column(name = "is_anonymous")
     private Boolean isAnonymous = false;
 
@@ -59,6 +62,14 @@ public class Poll {
 
     public void setPollType(String pollType) {
         this.pollType = pollType;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
 
     public Boolean getIsAnonymous() {

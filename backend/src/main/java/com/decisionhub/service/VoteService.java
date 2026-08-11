@@ -75,6 +75,7 @@ public class VoteService {
         );
     }
 
+    @Transactional(readOnly = true)
     public VoteResultResponse getVoteResults(Long pollId) {
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new PollNotFoundException("Poll not found with id: " + pollId));

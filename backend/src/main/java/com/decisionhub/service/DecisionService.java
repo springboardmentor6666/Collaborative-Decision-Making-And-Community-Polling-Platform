@@ -69,6 +69,9 @@ public class DecisionService {
             if (request.getPollType() != null && !request.getPollType().trim().isEmpty()) {
                 Poll poll = new Poll();
                 poll.setPollType(request.getPollType());
+                if (request.getPollQuestion() != null && !request.getPollQuestion().trim().isEmpty()) {
+                    poll.setQuestion(request.getPollQuestion().trim());
+                }
                 poll.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
                 poll.setDecision(decision);
                 decision.getPolls().add(poll);
@@ -139,6 +142,7 @@ public class DecisionService {
                         poll.getId(),
                         decision.getId(),
                         poll.getPollType(),
+                        poll.getQuestion(),
                         poll.getIsAnonymous(),
                         poll.getEndsAt(),
                         optionDtos
