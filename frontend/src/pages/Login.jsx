@@ -21,6 +21,7 @@ function Login() {
 
   // Trigger animations on load
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
 
     let i = 0;
@@ -63,7 +64,7 @@ function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/users/login", {
+      const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -73,7 +74,9 @@ function Login() {
 
       const result = await response.json();
 
-      if (result.success) {
+      console.log("Login response:", result);
+
+      if (response.ok && result.token) {
         setIsError(false);
         setMessage(result.message || "Login successful!");
 
@@ -92,13 +95,14 @@ function Login() {
       }
     } catch (error) {
       setIsError(true);
+      console.error("Login error:", error);
       setMessage("Server Error");
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/users/auth/google";
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (

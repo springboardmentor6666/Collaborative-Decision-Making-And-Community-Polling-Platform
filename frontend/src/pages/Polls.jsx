@@ -19,7 +19,7 @@ function Polls() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:8080/decisions", {
+      const response = await fetch("http://localhost:8080/api/decisions"/*just added the /api in the url*/, {
         headers: {
           "Authorization": `Bearer ${token}`
         }

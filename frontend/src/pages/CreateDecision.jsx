@@ -55,7 +55,7 @@ function CreateDecision() {
 
             const token = localStorage.getItem("token");
 
-            const response = await fetch("http://localhost:8080/decisions", {
+            const response = await fetch("http://localhost:8080/api/decisions",/*just changed the /api in the url*/ {
 
                 method: "POST",
 
