@@ -1,5 +1,6 @@
 package com.decisionhub.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public class UserResponse {
@@ -39,6 +40,11 @@ public class UserResponse {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    @JsonProperty("name")
+    public String getName() {
+        return fullName;
     }
 
     public String getEmail() {

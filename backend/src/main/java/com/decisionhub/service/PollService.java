@@ -7,17 +7,20 @@ import com.decisionhub.entity.Decision;
 import com.decisionhub.entity.DecisionOption;
 import com.decisionhub.entity.Poll;
 import com.decisionhub.entity.PollOption;
+import com.decisionhub.entity.Vote;
 import com.decisionhub.exception.DecisionNotFoundException;
 import com.decisionhub.exception.PollNotFoundException;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.DecisionOptionRepository;
 import com.decisionhub.repository.PollRepository;
 import com.decisionhub.repository.PollOptionRepository;
+import com.decisionhub.repository.VoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,15 +30,18 @@ public class PollService {
     private final DecisionRepository decisionRepository;
     private final DecisionOptionRepository decisionOptionRepository;
     private final PollOptionRepository pollOptionRepository;
+    private final VoteRepository voteRepository;
 
     public PollService(PollRepository pollRepository,
                        DecisionRepository decisionRepository,
                        DecisionOptionRepository decisionOptionRepository,
-                       PollOptionRepository pollOptionRepository) {
+                       PollOptionRepository pollOptionRepository,
+                       VoteRepository voteRepository) {
         this.pollRepository = pollRepository;
         this.decisionRepository = decisionRepository;
         this.decisionOptionRepository = decisionOptionRepository;
         this.pollOptionRepository = pollOptionRepository;
+        this.voteRepository = voteRepository;
     }
 
     @Transactional
@@ -102,11 +108,17 @@ public class PollService {
 
         List<OptionDto> optionDtos = new ArrayList<>();
         if (poll.getPollOptions() != null) {
+            // Fetch vote counts for real-time display
+            List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
+            Map<Long, Long> voteCounts = pollVotes.stream()
+                    .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
+
             optionDtos = poll.getPollOptions().stream()
                     .map(po -> new OptionDto(
                             po.getOption().getId(),
                             po.getOption().getLabel(),
-                            po.getOption().getDescription()))
+                            po.getOption().getDescription(),
+                            voteCounts.getOrDefault(po.getId(), 0L)))
                     .collect(Collectors.toList());
         }
 

@@ -63,7 +63,7 @@ export async function loginApi(email, password) {
   const user = {
     id: data.user?.id || 'usr_1',
     email: data.user?.email || email,
-    name: data.user?.name || email.split('@')[0],
+    name: data.user?.fullName || data.user?.name || email.split('@')[0],
     avatar: data.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
   };
 
@@ -285,8 +285,8 @@ export async function castVoteApi(voteData, token, extraData = {}) {
 /**
  * Get voting results.
  */
-export async function getVoteResultsApi(decisionId, token) {
-  return await request(`/api/votes/result/${decisionId}`, { token });
+export async function getVoteResultsApi(pollId, token) {
+  return await request(`/api/votes/result/${pollId}`, { token });
 }
 
 /**

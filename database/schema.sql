@@ -19,6 +19,8 @@ CREATE TABLE users (
     full_name VARCHAR(100),
     role VARCHAR(20) DEFAULT 'USER',           -- USER / MODERATOR / ADMIN
     provider VARCHAR(20) DEFAULT 'LOCAL',       -- LOCAL / GOOGLE
+    provider_id VARCHAR(100),                   -- OAuth provider user ID
+    profile_image VARCHAR(500),                 -- Avatar / profile picture URL
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE
 );
@@ -76,6 +78,7 @@ CREATE TABLE decisions (
     visibility VARCHAR(10) DEFAULT 'PUBLIC',    -- PUBLIC / PRIVATE
     category_id BIGINT,
     community_id BIGINT NULL,                   -- NULL for general decisions, FK to communities for group decisions
+    status VARCHAR(20) DEFAULT 'OPEN',          -- OPEN / CLOSED
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -115,6 +118,7 @@ CREATE TABLE polls (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     poll_type VARCHAR(20) DEFAULT 'SINGLE',     -- SINGLE / MULTI / RATING
+    question VARCHAR(255),                      -- Optional poll question text
     is_anonymous BOOLEAN DEFAULT FALSE,
     ends_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
@@ -200,7 +204,9 @@ CREATE TABLE IF NOT EXISTS decision_impressions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     user_id BIGINT NULL,                            -- NULL for anonymous visitors
-    ip_hash VARCHAR(64) NULL,                       -- Hashed IP for anonymous reach tracking
+    user_email VARCHAR(255) NULL,                    -- Email of logged-in user (denormalized)
+    client_ip VARCHAR(64) NULL,                      -- Client IP for anonymous tracking
+    ip_hash VARCHAR(64) NULL,                        -- Hashed IP for anonymous reach tracking
     type VARCHAR(20) NOT NULL DEFAULT 'VIEW',       -- 'VIEW' or 'REACH'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_impression_type CHECK (type IN ('VIEW', 'REACH')),

@@ -5,6 +5,7 @@ public class OptionDto {
     private Long id;
     private String label;
     private String description;
+    private Long voteCount;
 
     public OptionDto() {
     }
@@ -13,6 +14,13 @@ public class OptionDto {
         this.id = id;
         this.label = label;
         this.description = description;
+    }
+
+    public OptionDto(Long id, String label, String description, Long voteCount) {
+        this.id = id;
+        this.label = label;
+        this.description = description;
+        this.voteCount = voteCount;
     }
 
     public Long getId() {
@@ -37,5 +45,13 @@ public class OptionDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Long getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(Long voteCount) {
+        this.voteCount = voteCount;
     }
 }

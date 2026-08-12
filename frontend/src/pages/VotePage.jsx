@@ -50,11 +50,13 @@ export default function VotePage() {
         }
       }
 
-      try {
-        const res = await getVoteResultsApi(id, accessToken);
-        setResults(res);
-      } catch {
-        /* results optional */
+      if (dec.poll) {
+        try {
+          const res = await getVoteResultsApi(dec.poll.id, accessToken);
+          setResults(res);
+        } catch {
+          /* results optional */
+        }
       }
     } catch {
       setError('Could not load decision or poll details.');
@@ -88,7 +90,7 @@ export default function VotePage() {
       setSuccessMsg('Your vote has been recorded! Added to your Decision Analysis.');
       setHasVoted(true);
 
-      const updatedResults = await getVoteResultsApi(id, accessToken);
+      const updatedResults = await getVoteResultsApi(decision.poll?.id, accessToken);
       setResults(updatedResults);
     } catch (err) {
       if (err.message?.includes('already voted') || err.message?.includes('409')) {

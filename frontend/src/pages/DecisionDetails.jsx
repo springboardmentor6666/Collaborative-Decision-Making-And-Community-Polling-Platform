@@ -48,7 +48,7 @@ export default function DecisionDetails() {
 
       if (dec.poll) {
         try {
-          const res = await getVoteResultsApi(id, accessToken);
+          const res = await getVoteResultsApi(dec.poll.id, accessToken);
           setResults(res);
         } catch {
           /* results optional */

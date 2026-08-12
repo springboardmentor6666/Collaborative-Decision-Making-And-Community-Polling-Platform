@@ -8,12 +8,15 @@ import com.decisionhub.entity.*;
 import com.decisionhub.exception.DecisionNotFoundException;
 import com.decisionhub.repository.CategoryRepository;
 import com.decisionhub.repository.DecisionRepository;
+import com.decisionhub.repository.PollOptionRepository;
 import com.decisionhub.repository.UserRepository;
+import com.decisionhub.repository.VoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,15 +25,21 @@ public class DecisionService {
     private final DecisionRepository decisionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final PollOptionRepository pollOptionRepository;
+    private final VoteRepository voteRepository;
     private final UserService userService;
 
     public DecisionService(DecisionRepository decisionRepository,
                            UserRepository userRepository,
                            CategoryRepository categoryRepository,
+                           PollOptionRepository pollOptionRepository,
+                           VoteRepository voteRepository,
                            UserService userService) {
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.pollOptionRepository = pollOptionRepository;
+        this.voteRepository = voteRepository;
         this.userService = userService;
     }
 
@@ -83,6 +92,21 @@ public class DecisionService {
         }
 
         Decision savedDecision = decisionRepository.save(decision);
+
+        // Create PollOption records linking each DecisionOption to the Poll
+        if (!savedDecision.getPolls().isEmpty() && !savedDecision.getOptions().isEmpty()) {
+            Poll savedPoll = savedDecision.getPolls().get(0);
+            for (DecisionOption option : savedDecision.getOptions()) {
+                PollOption pollOption = new PollOption();
+                pollOption.setPoll(savedPoll);
+                pollOption.setOption(option);
+                pollOptionRepository.save(pollOption);
+            }
+            // Refresh the poll to include the newly created PollOptions in the response
+            savedDecision = decisionRepository.findById(savedDecision.getId())
+                    .orElse(savedDecision);
+        }
+
         return mapToDecisionResponse(savedDecision);
     }
 
@@ -132,10 +156,19 @@ public class DecisionService {
         List<PollResponse> pollResponses = new ArrayList<>();
         if (decision.getPolls() != null) {
             for (Poll poll : decision.getPolls()) {
+                // Fetch vote counts per poll option for real-time display
+                List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
+                Map<Long, Long> voteCounts = pollVotes.stream()
+                        .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
+
                 List<OptionDto> optionDtos = new ArrayList<>();
                 if (poll.getPollOptions() != null) {
                     optionDtos = poll.getPollOptions().stream()
-                            .map(po -> new OptionDto(po.getOption().getId(), po.getOption().getLabel(), po.getOption().getDescription()))
+                            .map(po -> new OptionDto(
+                                    po.getOption().getId(),
+                                    po.getOption().getLabel(),
+                                    po.getOption().getDescription(),
+                                    voteCounts.getOrDefault(po.getId(), 0L)))
                             .collect(Collectors.toList());
                 }
                 pollResponses.add(new PollResponse(
