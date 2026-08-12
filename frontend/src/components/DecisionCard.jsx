@@ -10,7 +10,7 @@ export default function DecisionCard({ decision }) {
       className="group block rounded-2xl border border-border-default bg-surface p-5 shadow-sm transition hover:border-primary-soft hover:shadow-md"
     >
       <div className="mb-3 flex items-start justify-between gap-3">
-        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary">
+        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary break-words">
           {decision.title}
         </h3>
         <span

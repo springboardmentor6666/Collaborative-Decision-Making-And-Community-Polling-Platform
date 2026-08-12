@@ -106,7 +106,7 @@ export default function DecisionDetails() {
             ) : (
               <div className="space-y-6">
                 {/* Top bar */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <Link
                     to="/dashboard"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
@@ -183,7 +183,7 @@ export default function DecisionDetails() {
 
                 {/* User Vote Banner if already voted */}
                 {userVote && (
-                  <div className="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                     <div className="flex items-center gap-3">
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold">
                         ✓

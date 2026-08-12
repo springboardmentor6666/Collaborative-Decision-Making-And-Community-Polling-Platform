@@ -12,6 +12,9 @@ import VotePage from './pages/VotePage';
 import AnalysisPage from './pages/AnalysisPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import Profile from './pages/Profile';
+import CommunitiesPage from './pages/CommunitiesPage';
+import CreateCommunity from './pages/CreateCommunity';
+import CommunityDetails from './pages/CommunityDetails';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import ContactSupport from './pages/ContactSupport';
@@ -81,6 +84,30 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/communities"
+          element={
+            <ProtectedRoute>
+              <CommunitiesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/communities/create"
+          element={
+            <ProtectedRoute>
+              <CreateCommunity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/communities/:id"
+          element={
+            <ProtectedRoute>
+              <CommunityDetails />
             </ProtectedRoute>
           }
         />

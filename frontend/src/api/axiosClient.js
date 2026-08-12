@@ -241,6 +241,7 @@ export async function createDecisionApi(decisionData, token, currentUser) {
     pollQuestion: decisionData.pollQuestion || null,
     isAnonymous: false,
     optionLabels: decisionData.pollOptions || [],
+    communityId: decisionData.communityId || null,
   };
   return await request('/api/decisions', {
     method: 'POST',
@@ -323,4 +324,58 @@ export async function recordImpressionApi(decisionId, type = 'VIEW', token = nul
  */
 export async function getCurrentUserApi(token) {
   return await request('/api/users/me', { token });
+}
+
+/**
+ * Community API endpoints
+ */
+export async function getCommunitiesApi(token) {
+  const data = await request('/api/communities', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getCommunityByIdApi(id, token) {
+  return await request(`/api/communities/${id}`, { token });
+}
+
+export async function createCommunityApi(communityData, token) {
+  return await request('/api/communities', {
+    method: 'POST',
+    body: communityData,
+    token,
+  });
+}
+
+export async function joinCommunityApi(id, token) {
+  return await request(`/api/communities/${id}/join`, {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function leaveCommunityApi(id, token) {
+  return await request(`/api/communities/${id}/leave`, {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function getCommunityMembersApi(id, token) {
+  const data = await request(`/api/communities/${id}/members`, { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function updateCommunityMemberRoleApi(communityId, memberId, role, token) {
+  return await request(`/api/communities/${communityId}/members/${memberId}`, {
+    method: 'PUT',
+    body: { role },
+    token,
+  });
+}
+
+export async function removeCommunityMemberApi(communityId, memberId, token) {
+  return await request(`/api/communities/${communityId}/members/${memberId}`, {
+    method: 'DELETE',
+    token,
+  });
 }

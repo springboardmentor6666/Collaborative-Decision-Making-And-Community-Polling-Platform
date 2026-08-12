@@ -5,6 +5,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    overflow-x: hidden;
+  }
+}
+
 /* ─── Custom Scrollbars ─── */
 ::-webkit-scrollbar {
   width: 6px;

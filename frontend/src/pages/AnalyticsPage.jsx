@@ -413,7 +413,7 @@ export default function AnalyticsPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border-default bg-surface p-6 shadow-2xl"
+              className="relative z-10 w-[95%] sm:w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border-default bg-surface p-6 shadow-2xl"
             >
               {/* Close button */}
               <button

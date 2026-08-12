@@ -121,7 +121,7 @@ export default function VotePage() {
             ) : (
               <div className="space-y-6">
                 {/* Back link */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <Link
                     to={`/decisions/${id}`}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
@@ -160,7 +160,7 @@ export default function VotePage() {
 
                 {/* Success */}
                 {successMsg && (
-                  <div className="flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-800">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-800">
                     <div className="flex items-center gap-3">
                       <svg className="h-5 w-5 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
