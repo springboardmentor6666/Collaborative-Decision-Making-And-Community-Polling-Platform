@@ -11,15 +11,15 @@ export function DecisionStatusBadge({ status, className }: DecisionStatusBadgePr
   const getStatusConfig = () => {
     switch (status) {
       case "ACTIVE":
-        return { label: "Open", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
+        return { label: "Open", color: "bg-emerald-50 text-emerald-600 border-emerald-200" };
       case "DRAFT":
-        return { label: "Draft", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" };
+        return { label: "Draft", color: "bg-amber-50 text-amber-600 border-amber-200" };
       case "CLOSED":
-        return { label: "Closed", color: "bg-slate-500/10 text-slate-400 border-slate-500/20" };
+        return { label: "Closed", color: "bg-slate-100 text-slate-600 border-slate-200" };
       case "ARCHIVED":
-        return { label: "Archived", color: "bg-red-500/10 text-red-500 border-red-500/20" };
+        return { label: "Archived", color: "bg-red-50 text-red-600 border-red-200" };
       default:
-        return { label: status, color: "bg-slate-800 text-slate-300" };
+        return { label: status, color: "bg-slate-100 text-slate-600" };
     }
   };
 

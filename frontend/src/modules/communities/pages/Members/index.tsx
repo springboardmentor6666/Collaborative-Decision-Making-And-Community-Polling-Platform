@@ -32,30 +32,30 @@ export default function Members() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-full border-slate-700 bg-slate-800 text-slate-300 hover:text-white">
+        <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-full border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50">
           <Link to={`/communities/${communityId}`}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center">
-            <Users className="w-8 h-8 mr-3 text-blue-500" />
+          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight flex items-center">
+            <Users className="w-8 h-8 mr-3 text-[#2563EB]" />
             Members
           </h1>
-          <p className="text-slate-400 mt-1">{community?.name} • {membersPage?.totalElements} members</p>
+          <p className="text-[#64748B] mt-1">{community?.name} • {membersPage?.totalElements} members</p>
         </div>
         <div className="flex-1" />
         {canManage && <InviteMemberModal communityId={communityId} />}
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
         <Tabs defaultValue="active" className="w-full">
           {canManage && (
-            <TabsList className="mb-6 bg-slate-950 border border-slate-800">
-              <TabsTrigger value="active" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400">
+            <TabsList className="mb-6 bg-slate-50 border border-[#E2E8F0] p-1">
+              <TabsTrigger value="active" className="data-[state=active]:bg-white data-[state=active]:text-[#0F172A] data-[state=active]:shadow-sm text-[#64748B]">
                 Active Members ({membersPage?.totalElements || 0})
               </TabsTrigger>
-              <TabsTrigger value="pending" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400">
+              <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-[#0F172A] data-[state=active]:shadow-sm text-[#64748B]">
                 Pending Requests ({requestsPage?.totalElements || 0})
               </TabsTrigger>
             </TabsList>
@@ -75,7 +75,7 @@ export default function Members() {
               />
             ))}
             {membersPage?.content.length === 0 && (
-              <div className="text-center py-10 text-slate-400">
+              <div className="text-center py-10 text-[#64748B]">
                 No members found.
               </div>
             )}
@@ -96,7 +96,7 @@ export default function Members() {
                 />
               ))}
               {requestsPage?.content.length === 0 && (
-                <div className="text-center py-10 text-slate-400">
+                <div className="text-center py-10 text-[#64748B]">
                   No pending requests.
                 </div>
               )}

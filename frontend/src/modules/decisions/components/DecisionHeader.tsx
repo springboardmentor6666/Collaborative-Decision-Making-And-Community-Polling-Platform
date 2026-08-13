@@ -46,52 +46,50 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 md:p-8 mb-8 shadow-sm relative overflow-hidden">
-      {/* Decorative gradient blob */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 md:p-8 mb-8 shadow-sm relative overflow-hidden">
       
-      <div className="flex flex-col lg:flex-row justify-between gap-6">
+      <div className="flex flex-col lg:flex-row justify-between gap-6 relative z-10">
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <DecisionStatusBadge status={decision.status} />
-            <span className="text-sm font-medium px-2.5 py-1 rounded-md bg-slate-800 text-slate-300">
+            <span className="text-sm font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
               {decision.voteType.replace("_", " ")}
             </span>
-            <span className="text-sm font-medium px-2.5 py-1 rounded-md bg-slate-800 text-slate-300">
+            <span className="text-sm font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
               {decision.visibility}
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#0F172A] mb-4 leading-tight">
             {decision.title}
           </h1>
 
           {decision.description && (
-            <p className="text-slate-400 text-lg mb-6 max-w-3xl whitespace-pre-line">
+            <p className="text-[#64748B] text-lg mb-6 max-w-3xl whitespace-pre-line">
               {decision.description}
             </p>
           )}
 
           <div className="flex flex-wrap items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8 border border-slate-700">
+              <Avatar className="h-8 w-8 border border-slate-200">
                 <AvatarImage src={decision.createdBy.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${decision.createdBy.username}`} />
-                <AvatarFallback>{decision.createdBy.fullName?.substring(0, 2).toUpperCase() || "U"}</AvatarFallback>
+                <AvatarFallback className="bg-slate-100 text-slate-600 font-medium">{decision.createdBy.fullName?.substring(0, 2).toUpperCase() || "U"}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-slate-400 text-xs">Created by</span>
-                <span className="font-medium text-slate-200">{decision.createdBy.fullName}</span>
+                <span className="text-[#64748B] text-xs">Created by</span>
+                <span className="font-semibold text-[#0F172A]">{decision.createdBy.fullName}</span>
               </div>
             </div>
 
             {decision.community && (
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+                <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-[#2563EB]">
                   <Users className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-slate-400 text-xs">Community</span>
-                  <Link to={`/communities/${decision.community.communityId}`} className="font-medium text-blue-400 hover:underline">
+                  <span className="text-[#64748B] text-xs">Community</span>
+                  <Link to={`/communities/${decision.community.communityId}`} className="font-semibold text-[#2563EB] hover:underline">
                     {decision.community.name}
                   </Link>
                 </div>
@@ -99,31 +97,31 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
             )}
 
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <BarChart3 className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-slate-400 text-xs">Total Votes</span>
-                <span className="font-medium text-slate-200">{decision.totalVotes.toLocaleString()}</span>
+                <span className="text-[#64748B] text-xs">Total Votes</span>
+                <span className="font-semibold text-[#0F172A]">{decision.totalVotes.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <div className="h-8 w-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                 <Calendar className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-slate-400 text-xs">Deadline</span>
-                <span className="font-medium text-slate-200">{deadlineDate}</span>
+                <span className="text-[#64748B] text-xs">Deadline</span>
+                <span className="font-semibold text-[#0F172A]">{deadlineDate}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex lg:flex-col gap-3 shrink-0">
+        <div className="flex lg:flex-col gap-3 shrink-0 relative z-10">
           {isOwner ? (
             <>
-              <Button asChild variant="outline" className="border-slate-700 hover:bg-slate-800 text-white w-full">
+              <Button asChild variant="outline" className="border-[#E2E8F0] hover:bg-slate-50 text-[#0F172A] w-full">
                 <Link to={`/decisions/${decision.decisionId}/edit`}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
@@ -131,7 +129,7 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
               </Button>
               <Button 
                 variant="destructive" 
-                className="w-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border-none"
+                className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-100"
                 onClick={handleDelete}
                 disabled={deleteDecision.isPending}
               >
@@ -142,10 +140,10 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
           ) : (
             <Button 
               variant="outline" 
-              className="border-slate-700 hover:bg-slate-800 text-white w-full"
+              className="border-[#E2E8F0] hover:bg-slate-50 text-[#0F172A] w-full"
               onClick={() => setIsReportModalOpen(true)}
             >
-              <Flag className="w-4 h-4 mr-2 text-red-400" />
+              <Flag className="w-4 h-4 mr-2 text-red-500" />
               Report
             </Button>
           )}

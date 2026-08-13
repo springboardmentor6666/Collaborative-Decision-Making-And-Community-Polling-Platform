@@ -33,7 +33,7 @@ export const CommentEditor: React.FC<CommentEditorProps> = ({
 
   if (!user) {
     return (
-      <div className="bg-muted p-4 rounded-lg text-center border border-border/50 text-sm">
+      <div className="bg-slate-50 p-4 rounded-lg text-center border border-[#E2E8F0] text-sm text-[#64748B]">
         Please log in to participate in the discussion.
       </div>
     );
@@ -48,9 +48,9 @@ export const CommentEditor: React.FC<CommentEditorProps> = ({
     <div className="flex gap-4">
       {!onCancel && (
          <div className="hidden sm:block flex-shrink-0">
-           <Avatar className="w-10 h-10 border border-border">
+           <Avatar className="w-10 h-10 border border-[#E2E8F0]">
               <AvatarImage src={user.profileImage} alt={user.username || user.fullName} />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+              <AvatarFallback className="bg-slate-100 text-slate-600 font-medium text-sm">
                  {getInitials(user.fullName || user.username)}
               </AvatarFallback>
            </Avatar>
@@ -61,7 +61,7 @@ export const CommentEditor: React.FC<CommentEditorProps> = ({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={placeholder}
-          className="w-full min-h-[100px] p-3 rounded-lg border border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-primary resize-y text-sm transition-shadow"
+          className="w-full min-h-[100px] p-3 rounded-lg border border-[#E2E8F0] bg-white focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-[#2563EB] resize-y text-sm transition-shadow text-[#0F172A] placeholder:text-[#94A3B8]"
           disabled={isSubmitting}
         />
         <div className="flex items-center justify-end gap-2">

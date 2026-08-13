@@ -22,17 +22,17 @@ export function DecisionSearch({ onSearch, placeholder = "Search decisions...", 
 
   return (
     <div className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0F172A]" />
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="pl-9 pr-9 bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-blue-500"
+        className="pl-9 pr-9 bg-white border-[#E2E8F0] text-[#0F172A] placeholder:text-[#94A3B8] focus-visible:ring-blue-500 rounded-[8px]"
       />
       {value && (
         <button
           onClick={() => setValue("")}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
         >
           <X className="w-4 h-4" />
         </button>

@@ -26,11 +26,11 @@ export default function CommunityList() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Discover Communities</h1>
-          <p className="text-slate-400 mt-1">Find and join communities that match your interests.</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Discover Communities</h1>
+          <p className="text-slate-500 mt-1">Find and join communities that match your interests.</p>
         </div>
         
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/20">
+        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
           <Link to="/communities/new">
             <Plus className="w-5 h-5 mr-2" />
             Create Community
@@ -38,28 +38,28 @@ export default function CommunityList() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <CommunitySearch initialQuery={searchQuery} onSearch={setSearchQuery} />
         
         <div className="flex space-x-2">
           <Button 
-            variant={visibilityFilter === undefined ? "default" : "outline"}
+            variant="outline"
             onClick={() => setVisibilityFilter(undefined)}
-            className={visibilityFilter === undefined ? "bg-slate-700 hover:bg-slate-600" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}
+            className={visibilityFilter === undefined ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-900" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}
           >
             All
           </Button>
           <Button 
-            variant={visibilityFilter === "PUBLIC" ? "default" : "outline"}
+            variant="outline"
             onClick={() => setVisibilityFilter("PUBLIC")}
-            className={visibilityFilter === "PUBLIC" ? "bg-slate-700 hover:bg-slate-600" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}
+            className={visibilityFilter === "PUBLIC" ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-900" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}
           >
             Public
           </Button>
           <Button 
-            variant={visibilityFilter === "PRIVATE" ? "default" : "outline"}
+            variant="outline"
             onClick={() => setVisibilityFilter("PRIVATE")}
-            className={visibilityFilter === "PRIVATE" ? "bg-slate-700 hover:bg-slate-600" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}
+            className={visibilityFilter === "PRIVATE" ? "bg-slate-900 hover:bg-slate-800 text-white border-slate-900" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}
           >
             Private
           </Button>
@@ -69,23 +69,23 @@ export default function CommunityList() {
       {isLoading ? (
         <CommunityListSkeleton />
       ) : isError ? (
-        <div className="text-center py-16 bg-slate-900/50 rounded-3xl border border-slate-800">
-          <p className="text-red-400 mb-4">Failed to load communities.</p>
-          <Button onClick={() => refetch()} variant="outline" className="border-slate-700">Try Again</Button>
+        <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <p className="text-red-500 mb-4">Failed to load communities.</p>
+          <Button onClick={() => refetch()} variant="outline" className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50">Try Again</Button>
         </div>
       ) : data?.content.length === 0 ? (
-        <div className="text-center py-20 bg-slate-900/50 rounded-3xl border border-slate-800 flex flex-col items-center">
-          <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-            <Users className="w-8 h-8 text-slate-500" />
+        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center">
+          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <Users className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No Communities Found</h3>
-          <p className="text-slate-400 mb-6 max-w-md">
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No Communities Found</h3>
+          <p className="text-slate-500 mb-6 max-w-md">
             {searchQuery 
               ? `We couldn't find any communities matching "${searchQuery}".` 
               : "There are no communities available yet. Be the first to create one!"}
           </p>
           {!searchQuery && (
-            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
               <Link to="/communities/new">Create Community</Link>
             </Button>
           )}

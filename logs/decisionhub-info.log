@@ -1,0 +1,249 @@
+2026-08-13 00:00:00.008 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 00:05:00.002 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 00:10:00.008 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 00:15:00.015 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 00:20:00.012 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 13:17:20.764 [background-preinit] INFO  o.h.validator.internal.util.Version [reqId=N/A, user=N/A] - HV000001: Hibernate Validator 8.0.1.Final
+2026-08-13 13:17:20.926 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 28024 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
+2026-08-13 13:17:20.929 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-08-13 13:17:20.934 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
+2026-08-13 13:17:21.122 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-13 13:17:21.124 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-13 13:17:28.540 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-13 13:17:28.740 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 185 ms. Found 16 JPA repository interfaces.
+2026-08-13 13:17:30.462 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
+2026-08-13 13:17:30.488 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
+2026-08-13 13:17:30.490 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
+2026-08-13 13:17:30.490 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-08-13 13:17:30.614 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
+2026-08-13 13:17:30.614 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 9487 ms
+2026-08-13 13:17:31.484 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Starting...
+2026-08-13 13:17:31.879 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7ee4dcdb
+2026-08-13 13:17:31.882 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Start completed.
+2026-08-13 13:17:31.931 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
+2026-08-13 13:17:31.956 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
+2026-08-13 13:17:32.086 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 2 migrations (execution time 00:00.091s)
+2026-08-13 13:17:32.109 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 2
+2026-08-13 13:17:32.116 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
+2026-08-13 13:17:32.350 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-13 13:17:32.543 [restartedMain] INFO  org.hibernate.Version [reqId=N/A, user=N/A] - HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-08-13 13:17:32.639 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
+2026-08-13 13:17:32.826 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
+2026-08-13 13:17:33.249 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-13 13:17:33.386 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-13 13:17:35.953 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-13 13:17:36.230 [restartedMain] WARN  o.h.t.s.i.ExceptionHandlerLoggedImpl [reqId=N/A, user=N/A] - GenerationTarget encountered exception accepting command : Error executing DDL "
+    create index idx_vote_option 
+       on vote (option_id)" via JDBC [ERROR: column "option_id" does not exist]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    create index idx_vote_option 
+       on vote (option_id)" via JDBC [ERROR: column "option_id" does not exist]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:575)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:515)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applyIndexes(AbstractSchemaMigrator.java:360)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:96)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:232)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:117)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:322)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:457)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1506)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1853)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1802)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:682)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:509)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365)
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1705)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1454)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:205)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:211)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:174)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:169)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:154)
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:87)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:266)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:240)
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4414)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:145)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:415)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:874)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:437)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128)
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:516)
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:222)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:188)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:162)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:619)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352)
+	at com.decisionhub.DecisionHubApplication.main(DecisionHubApplication.java:14)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+Caused by: org.postgresql.util.PSQLException: ERROR: column "option_id" does not exist
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:371)
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:502)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:419)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:341)
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:326)
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:302)
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:297)
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80)
+	... 126 common frames omitted
+2026-08-13 13:17:36.601 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-13 13:17:37.071 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory [reqId=N/A, user=N/A] - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-13 13:17:38.075 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
+2026-08-13 13:17:38.077 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
+2026-08-13 13:17:38.996 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
+2026-08-13 13:17:40.091 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
+2026-08-13 13:17:40.483 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-08-13 13:17:41.188 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
+2026-08-13 13:17:41.279 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
+2026-08-13 13:17:41.332 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
+2026-08-13 13:17:41.356 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 22.37 seconds (process running for 24.194)
+2026-08-13 13:17:41.383 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles and users...
+2026-08-13 13:17:41.569 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
+2026-08-13 13:17:43.939 [RMI TCP Connection(1)-192.168.1.11] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-13 13:17:43.939 [RMI TCP Connection(1)-192.168.1.11] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Initializing Servlet 'dispatcherServlet'
+2026-08-13 13:17:43.942 [RMI TCP Connection(1)-192.168.1.11] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Completed initialization in 3 ms
+2026-08-13 13:18:17.171 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2006e6f5, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:17.273 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=2006e6f5, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [102 ms]
+2026-08-13 13:18:17.302 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bfa93a79, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:17.315 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=bfa93a79, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [14 ms]
+2026-08-13 13:18:22.680 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ec72f644, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.316 [http-nio-8080-exec-6] WARN  c.d.interceptor.LoggingInterceptor [reqId=ec72f644, user=N/A] - SLOW API ALERT: POST /api/auth/login returned 200 in 636 ms
+2026-08-13 13:18:23.452 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=59b61162, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.492 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f131a66d, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.498 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=77e35005, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.498 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b10b9f05, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.509 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=22dd5d26, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:23.546 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=f131a66d, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [54 ms]
+2026-08-13 13:18:23.556 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=22dd5d26, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [47 ms]
+2026-08-13 13:18:23.593 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=b10b9f05, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [95 ms]
+2026-08-13 13:18:23.714 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=77e35005, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [216 ms]
+2026-08-13 13:18:23.714 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=59b61162, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [262 ms]
+2026-08-13 13:18:38.573 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a55cd058, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:38.580 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=a55cd058, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [7 ms]
+2026-08-13 13:18:52.400 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cf62bf9d, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:52.400 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=41fe1c86, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:52.463 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=cf62bf9d, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [63 ms]
+2026-08-13 13:18:52.512 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=41fe1c86, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [112 ms]
+2026-08-13 13:18:53.422 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ed59c5e4, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:53.452 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=ed59c5e4, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [30 ms]
+2026-08-13 13:18:53.588 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fb58807a, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:53.595 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=fb58807a, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [7 ms]
+2026-08-13 13:18:53.602 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=adf93321, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:53.608 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=adf93321, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [6 ms]
+2026-08-13 13:18:56.025 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7cf61d17, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:56.025 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a6ee0fe9, user=N/A] - HTTP Incoming Request: GET /api/communities/1 from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:56.025 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=388e0aa6, user=N/A] - HTTP Incoming Request: GET /api/communities/1/membership from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:56.040 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=a6ee0fe9, user=N/A] - HTTP Request Completed: GET /api/communities/1 -> Status 200 [15 ms]
+2026-08-13 13:18:56.050 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=388e0aa6, user=N/A] - HTTP Request Completed: GET /api/communities/1/membership -> Status 200 [25 ms]
+2026-08-13 13:18:56.059 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=7cf61d17, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [34 ms]
+2026-08-13 13:18:59.464 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cea20a08, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:59.464 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d7005069, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:59.464 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=28ca3237, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:18:59.477 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=cea20a08, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [13 ms]
+2026-08-13 13:18:59.529 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=28ca3237, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [65 ms]
+2026-08-13 13:18:59.539 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=d7005069, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [75 ms]
+2026-08-13 13:19:08.627 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c9fa7c89, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:19:08.630 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=c9fa7c89, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-08-13 13:19:30.628 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=286167bc, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:19:30.628 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f5b1bb8c, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-08-13 13:19:30.642 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=f5b1bb8c, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [14 ms]
+2026-08-13 13:19:30.642 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=286167bc, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [14 ms]
+2026-08-13 13:20:00.007 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 13:20:00.025 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Decision ID 6 deadline reached. Transitioned status to CLOSED.
+2026-08-13 13:20:00.155 [scheduling-1] INFO  c.d.s.impl.NotificationServiceImpl [reqId=N/A, user=N/A] - Dispatched notification to user ID 3: [DECISION_CLOSED] Poll Closed
+2026-08-13 13:25:00.016 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 13:30:00.008 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-08-13 13:35:00.017 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...

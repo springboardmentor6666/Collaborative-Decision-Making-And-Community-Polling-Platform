@@ -4,22 +4,22 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 
 export function CommunityCardSkeleton() {
   return (
-    <Card className="flex flex-col h-full bg-slate-900 border-slate-800 overflow-hidden">
-      <Skeleton className="h-32 w-full bg-slate-800" />
+    <Card className="flex flex-col h-full bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden">
+      <Skeleton className="h-32 w-full bg-slate-100" />
       
-      <CardHeader className="pt-4 pb-2 px-5 flex-grow">
-        <Skeleton className="h-6 w-3/4 mb-3 bg-slate-800" />
-        <Skeleton className="h-4 w-full mb-1 bg-slate-800" />
-        <Skeleton className="h-4 w-2/3 bg-slate-800" />
+      <CardHeader className="pt-6 pb-2 px-6 flex-grow">
+        <Skeleton className="h-6 w-3/4 mb-3 bg-slate-200" />
+        <Skeleton className="h-4 w-full mb-1 bg-slate-200" />
+        <Skeleton className="h-4 w-2/3 bg-slate-200" />
       </CardHeader>
       
-      <CardContent className="px-5 py-2">
-        <Skeleton className="h-4 w-1/3 bg-slate-800" />
+      <CardContent className="px-6 py-2">
+        <Skeleton className="h-4 w-1/3 bg-slate-200" />
       </CardContent>
       
-      <CardFooter className="px-5 pb-5 pt-3 flex gap-3">
-        <Skeleton className="h-10 flex-1 bg-slate-800" />
-        <Skeleton className="h-10 w-24 bg-slate-800" />
+      <CardFooter className="px-6 pb-6 pt-4 flex gap-3">
+        <Skeleton className="h-10 flex-1 bg-slate-200" />
+        <Skeleton className="h-10 flex-1 bg-slate-200" />
       </CardFooter>
     </Card>
   );

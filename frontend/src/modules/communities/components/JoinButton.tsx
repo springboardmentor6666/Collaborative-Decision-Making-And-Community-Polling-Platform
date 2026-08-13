@@ -35,12 +35,17 @@ export function JoinButton({ communityId, membership, communityVisibility, varia
   else if (isRejected) buttonText = "Request Rejected";
   else if (communityVisibility === "PRIVATE") buttonText = "Request to Join";
 
+  let computedClassName = className || "";
+  if (isMember || buttonText === "Join") {
+    computedClassName += " bg-white border-slate-300 text-slate-700 hover:bg-slate-50 font-medium";
+  }
+
   return (
     <Button 
-      variant={isMember ? "secondary" : variant}
+      variant={isMember || buttonText === "Join" ? "outline" : variant}
       onClick={handleToggleJoin}
       disabled={isPendingAPI || isPendingApproval || isRejected}
-      className={className}
+      className={computedClassName}
     >
       {isPendingAPI && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
       {buttonText}

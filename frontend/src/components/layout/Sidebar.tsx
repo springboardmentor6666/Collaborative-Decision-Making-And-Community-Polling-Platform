@@ -46,9 +46,9 @@ export function Sidebar() {
   const isAdmin = user?.role === 'ROLE_ADMIN';
 
   return (
-    <div className="flex flex-col h-full bg-card p-4">
+    <div className="flex flex-col h-full bg-white p-4 border-r border-[#E2E8F0]">
       <div className="flex items-center gap-2 px-2 py-4 mb-6">
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+        <div className="w-8 h-8 rounded-full bg-[#18181B] flex items-center justify-center text-white font-bold">
           D
         </div>
         <span className="font-bold text-lg hidden md:block">DecisionHub</span>
@@ -63,8 +63,8 @@ export function Sidebar() {
               cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm font-medium",
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-[#18181B] text-white" 
+                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
               )
             }
           >
@@ -82,8 +82,8 @@ export function Sidebar() {
                   cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm font-medium",
                     isActive 
-                      ? "bg-primary text-primary-foreground" 
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-[#18181B] text-white" 
+                      : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
                   )
                 }
               >
@@ -97,8 +97,8 @@ export function Sidebar() {
                 cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm font-medium",
                   isActive 
-                    ? "bg-primary text-primary-foreground" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-[#18181B] text-white" 
+                    : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
                 )
               }
             >
@@ -109,7 +109,7 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="mt-auto space-y-1 pt-6 border-t">
+      <div className="mt-auto space-y-1 pt-6 border-t border-[#E2E8F0]">
         {BOTTOM_ITEMS.map((item) => (
           <NavLink
             key={item.name}
@@ -118,8 +118,8 @@ export function Sidebar() {
               cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-sm font-medium",
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-[#18181B] text-white" 
+                  : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
               )
             }
           >

@@ -63,7 +63,7 @@ export default function DecisionDetails() {
         {/* Main Content: Poll & Comments */}
         <PollCard decision={decision} />
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl px-2 py-4 md:p-8 shadow-sm">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl px-2 py-4 md:p-8 shadow-sm">
           <CommentSection decisionId={decisionId} />
         </div>
 
@@ -71,16 +71,16 @@ export default function DecisionDetails() {
         
         {/* Attachments (if any) */}
         {decision.attachments && decision.attachments.length > 0 && (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-sm">
-            <h3 className="font-bold text-white text-lg mb-4">Attachments</h3>
+          <div className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm">
+            <h3 className="font-bold text-[#0F172A] text-lg mb-4">Attachments</h3>
             <div className="space-y-3">
               {decision.attachments.map((attachment) => (
-                <div key={attachment.attachmentId} className="flex items-center p-3 bg-slate-800/50 border border-slate-700 rounded-lg hover:border-slate-600 transition-colors">
+                <div key={attachment.attachmentId} className="flex items-center p-3 bg-slate-50 border border-[#E2E8F0] rounded-lg hover:border-slate-300 transition-colors">
                   <div className="flex-1 truncate">
-                    <p className="text-sm font-medium text-slate-300 truncate">{attachment.fileName}</p>
-                    <p className="text-xs text-slate-500">{attachment.fileType}</p>
+                    <p className="text-sm font-medium text-[#0F172A] truncate">{attachment.fileName}</p>
+                    <p className="text-xs text-[#64748B]">{attachment.fileType}</p>
                   </div>
-                  <Button variant="ghost" size="sm" asChild className="shrink-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10">
+                  <Button variant="ghost" size="sm" asChild className="shrink-0 text-[#2563EB] hover:text-[#1D4ED8] hover:bg-blue-50">
                     <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer">
                       View
                     </a>

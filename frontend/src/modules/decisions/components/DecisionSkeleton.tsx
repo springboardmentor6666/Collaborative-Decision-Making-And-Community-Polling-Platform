@@ -28,7 +28,7 @@ export function DecisionCardSkeleton() {
         </div>
       </CardContent>
 
-      <CardFooter className="px-5 py-3 border-t border-slate-800 flex justify-between items-center bg-slate-900/50">
+      <CardFooter className="px-5 py-3 border-t border-slate-800 flex justify-between items-center bg-[#111C33]">
         <Skeleton className="h-4 w-24 bg-slate-800" />
         <div className="flex gap-2">
           <Skeleton className="h-8 w-8 bg-slate-800 rounded-md" />

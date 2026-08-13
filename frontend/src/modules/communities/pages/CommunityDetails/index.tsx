@@ -31,12 +31,12 @@ export default function CommunityDetails() {
 
   if (isError || !community) {
     return (
-      <div className="text-center py-20 bg-slate-900/50 rounded-3xl border border-slate-800">
+      <div className="text-center py-20 bg-slate-50 rounded-3xl border border-[#E2E8F0]">
         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Community Not Found</h2>
-        <p className="text-slate-400 mb-6">The community you're looking for doesn't exist or you don't have access.</p>
+        <h2 className="text-2xl font-bold text-[#0F172A] mb-2">Community Not Found</h2>
+        <p className="text-[#64748B] mb-6">The community you're looking for doesn't exist or you don't have access.</p>
         <div className="flex justify-center gap-4">
-          <Button onClick={() => refetch()} variant="outline" className="border-slate-700">Try Again</Button>
+          <Button onClick={() => refetch()} variant="outline" className="border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-100">Try Again</Button>
           <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
             <Link to="/communities">Browse Communities</Link>
           </Button>
@@ -50,9 +50,9 @@ export default function CommunityDetails() {
       <CommunityHeader community={community} membership={membership || null} />
 
       <div>
-        <Card className="bg-slate-900 border-slate-800 shadow-lg">
-          <CardHeader className="border-b border-slate-800 pb-4">
-            <CardTitle className="text-xl text-white flex items-center">
+        <Card className="bg-white border-[#E2E8F0] shadow-sm">
+          <CardHeader className="border-b border-[#E2E8F0] pb-4">
+            <CardTitle className="text-xl text-[#0F172A] flex items-center">
               <FileText className="w-5 h-5 mr-2 text-blue-500" />
               Recent Decisions
             </CardTitle>
@@ -60,7 +60,7 @@ export default function CommunityDetails() {
           <CardContent className="pt-6">
             {!decisionsData?.content || decisionsData.content.length === 0 ? (
               <div className="text-center py-10">
-                <p className="text-slate-400">No decisions have been posted in this community yet.</p>
+                <p className="text-[#64748B]">No decisions have been posted in this community yet.</p>
                 {isMember && (
                   <Button asChild className="mt-4 bg-blue-600 hover:bg-blue-700 text-white">
                     <Link to="/decisions/new">Create a Decision</Link>

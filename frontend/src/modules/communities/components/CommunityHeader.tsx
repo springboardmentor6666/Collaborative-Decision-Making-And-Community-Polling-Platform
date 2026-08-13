@@ -26,24 +26,24 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
   });
 
   return (
-    <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-xl mb-6">
+    <div className="bg-white rounded-3xl overflow-hidden border border-[#E2E8F0] shadow-sm mb-6">
       {/* Banner */}
       <div 
-        className="h-48 md:h-64 bg-slate-800 relative w-full"
+        className="h-48 md:h-64 bg-slate-100 relative w-full"
         style={{
-          backgroundImage: community.image ? `url(${community.image})` : 'linear-gradient(to right, #1e293b, #0f172a)',
+          backgroundImage: community.image ? `url(${community.image})` : 'linear-gradient(to right, #f1f5f9, #e2e8f0)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
       </div>
       
       {/* Content */}
       <div className="px-6 md:px-10 pb-8 pt-6 relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 -mt-16 md:-mt-20 mb-4 z-10 relative">
-          <div className="bg-slate-950 p-2 rounded-2xl inline-block border border-slate-800 shadow-lg">
-            <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-800 rounded-xl flex items-center justify-center text-4xl font-bold text-blue-500 overflow-hidden">
+          <div className="bg-white p-2 rounded-2xl inline-block border border-[#E2E8F0] shadow-sm">
+            <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-100 rounded-xl flex items-center justify-center text-4xl font-bold text-[#2563EB] overflow-hidden">
               {community.image ? (
                 <img src={community.image} alt={community.name} className="w-full h-full object-cover" />
               ) : (
@@ -54,7 +54,7 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
           
           <div className="flex gap-3 w-full md:w-auto">
             {canEdit && (
-              <Button asChild variant="outline" className="border-slate-700 bg-slate-800/50 hover:bg-slate-700 text-white backdrop-blur-sm">
+              <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
                 <Link to={`/communities/${community.communityId}/edit`}>
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
@@ -73,36 +73,41 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">{community.name}</h1>
-            <Badge variant={community.visibility === "PUBLIC" ? "secondary" : "outline"} className="bg-slate-800 text-xs border-slate-700 text-white">
+            <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tight">{community.name}</h1>
+            <Badge 
+              variant="outline" 
+              className={community.visibility === "PUBLIC" 
+                ? "bg-[#EFF6FF] text-[#1D4ED8] border-none" 
+                : "bg-[#F1F5F9] text-[#334155] border-none"}
+            >
               {community.visibility === "PUBLIC" ? <Globe className="w-3 h-3 mr-1" /> : <Lock className="w-3 h-3 mr-1" />}
               {community.visibility}
             </Badge>
           </div>
           
-          <p className="text-slate-300 text-lg max-w-3xl mb-6">
+          <p className="text-[#64748B] text-lg max-w-3xl mb-6">
             {community.description || "Welcome to our community!"}
           </p>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-4 md:gap-8 text-sm text-slate-400 font-medium">
-              <div className="flex items-center hover:text-white transition-colors cursor-pointer" onClick={() => window.location.href = `/communities/${community.communityId}/members`}>
-                <Users className="w-4 h-4 mr-2 text-blue-500" />
+            <div className="flex flex-wrap gap-4 md:gap-8 text-sm text-[#64748B] font-medium">
+              <div className="flex items-center hover:text-[#0F172A] transition-colors cursor-pointer" onClick={() => window.location.href = `/communities/${community.communityId}/members`}>
+                <Users className="w-4 h-4 mr-2 text-[#2563EB]" />
                 <span>{community.memberCount.toLocaleString()} {community.memberCount === 1 ? 'Member' : 'Members'}</span>
               </div>
               
               <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-blue-500" />
-                <span>Managed by <span className="text-white font-semibold">{community.owner.username}</span></span>
+                <Shield className="w-4 h-4 mr-2 text-[#2563EB]" />
+                <span>Managed by <span className="text-[#0F172A] font-semibold">{community.owner.username}</span></span>
               </div>
               
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                <Calendar className="w-4 h-4 mr-2 text-[#2563EB]" />
                 <span>Created on {createdDate}</span>
               </div>
             </div>
             
-            <Button asChild variant="outline" className="border-slate-700 bg-slate-800 text-white hover:bg-slate-700 shrink-0">
+            <Button asChild variant="outline" className="border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 shrink-0">
               <Link to={`/communities/${community.communityId}/members`}>
                 View All Members
                 <ArrowRight className="w-4 h-4 ml-2" />

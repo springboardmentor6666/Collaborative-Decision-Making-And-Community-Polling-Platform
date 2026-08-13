@@ -43,15 +43,15 @@ export default function DecisionFeed() {
     
     if (!data?.content || data.content.length === 0) {
       return (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-slate-500" />
+        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
+          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+            <Search className="w-8 h-8 text-slate-400" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No Decisions Found</h3>
-          <p className="text-slate-400 mb-6 max-w-md mx-auto">
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No Decisions Found</h3>
+          <p className="text-slate-500 mb-6 max-w-md mx-auto">
             We couldn't find any decisions matching your criteria. Be the first to create one!
           </p>
-          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button asChild className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white">
             <Link to="/decisions/new">Create Decision</Link>
           </Button>
         </div>
@@ -73,8 +73,8 @@ export default function DecisionFeed() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Decision Board</h1>
-        <p className="text-slate-400">Discover and participate in community decisions.</p>
+        <h1 className="text-[32px] font-bold text-[#0F172A] mb-2 leading-tight">Decisions</h1>
+        <p className="text-[#64748B] text-[15px]">Discover and participate in community decisions.</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -97,16 +97,16 @@ export default function DecisionFeed() {
 
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             {!(searchQuery || statusFilter || visibilityFilter || voteTypeFilter) && (
-              <TabsList className="bg-slate-900 border border-slate-800 p-1">
-                <TabsTrigger value="all" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">All</TabsTrigger>
-                <TabsTrigger value="trending" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">Trending</TabsTrigger>
-                <TabsTrigger value="popular" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">Popular</TabsTrigger>
-                <TabsTrigger value="latest" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">Latest</TabsTrigger>
+              <TabsList className="bg-transparent border-none p-0 gap-2">
+                <TabsTrigger value="all" className="data-[state=active]:bg-[#0F172A] data-[state=active]:text-white text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] rounded-md px-3 py-1.5 transition-colors font-medium">All</TabsTrigger>
+                <TabsTrigger value="trending" className="data-[state=active]:bg-[#0F172A] data-[state=active]:text-white text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] rounded-md px-3 py-1.5 transition-colors font-medium">Trending</TabsTrigger>
+                <TabsTrigger value="popular" className="data-[state=active]:bg-[#0F172A] data-[state=active]:text-white text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] rounded-md px-3 py-1.5 transition-colors font-medium">Popular</TabsTrigger>
+                <TabsTrigger value="latest" className="data-[state=active]:bg-[#0F172A] data-[state=active]:text-white text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] rounded-md px-3 py-1.5 transition-colors font-medium">Latest</TabsTrigger>
               </TabsList>
             )}
 
             {user && (
-              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shrink-0">
+              <Button asChild className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white shrink-0 ml-2 shadow-sm rounded-[10px]">
                 <Link to="/decisions/new">
                   <PlusCircle className="w-4 h-4 mr-2" />
                   New Decision
@@ -119,7 +119,7 @@ export default function DecisionFeed() {
         <div className="w-full">
           {searchQuery || statusFilter || visibilityFilter || voteTypeFilter ? (
             <div>
-              <div className="mb-4 text-sm text-slate-400 font-medium">
+              <div className="mb-4 text-[14px] text-slate-500 font-medium">
                 Showing results for your filters
               </div>
               {renderContent(allDecisions, loadingAll)}

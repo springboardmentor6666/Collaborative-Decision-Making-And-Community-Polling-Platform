@@ -36,26 +36,26 @@ export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
   };
 
   return (
-    <Card className="flex flex-col bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors shadow-sm">
+    <Card className="flex flex-col bg-white border-[#E2E8F0] hover:border-slate-300 transition-colors shadow-sm rounded-xl overflow-hidden">
       <Link to={`/decisions/${decision.decisionId}`} className="flex-1">
-        <CardHeader className="pb-3 pt-5 px-5">
-          <div className="flex justify-between items-start gap-4 mb-3">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6 border border-slate-700">
+        <CardHeader className="pb-3 pt-6 px-6">
+          <div className="flex justify-between items-start gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-6 w-6 border border-slate-200">
                 <AvatarImage src={decision.createdBy.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${decision.createdBy.username}`} />
-                <AvatarFallback className="bg-slate-800 text-[10px] text-white">
+                <AvatarFallback className="bg-slate-100 text-[10px] text-slate-600 font-medium">
                   {decision.createdBy.fullName?.substring(0, 2).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <span className="text-sm font-medium text-slate-300">
+                <span className="text-[14px] font-semibold text-[#0F172A]">
                   {decision.createdBy.fullName}
                 </span>
                 {decision.community && (
                   <>
-                    <span className="hidden sm:inline text-slate-600">•</span>
-                    <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full flex items-center w-fit">
-                      <Users className="w-3 h-3 mr-1" />
+                    <span className="hidden sm:inline text-slate-300">•</span>
+                    <span className="text-[12px] font-medium text-[#2563EB] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full flex items-center w-fit">
+                      <Users className="w-3 h-3 mr-1.5" />
                       {decision.community.name}
                     </span>
                   </>
@@ -65,39 +65,41 @@ export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
             <DecisionStatusBadge status={decision.status} />
           </div>
           
-          <h3 className="text-xl font-bold text-white line-clamp-2 hover:text-blue-400 transition-colors">
+          <h3 className="text-[19px] font-bold text-[#0F172A] line-clamp-2 hover:text-[#2563EB] transition-colors leading-snug">
             {decision.title}
           </h3>
           
           {decision.description && (
-            <p className="text-slate-400 text-sm line-clamp-2 mt-2">
+            <p className="text-[#64748B] text-[15px] line-clamp-2 mt-2 leading-relaxed">
               {decision.description}
             </p>
           )}
         </CardHeader>
 
-        <CardContent className="px-5 py-3">
-          <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500">
+        <CardContent className="px-6 pb-6 pt-0 mt-3">
+          <div className="flex flex-wrap gap-4 text-[13px] font-medium text-[#64748B]">
             <div className="flex items-center">
-              <Clock className="w-3.5 h-3.5 mr-1" />
+              <Clock className="w-4 h-4 mr-1.5 opacity-70 text-[#94A3B8]" />
               {getDeadlineText()}
             </div>
+            <div className="w-px h-3.5 bg-[#E2E8F0] my-auto hidden sm:block"></div>
             <div className="flex items-center">
-              <BarChart3 className="w-3.5 h-3.5 mr-1 text-emerald-500" />
-              <span className="text-slate-300 mr-1">{decision.totalVotes.toLocaleString()}</span> Votes
+              <BarChart3 className="w-4 h-4 mr-1.5 text-[#3B82F6]" />
+              <span className="text-[#64748B] mr-1">{decision.totalVotes.toLocaleString()}</span> Votes
             </div>
+            <div className="w-px h-3.5 bg-[#E2E8F0] my-auto hidden sm:block"></div>
             <div className="flex items-center">
-              <MessageSquare className="w-3.5 h-3.5 mr-1 text-blue-500" />
-              <span className="text-slate-300 mr-1">0</span> Comments
+              <MessageSquare className="w-4 h-4 mr-1.5 text-[#60A5FA]" />
+              <span className="text-[#64748B] mr-1">0</span> Comments
             </div>
           </div>
         </CardContent>
       </Link>
 
-      <CardFooter className="px-5 py-3 border-t border-slate-800 flex justify-between items-center bg-slate-900/50">
-        <span className="text-xs text-slate-500">Created {createdDate}</span>
+      <CardFooter className="px-6 py-4 border-t border-[#E2E8F0] flex justify-between items-center bg-white">
+        <span className="text-[13px] text-[#64748B]">Created {createdDate}</span>
         
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-[#64748B]">
           <ReportButton decisionId={decision.decisionId} />
           <BookmarkButton decisionId={decision.decisionId} isSaved={isSaved} />
           <ShareButton decisionId={decision.decisionId} title={decision.title} />

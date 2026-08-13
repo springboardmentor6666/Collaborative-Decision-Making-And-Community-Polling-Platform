@@ -1,0 +1,6 @@
+2026-08-12 18:29:53.445 [http-nio-8080-exec-6] ERROR c.d.exception.GlobalExceptionHandler [reqId=1f5e08f9, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.
+2026-08-12 18:29:54.472 [http-nio-8080-exec-1] ERROR c.d.exception.GlobalExceptionHandler [reqId=f798d4da, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.
+2026-08-12 18:31:26.696 [http-nio-8080-exec-7] ERROR c.d.exception.GlobalExceptionHandler [reqId=e5f2e9fe, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.
+2026-08-12 18:35:07.050 [http-nio-8080-exec-1] ERROR c.d.exception.GlobalExceptionHandler [reqId=c83d01db, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.
+2026-08-12 18:35:38.745 [http-nio-8080-exec-7] ERROR c.d.exception.GlobalExceptionHandler [reqId=c30938f5, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.
+2026-08-12 18:35:39.762 [http-nio-8080-exec-9] ERROR c.d.exception.GlobalExceptionHandler [reqId=27c0c0d0, user=N/A] - Forbidden operation: Only owners and moderators can view pending requests.

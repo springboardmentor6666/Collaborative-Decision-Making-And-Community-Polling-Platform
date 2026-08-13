@@ -64,23 +64,23 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
   return (
     <div className="flex gap-4 p-4">
       <div className="flex-shrink-0">
-        <Avatar className="w-10 h-10 border border-border">
+        <Avatar className="w-10 h-10 border border-[#E2E8F0]">
           <AvatarImage src={comment.user.profileImage} alt={comment.user.username || comment.user.fullName} />
-          <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+          <AvatarFallback className="bg-slate-100 text-slate-600 font-medium text-sm">
              {getInitials(comment.user.fullName || comment.user.username)}
           </AvatarFallback>
         </Avatar>
       </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-sm">
+          <span className="font-semibold text-sm text-[#0F172A]">
             {comment.user.fullName || comment.user.username}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-[#64748B]">
             {formatDate(comment.createdAt)}
           </span>
           {comment.edited && (
-            <span className="text-xs text-muted-foreground italic">(edited)</span>
+            <span className="text-xs text-[#64748B] italic">(edited)</span>
           )}
         </div>
         
@@ -95,7 +95,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
             />
           </div>
         ) : (
-          <p className="text-sm text-foreground whitespace-pre-wrap mt-1 leading-relaxed">
+          <p className="text-sm text-[#0F172A] whitespace-pre-wrap mt-1 leading-relaxed">
             {comment.message}
           </p>
         )}
@@ -105,7 +105,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
             {user && (
               <button
                 onClick={() => setIsReplying(!isReplying)}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="flex items-center gap-1 text-xs text-[#64748B] hover:text-[#2563EB] transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 Reply
@@ -114,7 +114,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
             {canModify && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="flex items-center gap-1 text-xs text-[#64748B] hover:text-[#2563EB] transition-colors"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 Edit
@@ -123,7 +123,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
             {canDelete && (
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                className="flex items-center gap-1 text-xs text-[#64748B] hover:text-red-600 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Delete
@@ -133,7 +133,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
         )}
 
         {isReplying && (
-          <div className="mt-4 border-l-2 border-border/50 pl-4">
+          <div className="mt-4 border-l-2 border-[#E2E8F0] pl-4">
             <CommentEditor
               onSubmit={handleReplySubmit}
               onCancel={() => setIsReplying(false)}
@@ -145,7 +145,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
         )}
 
         {comment.replies && comment.replies.length > 0 && (
-          <div className="mt-4 space-y-4 border-l-2 border-border/30 pl-2 sm:pl-4">
+          <div className="mt-4 space-y-4 border-l-2 border-[#E2E8F0] pl-2 sm:pl-4">
             {comment.replies.map((reply) => (
               <CommentCard key={reply.commentId} comment={reply} decisionId={decisionId} />
             ))}
