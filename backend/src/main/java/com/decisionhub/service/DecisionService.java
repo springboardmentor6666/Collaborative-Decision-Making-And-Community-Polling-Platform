@@ -1,0 +1,240 @@
+package com.decisionhub.service;
+
+import com.decisionhub.dto.DecisionRequest;
+import com.decisionhub.dto.DecisionResponse;
+import com.decisionhub.dto.OptionDto;
+import com.decisionhub.dto.PollResponse;
+import com.decisionhub.entity.*;
+import com.decisionhub.exception.CommunityNotFoundException;
+import com.decisionhub.exception.DecisionNotFoundException;
+import com.decisionhub.repository.CategoryRepository;
+import com.decisionhub.repository.CommunityMemberRepository;
+import com.decisionhub.repository.CommunityRepository;
+import com.decisionhub.repository.DecisionRepository;
+import com.decisionhub.repository.PollOptionRepository;
+import com.decisionhub.repository.UserRepository;
+import com.decisionhub.repository.VoteRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class DecisionService {
+
+    private final DecisionRepository decisionRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final CommunityRepository communityRepository;
+    private final CommunityMemberRepository communityMemberRepository;
+    private final PollOptionRepository pollOptionRepository;
+    private final VoteRepository voteRepository;
+    private final UserService userService;
+
+    public DecisionService(DecisionRepository decisionRepository,
+                           UserRepository userRepository,
+                           CategoryRepository categoryRepository,
+                           CommunityRepository communityRepository,
+                           CommunityMemberRepository communityMemberRepository,
+                           PollOptionRepository pollOptionRepository,
+                           VoteRepository voteRepository,
+                           UserService userService) {
+        this.decisionRepository = decisionRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.communityRepository = communityRepository;
+        this.communityMemberRepository = communityMemberRepository;
+        this.pollOptionRepository = pollOptionRepository;
+        this.voteRepository = voteRepository;
+        this.userService = userService;
+    }
+
+    @Transactional
+    public DecisionResponse createDecision(DecisionRequest request, String userEmail) {
+        User owner = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        Decision decision = new Decision();
+        decision.setTitle(request.getTitle());
+        decision.setDescription(request.getDescription());
+        decision.setOwner(owner);
+
+        if (request.getVisibility() != null) {
+            decision.setVisibility(request.getVisibility());
+        }
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+            decision.setCategory(category);
+        }
+
+        if (request.getCommunityId() != null) {
+            Community community = communityRepository.findById(request.getCommunityId())
+                    .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + request.getCommunityId()));
+            
+            // Server-side authorization check: User must be a member of the community to post group decisions
+            boolean isMember = communityMemberRepository.existsByCommunityIdAndUserId(community.getId(), owner.getId());
+            if (!isMember) {
+                throw new AccessDeniedException("Only community members can create decisions inside this community");
+            }
+            decision.setCommunity(community);
+        }
+
+        // Create embedded poll + decision options if provided
+        if (request.getOptionLabels() != null && !request.getOptionLabels().isEmpty()) {
+            // Create decision options
+            for (String label : request.getOptionLabels()) {
+                if (label != null && !label.trim().isEmpty()) {
+                    DecisionOption option = new DecisionOption();
+                    option.setLabel(label.trim());
+                    option.setDecision(decision);
+                    decision.getOptions().add(option);
+                }
+            }
+
+            // Create poll if pollType is specified
+            if (request.getPollType() != null && !request.getPollType().trim().isEmpty()) {
+                Poll poll = new Poll();
+                poll.setPollType(request.getPollType());
+                if (request.getPollQuestion() != null && !request.getPollQuestion().trim().isEmpty()) {
+                    poll.setQuestion(request.getPollQuestion().trim());
+                }
+                poll.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
+                poll.setDecision(decision);
+                decision.getPolls().add(poll);
+            }
+        }
+
+        Decision savedDecision = decisionRepository.save(decision);
+
+        // Create PollOption records linking each DecisionOption to the Poll
+        if (!savedDecision.getPolls().isEmpty() && !savedDecision.getOptions().isEmpty()) {
+            Poll savedPoll = savedDecision.getPolls().get(0);
+            for (DecisionOption option : savedDecision.getOptions()) {
+                PollOption pollOption = new PollOption();
+                pollOption.setPoll(savedPoll);
+                pollOption.setOption(option);
+                PollOption savedPo = pollOptionRepository.save(pollOption);
+                savedPoll.getPollOptions().add(savedPo);
+            }
+        }
+
+        return mapToDecisionResponse(savedDecision);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DecisionResponse> getAllDecisions() {
+        return decisionRepository.findByIsDeletedFalse().stream()
+                .map(this::mapToDecisionResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DecisionResponse getDecisionById(Long id) {
+        Decision decision = decisionRepository.findById(id)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+        return mapToDecisionResponse(decision);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DecisionResponse> getDecisionsByCommunityId(Long communityId, String userEmail) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
+
+        if ("PRIVATE".equalsIgnoreCase(community.getVisibility())) {
+            if (userEmail == null || userEmail.isBlank()) {
+                throw new AccessDeniedException("Access denied to private community decisions");
+            }
+            User user = userRepository.findByEmail(userEmail).orElse(null);
+            if (user == null || !communityMemberRepository.existsByCommunityIdAndUserId(communityId, user.getId())) {
+                throw new AccessDeniedException("Access denied to private community decisions");
+            }
+        }
+
+        List<Decision> decisions = decisionRepository.findByCommunityIdAndIsDeletedFalse(communityId);
+        return decisions.stream()
+                .map(this::mapToDecisionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public DecisionResponse updateDecision(Long id, DecisionRequest request, String userEmail) {
+        Decision decision = decisionRepository.findById(id)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+
+        decision.setTitle(request.getTitle());
+        decision.setDescription(request.getDescription());
+        if (request.getVisibility() != null) {
+            decision.setVisibility(request.getVisibility());
+        }
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+            decision.setCategory(category);
+        }
+
+        Decision updatedDecision = decisionRepository.save(decision);
+        return mapToDecisionResponse(updatedDecision);
+    }
+
+    @Transactional
+    public void deleteDecision(Long id, String userEmail) {
+        Decision decision = decisionRepository.findById(id)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+        // Soft delete
+        decision.setIsDeleted(true);
+        decisionRepository.save(decision);
+    }
+
+    public DecisionResponse mapToDecisionResponse(Decision decision) {
+        List<PollResponse> pollResponses = new ArrayList<>();
+        if (decision.getPolls() != null) {
+            for (Poll poll : decision.getPolls()) {
+                List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
+                Map<Long, Long> voteCounts = pollVotes.stream()
+                        .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
+
+                List<OptionDto> optionDtos = new ArrayList<>();
+                if (poll.getPollOptions() != null) {
+                    optionDtos = poll.getPollOptions().stream()
+                            .map(po -> new OptionDto(
+                                    po.getOption().getId(),
+                                    po.getOption().getLabel(),
+                                    po.getOption().getDescription(),
+                                    voteCounts.getOrDefault(po.getId(), 0L)))
+                            .collect(Collectors.toList());
+                }
+                pollResponses.add(new PollResponse(
+                        poll.getId(),
+                        decision.getId(),
+                        poll.getPollType(),
+                        poll.getQuestion(),
+                        poll.getIsAnonymous(),
+                        poll.getEndsAt(),
+                        optionDtos
+                ));
+            }
+        }
+
+        Long communityId = decision.getCommunity() != null ? decision.getCommunity().getId() : null;
+        String communityName = decision.getCommunity() != null ? decision.getCommunity().getName() : null;
+
+        return new DecisionResponse(
+                decision.getId(),
+                decision.getTitle(),
+                decision.getDescription(),
+                decision.getVisibility(),
+                decision.getIsDeleted(),
+                decision.getCreatedAt(),
+                userService.mapToUserResponse(decision.getOwner()),
+                decision.getCategory() != null ? decision.getCategory().getId() : null,
+                decision.getCategory() != null ? decision.getCategory().getName() : null,
+                communityId,
+                communityName,
+                pollResponses
+        );
+    }
+}
