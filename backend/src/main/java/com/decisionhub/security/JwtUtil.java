@@ -42,13 +42,13 @@ public class JwtUtil {
             if (decoded.length > 0) {
                 return normalizeKeyBytes(decoded);
             }
-        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
             // Fall back to a UTF-8 based key for plain-text secrets.
         }
 
         try {
             return normalizeKeyBytes(java.util.HexFormat.of().parseHex(configuredSecret));
-        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
             // Fall back to the raw secret bytes.
         }
 

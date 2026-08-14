@@ -14,6 +14,8 @@ public class DecisionResponse {
     private UserResponse owner;
     private Long categoryId;
     private String categoryName;
+    private Long communityId;
+    private String communityName;
     private List<PollResponse> polls;
 
     public DecisionResponse() {
@@ -31,6 +33,23 @@ public class DecisionResponse {
         this.owner = owner;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.polls = polls;
+    }
+
+    public DecisionResponse(Long id, String title, String description, String visibility, Boolean isDeleted,
+                            LocalDateTime createdAt, UserResponse owner, Long categoryId, String categoryName,
+                            Long communityId, String communityName, List<PollResponse> polls) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.visibility = visibility;
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.owner = owner;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.communityId = communityId;
+        this.communityName = communityName;
         this.polls = polls;
     }
 
@@ -104,6 +123,22 @@ public class DecisionResponse {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
     }
 
     public List<PollResponse> getPolls() {

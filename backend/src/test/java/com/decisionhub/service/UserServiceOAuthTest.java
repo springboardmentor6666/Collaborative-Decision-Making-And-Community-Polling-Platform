@@ -49,7 +49,7 @@ class UserServiceOAuthTest {
         when(userRepository.findByProviderAndProviderId("GOOGLE", "google-123")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("oauth@example.com")).thenReturn(Optional.of(existingUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(passwordEncoder.encode(any())).thenReturn("encoded-password");
+        org.mockito.Mockito.lenient().when(passwordEncoder.encode(any())).thenReturn("encoded-password");
         when(jwtUtil.generateToken("oauth@example.com")).thenReturn("jwt-token");
 
         AuthResponse response = userService.processOAuthLogin("GOOGLE", "google-123", "oauth@example.com", "Existing User", "https://avatar.test/pic");

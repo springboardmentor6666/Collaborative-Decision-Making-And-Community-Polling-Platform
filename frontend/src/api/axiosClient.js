@@ -329,12 +329,13 @@ export async function getCurrentUserApi(token) {
 /**
  * Community API endpoints
  */
-export async function getCommunitiesApi(token) {
-  const data = await request('/api/communities', { token });
+export async function getCommunitiesApi(search = '', token = null) {
+  const query = search ? `?search=${encodeURIComponent(search)}` : '';
+  const data = await request(`/api/communities${query}`, { token });
   return Array.isArray(data) ? data : [];
 }
 
-export async function getCommunityByIdApi(id, token) {
+export async function getCommunityByIdApi(id, token = null) {
   return await request(`/api/communities/${id}`, { token });
 }
 
@@ -342,6 +343,21 @@ export async function createCommunityApi(communityData, token) {
   return await request('/api/communities', {
     method: 'POST',
     body: communityData,
+    token,
+  });
+}
+
+export async function updateCommunityApi(id, communityData, token) {
+  return await request(`/api/communities/${id}`, {
+    method: 'PUT',
+    body: communityData,
+    token,
+  });
+}
+
+export async function deleteCommunityApi(id, token) {
+  return await request(`/api/communities/${id}`, {
+    method: 'DELETE',
     token,
   });
 }
@@ -360,22 +376,60 @@ export async function leaveCommunityApi(id, token) {
   });
 }
 
-export async function getCommunityMembersApi(id, token) {
+export async function getCommunityMembersApi(id, token = null) {
   const data = await request(`/api/communities/${id}/members`, { token });
   return Array.isArray(data) ? data : [];
 }
 
-export async function updateCommunityMemberRoleApi(communityId, memberId, role, token) {
-  return await request(`/api/communities/${communityId}/members/${memberId}`, {
-    method: 'PUT',
+export async function updateCommunityMemberRoleApi(communityId, userId, role, token) {
+  return await request(`/api/communities/${communityId}/members/${userId}/role`, {
+    method: 'PATCH',
     body: { role },
     token,
   });
 }
 
-export async function removeCommunityMemberApi(communityId, memberId, token) {
-  return await request(`/api/communities/${communityId}/members/${memberId}`, {
+export async function removeCommunityMemberApi(communityId, userId, token) {
+  return await request(`/api/communities/${communityId}/members/${userId}`, {
     method: 'DELETE',
     token,
   });
+}
+
+export async function transferOwnershipApi(communityId, newOwnerUserId, token) {
+  return await request(`/api/communities/${communityId}/transfer-ownership`, {
+    method: 'POST',
+    body: { newOwnerUserId },
+    token,
+  });
+}
+
+export async function getCommunityDecisionsApi(communityId, token = null) {
+  const data = await request(`/api/communities/${communityId}/decisions`, { token });
+  if (Array.isArray(data)) {
+    return data.map((d) => ({
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+      votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
+      optionsCount: d.polls?.[0]?.options?.length || 0,
+      createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
+      createdAt: d.createdAt || new Date().toISOString(),
+      communityId: d.communityId,
+      communityName: d.communityName,
+      poll: d.polls?.[0]
+        ? {
+            id: d.polls[0].id,
+            question: d.polls[0].question || d.title,
+            options: d.polls[0].options?.map((o, idx) => ({
+              id: o.id || idx + 1,
+              optionText: o.label || o.optionText || `Option ${idx + 1}`,
+              voteCount: o.voteCount || 0,
+            })) || [],
+          }
+        : null,
+    }));
+  }
+  return [];
 }

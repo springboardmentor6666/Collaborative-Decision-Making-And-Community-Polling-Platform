@@ -5,12 +5,16 @@ import com.decisionhub.dto.DecisionResponse;
 import com.decisionhub.dto.OptionDto;
 import com.decisionhub.dto.PollResponse;
 import com.decisionhub.entity.*;
+import com.decisionhub.exception.CommunityNotFoundException;
 import com.decisionhub.exception.DecisionNotFoundException;
 import com.decisionhub.repository.CategoryRepository;
+import com.decisionhub.repository.CommunityMemberRepository;
+import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.PollOptionRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.repository.VoteRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,8 @@ public class DecisionService {
     private final DecisionRepository decisionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CommunityRepository communityRepository;
+    private final CommunityMemberRepository communityMemberRepository;
     private final PollOptionRepository pollOptionRepository;
     private final VoteRepository voteRepository;
     private final UserService userService;
@@ -32,12 +38,16 @@ public class DecisionService {
     public DecisionService(DecisionRepository decisionRepository,
                            UserRepository userRepository,
                            CategoryRepository categoryRepository,
+                           CommunityRepository communityRepository,
+                           CommunityMemberRepository communityMemberRepository,
                            PollOptionRepository pollOptionRepository,
                            VoteRepository voteRepository,
                            UserService userService) {
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.communityRepository = communityRepository;
+        this.communityMemberRepository = communityMemberRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
         this.userService = userService;
@@ -62,6 +72,18 @@ public class DecisionService {
             decision.setCategory(category);
         }
 
+        if (request.getCommunityId() != null) {
+            Community community = communityRepository.findById(request.getCommunityId())
+                    .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + request.getCommunityId()));
+            
+            // Server-side authorization check: User must be a member of the community to post group decisions
+            boolean isMember = communityMemberRepository.existsByCommunityIdAndUserId(community.getId(), owner.getId());
+            if (!isMember) {
+                throw new AccessDeniedException("Only community members can create decisions inside this community");
+            }
+            decision.setCommunity(community);
+        }
+
         // Create embedded poll + decision options if provided
         if (request.getOptionLabels() != null && !request.getOptionLabels().isEmpty()) {
             // Create decision options
@@ -84,10 +106,6 @@ public class DecisionService {
                 poll.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
                 poll.setDecision(decision);
                 decision.getPolls().add(poll);
-
-                // Note: PollOptions (linking poll to decision_options) should be created
-                // after both are persisted, since they need IDs. This is handled in a follow-up
-                // or via the PollService.
             }
         }
 
@@ -100,11 +118,9 @@ public class DecisionService {
                 PollOption pollOption = new PollOption();
                 pollOption.setPoll(savedPoll);
                 pollOption.setOption(option);
-                pollOptionRepository.save(pollOption);
+                PollOption savedPo = pollOptionRepository.save(pollOption);
+                savedPoll.getPollOptions().add(savedPo);
             }
-            // Refresh the poll to include the newly created PollOptions in the response
-            savedDecision = decisionRepository.findById(savedDecision.getId())
-                    .orElse(savedDecision);
         }
 
         return mapToDecisionResponse(savedDecision);
@@ -122,6 +138,27 @@ public class DecisionService {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
         return mapToDecisionResponse(decision);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DecisionResponse> getDecisionsByCommunityId(Long communityId, String userEmail) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
+
+        if ("PRIVATE".equalsIgnoreCase(community.getVisibility())) {
+            if (userEmail == null || userEmail.isBlank()) {
+                throw new AccessDeniedException("Access denied to private community decisions");
+            }
+            User user = userRepository.findByEmail(userEmail).orElse(null);
+            if (user == null || !communityMemberRepository.existsByCommunityIdAndUserId(communityId, user.getId())) {
+                throw new AccessDeniedException("Access denied to private community decisions");
+            }
+        }
+
+        List<Decision> decisions = decisionRepository.findByCommunityIdAndIsDeletedFalse(communityId);
+        return decisions.stream()
+                .map(this::mapToDecisionResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -156,7 +193,6 @@ public class DecisionService {
         List<PollResponse> pollResponses = new ArrayList<>();
         if (decision.getPolls() != null) {
             for (Poll poll : decision.getPolls()) {
-                // Fetch vote counts per poll option for real-time display
                 List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
                 Map<Long, Long> voteCounts = pollVotes.stream()
                         .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
@@ -183,6 +219,9 @@ public class DecisionService {
             }
         }
 
+        Long communityId = decision.getCommunity() != null ? decision.getCommunity().getId() : null;
+        String communityName = decision.getCommunity() != null ? decision.getCommunity().getName() : null;
+
         return new DecisionResponse(
                 decision.getId(),
                 decision.getTitle(),
@@ -193,6 +232,8 @@ public class DecisionService {
                 userService.mapToUserResponse(decision.getOwner()),
                 decision.getCategory() != null ? decision.getCategory().getId() : null,
                 decision.getCategory() != null ? decision.getCategory().getName() : null,
+                communityId,
+                communityName,
                 pollResponses
         );
     }

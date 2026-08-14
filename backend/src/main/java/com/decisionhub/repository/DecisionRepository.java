@@ -12,4 +12,6 @@ public interface DecisionRepository extends JpaRepository<Decision, Long> {
     List<Decision> findByVisibility(String visibility);
     List<Decision> findByIsDeletedFalse();
     List<Decision> findByOwnerIdAndIsDeletedFalse(Long ownerId);
+    List<Decision> findByCommunityIdAndIsDeletedFalse(Long communityId);
+    long countByCommunityIdAndIsDeletedFalse(Long communityId);
 }

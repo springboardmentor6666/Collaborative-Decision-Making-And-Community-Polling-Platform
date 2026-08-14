@@ -14,6 +14,8 @@ public class DecisionRequest {
 
     private Long categoryId;
 
+    private Long communityId;
+
     // Embedded poll creation fields (optional)
     private String pollType;
     private String pollQuestion;
@@ -64,6 +66,14 @@ public class DecisionRequest {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getPollType() {

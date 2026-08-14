@@ -11,19 +11,32 @@ export default function CommunitiesPage() {
   const { accessToken } = useAuth();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    getCommunitiesApi(accessToken)
-      .then(setCommunities)
-      .catch(() => setCommunities([]))
-      .finally(() => setLoading(false));
-  }, [accessToken]);
+    let isSubscribed = true;
+    setLoading(true);
+    setError(null);
 
-  const filteredCommunities = communities.filter(c => 
-    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const timer = setTimeout(() => {
+      getCommunitiesApi(searchQuery, accessToken)
+        .then((data) => {
+          if (isSubscribed) setCommunities(data);
+        })
+        .catch((err) => {
+          if (isSubscribed) setError(err.message || 'Failed to load communities.');
+        })
+        .finally(() => {
+          if (isSubscribed) setLoading(false);
+        });
+    }, 300);
+
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, accessToken]);
 
   return (
     <div className="page-shell min-h-screen flex flex-col sm:pr-[60px]">
@@ -69,14 +82,21 @@ export default function CommunitiesPage() {
               </div>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-100 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {/* Grid */}
             {loading ? (
               <div className="flex h-40 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
-            ) : filteredCommunities.length > 0 ? (
+            ) : communities.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredCommunities.map((community) => (
+                {communities.map((community) => (
                   <CommunityCard key={community.id} community={community} />
                 ))}
               </div>

@@ -30,6 +30,10 @@ public class Decision {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
+    private Community community;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -109,6 +113,14 @@ public class Decision {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Community getCommunity() {
+        return community;
+    }
+
+    public void setCommunity(Community community) {
+        this.community = community;
     }
 
     public LocalDateTime getCreatedAt() {
