@@ -9,6 +9,7 @@ import Communities from "./pages/Communities";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import OAuth2Success from "./pages/OAuth2Success";
 import "./index.css";
 import LandingPage from "./pages/LandingPage";
 function App() {
@@ -28,10 +29,12 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/create-decision" element={<CreateDecision />} />
         <Route path="/decisions" element={<MyDecisions />} />
+        <Route path="/oauth2/success" element={<OAuth2Success />} />
         <Route path="/polls" element={<Polls />} />
         <Route path="/communities" element={<Communities />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/profile" element={<Profile />} />
+
 
 
 

@@ -3,7 +3,10 @@ package com.decisionhub.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "decisions")
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Decision {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,11 +30,26 @@ public class Decision {
     @Column(nullable = false)
     private String visibility;
 
+    @Column(nullable = false)
+    private boolean anonymous = false;
+
+    private String category;
+
+    private LocalDate deadline;
+
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User createdBy;
+
+    @OneToMany(
+            mappedBy = "decision",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<Option> options = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

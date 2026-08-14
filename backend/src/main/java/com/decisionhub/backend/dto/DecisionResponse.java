@@ -1,9 +1,9 @@
 package com.decisionhub.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -17,5 +17,13 @@ public class DecisionResponse {
 
     private String description;
 
+    private String category;
+
     private String visibility;
+
+    private LocalDate deadline;
+
+    private boolean anonymous;
+
+    private List<OptionResponse> options;
 }

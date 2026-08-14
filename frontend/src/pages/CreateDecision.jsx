@@ -19,6 +19,7 @@ function CreateDecision() {
 
     const [message, setMessage] = useState("");
 
+
     const handleChange = (e) => {
 
         const { name, value, type, checked } = e.target;
@@ -30,13 +31,17 @@ function CreateDecision() {
 
     };
 
+
     const handleOptionChange = (index, value) => {
 
         const updatedOptions = [...options];
+
         updatedOptions[index] = value;
+
         setOptions(updatedOptions);
 
     };
+
 
     const addOption = () => {
 
@@ -44,48 +49,92 @@ function CreateDecision() {
 
     };
 
+
     const handleSubmit = async () => {
 
         const data = {
             ...decision,
-            options: options.filter(option => option.trim() !== "")
+
+            options: options.filter(
+                option => option.trim() !== ""
+            )
         };
+
 
         try {
 
             const token = localStorage.getItem("token");
 
-            const response = await fetch("http://localhost:8080/api/decisions",/*just changed the /api in the url*/ {
+            console.log("TOKEN:", token);
+            console.log("DATA:", data);
 
-                method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
+            if (!token) {
 
-                body: JSON.stringify(data)
+                setMessage("Please login first.");
 
-            });
+                navigate("/login");
+
+                return;
+            }
+
+
+            const response = await fetch(
+                "http://localhost:8080/api/decisions",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
 
             const result = await response.text();
 
-            setMessage(result);
+            console.log("STATUS:", response.status);
+            console.log("RESPONSE:", result);
+
+
+            if (!response.ok) {
+
+                setMessage(
+                    `Failed to create decision: ${result}`
+                );
+
+                return;
+            }
+
+
+            setMessage(
+                "Decision created successfully!"
+            );
+
 
             setTimeout(() => {
-
                 navigate("/home");
+            }, 1000);
 
-            }, 1500);
 
-        }
-        catch (error) {
+        } catch (error) {
 
-            setMessage("Server Error");
+            console.error(
+                "Create decision error:",
+                error
+            );
+
+            setMessage(
+                "Server error. Could not create decision."
+            );
 
         }
 
     };
+
 
     return (
 
@@ -96,330 +145,790 @@ function CreateDecision() {
 
             <style>{`
 
-            .form-card{
-                background:white;
-                border-radius:16px;
-                padding:32px;
-                box-shadow:0 1px 4px rgba(0,0,0,.06);
-                max-width:760px;
-            }
+                /* =========================
+                   PAGE
+                ========================= */
 
-            .field-label{
-                font-size:13px;
-                font-weight:600;
-                color:#374151;
-                margin-bottom:6px;
-                display:block;
-            }
+                .create-page {
+                    width: 100%;
+                    min-height: calc(100vh - 100px);
 
-            .field-group{
-                margin-bottom:20px;
-            }
+                    padding: 5px 0 40px;
 
-            .form-card input[type="text"],
-            .form-card input:not([type]),
-            .form-card input[type="date"],
-            .form-card textarea,
-            .form-card select{
+                    color: #f8fafc;
+                }
 
-                width:100%;
-                padding:12px 14px;
-                border:1px solid #e5e7eb;
-                border-radius:10px;
-                font-size:14px;
-                color:#111827;
-                background:#f9fafb;
-                outline:none;
-                transition:.15s;
 
-            }
+                /* =========================
+                   FORM CARD
+                ========================= */
 
-            .form-card input:focus,
-            .form-card textarea:focus,
-            .form-card select:focus{
+                .form-card {
 
-                border-color:#4f46e5;
-                background:white;
-                box-shadow:0 0 0 3px rgba(79,70,229,.12);
+                    width: 100%;
+                    max-width: 850px;
 
-            }
+                    background: #15121f;
 
-            .form-card textarea{
+                    border:
+                        1px solid #2d2840;
 
-                resize:none;
-                height:90px;
+                    border-radius: 16px;
 
-            }
+                    padding: 30px;
 
-            .radio-row{
+                    box-shadow:
+                        0 8px 30px rgba(0, 0, 0, 0.20);
+                }
 
-                display:flex;
-                gap:28px;
-                margin-bottom:20px;
 
-            }
+                /* =========================
+                   FORM INTRO
+                ========================= */
 
-            .radio-option{
+                .form-intro {
+                    margin-bottom: 28px;
 
-                display:flex;
-                align-items:center;
-                gap:8px;
-                font-size:14px;
-                color:#374151;
-                cursor:pointer;
+                    padding-bottom: 20px;
 
-            }
+                    border-bottom:
+                        1px solid #2a2536;
+                }
 
-            .radio-option input{
 
-                width:16px;
-                height:16px;
-                accent-color:#4f46e5;
+                .form-intro h2 {
 
-            }
+                    color: #f8fafc;
 
-            .checkbox-row{
+                    font-size: 20px;
 
-                display:flex;
-                align-items:center;
-                gap:10px;
-                margin-bottom:24px;
-                font-size:14px;
-                color:#374151;
+                    font-weight: 600;
 
-            }
+                    margin-bottom: 6px;
+                }
 
-            .checkbox-row input{
 
-                width:16px;
-                height:16px;
-                accent-color:#4f46e5;
+                .form-intro p {
 
-            }
+                    color: #938ca2;
 
-            .section-heading{
+                    font-size: 13px;
 
-                font-size:15px;
-                font-weight:700;
-                color:#111827;
-                margin:24px 0 12px;
+                    line-height: 1.5;
+                }
 
-            }
 
-            .option-input{
+                /* =========================
+                   FIELD GROUP
+                ========================= */
 
-                margin-bottom:10px;
+                .field-group {
+                    margin-bottom: 20px;
+                }
 
-            }
 
-            .btn-row{
+                .field-label {
 
-                display:flex;
-                gap:12px;
-                margin-top:10px;
+                    display: block;
 
-            }
+                    font-size: 13px;
 
-            .btn-add{
+                    font-weight: 600;
 
-                background:#ecfdf5;
-                color:#059669;
-                border:1px solid #a7f3d0;
-                padding:11px 18px;
-                border-radius:10px;
-                font-weight:600;
-                font-size:14px;
-                cursor:pointer;
+                    color: #ddd6fe;
 
-            }
+                    margin-bottom: 7px;
+                }
 
-            .btn-add:hover{
 
-                background:#d1fae5;
+                /* =========================
+                   INPUTS
+                ========================= */
 
-            }
+                .form-card input[type="text"],
+                .form-card input:not([type]),
+                .form-card input[type="date"],
+                .form-card textarea,
+                .form-card select {
 
-            .btn-submit{
+                    width: 100%;
 
-                width:100%;
-                background:#4f46e5;
-                color:white;
-                border:none;
-                padding:13px 18px;
-                border-radius:10px;
-                font-weight:700;
-                font-size:14px;
-                cursor:pointer;
-                margin-top:22px;
-                transition:.15s;
+                    padding: 12px 14px;
 
-            }
+                    border:
+                        1px solid #353044;
 
-            .btn-submit:hover{
+                    border-radius: 9px;
 
-                background:#4338ca;
+                    font-size: 14px;
 
-            }
+                    color: #f3f4f6;
 
-            .form-message{
+                    background: #1b1825;
 
-                margin-top:16px;
-                text-align:center;
-                font-weight:600;
-                color:#4f46e5;
-                font-size:14px;
+                    outline: none;
 
-            }
+                    transition:
+                        border-color 0.2s ease,
+                        background 0.2s ease;
+                }
 
-            `}</style>
 
-            <div className="form-card">
+                .form-card input::placeholder,
+                .form-card textarea::placeholder {
 
-                <div className="field-group">
-                    <span className="field-label">Decision Title</span>
-                    <input
-                        name="title"
-                        placeholder="e.g. Which framework should we use?"
-                        onChange={handleChange}
-                    />
-                </div>
+                    color: #777184;
+                }
 
-                <div className="field-group">
-                    <span className="field-label">Description</span>
-                    <textarea
-                        name="description"
-                        placeholder="Add some context for people voting..."
-                        onChange={handleChange}
-                    />
-                </div>
 
-                <div className="field-group">
-                    <span className="field-label">Category</span>
-                    <select
-                        name="category"
-                        onChange={handleChange}
-                    >
+                .form-card input:focus,
+                .form-card textarea:focus,
+                .form-card select:focus {
 
-                        <option value="">Select Category</option>
-                        <option>Career</option>
-                        <option>Technology</option>
-                        <option>Education</option>
-                        <option>Travel</option>
-                        <option>Finance</option>
+                    border-color: #6d4bc3;
 
-                    </select>
-                </div>
+                    background: #201c2c;
 
-                <span className="field-label">Visibility</span>
-                <div className="radio-row">
+                    box-shadow:
+                        0 0 0 2px
+                        rgba(109, 75, 195, 0.12);
+                }
 
-                    <label className="radio-option">
 
-                        <input
-                            type="radio"
-                            name="visibility"
-                            value="PUBLIC"
-                            checked={decision.visibility === "PUBLIC"}
-                            onChange={handleChange}
-                        />
+                /* =========================
+                   TEXTAREA
+                ========================= */
 
-                        Public
+                .form-card textarea {
 
-                    </label>
+                    resize: vertical;
 
-                    <label className="radio-option">
+                    min-height: 100px;
 
-                        <input
-                            type="radio"
-                            name="visibility"
-                            value="PRIVATE"
-                            checked={decision.visibility === "PRIVATE"}
-                            onChange={handleChange}
-                        />
+                    line-height: 1.5;
+                }
 
-                        Private
 
-                    </label>
+                /* =========================
+                   SELECT
+                ========================= */
 
-                </div>
+                .form-card select {
 
-                <div className="field-group">
-                    <span className="field-label">Deadline</span>
-                    <input
-                        type="date"
-                        name="deadline"
-                        onChange={handleChange}
-                    />
-                </div>
+                    cursor: pointer;
+                }
 
-                <label className="checkbox-row">
 
-                    <input
-                        type="checkbox"
-                        name="anonymous"
-                        onChange={handleChange}
-                    />
+                .form-card select option {
 
-                    Allow Anonymous Voting
+                    background: #1b1825;
 
-                </label>
+                    color: #f3f4f6;
+                }
 
-                <div className="section-heading">Options</div>
 
-                {
+                /* =========================
+                   VISIBILITY
+                ========================= */
 
-                    options.map((option, index) => (
+                .visibility-section {
 
-                        <div className="option-input" key={index}>
-                            <input
+                    margin-bottom: 22px;
+                }
 
-                                placeholder={`Option ${index + 1}`}
 
-                                value={option}
+                .radio-row {
 
-                                onChange={(e) => handleOptionChange(index, e.target.value)}
+                    display: flex;
 
-                            />
-                        </div>
+                    align-items: center;
 
-                    ))
+                    gap: 25px;
+
+                    margin-top: 10px;
+                }
+
+
+                .radio-option {
+
+                    display: flex;
+
+                    align-items: center;
+
+                    gap: 8px;
+
+                    font-size: 14px;
+
+                    color: #b9b2c5;
+
+                    cursor: pointer;
+                }
+
+
+                .radio-option input {
+
+                    width: 16px;
+
+                    height: 16px;
+
+                    accent-color: #6d4bc3;
+
+                    cursor: pointer;
+                }
+
+
+                .radio-option:hover {
+
+                    color: #ddd6fe;
+                }
+
+
+                /* =========================
+                   CHECKBOX
+                ========================= */
+
+                .checkbox-row {
+
+                    display: flex;
+
+                    align-items: center;
+
+                    gap: 10px;
+
+                    margin-bottom: 26px;
+
+                    font-size: 14px;
+
+                    color: #b9b2c5;
+
+                    cursor: pointer;
+                }
+
+
+                .checkbox-row input {
+
+                    width: 16px;
+
+                    height: 16px;
+
+                    accent-color: #6d4bc3;
+
+                    cursor: pointer;
+                }
+
+
+                /* =========================
+                   OPTIONS SECTION
+                ========================= */
+
+                .section-heading {
+
+                    font-size: 16px;
+
+                    font-weight: 600;
+
+                    color: #f3f4f6;
+
+                    margin:
+
+                        26px 0 12px;
+
+                    padding-bottom: 10px;
+
+                    border-bottom:
+                        1px solid #2a2536;
+                }
+
+
+                .option-input {
+
+                    margin-bottom: 10px;
+                }
+
+
+                .option-number {
+
+                    display: block;
+
+                    color: #8f879d;
+
+                    font-size: 11px;
+
+                    margin-bottom: 5px;
+                }
+
+
+                /* =========================
+                   BUTTON ROW
+                ========================= */
+
+                .btn-row {
+
+                    display: flex;
+
+                    gap: 12px;
+
+                    margin-top: 14px;
+                }
+
+
+                /* =========================
+                   ADD OPTION
+                ========================= */
+
+                .btn-add {
+
+                    background: #201a30;
+
+                    color: #c4b5fd;
+
+                    border:
+                        1px solid #493773;
+
+                    padding: 10px 17px;
+
+                    border-radius: 8px;
+
+                    font-weight: 600;
+
+                    font-size: 13px;
+
+                    cursor: pointer;
+
+                    transition: 0.2s ease;
+                }
+
+
+                .btn-add:hover {
+
+                    background: #2a2140;
+
+                    border-color: #6548a0;
+                }
+
+
+                /* =========================
+                   SUBMIT
+                ========================= */
+
+                .btn-submit {
+
+                    width: 100%;
+
+                    background:
+                        #6d3dcc;
+
+                    color: white;
+
+                    border: none;
+
+                    padding: 13px 18px;
+
+                    border-radius: 9px;
+
+                    font-weight: 600;
+
+                    font-size: 14px;
+
+                    cursor: pointer;
+
+                    margin-top: 24px;
+
+                    transition: 0.2s ease;
+                }
+
+
+                .btn-submit:hover {
+
+                    background:
+                        #7848d8;
+
+                    box-shadow:
+                        0 5px 15px
+                        rgba(109, 61, 204, 0.20);
+                }
+
+
+                /* =========================
+                   MESSAGE
+                ========================= */
+
+                .form-message {
+
+                    margin-top: 16px;
+
+                    padding: 11px 14px;
+
+                    border-radius: 8px;
+
+                    text-align: center;
+
+                    font-weight: 500;
+
+                    color: #c4b5fd;
+
+                    background: #211a32;
+
+                    border:
+                        1px solid #493773;
+
+                    font-size: 13px;
+                }
+
+
+                /* =========================
+                   SUCCESS MESSAGE
+                ========================= */
+
+                .form-message.success {
+
+                    color: #86efac;
+
+                    background: #10251d;
+
+                    border-color: #23734f;
+                }
+
+
+                /* =========================
+                   RESPONSIVE
+                ========================= */
+
+                @media (max-width: 700px) {
+
+                    .create-page {
+
+                        padding:
+                            5px 0 30px;
+                    }
+
+
+                    .form-card {
+
+                        padding: 22px;
+
+                        border-radius: 12px;
+                    }
+
+
+                    .radio-row {
+
+                        gap: 18px;
+                    }
 
                 }
 
-                <div className="btn-row">
+
+                @media (max-width: 450px) {
+
+                    .form-card {
+
+                        padding: 18px;
+                    }
+
+
+                    .radio-row {
+
+                        flex-direction: column;
+
+                        align-items: flex-start;
+
+                        gap: 12px;
+                    }
+
+                }
+
+            `}</style>
+
+
+            <div className="create-page">
+
+                <div className="form-card">
+
+                    {/* =========================
+                        FORM INTRO
+                    ========================= */}
+
+                    <div className="form-intro">
+
+                        <h2>
+                            Create a New Decision
+                        </h2>
+
+                        <p>
+                            Add the details below and give people
+                            clear options to vote on.
+                        </p>
+
+                    </div>
+
+
+                    {/* =========================
+                        TITLE
+                    ========================= */}
+
+                    <div className="field-group">
+
+                        <span className="field-label">
+                            Decision Title
+                        </span>
+
+                        <input
+                            type="text"
+                            name="title"
+                            placeholder="e.g. Which framework should we use?"
+                            value={decision.title}
+                            onChange={handleChange}
+                        />
+
+                    </div>
+
+
+                    {/* =========================
+                        DESCRIPTION
+                    ========================= */}
+
+                    <div className="field-group">
+
+                        <span className="field-label">
+                            Description
+                        </span>
+
+                        <textarea
+                            name="description"
+                            placeholder="Add some context for people voting..."
+                            value={decision.description}
+                            onChange={handleChange}
+                        />
+
+                    </div>
+
+
+                    {/* =========================
+                        CATEGORY
+                    ========================= */}
+
+                    <div className="field-group">
+
+                        <span className="field-label">
+                            Category
+                        </span>
+
+                        <select
+                            name="category"
+                            value={decision.category}
+                            onChange={handleChange}
+                        >
+
+                            <option value="">
+                                Select Category
+                            </option>
+
+                            <option value="Career">
+                                Career
+                            </option>
+
+                            <option value="Technology">
+                                Technology
+                            </option>
+
+                            <option value="Education">
+                                Education
+                            </option>
+
+                            <option value="Travel">
+                                Travel
+                            </option>
+
+                            <option value="Finance">
+                                Finance
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {/* =========================
+                        VISIBILITY
+                    ========================= */}
+
+                    <div className="visibility-section">
+
+                        <span className="field-label">
+                            Visibility
+                        </span>
+
+
+                        <div className="radio-row">
+
+                            <label className="radio-option">
+
+                                <input
+                                    type="radio"
+                                    name="visibility"
+                                    value="PUBLIC"
+                                    checked={
+                                        decision.visibility === "PUBLIC"
+                                    }
+                                    onChange={handleChange}
+                                />
+
+                                Public
+
+                            </label>
+
+
+                            <label className="radio-option">
+
+                                <input
+                                    type="radio"
+                                    name="visibility"
+                                    value="PRIVATE"
+                                    checked={
+                                        decision.visibility === "PRIVATE"
+                                    }
+                                    onChange={handleChange}
+                                />
+
+                                Private
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* =========================
+                        DEADLINE
+                    ========================= */}
+
+                    <div className="field-group">
+
+                        <span className="field-label">
+                            Deadline
+                        </span>
+
+                        <input
+                            type="date"
+                            name="deadline"
+                            value={decision.deadline}
+                            onChange={handleChange}
+                        />
+
+                    </div>
+
+
+                    {/* =========================
+                        ANONYMOUS VOTING
+                    ========================= */}
+
+                    <label className="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            name="anonymous"
+                            checked={decision.anonymous}
+                            onChange={handleChange}
+                        />
+
+                        Allow Anonymous Voting
+
+                    </label>
+
+
+                    {/* =========================
+                        OPTIONS
+                    ========================= */}
+
+                    <div className="section-heading">
+                        Voting Options
+                    </div>
+
+
+                    {options.map((option, index) => (
+
+                        <div
+                            className="option-input"
+                            key={index}
+                        >
+
+                            <span className="option-number">
+                                Option {index + 1}
+                            </span>
+
+                            <input
+                                type="text"
+                                placeholder={
+                                    `Enter option ${index + 1}`
+                                }
+                                value={option}
+                                onChange={(e) =>
+                                    handleOptionChange(
+                                        index,
+                                        e.target.value
+                                    )
+                                }
+                            />
+
+                        </div>
+
+                    ))}
+
+
+                    {/* =========================
+                        ADD OPTION
+                    ========================= */}
+
+                    <div className="btn-row">
+
+                        <button
+                            type="button"
+                            className="btn-add"
+                            onClick={addOption}
+                        >
+                            + Add Option
+                        </button>
+
+                    </div>
+
+
+                    {/* =========================
+                        SUBMIT
+                    ========================= */}
 
                     <button
-                        className="btn-add"
-                        onClick={addOption}
+                        type="button"
+                        className="btn-submit"
+                        onClick={handleSubmit}
                     >
-
-                        + Add Option
-
+                        Create Decision
                     </button>
 
+
+                    {/* =========================
+                        MESSAGE
+                    ========================= */}
+
+                    {message && (
+                        <div
+                            className={
+                                message.includes("successfully")
+                                    ? "form-message success"
+                                    : "form-message"
+                            }
+                        >
+                            {message}
+                        </div>
+                    )}
+
                 </div>
-
-                <button
-                    className="btn-submit"
-                    onClick={handleSubmit}
-                >
-
-                    Create Decision
-
-                </button>
-
-                {message && (
-                    <div className="form-message">
-                        {message}
-                    </div>
-                )}
 
             </div>
 
         </DashboardLayout>
-
     );
-
 }
 
 export default CreateDecision;

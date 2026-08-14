@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/hello"
                         ).permitAll()
+                        .requestMatchers("/api/decisions/**").permitAll()
 
                         // Google OAuth2
                         .requestMatchers(
@@ -92,7 +93,10 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        "http://localhost:5174"
+                )
         );
 
         configuration.setAllowedMethods(

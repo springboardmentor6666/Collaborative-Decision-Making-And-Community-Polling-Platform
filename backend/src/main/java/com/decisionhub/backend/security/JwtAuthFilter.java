@@ -36,32 +36,48 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
+        // No JWT → continue normally
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = authHeader.substring(7);
-        String email = jwtService.extractEmail(jwt);
+        String jwt = authHeader.substring(7).trim();
 
-        if (email != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+        // Empty or obviously invalid JWT → continue normally
+        if (jwt.isEmpty() || jwt.chars().filter(ch -> ch == '.').count() != 2) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            UserDetails userDetails =
-                    customUserDetailsService.loadUserByUsername(email);
+        try {
+            String email = jwtService.extractEmail(jwt);
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+            if (email != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                UserDetails userDetails =
+                        customUserDetailsService.loadUserByUsername(email);
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authToken);
+            }
+
+        } catch (Exception e) {
+            // Invalid/expired JWT → don't crash the request
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

@@ -10,7 +10,11 @@ public class OptionResponse {
 
     private Long id;
 
+    private Long decisionId;
+
     private String optionText;
 
-    private Long decisionId;
+    private long voteCount;
+
+    private boolean selected;
 }

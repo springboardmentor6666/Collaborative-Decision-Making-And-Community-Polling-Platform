@@ -10,9 +10,11 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   useEffect(() => {
     fetchDecisions();
   }, []);
+
 
   const fetchDecisions = async () => {
 
@@ -20,23 +22,32 @@ function Home() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:8080/api/decisions", {
-        headers: {
-          "Authorization": `Bearer ${token}`
+      const response = await fetch(
+        "http://localhost:8080/api/decisions",
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
         }
-      });
+      );
+
 
       if (!response.ok) {
         throw new Error("Failed to load");
       }
 
+
       const data = await response.json();
 
       setDecisions(data);
 
+
     } catch (err) {
 
-      setError("Unable to load your decisions right now.");
+      setError(
+        "Unable to load your decisions right now."
+      );
+
 
     } finally {
 
@@ -46,21 +57,29 @@ function Home() {
 
   };
 
+
+  /* =========================
+     QUICK ACTIONS
+  ========================= */
+
   const quickActions = [
+
     {
       title: "Create Decision",
       description: "Start a new decision board",
       icon: "➕",
-      color: "#4f46e5",
+      color: "#6d3dcc",
       route: "/create-decision"
     },
+
     {
       title: "My Decisions",
       description: "View and manage your boards",
       icon: "📊",
-      color: "#0891b2",
+      color: "#2563eb",
       route: "/decisions"
     },
+
     {
       title: "Active Polls",
       description: "See polls you can vote on",
@@ -68,284 +87,829 @@ function Home() {
       color: "#7c3aed",
       route: "/polls"
     },
+
     {
       title: "Communities",
       description: "Join and collaborate with others",
       icon: "👥",
-      color: "#db2777",
+      color: "#be3c88",
       route: "/communities"
     },
+
     {
       title: "Analytics",
       description: "Track decision trends",
       icon: "📈",
-      color: "#059669",
+      color: "#168653",
       route: "/analytics"
     },
+
     {
       title: "Profile",
       description: "Manage your account",
       icon: "👤",
-      color: "#d97706",
+      color: "#b7791f",
       route: "/profile"
     }
+
   ];
 
-  const totalDecisions = decisions.length;
-  const publicDecisions = decisions.filter(d => d.visibility === "PUBLIC").length;
-  const privateDecisions = decisions.filter(d => d.visibility === "PRIVATE").length;
+
+  /* =========================
+     STATISTICS
+  ========================= */
+
+  const totalDecisions =
+    decisions.length;
+
+
+  const publicDecisions =
+    decisions.filter(
+      d => d.visibility === "PUBLIC"
+    ).length;
+
+
+  const privateDecisions =
+    decisions.filter(
+      d => d.visibility === "PRIVATE"
+    ).length;
+
 
   const stats = [
-    { label: "Total Decisions", value: totalDecisions, icon: "🧭" },
-    { label: "Public Boards", value: publicDecisions, icon: "🌐" },
-    { label: "Private Boards", value: privateDecisions, icon: "🔒" },
-    { label: "Communities Joined", value: 0, icon: "👥" }
+
+    {
+      label: "Total Decisions",
+      value: totalDecisions,
+      icon: "🧭"
+    },
+
+    {
+      label: "Public Boards",
+      value: publicDecisions,
+      icon: "🌐"
+    },
+
+    {
+      label: "Private Boards",
+      value: privateDecisions,
+      icon: "🔒"
+    },
+
+    {
+      label: "Communities Joined",
+      value: 0,
+      icon: "👥"
+    }
+
   ];
 
+
   return (
+
     <DashboardLayout
       pageTitle="Welcome Back 👋"
       pageSubtitle="Create polls, compare ideas and make smarter decisions together."
     >
+
       <style>{`
 
-        .stats-grid{
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-          gap:20px;
-          margin-bottom:35px;
+        /* =========================
+           HOME PAGE
+        ========================= */
+
+        .home-page {
+
+          width: 100%;
+
+          min-height:
+            calc(100vh - 100px);
+
+          padding:
+            5px 0 40px;
+
+          color: #f8fafc;
         }
 
-        .stat-card{
-          background:white;
-          border-radius:16px;
-          padding:22px;
-          box-shadow:0 1px 4px rgba(0,0,0,.06);
-          display:flex;
-          align-items:center;
-          gap:16px;
+
+        /* =========================
+           STATISTICS
+        ========================= */
+
+        .stats-grid {
+
+          width: 100%;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+          gap: 18px;
+
+          margin-bottom: 35px;
         }
 
-        .stat-icon{
-          width:48px;
-          height:48px;
-          border-radius:12px;
-          background:#eef2ff;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:22px;
+
+        .stat-card {
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 14px;
+
+          min-width: 0;
+
+          padding: 20px;
+
+          background: #15121f;
+
+          border:
+            1px solid #2d2840;
+
+          border-radius: 14px;
+
+          transition:
+            border-color 0.2s ease,
+            transform 0.2s ease;
         }
 
-        .stat-value{
-          font-size:24px;
-          font-weight:800;
-          color:#111827;
+
+        .stat-card:hover {
+
+          border-color:
+            #4c3a70;
+
+          transform:
+            translateY(-2px);
         }
 
-        .stat-label{
-          font-size:13px;
-          color:#6b7280;
+
+        .stat-icon {
+
+          width: 46px;
+
+          height: 46px;
+
+          min-width: 46px;
+
+          border-radius: 11px;
+
+          background: #211a32;
+
+          border:
+            1px solid #3b2c5c;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 20px;
         }
 
-        .section-title{
-          font-size:18px;
-          font-weight:700;
-          color:#111827;
-          margin-bottom:16px;
+
+        .stat-value {
+
+          font-size: 24px;
+
+          font-weight: 700;
+
+          color: #f8fafc;
+
+          line-height: 1.2;
         }
 
-        .actions-grid{
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-          gap:20px;
-          margin-bottom:40px;
+
+        .stat-label {
+
+          font-size: 12px;
+
+          color: #918a9f;
+
+          margin-top: 4px;
+
+          white-space: nowrap;
         }
 
-        .action-card{
-          background:white;
-          border-radius:16px;
-          padding:24px;
-          cursor:pointer;
-          box-shadow:0 1px 4px rgba(0,0,0,.06);
-          transition:.2s;
-          border-top:4px solid transparent;
+
+        /* =========================
+           SECTION TITLE
+        ========================= */
+
+        .section-title {
+
+          font-size: 17px;
+
+          font-weight: 600;
+
+          color: #eee9f7;
+
+          margin-bottom: 15px;
         }
 
-        .action-card:hover{
-          transform:translateY(-4px);
-          box-shadow:0 8px 20px rgba(0,0,0,.1);
+
+        /* =========================
+           QUICK ACTIONS
+        ========================= */
+
+        .actions-grid {
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+          gap: 18px;
+
+          margin-bottom: 38px;
         }
 
-        .action-icon{
-          width:46px;
-          height:46px;
-          border-radius:12px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:22px;
-          color:white;
-          margin-bottom:16px;
+
+        .action-card {
+
+          position: relative;
+
+          min-width: 0;
+
+          background: #15121f;
+
+          border:
+            1px solid #2d2840;
+
+          border-top:
+            3px solid transparent;
+
+          border-radius: 14px;
+
+          padding: 21px;
+
+          cursor: pointer;
+
+          transition:
+            transform 0.2s ease,
+            border-color 0.2s ease,
+            background 0.2s ease;
         }
 
-        .action-card h3{
-          font-size:17px;
-          color:#111827;
-          margin-bottom:6px;
+
+        .action-card:hover {
+
+          transform:
+            translateY(-3px);
+
+          background: #181521;
+
+          border-color:
+            #403651;
         }
 
-        .action-card p{
-          font-size:13px;
-          color:#6b7280;
+
+        .action-icon {
+
+          width: 44px;
+
+          height: 44px;
+
+          border-radius: 10px;
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          font-size: 20px;
+
+          color: white;
+
+          margin-bottom: 15px;
         }
 
-        .recent-list{
-          background:white;
-          border-radius:16px;
-          box-shadow:0 1px 4px rgba(0,0,0,.06);
-          overflow:hidden;
+
+        .action-card h3 {
+
+          font-size: 16px;
+
+          font-weight: 600;
+
+          color: #f3f0f7;
+
+          margin-bottom: 6px;
         }
 
-        .recent-row{
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          padding:18px 22px;
-          border-bottom:1px solid #f1f2f6;
+
+        .action-card p {
+
+          font-size: 13px;
+
+          color: #918a9f;
+
+          line-height: 1.5;
         }
 
-        .recent-row:last-child{
-          border-bottom:none;
+
+        /* =========================
+           RECENT DECISIONS
+        ========================= */
+
+        .recent-list {
+
+          width: 100%;
+
+          background: #15121f;
+
+          border:
+            1px solid #2d2840;
+
+          border-radius: 14px;
+
+          overflow: hidden;
         }
 
-        .recent-title{
-          font-weight:600;
-          color:#111827;
+
+        .recent-row {
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: space-between;
+
+          gap: 20px;
+
+          padding:
+            17px 20px;
+
+          border-bottom:
+            1px solid #282334;
         }
 
-        .recent-meta{
-          font-size:12px;
-          color:#6b7280;
-          margin-top:3px;
+
+        .recent-row:last-child {
+
+          border-bottom: none;
         }
 
-        .badge{
-          padding:5px 12px;
-          border-radius:20px;
-          font-size:12px;
-          font-weight:700;
+
+        .recent-row:hover {
+
+          background:
+            rgba(255, 255, 255, 0.015);
         }
 
-        .badge-public{
-          background:#dcfce7;
-          color:#15803d;
+
+        .recent-info {
+
+          min-width: 0;
         }
 
-        .badge-private{
-          background:#fee2e2;
-          color:#b91c1c;
+
+        .recent-title {
+
+          font-weight: 600;
+
+          color: #eeeaf5;
+
+          font-size: 14px;
+
+          overflow: hidden;
+
+          text-overflow: ellipsis;
+
+          white-space: nowrap;
         }
 
-        .view-btn{
-          background:#eef2ff;
-          color:#4338ca;
-          border:none;
-          padding:8px 16px;
-          border-radius:8px;
-          font-weight:600;
-          cursor:pointer;
-          font-size:13px;
+
+        .recent-meta {
+
+          font-size: 12px;
+
+          color: #898192;
+
+          margin-top: 4px;
+
+          white-space: nowrap;
+
+          overflow: hidden;
+
+          text-overflow: ellipsis;
         }
 
-        .empty-state{
-          padding:40px;
-          text-align:center;
-          color:#6b7280;
+
+        /* =========================
+           RIGHT SIDE
+        ========================= */
+
+        .recent-actions {
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 12px;
+
+          flex-shrink: 0;
+        }
+
+
+        /* =========================
+           BADGES
+        ========================= */
+
+        .badge {
+
+          padding:
+            5px 10px;
+
+          border-radius: 6px;
+
+          font-size: 11px;
+
+          font-weight: 600;
+        }
+
+
+        .badge-public {
+
+          background:
+            #10251d;
+
+          color:
+            #86efac;
+
+          border:
+            1px solid #235c43;
+        }
+
+
+        .badge-private {
+
+          background:
+            #28191d;
+
+          color:
+            #fca5a5;
+
+          border:
+            1px solid #66333a;
+        }
+
+
+        /* =========================
+           VIEW BUTTON
+        ========================= */
+
+        .view-btn {
+
+          background:
+            #211a32;
+
+          color:
+            #c4b5fd;
+
+          border:
+            1px solid #493773;
+
+          padding:
+            7px 14px;
+
+          border-radius: 7px;
+
+          font-weight: 600;
+
+          cursor: pointer;
+
+          font-size: 12px;
+
+          transition:
+            background 0.2s ease,
+            border-color 0.2s ease;
+        }
+
+
+        .view-btn:hover {
+
+          background:
+            #2a2140;
+
+          border-color:
+            #6749a1;
+        }
+
+
+        /* =========================
+           EMPTY STATE
+        ========================= */
+
+        .empty-state {
+
+          padding:
+            40px 25px;
+
+          text-align: center;
+
+          color: #898192;
+
+          font-size: 13px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1100px) {
+
+          .stats-grid {
+
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+
+
+          .actions-grid {
+
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+          .stats-grid {
+
+            grid-template-columns:
+              1fr;
+          }
+
+
+          .actions-grid {
+
+            grid-template-columns:
+              1fr;
+          }
+
+
+          .recent-row {
+
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
+          }
+
+
+          .recent-actions {
+
+            width: 100%;
+
+            justify-content:
+              space-between;
+          }
+
+        }
+
+
+        @media (max-width: 450px) {
+
+          .stat-card {
+
+            padding: 16px;
+          }
+
+
+          .action-card {
+
+            padding: 18px;
+          }
+
         }
 
       `}</style>
 
-      <div className="stats-grid">
-        {stats.map((stat, i) => (
-          <div className="stat-card" key={i}>
-            <div className="stat-icon">{stat.icon}</div>
-            <div>
-              <div className="stat-value">{stat.value}</div>
-              <div className="stat-label">{stat.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      <div className="section-title">Quick Actions</div>
+      <div className="home-page">
 
-      <div className="actions-grid">
-        {quickActions.map((action, i) => (
-          <div
-            className="action-card"
-            key={i}
-            style={{ borderTopColor: action.color }}
-            onClick={() => navigate(action.route)}
-          >
-            <div className="action-icon" style={{ background: action.color }}>
-              {action.icon}
-            </div>
-            <h3>{action.title}</h3>
-            <p>{action.description}</p>
-          </div>
-        ))}
-      </div>
 
-      <div className="section-title">Recent Decisions</div>
+        {/* =========================
+            STATISTICS
+        ========================= */}
 
-      <div className="recent-list">
+        <div className="stats-grid">
 
-        {loading && (
-          <div className="empty-state">Loading your decisions...</div>
-        )}
+          {stats.map((stat, i) => (
 
-        {!loading && error && (
-          <div className="empty-state">{error}</div>
-        )}
+            <div
+              className="stat-card"
+              key={i}
+            >
 
-        {!loading && !error && decisions.length === 0 && (
-          <div className="empty-state">
-            You haven't created any decisions yet. Click "Create Decision" to get started.
-          </div>
-        )}
-
-        {!loading && !error && decisions.slice(0, 5).map((decision) => (
-          <div className="recent-row" key={decision.id}>
-
-            <div>
-              <div className="recent-title">{decision.title}</div>
-              <div className="recent-meta">
-                {decision.category || "Uncategorized"}
-                {decision.deadline ? ` • Deadline: ${decision.deadline}` : ""}
+              <div className="stat-icon">
+                {stat.icon}
               </div>
+
+
+              <div>
+
+                <div className="stat-value">
+                  {stat.value}
+                </div>
+
+                <div className="stat-label">
+                  {stat.label}
+                </div>
+
+              </div>
+
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-              <span
-                className={
-                  "badge " +
-                  (decision.visibility === "PRIVATE" ? "badge-private" : "badge-public")
-                }
-              >
-                {decision.visibility || "PUBLIC"}
-              </span>
+          ))}
 
-              <button
-                className="view-btn"
-                onClick={() => navigate("/decisions")}
+        </div>
+
+
+        {/* =========================
+            QUICK ACTIONS
+        ========================= */}
+
+        <div className="section-title">
+          Quick Actions
+        </div>
+
+
+        <div className="actions-grid">
+
+          {quickActions.map((action, i) => (
+
+            <div
+              className="action-card"
+              key={i}
+
+              style={{
+                borderTopColor:
+                  action.color
+              }}
+
+              onClick={() =>
+                navigate(action.route)
+              }
+            >
+
+              <div
+                className="action-icon"
+
+                style={{
+                  background:
+                    action.color
+                }}
               >
-                View
-              </button>
+                {action.icon}
+              </div>
+
+
+              <h3>
+                {action.title}
+              </h3>
+
+
+              <p>
+                {action.description}
+              </p>
+
             </div>
 
-          </div>
-        ))}
+          ))}
+
+        </div>
+
+
+        {/* =========================
+            RECENT DECISIONS
+        ========================= */}
+
+        <div className="section-title">
+          Recent Decisions
+        </div>
+
+
+        <div className="recent-list">
+
+
+          {/* LOADING */}
+
+          {loading && (
+
+            <div className="empty-state">
+              Loading your decisions...
+            </div>
+
+          )}
+
+
+          {/* ERROR */}
+
+          {!loading && error && (
+
+            <div className="empty-state">
+              {error}
+            </div>
+
+          )}
+
+
+          {/* NO DECISIONS */}
+
+          {!loading &&
+            !error &&
+            decisions.length === 0 && (
+
+              <div className="empty-state">
+
+                You haven't created any decisions yet.
+                Click "Create Decision" to get started.
+
+              </div>
+
+            )}
+
+
+          {/* DECISIONS */}
+
+          {!loading &&
+            !error &&
+            decisions
+              .slice(0, 5)
+              .map((decision) => (
+
+                <div
+                  className="recent-row"
+                  key={decision.id}
+                >
+
+
+                  <div className="recent-info">
+
+                    <div className="recent-title">
+                      {decision.title}
+                    </div>
+
+
+                    <div className="recent-meta">
+
+                      {decision.category ||
+                        "Uncategorized"}
+
+                      {decision.deadline
+                        ? ` • Deadline: ${decision.deadline}`
+                        : ""}
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="recent-actions">
+
+
+                    <span
+                      className={
+                        "badge " +
+                        (
+                          decision.visibility === "PRIVATE"
+                            ? "badge-private"
+                            : "badge-public"
+                        )
+                      }
+                    >
+                      {decision.visibility ||
+                        "PUBLIC"}
+                    </span>
+
+
+                    <button
+                      className="view-btn"
+
+                      onClick={() =>
+                        navigate("/decisions")
+                      }
+                    >
+                      View
+                    </button>
+
+
+                  </div>
+
+                </div>
+
+              ))}
+
+
+        </div>
 
       </div>
 
