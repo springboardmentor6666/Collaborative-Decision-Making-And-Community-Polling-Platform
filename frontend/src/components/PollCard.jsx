@@ -18,9 +18,9 @@ const PollCard = ({ poll, decisionId, selectedOptionId, onSelectOption, onVote, 
   return (
     <div className="rounded-2xl border border-border-default bg-surface p-6 shadow-sm">
       {/* Poll header */}
-      <div className="mb-5">
+      <div className="mb-5 min-w-0">
         <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-muted">Active Poll</p>
-        <h3 className="text-xl font-black tracking-tight text-text-primary">{poll.question}</h3>
+        <h3 className="text-xl font-black tracking-tight text-text-primary break-words [overflow-wrap:anywhere]">{poll.question}</h3>
         {totalVotes > 0 && (
           <p className="mt-1 text-xs text-muted">{totalVotes} vote{totalVotes !== 1 ? 's' : ''} cast</p>
         )}
@@ -53,8 +53,8 @@ const PollCard = ({ poll, decisionId, selectedOptionId, onSelectOption, onVote, 
                 />
               )}
 
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative flex items-center justify-between gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition ${
                       isSelected
@@ -66,11 +66,11 @@ const PollCard = ({ poll, decisionId, selectedOptionId, onSelectOption, onVote, 
                       <span className="h-2 w-2 rounded-full bg-white" />
                     )}
                   </span>
-                  <span className="text-sm font-semibold text-text-primary">{option.optionText}</span>
+                  <span className="text-sm font-semibold text-text-primary min-w-0 flex-1 break-words [overflow-wrap:anywhere]">{option.optionText}</span>
                 </div>
 
                 {hasVoted && (
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <span className="text-sm font-bold text-text-primary">{percentage}%</span>
                     <span className="block text-xs text-muted">{option.voteCount} vote{option.voteCount !== 1 ? 's' : ''}</span>
                   </div>

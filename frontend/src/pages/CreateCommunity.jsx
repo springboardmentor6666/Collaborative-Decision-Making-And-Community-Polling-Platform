@@ -5,6 +5,7 @@ import { createCommunityApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import CategorySelector from '../components/CategorySelector';
 
 export default function CreateCommunity() {
   const navigate = useNavigate();
@@ -13,7 +14,8 @@ export default function CreateCommunity() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    visibility: 'PUBLIC'
+    visibility: 'PUBLIC',
+    categoryId: null,
   });
   
   const [loading, setLoading] = useState(false);
@@ -93,6 +95,11 @@ export default function CreateCommunity() {
                     required
                   />
                 </div>
+
+                <CategorySelector
+                  selectedCategoryId={formData.categoryId}
+                  onChange={(catId) => setFormData({ ...formData, categoryId: catId })}
+                />
 
                 <div>
                   <label htmlFor="description" className="mb-2 block text-sm font-bold text-text-primary">

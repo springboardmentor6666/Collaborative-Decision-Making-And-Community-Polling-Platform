@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { createDecisionApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import CategorySelector from '../components/CategorySelector';
 
 export default function CreateDecision() {
   const navigate = useNavigate();
@@ -18,8 +19,15 @@ export default function CreateDecision() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('OPEN');
+  const [categoryId, setCategoryId] = useState(null);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
+
+  // MCDA state
+  const [enableMcda, setEnableMcda] = useState(false);
+  const [factors, setFactors] = useState(['Cost / Budget', 'Feasibility & Speed', 'Impact']);
+  const [matrixScores, setMatrixScores] = useState({}); // { [optionIdx]: { [factorIdx]: score } }
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,6 +52,34 @@ export default function CreateDecision() {
     setPollOptions(pollOptions.filter((_, i) => i !== index));
   };
 
+  const handleAddFactor = () => {
+    if (factors.length < 6) {
+      setFactors([...factors, '']);
+    }
+  };
+
+  const handleFactorChange = (index, value) => {
+    const updated = [...factors];
+    updated[index] = value;
+    setFactors(updated);
+  };
+
+  const handleRemoveFactor = (index) => {
+    if (factors.length <= 1) return;
+    setFactors(factors.filter((_, i) => i !== index));
+  };
+
+  const handleScoreChange = (optIdx, factorIdx, value) => {
+    const scoreNum = Math.min(10, Math.max(1, Number(value) || 0));
+    setMatrixScores((prev) => ({
+      ...prev,
+      [optIdx]: {
+        ...(prev[optIdx] || {}),
+        [factorIdx]: scoreNum,
+      },
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -54,15 +90,35 @@ export default function CreateDecision() {
       return;
     }
 
+    const trimmedFactors = factors.map((f) => f.trim()).filter(Boolean);
+
+    // Build option scores payload if MCDA enabled
+    const optionScoresPayload = [];
+    if (enableMcda && trimmedFactors.length > 0 && trimmedOptions.length > 0) {
+      trimmedOptions.forEach((optLabel, optIdx) => {
+        trimmedFactors.forEach((factorName, fIdx) => {
+          const score = matrixScores[optIdx]?.[fIdx] ?? 5;
+          optionScoresPayload.push({
+            optionLabel: optLabel,
+            factorName: factorName,
+            score: score,
+          });
+        });
+      });
+    }
+
     setSubmitting(true);
     try {
       const payload = {
         title: title.trim(),
         description: description.trim(),
         status,
+        categoryId: categoryId || null,
         pollQuestion: pollQuestion.trim() || null,
         pollOptions: pollQuestion.trim() ? trimmedOptions : null,
         communityId,
+        comparisonFactorNames: enableMcda ? trimmedFactors : null,
+        optionScores: enableMcda ? optionScoresPayload : null,
       };
 
       const created = await createDecisionApi(payload, accessToken, user);
@@ -74,8 +130,7 @@ export default function CreateDecision() {
     }
   };
 
-  const inputClass =
-    'app-input px-4 py-3';
+  const inputClass = 'app-input px-4 py-3 text-xs sm:text-sm';
   const labelClass = 'mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-muted';
 
   return (
@@ -98,7 +153,7 @@ export default function CreateDecision() {
 
             <div className="mb-8">
               <h1 className="text-3xl font-black tracking-tight text-primary">Create Decision</h1>
-              <p className="mt-1 text-secondary">Define your decision and attach an optional voting poll.</p>
+              <p className="mt-1 text-secondary">Define your decision, categorize it, and attach structured evaluation tools.</p>
               {communityName && (
                 <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,6 +188,12 @@ export default function CreateDecision() {
                     className={inputClass}
                   />
                 </div>
+
+                {/* Category Selection */}
+                <CategorySelector
+                  selectedCategoryId={categoryId}
+                  onChange={(id) => setCategoryId(id)}
+                />
 
                 <div>
                   <label className={labelClass}>Description</label>
@@ -215,6 +276,118 @@ export default function CreateDecision() {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Multi-Criteria Decision Analysis (MCDA) Card */}
+              <div className="rounded-[2rem] border border-default bg-surface p-6 shadow-sm space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-black tracking-tight text-primary">
+                      Multi-Criteria Comparison Matrix (MCDA)
+                    </h2>
+                    <p className="mt-1 text-sm text-secondary">
+                      Evaluate and score options across custom decision factors.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEnableMcda(!enableMcda)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+                      enableMcda
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-surface-alt border border-border-default text-muted hover:text-text-primary'
+                    }`}
+                  >
+                    {enableMcda ? '✓ Matrix Enabled' : '+ Enable Matrix'}
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {enableMcda && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4 overflow-hidden pt-2 border-t border-border-default"
+                    >
+                      <div>
+                        <label className={labelClass}>Decision Factors / Criteria</label>
+                        <div className="space-y-2">
+                          {factors.map((factor, fIdx) => (
+                            <div key={fIdx} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={factor}
+                                onChange={(e) => handleFactorChange(fIdx, e.target.value)}
+                                placeholder={`Factor ${fIdx + 1} (e.g. Cost, Speed, Feasibility)`}
+                                className={`${inputClass} flex-1`}
+                              />
+                              {factors.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveFactor(fIdx)}
+                                  className="rounded-xl border border-default bg-surface p-2 text-secondary hover:text-red-500"
+                                >
+                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          {factors.length < 6 && (
+                            <button
+                              type="button"
+                              onClick={handleAddFactor}
+                              className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              + Add comparison factor
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Score Matrix Preview if options exist */}
+                      {pollOptions.filter((o) => o.trim()).length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-border-default">
+                          <label className={labelClass}>Assign Option Scores (1 - 10)</label>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs text-left">
+                              <thead>
+                                <tr className="border-b border-border-default text-muted">
+                                  <th className="py-2 px-2">Option</th>
+                                  {factors.filter((f) => f.trim()).map((f, i) => (
+                                    <th key={i} className="py-2 px-2 text-center">{f}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border-default">
+                                {pollOptions.filter((o) => o.trim()).map((opt, optIdx) => (
+                                  <tr key={optIdx}>
+                                    <td className="py-2.5 px-2 font-bold text-text-primary">{opt}</td>
+                                    {factors.filter((f) => f.trim()).map((_, fIdx) => (
+                                      <td key={fIdx} className="py-2 px-2 text-center">
+                                        <input
+                                          type="number"
+                                          min="1"
+                                          max="10"
+                                          value={matrixScores[optIdx]?.[fIdx] ?? 5}
+                                          onChange={(e) => handleScoreChange(optIdx, fIdx, e.target.value)}
+                                          className="w-14 rounded-lg border border-border-default bg-surface px-2 py-1 text-center font-bold text-xs"
+                                        />
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Actions */}

@@ -11,6 +11,66 @@ export const UI_MODES = {
   saffron: 'saffron',
 };
 
+export const FONT_FAMILIES = {
+  inter: {
+    id: 'inter',
+    name: 'Inter',
+    value: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    googleFontUrl: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap',
+  },
+  poppins: {
+    id: 'poppins',
+    name: 'Poppins',
+    value: "'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    googleFontUrl: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap',
+  },
+  roboto: {
+    id: 'roboto',
+    name: 'Roboto',
+    value: "'Roboto', Arial, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    googleFontUrl: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap',
+  },
+  openSans: {
+    id: 'openSans',
+    name: 'Open Sans',
+    value: "'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    googleFontUrl: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap',
+  },
+  system: {
+    id: 'system',
+    name: 'System',
+    value: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    googleFontUrl: null,
+  },
+};
+
+export const FONT_SIZES = {
+  small: {
+    id: 'small',
+    label: 'Small',
+    scale: '0.9',
+    percentage: '90%',
+  },
+  default: {
+    id: 'default',
+    label: 'Default',
+    scale: '1',
+    percentage: '100%',
+  },
+  large: {
+    id: 'large',
+    label: 'Large',
+    scale: '1.1',
+    percentage: '110%',
+  },
+  extraLarge: {
+    id: 'extraLarge',
+    label: 'Extra Large',
+    scale: '1.2',
+    percentage: '120%',
+  },
+};
+
 export const themeOrder = [THEMES.default, THEMES.light, THEMES.dark];
 
 export const getThemeTokens = (theme, uiMode) => {
@@ -137,6 +197,8 @@ export const getThemeTokens = (theme, uiMode) => {
     modeTokens.primarySoft = 'rgba(248, 250, 252, 0.16)';
   }
 
+  const primaryContrast = (theme === THEMES.dark && uiMode === UI_MODES.black) ? '#0f172a' : '#ffffff';
+
   return {
     '--background': tokens.background,
     '--surface': tokens.surface,
@@ -148,6 +210,7 @@ export const getThemeTokens = (theme, uiMode) => {
     '--primary': modeTokens.primary,
     '--primary-hover': modeTokens.primaryHover,
     '--primary-soft': modeTokens.primarySoft,
+    '--primary-contrast': primaryContrast,
     '--shadow': tokens.shadow,
     '--success': tokens.success,
     '--warning': tokens.warning,

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchDecisionById, castVoteApi, getVoteResultsApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
+import { fetchDecisionById, castVoteApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import PollCard from '../components/PollCard';
-import ResultChart from '../components/ResultChart';
 import Loader from '../components/Loader';
 
 export default function VotePage() {
@@ -16,7 +15,6 @@ export default function VotePage() {
 
   const [decision, setDecision] = useState(null);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
-  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
@@ -47,15 +45,6 @@ export default function VotePage() {
           }
         } catch (e) {
           // ignore
-        }
-      }
-
-      if (dec.poll) {
-        try {
-          const res = await getVoteResultsApi(dec.poll.id, accessToken);
-          setResults(res);
-        } catch {
-          /* results optional */
         }
       }
     } catch {
@@ -89,9 +78,6 @@ export default function VotePage() {
 
       setSuccessMsg('Your vote has been recorded! Added to your Decision Analysis.');
       setHasVoted(true);
-
-      const updatedResults = await getVoteResultsApi(decision.poll?.id, accessToken);
-      setResults(updatedResults);
     } catch (err) {
       if (err.message?.includes('already voted') || err.message?.includes('409')) {
         setError('You have already voted on this decision.');
@@ -186,17 +172,6 @@ export default function VotePage() {
                   isSubmitting={submitting}
                   hasVoted={hasVoted}
                 />
-
-                {/* Results */}
-                {decision.status === 'CLOSED' ? (
-                  <div className="mt-6 rounded-2xl border border-default bg-background p-6 text-center shadow-sm">
-                    <p className="text-sm font-semibold text-secondary">
-                      Info is no more public, contact admin/ poll creator ({decision.createdBy?.name || 'respective user'})
-                    </p>
-                  </div>
-                ) : (
-                  results && <ResultChart results={results} />
-                )}
               </div>
             )}
           </div>
@@ -206,4 +181,3 @@ export default function VotePage() {
     </div>
   );
 }
-

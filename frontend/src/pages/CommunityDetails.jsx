@@ -17,6 +17,7 @@ import DecisionCard from '../components/DecisionCard';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import CategoryBadge from '../components/CategoryBadge';
 
 export default function CommunityDetails() {
   const { id } = useParams();
@@ -241,13 +242,13 @@ export default function CommunityDetails() {
           <div className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
             
             {/* Header */}
-            <div className="mb-8 rounded-3xl border border-border-default bg-surface p-6 shadow-sm md:p-8">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-black text-text-primary tracking-tight">{community.name}</h1>
+            <div className="mb-8 rounded-3xl border border-border-default bg-surface p-6 shadow-sm md:p-8 min-w-0">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 min-w-0">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-3 mb-2 min-w-0">
+                    <h1 className="text-3xl font-black text-text-primary tracking-tight break-words [overflow-wrap:anywhere]">{community.name}</h1>
                     <span
-                      className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                      className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold"
                       style={{
                         backgroundColor: isPublic ? 'var(--status-open-bg)' : 'var(--status-closed-bg)',
                         color: isPublic ? 'var(--status-open-text)' : 'var(--status-closed-text)',
@@ -255,8 +256,11 @@ export default function CommunityDetails() {
                     >
                       {isPublic ? 'Public' : 'Private'}
                     </span>
+                    {(community.categoryName || community.category?.name) && (
+                      <CategoryBadge name={community.categoryName || community.category?.name} size="sm" />
+                    )}
                   </div>
-                  <p className="text-secondary max-w-2xl">{community.description}</p>
+                  <p className="text-secondary max-w-2xl break-words [overflow-wrap:anywhere]">{community.description}</p>
                   
                   <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted">
                     <span className="flex items-center gap-1">

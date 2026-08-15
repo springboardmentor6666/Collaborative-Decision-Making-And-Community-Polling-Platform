@@ -303,7 +303,7 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary">
+                        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary break-words [overflow-wrap:anywhere] line-clamp-2">
                           {dec.title}
                         </h3>
 
@@ -311,7 +311,7 @@ export default function AnalyticsPage() {
                         {dec.poll?.question && (
                           <div className="mt-2 rounded-xl bg-surface-alt p-3 text-xs">
                             <p className="font-bold text-primary">Attached Poll:</p>
-                            <p className="mt-0.5 text-text-primary">{dec.poll.question}</p>
+                            <p className="mt-0.5 text-text-primary break-words [overflow-wrap:anywhere]">{dec.poll.question}</p>
                             <p className="mt-1 text-[11px] text-muted">
                               {dec.poll.options?.length || 0} voting options configured
                             </p>

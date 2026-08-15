@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchDecisionById, deleteDecisionApi, getVoteResultsApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
+import { fetchDecisionById, deleteDecisionApi, getMyVotesAnalysisApi, recordImpressionApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
-import ResultChart from '../components/ResultChart';
 import Loader from '../components/Loader';
+import CategoryBadge from '../components/CategoryBadge';
+import ComparisonMatrix from '../components/ComparisonMatrix';
+import CommentSection from '../components/CommentSection';
 
 export default function DecisionDetails() {
   const { id } = useParams();
@@ -14,7 +16,6 @@ export default function DecisionDetails() {
   const { user, accessToken } = useAuth();
 
   const [decision, setDecision] = useState(null);
-  const [results, setResults] = useState(null);
   const [userVote, setUserVote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,15 +44,6 @@ export default function DecisionDetails() {
           }
         } catch (e) {
           // ignore error fetching votes
-        }
-      }
-
-      if (dec.poll) {
-        try {
-          const res = await getVoteResultsApi(dec.poll.id, accessToken);
-          setResults(res);
-        } catch {
-          /* results optional */
         }
       }
     } catch {
@@ -118,32 +110,50 @@ export default function DecisionDetails() {
                   </Link>
 
                   {isCreator && (
-                    <button
-                      onClick={handleDelete}
-                      disabled={deleting}
-                      className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-60"
-                    >
-                      {deleting ? 'Deleting...' : 'Delete Decision'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/decisions/${id}/edit`}
+                        className="rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary transition hover:bg-surface-alt"
+                      >
+                        Edit Decision
+                      </Link>
+                      <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                      >
+                        {deleting ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
                   )}
                 </div>
 
                 {/* Decision Main Card */}
-                <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-5">
-                  {/* Status + title */}
-                  <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-default pb-5">
-                    <div>
-                      <span className="mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={getStatusStyle(decision.status)}>
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: !isOpen ? 'var(--status-closed-text)' : 'var(--status-open-text)' }} />
-                        {decision.status}
-                      </span>
-                      <h1 className="text-3xl font-black tracking-tight text-text-primary">{decision.title}</h1>
+                <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-5 min-w-0">
+                  {/* Status + Category + Title */}
+                  <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-default pb-5 min-w-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={getStatusStyle(decision.status)}>
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: !isOpen ? 'var(--status-closed-text)' : 'var(--status-open-text)' }} />
+                          {decision.status}
+                        </span>
+                        {decision.categoryName && (
+                          <CategoryBadge name={decision.categoryName} size="sm" />
+                        )}
+                        {decision.communityName && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300 border border-blue-500/30">
+                            👥 {decision.communityName}
+                          </span>
+                        )}
+                      </div>
+                      <h1 className="text-3xl font-black tracking-tight text-text-primary break-words [overflow-wrap:anywhere]">{decision.title}</h1>
                     </div>
 
                     {isOpen && decision.poll && (
                       <Link
                         to={`/decisions/${id}/vote`}
-                        className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover"
+                        className="flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover shrink-0"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -173,9 +183,9 @@ export default function DecisionDetails() {
                   </div>
 
                   {/* Description */}
-                  <div>
+                  <div className="min-w-0">
                     <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-muted">Description</p>
-                    <p className="text-sm leading-relaxed text-secondary whitespace-pre-line">
+                    <p className="text-sm leading-relaxed text-secondary whitespace-pre-line break-words [overflow-wrap:anywhere]">
                       {decision.description || 'No detailed background provided.'}
                     </p>
                   </div>
@@ -263,16 +273,17 @@ export default function DecisionDetails() {
                   </div>
                 )}
 
-                {/* Results Chart */}
-                {decision.status === 'CLOSED' ? (
-                  <div className="rounded-2xl border border-border-default bg-surface-alt p-6 text-center shadow-sm">
-                    <p className="text-sm font-semibold text-secondary">
-                      This decision is closed. Historical results are archived.
-                    </p>
-                  </div>
-                ) : (
-                  results && <ResultChart results={results} />
+                {/* Multi-Criteria Comparison Matrix */}
+                {decision.comparisonFactors && decision.comparisonFactors.length > 0 && (
+                  <ComparisonMatrix
+                    factors={decision.comparisonFactors}
+                    optionScores={decision.optionScores || []}
+                    options={decision.options || decision.poll?.options || []}
+                  />
                 )}
+
+                {/* Threaded Discussion / Comment Section */}
+                <CommentSection decisionId={id} />
               </div>
             )}
           </div>
@@ -282,4 +293,3 @@ export default function DecisionDetails() {
     </div>
   );
 }
-

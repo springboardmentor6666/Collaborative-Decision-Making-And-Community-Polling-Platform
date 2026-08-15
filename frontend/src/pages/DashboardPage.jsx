@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { fetchDecisions } from '../api/axiosClient';
+import { useEffect, useState, useMemo } from 'react';
+import { fetchDecisions, getCategoriesApi } from '../api/axiosClient';
 import DecisionCard from '../components/DecisionCard';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -10,14 +10,37 @@ import IconSidebar from '../components/IconSidebar';
 export default function DashboardPage() {
   const { user, accessToken } = useAuth();
   const [decisions, setDecisions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loadingDecisions, setLoadingDecisions] = useState(true);
 
   useEffect(() => {
-    fetchDecisions(accessToken)
-      .then(setDecisions)
-      .catch(() => setDecisions([]))
-      .finally(() => setLoadingDecisions(false));
+    Promise.all([
+      fetchDecisions(accessToken).catch(() => []),
+      getCategoriesApi(accessToken).catch(() => []),
+    ]).then(([decData, catData]) => {
+      setDecisions(decData);
+      setCategories(catData);
+      setLoadingDecisions(false);
+    });
   }, [accessToken]);
+
+  const filteredDecisions = useMemo(() => {
+    return decisions.filter((d) => {
+      const matchesSearch =
+        !searchQuery.trim() ||
+        d.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCat =
+        selectedCategory === 'ALL' ||
+        (d.categoryName && d.categoryName.toLowerCase() === selectedCategory.toLowerCase()) ||
+        (d.categoryId && String(d.categoryId) === String(selectedCategory));
+
+      return matchesSearch && matchesCat;
+    });
+  }, [decisions, searchQuery, selectedCategory]);
 
   return (
     <div className="page-shell min-h-screen flex flex-col sm:pr-[60px]">
@@ -88,10 +111,57 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Decisions section */}
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-text-primary">All Decisions</h2>
-              <span className="text-xs font-semibold text-muted">{decisions.length} Available</span>
+            {/* Filter & Search Bar Side-by-Side */}
+            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-text-primary">All Decisions</h2>
+                <span className="rounded-full bg-surface-alt px-2.5 py-0.5 text-xs font-bold text-muted">
+                  {filteredDecisions.length}
+                </span>
+              </div>
+
+              {/* Side-by-side Filter & Search */}
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+                {/* Category Filter Dropdown */}
+                <div className="relative min-w-[160px] sm:w-48">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="app-input w-full px-3 py-2 text-xs sm:text-sm font-medium cursor-pointer"
+                  >
+                    <option value="ALL">✨ All Categories</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Search Input */}
+                <div className="relative flex-1 sm:w-64">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search decisions..."
+                    className="app-input w-full pl-9 pr-4 py-2 text-xs sm:text-sm"
+                  />
+                  <svg
+                    className="absolute left-3 top-2.5 h-4 w-4 text-muted"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Decisions grid */}
@@ -99,15 +169,19 @@ export default function DashboardPage() {
               <div className="flex h-40 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
-            ) : decisions.length > 0 ? (
+            ) : filteredDecisions.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {decisions.map((decision) => (
+                {filteredDecisions.map((decision) => (
                   <DecisionCard key={decision.id} decision={decision} />
                 ))}
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-border-default bg-surface p-12 text-center">
-                <p className="mb-4 text-secondary">No decisions yet. Create your first poll!</p>
+                <p className="mb-4 text-secondary">
+                  {searchQuery || selectedCategory !== 'ALL'
+                    ? 'No decisions match the selected category or search criteria.'
+                    : 'No decisions yet. Create your first poll!'}
+                </p>
                 <Link
                   to="/decisions/create"
                   className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover"
