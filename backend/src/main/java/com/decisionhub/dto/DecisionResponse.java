@@ -17,6 +17,9 @@ public class DecisionResponse {
     private Long communityId;
     private String communityName;
     private List<PollResponse> polls;
+    private List<OptionDto> options;
+    private List<ComparisonFactorDto> comparisonFactors;
+    private List<OptionScoreDto> optionScores;
 
     public DecisionResponse() {
     }
@@ -147,5 +150,29 @@ public class DecisionResponse {
 
     public void setPolls(List<PollResponse> polls) {
         this.polls = polls;
+    }
+
+    public List<OptionDto> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<OptionDto> options) {
+        this.options = options;
+    }
+
+    public List<ComparisonFactorDto> getComparisonFactors() {
+        return comparisonFactors;
+    }
+
+    public void setComparisonFactors(List<ComparisonFactorDto> comparisonFactors) {
+        this.comparisonFactors = comparisonFactors;
+    }
+
+    public List<OptionScoreDto> getOptionScores() {
+        return optionScores;
+    }
+
+    public void setOptionScores(List<OptionScoreDto> optionScores) {
+        this.optionScores = optionScores;
     }
 }

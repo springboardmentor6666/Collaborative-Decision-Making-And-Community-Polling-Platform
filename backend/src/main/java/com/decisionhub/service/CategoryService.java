@@ -1,19 +1,15 @@
 package com.decisionhub.service;
 
+import com.decisionhub.entity.Category;
 import com.decisionhub.repository.CategoryRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * CategoryService — handles category lookup operations.
- * 
- * TODO: Implement the following features:
- * - Get all categories
- * - Get category by ID
- * - Create a category (admin only)
- * - Update a category (admin only)
- * - Delete a category (admin only)
- * - Seed default categories (Career, Education, Technology, Travel, Finance, Lifestyle)
- */
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class CategoryService {
 
@@ -23,5 +19,46 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    // TODO: Implement category CRUD operations
+    @PostConstruct
+    @Transactional
+    public void seedDefaultCategories() {
+        if (categoryRepository.count() == 0) {
+            List<String> defaultNames = Arrays.asList(
+                    "Technology & Engineering",
+                    "Governance & Policy",
+                    "Product & Design",
+                    "Finance & Budget",
+                    "Operations & Strategy",
+                    "Community & Culture",
+                    "Other"
+            );
+            for (String name : defaultNames) {
+                if (!categoryRepository.existsByName(name)) {
+                    categoryRepository.save(new Category(null, name));
+                }
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Category> getAllCategories() {
+        seedDefaultCategories();
+        return categoryRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Category> getCategoryById(Long id) {
+        return categoryRepository.findById(id);
+    }
+
+    @Transactional
+    public Category createCategory(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be empty");
+        }
+        String cleanName = name.trim();
+        return categoryRepository.findByName(cleanName)
+                .orElseGet(() -> categoryRepository.save(new Category(null, cleanName)));
+    }
 }
+
