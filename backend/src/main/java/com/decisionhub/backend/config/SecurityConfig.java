@@ -62,8 +62,6 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/hello"
                         ).permitAll()
-                        .requestMatchers("/api/decisions/**").permitAll()
-
                         // Google OAuth2
                         .requestMatchers(
                                 "/oauth2/**",

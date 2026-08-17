@@ -9,10 +9,13 @@ function Home() {
   const [decisions, setDecisions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [profile, setProfile] = useState(null);
 
 
   useEffect(() => {
     fetchDecisions();
+    fetch("http://localhost:8080/api/users/profile", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+      .then(response => response.ok ? response.json() : null).then(setProfile).catch(() => setProfile(null));
   }, []);
 
 
@@ -157,7 +160,7 @@ function Home() {
 
     {
       label: "Communities Joined",
-      value: 0,
+      value: profile?.joinedCommunities ?? 0,
       icon: "👥"
     }
 

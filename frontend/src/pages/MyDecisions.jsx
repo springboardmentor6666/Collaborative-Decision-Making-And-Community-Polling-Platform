@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import Toast from "../components/Toast";
 
 function MyDecisions() {
 
     const [decisions, setDecisions] = useState([]);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
 
     const navigate = useNavigate();
 
@@ -18,6 +20,7 @@ function MyDecisions() {
     useEffect(() => {
         fetchDecisions();
     }, []);
+    useEffect(() => { if (!message) return; const timer = setTimeout(() => setMessage(""), 3500); return () => clearTimeout(timer); }, [message]);
 
 
     const fetchDecisions = async () => {
@@ -27,7 +30,7 @@ function MyDecisions() {
             const token = localStorage.getItem("token");
 
             const response = await fetch(
-                "http://localhost:8080/api/decisions",
+                "http://localhost:8080/api/decisions/my",
                 {
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -50,7 +53,7 @@ function MyDecisions() {
 
             console.error(error);
 
-            setMessage(
+            setIsError(true); setMessage(
                 "Unable to load decisions"
             );
 
@@ -82,7 +85,7 @@ function MyDecisions() {
 
             if (!token) {
 
-                alert("Please login first");
+                setIsError(true); setMessage("Please login first");
 
                 navigate("/login");
 
@@ -119,17 +122,13 @@ function MyDecisions() {
 
             if (!response.ok) {
 
-                alert(
-                    `Failed to delete: ${result}`
-                );
+                setIsError(true); setMessage(`Failed to delete: ${result}`);
 
                 return;
             }
 
 
-            alert(
-                "Decision deleted successfully!"
-            );
+            setIsError(false); setMessage("Decision deleted successfully!");
 
 
             setDecisions((prev) =>
@@ -147,7 +146,7 @@ function MyDecisions() {
                 error
             );
 
-            alert("Server Error");
+            setIsError(true); setMessage("Server error while deleting decision.");
 
         }
 
@@ -160,6 +159,7 @@ function MyDecisions() {
             pageTitle="My Decisions"
             pageSubtitle="View, manage and share the decision boards you've created."
         >
+            <Toast message={message} isError={isError} />
 
             <style>{`
 
@@ -900,6 +900,21 @@ function MyDecisions() {
 
                                             </div>
 
+                                            <div className="detail-row">
+                                                <span className="detail-label">Community</span>
+                                                <span className="detail-value">{decision.communityName || "Personal / public"}</span>
+                                            </div>
+
+                                            <div className="detail-row">
+                                                <span className="detail-label">Options & votes</span>
+                                                <span className="detail-value">{decision.options?.length || 0} options · {decision.totalVotes || 0} votes</span>
+                                            </div>
+
+                                            <div className="detail-row">
+                                                <span className="detail-label">Created</span>
+                                                <span className="detail-value">{decision.createdAt ? new Date(decision.createdAt).toLocaleDateString() : "Not available"}</span>
+                                            </div>
+
 
                                             <div className="detail-row">
 
@@ -948,7 +963,7 @@ function MyDecisions() {
                                                     className="btn-view"
                                                     onClick={() =>
                                                         navigate(
-                                                            `/decision/${decision.id}`
+                                                            `/polls`
                                                         )
                                                     }
                                                 >

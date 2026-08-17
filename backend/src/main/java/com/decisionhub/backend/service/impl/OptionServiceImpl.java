@@ -7,6 +7,8 @@ import com.decisionhub.backend.entity.Option;
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.OptionRepository;
 import com.decisionhub.backend.service.OptionService;
+import com.decisionhub.backend.service.CurrentUserService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +19,13 @@ public class OptionServiceImpl implements OptionService {
 
     private final OptionRepository optionRepository;
     private final DecisionRepository decisionRepository;
+    private final CurrentUserService currentUser;
 
     public OptionServiceImpl(OptionRepository optionRepository,
-                             DecisionRepository decisionRepository) {
+                             DecisionRepository decisionRepository, CurrentUserService currentUser) {
         this.optionRepository = optionRepository;
         this.decisionRepository = decisionRepository;
+        this.currentUser = currentUser;
     }
 
     @Override
@@ -29,6 +33,7 @@ public class OptionServiceImpl implements OptionService {
 
         Decision decision = decisionRepository.findById(request.getDecisionId())
                 .orElseThrow(() -> new RuntimeException("Decision not found"));
+        assertOwner(decision);
 
         Option option = Option.builder()
                 .optionText(request.getOptionText())
@@ -62,6 +67,7 @@ public class OptionServiceImpl implements OptionService {
 
         Option option = optionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Option not found"));
+        assertOwner(option.getDecision());
 
         option.setOptionText(request.getOptionText());
 
@@ -79,7 +85,12 @@ public class OptionServiceImpl implements OptionService {
 
         Option option = optionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Option not found"));
+        assertOwner(option.getDecision());
 
         optionRepository.delete(option);
+    }
+
+    private void assertOwner(Decision decision) {
+        if (!decision.getCreatedBy().getId().equals(currentUser.get().getId())) throw new AccessDeniedException("You can only modify options on your own decision");
     }
 }

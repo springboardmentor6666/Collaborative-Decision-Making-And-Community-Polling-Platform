@@ -1,5 +1,6 @@
 package com.decisionhub.backend.repository;
 
+import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.entity.Vote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,4 +17,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     List<Vote> findByDecisionId(Long decisionId);
 
     long countByOptionId(Long optionId);
+    long countByUser(User user);
+    long countByDecisionId(Long decisionId);
 }

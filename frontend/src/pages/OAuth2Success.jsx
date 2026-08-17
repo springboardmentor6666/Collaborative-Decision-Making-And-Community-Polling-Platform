@@ -11,11 +11,25 @@ function OAuth2Success() {
         const email = params.get("email");
         const role = params.get("role");
 
+        console.log("OAuth2 Success URL:", window.location.href);
         console.log("Google OAuth token:", token);
+        console.log("Google OAuth email:", email);
+        console.log("Google OAuth role:", role);
 
-        if (token) {
-            localStorage.setItem("token", token);
+        // If OAuth data is not present, check whether
+        // we already have a logged-in user.
+        if (!token) {
+            const existingToken = localStorage.getItem("token");
+
+            if (existingToken) {
+                navigate("/home", { replace: true });
+            }
+
+            return;
         }
+
+        // Save Google authentication data
+        localStorage.setItem("token", token);
 
         if (email) {
             localStorage.setItem("userEmail", email);
@@ -25,14 +39,18 @@ function OAuth2Success() {
             localStorage.setItem("role", role);
         }
 
-        if (token) {
-            navigate("/home");
-        } else {
-            navigate("/login");
-        }
+        console.log("Google login successful!");
+        console.log("Redirecting to Home...");
+
+        navigate("/home", { replace: true });
+
     }, [navigate]);
 
-    return <div>Logging you in...</div>;
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+            <p>Logging you in...</p>
+        </div>
+    );
 }
 
 export default OAuth2Success;

@@ -2,6 +2,7 @@ package com.decisionhub.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
@@ -26,4 +27,10 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "decision_id")
     private Decision decision;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    void onCreate() { createdAt = LocalDateTime.now(); }
 }

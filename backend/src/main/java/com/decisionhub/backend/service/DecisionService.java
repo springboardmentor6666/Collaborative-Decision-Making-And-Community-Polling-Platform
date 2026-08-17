@@ -27,4 +27,5 @@ public interface DecisionService {
             Long decisionId,
             Long optionId
     );
+    DecisionResponse toResponse(com.decisionhub.backend.entity.Decision decision);
 }

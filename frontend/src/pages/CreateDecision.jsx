@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import Toast from "../components/Toast";
 
 function CreateDecision() {
 
@@ -18,6 +19,18 @@ function CreateDecision() {
     const [options, setOptions] = useState(["", ""]);
 
     const [message, setMessage] = useState("");
+    const [isError, setIsError] = useState(false);
+    const [communities, setCommunities] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        fetch("http://localhost:8080/api/communities", { headers: { Authorization: `Bearer ${token}` } })
+            .then(async r => r.ok ? r.json() : [])
+            .then(setCommunities).catch(() => setCommunities([]));
+    }, []);
+    useEffect(() => { if (!message) return; const timer = setTimeout(() => setMessage(""), 3500); return () => clearTimeout(timer); }, [message]);
 
 
     const handleChange = (e) => {
@@ -48,16 +61,20 @@ function CreateDecision() {
         setOptions([...options, ""]);
 
     };
+    const removeOption = (index) => { if (options.length > 2) setOptions(options.filter((_, i) => i !== index)); };
 
 
     const handleSubmit = async () => {
 
+        const cleanOptions = options.map(option => option.trim()).filter(Boolean);
+        if (!decision.title.trim() || !decision.description.trim() || cleanOptions.length < 2) {
+            setIsError(true); setMessage("Enter a title, description, and at least two options."); return;
+        }
+
         const data = {
             ...decision,
-
-            options: options.filter(
-                option => option.trim() !== ""
-            )
+            options: cleanOptions,
+            communityId: decision.communityId ? Number(decision.communityId) : null
         };
 
 
@@ -71,7 +88,7 @@ function CreateDecision() {
 
             if (!token) {
 
-                setMessage("Please login first.");
+                setIsError(true); setMessage("Please login first.");
 
                 navigate("/login");
 
@@ -79,6 +96,7 @@ function CreateDecision() {
             }
 
 
+            setSubmitting(true);
             const response = await fetch(
                 "http://localhost:8080/api/decisions",
                 {
@@ -94,7 +112,7 @@ function CreateDecision() {
             );
 
 
-            const result = await response.text();
+            const result = await response.json().catch(() => ({}));
 
             console.log("STATUS:", response.status);
             console.log("RESPONSE:", result);
@@ -102,21 +120,17 @@ function CreateDecision() {
 
             if (!response.ok) {
 
-                setMessage(
-                    `Failed to create decision: ${result}`
-                );
+                setIsError(true); setMessage(result.message || "Unable to create decision.");
 
                 return;
             }
 
 
-            setMessage(
-                "Decision created successfully!"
-            );
+            setIsError(false); setMessage("Decision created successfully!");
 
 
             setTimeout(() => {
-                navigate("/home");
+                navigate("/decisions");
             }, 1000);
 
 
@@ -127,9 +141,9 @@ function CreateDecision() {
                 error
             );
 
-            setMessage(
-                "Server error. Could not create decision."
-            );
+            setIsError(true); setMessage("Server error. Could not create decision.");
+
+        } finally { setSubmitting(false);
 
         }
 
@@ -142,6 +156,7 @@ function CreateDecision() {
             pageTitle="Create Decision"
             pageSubtitle="Set up a new decision board for people to vote on."
         >
+            <Toast message={message} isError={isError} />
 
             <style>{`
 
@@ -683,6 +698,14 @@ function CreateDecision() {
 
                     </div>
 
+                    <div className="field-group">
+                        <span className="field-label">Community (optional)</span>
+                        <select name="communityId" value={decision.communityId || ""} onChange={handleChange}>
+                            <option value="">No community</option>
+                            {communities.filter(c => c.joined).map(c => <option key={c.id} value={c.id}>{c.communityName}</option>)}
+                        </select>
+                    </div>
+
 
                     {/* =========================
                         DESCRIPTION
@@ -871,6 +894,7 @@ function CreateDecision() {
                                     )
                                 }
                             />
+                            {options.length > 2 && <button type="button" className="btn-add" onClick={() => removeOption(index)}>Remove</button>}
 
                         </div>
 
@@ -903,7 +927,7 @@ function CreateDecision() {
                         className="btn-submit"
                         onClick={handleSubmit}
                     >
-                        Create Decision
+                        {submitting ? "Creating..." : "Create Decision"}
                     </button>
 
 

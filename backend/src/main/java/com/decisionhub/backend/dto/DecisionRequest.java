@@ -1,18 +1,26 @@
 package com.decisionhub.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
 public class DecisionRequest {
 
+    @NotBlank(message = "Title is required")
     private String title;
+    @NotBlank(message = "Description is required")
     private String description;
     private String category;
-    private String visibility;
+    private String visibility = "PUBLIC";
     private LocalDate deadline;
     private boolean anonymous;
 
-    private List<String> options;
+    @NotEmpty(message = "Add at least two options")
+    @Size(min = 2, message = "Add at least two options")
+    private List<@NotBlank(message = "Option text cannot be blank") String> options;
+    private Long communityId;
 
     public DecisionRequest() {
     }
@@ -72,4 +80,6 @@ public class DecisionRequest {
     public void setOptions(List<String> options) {
         this.options = options;
     }
+    public Long getCommunityId() { return communityId; }
+    public void setCommunityId(Long communityId) { this.communityId = communityId; }
 }

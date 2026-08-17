@@ -43,6 +43,10 @@ public class Decision {
     @JoinColumn(name = "user_id")
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
+    private Community community;
+
     @OneToMany(
             mappedBy = "decision",
             cascade = CascadeType.ALL,

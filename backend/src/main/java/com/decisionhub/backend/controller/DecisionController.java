@@ -38,9 +38,8 @@ public class DecisionController {
     // MY DECISIONS
     // =========================================================
 
-    @GetMapping
+    @GetMapping("/my")
     public List<DecisionResponse> getMyDecisions() {
-
         return decisionService.getMyDecisions();
     }
 
@@ -48,7 +47,7 @@ public class DecisionController {
     // ACTIVE PUBLIC POLLS - ALL USERS
     // =========================================================
 
-    @GetMapping("/public")
+    @GetMapping({"/public", "/active"})
     public List<DecisionResponse>
     getActivePublicDecisions() {
 

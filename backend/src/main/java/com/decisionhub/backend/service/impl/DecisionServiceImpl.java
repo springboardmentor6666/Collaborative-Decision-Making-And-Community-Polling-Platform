@@ -6,6 +6,7 @@ import com.decisionhub.backend.dto.OptionResponse;
 import com.decisionhub.backend.dto.VoteResponse;
 
 import com.decisionhub.backend.entity.Decision;
+import com.decisionhub.backend.entity.Community;
 import com.decisionhub.backend.entity.Option;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.entity.Vote;
@@ -14,12 +15,16 @@ import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.OptionRepository;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.repository.VoteRepository;
+import com.decisionhub.backend.repository.CommunityRepository;
 
 import com.decisionhub.backend.service.DecisionService;
+import com.decisionhub.backend.service.CurrentUserService;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,17 +37,21 @@ public class DecisionServiceImpl implements DecisionService {
     private final UserRepository userRepository;
     private final OptionRepository optionRepository;
     private final VoteRepository voteRepository;
+    private final CommunityRepository communityRepository;
+    private final CurrentUserService currentUser;
 
     public DecisionServiceImpl(
             DecisionRepository decisionRepository,
             UserRepository userRepository,
             OptionRepository optionRepository,
-            VoteRepository voteRepository) {
+            VoteRepository voteRepository, CommunityRepository communityRepository, CurrentUserService currentUser) {
 
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.optionRepository = optionRepository;
         this.voteRepository = voteRepository;
+        this.communityRepository = communityRepository;
+        this.currentUser = currentUser;
     }
 
     // =========================================================
@@ -50,11 +59,17 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
+    @Transactional
     public DecisionResponse createDecision(
             DecisionRequest request) {
 
         User user = getCurrentUser();
 
+        Community community = null;
+        if (request.getCommunityId() != null) {
+            community = communityRepository.findById(request.getCommunityId()).orElseThrow(() -> new java.util.NoSuchElementException("Community not found"));
+            if (community.getMembers().stream().noneMatch(member -> member.getId().equals(user.getId()))) throw new AccessDeniedException("Join the community before creating a decision there");
+        }
         Decision decision = Decision.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -63,6 +78,7 @@ public class DecisionServiceImpl implements DecisionService {
                 .deadline(request.getDeadline())
                 .anonymous(request.isAnonymous())
                 .createdBy(user)
+                .community(community)
                 .build();
 
         Decision savedDecision =
@@ -118,11 +134,7 @@ public class DecisionServiceImpl implements DecisionService {
         return decisionRepository
                 .findAll()
                 .stream()
-                .filter(decision ->
-                        "PUBLIC".equalsIgnoreCase(
-                                decision.getVisibility()
-                        )
-                )
+                .filter(this::canView)
                 .filter(decision ->
                         decision.getDeadline() == null ||
                                 !decision.getDeadline().isBefore(today)
@@ -145,6 +157,7 @@ public class DecisionServiceImpl implements DecisionService {
                                         "Decision not found"
                                 ));
 
+        if (!canView(decision)) throw new AccessDeniedException("You do not have access to this decision");
         return buildDecisionResponse(decision);
     }
 
@@ -244,14 +257,7 @@ public class DecisionServiceImpl implements DecisionService {
             );
         }
 
-        // Check public
-        if (!"PUBLIC".equalsIgnoreCase(
-                decision.getVisibility())) {
-
-            throw new RuntimeException(
-                    "This poll is not public"
-            );
-        }
+        if (!canView(decision)) throw new AccessDeniedException("You do not have access to this poll");
 
         Option option =
                 optionRepository.findById(optionId)
@@ -289,7 +295,7 @@ public class DecisionServiceImpl implements DecisionService {
                 .option(option)
                 .build();
 
-        voteRepository.save(vote);
+        try { voteRepository.saveAndFlush(vote); } catch (org.springframework.dao.DataIntegrityViolationException ex) { throw new IllegalStateException("You have already voted on this poll"); }
 
         return VoteResponse.builder()
                 .id(vote.getId())
@@ -301,34 +307,13 @@ public class DecisionServiceImpl implements DecisionService {
     // CURRENT USER
     // =========================================================
 
-    private User getCurrentUser() {
-
-        Authentication authentication =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
-
-        if (authentication == null ||
-                !authentication.isAuthenticated()) {
-
-            throw new RuntimeException(
-                    "User not authenticated"
-            );
-        }
-
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"
-                        ));
-    }
+    private User getCurrentUser() { return currentUser.get(); }
 
     // =========================================================
     // RESPONSE BUILDER
     // =========================================================
 
+    @Override public DecisionResponse toResponse(Decision decision) { return buildDecisionResponse(decision); }
     private DecisionResponse buildDecisionResponse(
             Decision decision) {
 
@@ -392,7 +377,22 @@ public class DecisionServiceImpl implements DecisionService {
                 .visibility(decision.getVisibility())
                 .deadline(decision.getDeadline())
                 .anonymous(decision.isAnonymous())
+                .createdAt(decision.getCreatedAt())
+                .createdByName(decision.isAnonymous() ? "Anonymous" : decision.getCreatedBy().getName())
+                .communityId(decision.getCommunity() == null ? null : decision.getCommunity().getId())
+                .communityName(decision.getCommunity() == null ? null : decision.getCommunity().getCommunityName())
+                .totalVotes(voteRepository.countByDecisionId(decision.getId()))
+                .alreadyVoted(options.stream().anyMatch(OptionResponse::isSelected))
+                .status(decision.getDeadline() != null && decision.getDeadline().isBefore(LocalDate.now()) ? "COMPLETED" : "ACTIVE")
                 .options(options)
                 .build();
+    }
+
+    private boolean canView(Decision decision) {
+        if (decision.getCommunity() != null) {
+            User user = getCurrentUser();
+            return decision.getCommunity().getMembers().stream().anyMatch(member -> member.getId().equals(user.getId()));
+        }
+        return "PUBLIC".equalsIgnoreCase(decision.getVisibility()) || decision.getCreatedBy().getId().equals(getCurrentUser().getId());
     }
 }

@@ -8,10 +8,8 @@ import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.security.JwtService;
 import com.decisionhub.backend.service.AuthService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -48,7 +46,15 @@ public class AuthServiceImpl implements AuthService {
         // Save to Database
         userRepository.save(user);
 
-        return new AuthResponse(null, "User Registered Successfully");
+        // Generate JWT
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new AuthResponse(
+                true,
+                token,
+                user.getRole().name(),
+                "User Registered Successfully"
+        );
     }
 
     @Override
@@ -61,8 +67,14 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid Password");
         }
 
+        // Generate JWT
         String token = jwtService.generateToken(user.getEmail());
 
-        return new AuthResponse(token, "Login Successful");
+        return new AuthResponse(
+                true,
+                token,
+                user.getRole().name(),
+                "Login Successful"
+        );
     }
 }
