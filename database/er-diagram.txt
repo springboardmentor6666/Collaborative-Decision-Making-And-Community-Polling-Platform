@@ -177,3 +177,4 @@ Normalization: 3NF
 - Non-key attributes depend only on the primary key (e.g. option_scores isolates the
   score from both option and factor rather than duplicating factor names per option).
 - Lookup data (categories) is separated to avoid duplicate strings.
+

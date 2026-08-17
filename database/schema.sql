@@ -155,6 +155,7 @@ CREATE TABLE comments (
     parent_id BIGINT NULL,                      -- nullable, self-referencing
     content VARCHAR(2000) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_flagged BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -192,6 +193,8 @@ CREATE INDEX idx_votes_poll ON votes(poll_id);
 CREATE INDEX idx_votes_voter ON votes(voter_id);
 CREATE INDEX idx_comments_decision ON comments(decision_id);
 CREATE INDEX idx_comments_parent ON comments(parent_id);
+CREATE INDEX idx_comments_author ON comments(author_id);
+CREATE INDEX idx_comments_created_at ON comments(created_at);
 CREATE INDEX idx_communities_created_by ON communities(created_by);
 CREATE INDEX idx_communities_visibility ON communities(visibility);
 CREATE INDEX idx_community_members ON community_members(community_id, user_id);
@@ -217,3 +220,4 @@ CREATE TABLE IF NOT EXISTS decision_impressions (
 -- Indexes on decision_impressions
 CREATE INDEX idx_impressions_decision ON decision_impressions (decision_id);
 CREATE INDEX idx_impressions_type ON decision_impressions (decision_id, type);
+
