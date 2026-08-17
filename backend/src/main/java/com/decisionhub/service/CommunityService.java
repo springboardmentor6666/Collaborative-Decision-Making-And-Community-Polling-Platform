@@ -266,36 +266,48 @@ public class CommunityService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
+        if (requesterEmail == null || requesterEmail.isBlank()) {
+            throw new AccessDeniedException("Authentication required");
+        }
+
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + requesterEmail));
 
+        boolean isCreator = community.getCreatedBy() != null && community.getCreatedBy().getId().equals(requester.getId());
         CommunityMember requesterMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, requester.getId())
-                .orElseThrow(() -> new AccessDeniedException("Only community owners and admins can manage member roles"));
+                .orElse(null);
 
-        if (!"OWNER".equals(requesterMember.getRole()) && !"ADMIN".equals(requesterMember.getRole())) {
+        boolean isOwner = isCreator || (requesterMember != null && "OWNER".equalsIgnoreCase(requesterMember.getRole()));
+        boolean isAdmin = requesterMember != null && "ADMIN".equalsIgnoreCase(requesterMember.getRole());
+
+        if (!isOwner && !isAdmin) {
             throw new AccessDeniedException("Only community owners and admins can manage member roles");
         }
 
         CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, targetUserId)
+                .or(() -> communityMemberRepository.findById(targetUserId))
                 .orElseThrow(() -> new IllegalArgumentException("Target user is not a member of this community"));
 
-        if ("OWNER".equals(targetMember.getRole())) {
+        if ("OWNER".equalsIgnoreCase(targetMember.getRole()) || 
+            (community.getCreatedBy() != null && community.getCreatedBy().getId().equals(targetMember.getUser().getId()))) {
             throw new IllegalArgumentException("Cannot alter owner role directly. Use transfer ownership endpoint.");
         }
 
         String newRole = request.getRole() != null ? request.getRole().toUpperCase().trim() : "";
-        if (!"ADMIN".equals(newRole) && !"MEMBER".equals(newRole)) {
+        if (!"ADMIN".equalsIgnoreCase(newRole) && !"MEMBER".equalsIgnoreCase(newRole)) {
             throw new IllegalArgumentException("Invalid role. Role must be ADMIN or MEMBER");
         }
 
-        if ("ADMIN".equals(requesterMember.getRole()) && "OWNER".equals(requesterMember.getRole())) {
-            throw new AccessDeniedException("Admins cannot modify role of another admin");
-        }
-        if ("ADMIN".equals(requesterMember.getRole())) {
-            throw new AccessDeniedException("Only community owners can promote members to ADMIN");
+        if (!isOwner && isAdmin) {
+            if ("ADMIN".equalsIgnoreCase(targetMember.getRole())) {
+                throw new AccessDeniedException("Admins cannot modify role of another admin");
+            }
+            if ("ADMIN".equalsIgnoreCase(newRole)) {
+                throw new AccessDeniedException("Only community owners can promote members to ADMIN");
+            }
         }
 
-        targetMember.setRole(newRole);
+        targetMember.setRole(newRole.toUpperCase());
         CommunityMember updated = communityMemberRepository.save(targetMember);
 
         return new CommunityMemberResponse(
@@ -312,24 +324,34 @@ public class CommunityService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
+        if (requesterEmail == null || requesterEmail.isBlank()) {
+            throw new AccessDeniedException("Authentication required");
+        }
+
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + requesterEmail));
 
+        boolean isCreator = community.getCreatedBy() != null && community.getCreatedBy().getId().equals(requester.getId());
         CommunityMember requesterMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, requester.getId())
-                .orElseThrow(() -> new AccessDeniedException("Only community owners and admins can remove members"));
+                .orElse(null);
 
-        if (!"OWNER".equals(requesterMember.getRole()) && !"ADMIN".equals(requesterMember.getRole())) {
+        boolean isOwner = isCreator || (requesterMember != null && "OWNER".equalsIgnoreCase(requesterMember.getRole()));
+        boolean isAdmin = requesterMember != null && "ADMIN".equalsIgnoreCase(requesterMember.getRole());
+
+        if (!isOwner && !isAdmin) {
             throw new AccessDeniedException("Only community owners and admins can remove members");
         }
 
         CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, targetUserId)
+                .or(() -> communityMemberRepository.findById(targetUserId))
                 .orElseThrow(() -> new IllegalArgumentException("Target user is not a member of this community"));
 
-        if ("OWNER".equals(targetMember.getRole())) {
+        if ("OWNER".equalsIgnoreCase(targetMember.getRole()) ||
+            (community.getCreatedBy() != null && community.getCreatedBy().getId().equals(targetMember.getUser().getId()))) {
             throw new IllegalArgumentException("Cannot remove the community owner");
         }
 
-        if ("ADMIN".equals(requesterMember.getRole()) && "ADMIN".equals(targetMember.getRole())) {
+        if (!isOwner && isAdmin && "ADMIN".equalsIgnoreCase(targetMember.getRole())) {
             throw new AccessDeniedException("Admins cannot remove other admins");
         }
 
@@ -341,27 +363,39 @@ public class CommunityService {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
 
+        if (requesterEmail == null || requesterEmail.isBlank()) {
+            throw new AccessDeniedException("Authentication required");
+        }
+
         User requester = userRepository.findByEmail(requesterEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + requesterEmail));
 
+        boolean isCreator = community.getCreatedBy() != null && community.getCreatedBy().getId().equals(requester.getId());
         CommunityMember requesterMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, requester.getId())
-                .orElseThrow(() -> new AccessDeniedException("Only the community owner can transfer ownership"));
+                .orElse(null);
 
-        if (!"OWNER".equals(requesterMember.getRole())) {
+        boolean isOwner = isCreator || (requesterMember != null && "OWNER".equalsIgnoreCase(requesterMember.getRole()));
+        if (!isOwner) {
             throw new AccessDeniedException("Only the community owner can transfer ownership");
         }
 
-        CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, request.getNewOwnerUserId())
+        Long targetUserId = request.getNewOwnerUserId();
+        CommunityMember targetMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, targetUserId)
+                .or(() -> communityMemberRepository.findById(targetUserId))
                 .orElseThrow(() -> new IllegalArgumentException("Target user is not a member of this community"));
 
-        if ("OWNER".equals(targetMember.getRole())) {
+        if ("OWNER".equalsIgnoreCase(targetMember.getRole())) {
             throw new IllegalArgumentException("Target user is already the owner");
         }
 
-        // Demote current owner to ADMIN, promote target to OWNER
-        requesterMember.setRole("ADMIN");
+        // Demote previous owner to ADMIN
+        if (requesterMember != null) {
+            requesterMember.setRole("ADMIN");
+            communityMemberRepository.save(requesterMember);
+        }
+
+        // Promote new owner to OWNER
         targetMember.setRole("OWNER");
-        communityMemberRepository.save(requesterMember);
         communityMemberRepository.save(targetMember);
 
         community.setCreatedBy(targetMember.getUser());
@@ -380,10 +414,17 @@ public class CommunityService {
         if (userEmail != null && !userEmail.isBlank()) {
             User user = userRepository.findByEmail(userEmail).orElse(null);
             if (user != null) {
+                boolean isCreator = community.getCreatedBy() != null && community.getCreatedBy().getId().equals(user.getId());
                 Optional<CommunityMember> memberOpt = communityMemberRepository.findByCommunityIdAndUserId(community.getId(), user.getId());
                 if (memberOpt.isPresent()) {
                     isMember = true;
                     currentUserRole = memberOpt.get().getRole();
+                    if (isCreator && (currentUserRole == null || !"ADMIN".equalsIgnoreCase(currentUserRole))) {
+                        currentUserRole = "OWNER";
+                    }
+                } else if (isCreator) {
+                    isMember = true;
+                    currentUserRole = "OWNER";
                 }
             }
         }

@@ -12,4 +12,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByDecisionId(Long decisionId);
     List<Comment> findByDecisionIdAndParentIsNull(Long decisionId);
     List<Comment> findByAuthorId(Long authorId);
+    List<Comment> findByParentId(Long parentId);
 }

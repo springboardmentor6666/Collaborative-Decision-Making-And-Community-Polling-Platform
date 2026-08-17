@@ -1,19 +1,10 @@
 package com.decisionhub.service;
 
-import com.decisionhub.dto.DecisionRequest;
-import com.decisionhub.dto.DecisionResponse;
-import com.decisionhub.dto.OptionDto;
-import com.decisionhub.dto.PollResponse;
+import com.decisionhub.dto.*;
 import com.decisionhub.entity.*;
 import com.decisionhub.exception.CommunityNotFoundException;
 import com.decisionhub.exception.DecisionNotFoundException;
-import com.decisionhub.repository.CategoryRepository;
-import com.decisionhub.repository.CommunityMemberRepository;
-import com.decisionhub.repository.CommunityRepository;
-import com.decisionhub.repository.DecisionRepository;
-import com.decisionhub.repository.PollOptionRepository;
-import com.decisionhub.repository.UserRepository;
-import com.decisionhub.repository.VoteRepository;
+import com.decisionhub.repository.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +24,8 @@ public class DecisionService {
     private final CommunityMemberRepository communityMemberRepository;
     private final PollOptionRepository pollOptionRepository;
     private final VoteRepository voteRepository;
+    private final ComparisonFactorRepository comparisonFactorRepository;
+    private final OptionScoreRepository optionScoreRepository;
     private final UserService userService;
 
     public DecisionService(DecisionRepository decisionRepository,
@@ -42,6 +35,8 @@ public class DecisionService {
                            CommunityMemberRepository communityMemberRepository,
                            PollOptionRepository pollOptionRepository,
                            VoteRepository voteRepository,
+                           ComparisonFactorRepository comparisonFactorRepository,
+                           OptionScoreRepository optionScoreRepository,
                            UserService userService) {
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
@@ -50,6 +45,8 @@ public class DecisionService {
         this.communityMemberRepository = communityMemberRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
+        this.comparisonFactorRepository = comparisonFactorRepository;
+        this.optionScoreRepository = optionScoreRepository;
         this.userService = userService;
     }
 
@@ -109,6 +106,18 @@ public class DecisionService {
             }
         }
 
+        // Create Comparison Factors if provided
+        if (request.getComparisonFactorNames() != null && !request.getComparisonFactorNames().isEmpty()) {
+            for (String factorName : request.getComparisonFactorNames()) {
+                if (factorName != null && !factorName.trim().isEmpty()) {
+                    ComparisonFactor factor = new ComparisonFactor();
+                    factor.setName(factorName.trim());
+                    factor.setDecision(decision);
+                    decision.getComparisonFactors().add(factor);
+                }
+            }
+        }
+
         Decision savedDecision = decisionRepository.save(decision);
 
         // Create PollOption records linking each DecisionOption to the Poll
@@ -120,6 +129,30 @@ public class DecisionService {
                 pollOption.setOption(option);
                 PollOption savedPo = pollOptionRepository.save(pollOption);
                 savedPoll.getPollOptions().add(savedPo);
+            }
+        }
+
+        // Save Option Scores if comparison factors and option scores were supplied
+        if (request.getOptionScores() != null && !request.getOptionScores().isEmpty() &&
+                !savedDecision.getOptions().isEmpty() && !savedDecision.getComparisonFactors().isEmpty()) {
+            for (OptionScoreDto scoreDto : request.getOptionScores()) {
+                DecisionOption opt = savedDecision.getOptions().stream()
+                        .filter(o -> (scoreDto.getOptionId() != null && o.getId().equals(scoreDto.getOptionId())) ||
+                                (scoreDto.getOptionLabel() != null && o.getLabel().equalsIgnoreCase(scoreDto.getOptionLabel().trim())))
+                        .findFirst().orElse(null);
+
+                ComparisonFactor factor = savedDecision.getComparisonFactors().stream()
+                        .filter(f -> (scoreDto.getFactorId() != null && f.getId().equals(scoreDto.getFactorId())) ||
+                                (scoreDto.getFactorName() != null && f.getName().equalsIgnoreCase(scoreDto.getFactorName().trim())))
+                        .findFirst().orElse(null);
+
+                if (opt != null && factor != null && scoreDto.getScore() != null) {
+                    OptionScore os = new OptionScore();
+                    os.setOption(opt);
+                    os.setFactor(factor);
+                    os.setScore(scoreDto.getScore());
+                    optionScoreRepository.save(os);
+                }
             }
         }
 
@@ -191,6 +224,8 @@ public class DecisionService {
 
     public DecisionResponse mapToDecisionResponse(Decision decision) {
         List<PollResponse> pollResponses = new ArrayList<>();
+        List<OptionDto> allOptions = new ArrayList<>();
+
         if (decision.getPolls() != null) {
             for (Poll poll : decision.getPolls()) {
                 List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
@@ -206,6 +241,7 @@ public class DecisionService {
                                     po.getOption().getDescription(),
                                     voteCounts.getOrDefault(po.getId(), 0L)))
                             .collect(Collectors.toList());
+                    allOptions.addAll(optionDtos);
                 }
                 pollResponses.add(new PollResponse(
                         poll.getId(),
@@ -219,10 +255,32 @@ public class DecisionService {
             }
         }
 
+        // Map comparison factors
+        List<ComparisonFactor> factors = comparisonFactorRepository.findByDecisionId(decision.getId());
+        List<ComparisonFactorDto> factorDtos = factors.stream()
+                .map(f -> new ComparisonFactorDto(f.getId(), f.getName()))
+                .collect(Collectors.toList());
+
+        // Map option scores
+        List<OptionScoreDto> scoreDtos = new ArrayList<>();
+        for (ComparisonFactor f : factors) {
+            List<OptionScore> scores = optionScoreRepository.findByFactorId(f.getId());
+            for (OptionScore os : scores) {
+                scoreDtos.add(new OptionScoreDto(
+                        os.getId(),
+                        os.getOption() != null ? os.getOption().getId() : null,
+                        os.getOption() != null ? os.getOption().getLabel() : null,
+                        f.getId(),
+                        f.getName(),
+                        os.getScore()
+                ));
+            }
+        }
+
         Long communityId = decision.getCommunity() != null ? decision.getCommunity().getId() : null;
         String communityName = decision.getCommunity() != null ? decision.getCommunity().getName() : null;
 
-        return new DecisionResponse(
+        DecisionResponse response = new DecisionResponse(
                 decision.getId(),
                 decision.getTitle(),
                 decision.getDescription(),
@@ -236,5 +294,11 @@ public class DecisionService {
                 communityName,
                 pollResponses
         );
+
+        response.setOptions(allOptions);
+        response.setComparisonFactors(factorDtos);
+        response.setOptionScores(scoreDtos);
+
+        return response;
     }
 }

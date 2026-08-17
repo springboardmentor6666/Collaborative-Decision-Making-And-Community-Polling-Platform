@@ -22,6 +22,10 @@ public class DecisionRequest {
     private Boolean isAnonymous;
     private List<String> optionLabels;
 
+    // Multi-criteria comparison factors and option scores (optional)
+    private List<String> comparisonFactorNames;
+    private List<OptionScoreDto> optionScores;
+
     public DecisionRequest() {
     }
 
@@ -106,5 +110,21 @@ public class DecisionRequest {
 
     public void setOptionLabels(List<String> optionLabels) {
         this.optionLabels = optionLabels;
+    }
+
+    public List<String> getComparisonFactorNames() {
+        return comparisonFactorNames;
+    }
+
+    public void setComparisonFactorNames(List<String> comparisonFactorNames) {
+        this.comparisonFactorNames = comparisonFactorNames;
+    }
+
+    public List<OptionScoreDto> getOptionScores() {
+        return optionScores;
+    }
+
+    public void setOptionScores(List<OptionScoreDto> optionScores) {
+        this.optionScores = optionScores;
     }
 }

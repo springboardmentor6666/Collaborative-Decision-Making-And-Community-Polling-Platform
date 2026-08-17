@@ -6,6 +6,7 @@ import { getMyVotesAnalysisApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import PieChart from '../components/PieChart';
 
 const BAR_COLORS = [
   '#2563eb', // Blue
@@ -282,13 +283,13 @@ export default function AnalysisPage() {
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary">
+                        <h3 className="text-base font-bold text-text-primary transition group-hover:text-primary break-words [overflow-wrap:anywhere] line-clamp-2">
                           {item.title}
                         </h3>
 
                         {/* Poll Question */}
                         {poll?.question && (
-                          <p className="mt-1.5 text-xs font-medium text-secondary line-clamp-1">
+                          <p className="mt-1.5 text-xs font-medium text-secondary break-words [overflow-wrap:anywhere] line-clamp-2">
                             ❓ {poll.question}
                           </p>
                         )}
@@ -301,24 +302,24 @@ export default function AnalysisPage() {
                               : 'border-amber-500/20 bg-amber-500/5'
                           }`}
                         >
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-muted">Your Voted Choice</span>
+                          <div className="flex items-center justify-between text-xs gap-2">
+                            <span className="font-semibold text-muted shrink-0">Your Voted Choice</span>
                             <span
-                              className={`font-black ${
+                              className={`font-black shrink-0 ${
                                 isWon ? 'text-emerald-600' : 'text-amber-600'
                               }`}
                             >
                               {outcome.userVotePct}% of votes
                             </span>
                           </div>
-                          <p className="mt-1 text-sm font-bold text-text-primary">
+                          <p className="mt-1 text-sm font-bold text-text-primary break-words [overflow-wrap:anywhere]">
                             👉 {userVote.optionText}
                           </p>
                         </div>
 
                         {/* Leader info if user is trailing */}
                         {!isWon && outcome.winningOption && (
-                          <p className="mt-2 text-xs text-muted">
+                          <p className="mt-2 text-xs text-muted break-words [overflow-wrap:anywhere]">
                             Current Leader:{' '}
                             <strong className="text-text-primary">
                               {outcome.winningOption.optionText}
@@ -488,70 +489,24 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              {/* Vote Distribution Bar Chart */}
+              {/* Vote Distribution Pie Chart */}
               <div className="mb-6 rounded-2xl border border-border-default bg-surface p-5 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4 flex items-center justify-between border-b border-border-default pb-3">
                   <h4 className="text-sm font-bold text-text-primary">Vote Distribution Breakdown</h4>
                   <span className="text-xs font-semibold text-muted">
                     {selectedDecision.outcome.totalVotes} total votes
                   </span>
                 </div>
 
-                <div className="space-y-4">
-                  {selectedDecision.poll?.options?.map((opt, idx) => {
-                    const total = selectedDecision.outcome.totalVotes;
-                    const pct = total > 0 ? Math.round(((opt.voteCount || 0) / total) * 100) : 0;
-                    const isUserChoice = Number(opt.id) === Number(selectedDecision.userVote.optionId);
-                    const isLeader =
-                      selectedDecision.outcome.winningOption &&
-                      Number(opt.id) === Number(selectedDecision.outcome.winningOption.id);
-                    const color = BAR_COLORS[idx % BAR_COLORS.length];
-
-                    return (
-                      <div key={opt.id || idx} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: color }}
-                            />
-                            <span
-                              className={`font-bold ${
-                                isUserChoice ? 'text-primary' : 'text-text-primary'
-                              }`}
-                            >
-                              {opt.optionText}
-                            </span>
-                            {isUserChoice && (
-                              <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                                Your Choice
-                              </span>
-                            )}
-                            {isLeader && (
-                              <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600">
-                                👑 Leading
-                              </span>
-                            )}
-                          </div>
-                          <span className="font-bold text-text-primary">
-                            {pct}%{' '}
-                            <span className="font-normal text-muted">({opt.voteCount || 0} votes)</span>
-                          </span>
-                        </div>
-
-                        {/* Bar */}
-                        <div className="h-3 w-full overflow-hidden rounded-full bg-surface-alt">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${pct}%` }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: color }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="pt-2">
+                  <PieChart
+                    options={selectedDecision.poll?.options || []}
+                    totalVotes={selectedDecision.outcome.totalVotes}
+                    winningOption={selectedDecision.outcome.winningOption?.optionText}
+                    userChoiceId={selectedDecision.userVote?.optionId}
+                    size={180}
+                    showLegend={true}
+                  />
                 </div>
               </div>
 

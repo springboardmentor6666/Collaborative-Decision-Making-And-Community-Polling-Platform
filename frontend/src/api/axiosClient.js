@@ -42,7 +42,18 @@ async function request(endpoint, options = {}) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `Request failed with status ${response.status}`);
     }
-    return await response.json();
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+    const text = await response.text();
+    if (!text || !text.trim()) {
+      return null;
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
   } catch (error) {
     // If backend is unreachable or endpoint missing, handle fallback for development/demo
     throw error;
@@ -180,6 +191,10 @@ export async function fetchDecisions(token) {
       title: d.title,
       description: d.description,
       status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+      categoryId: d.categoryId || null,
+      categoryName: d.categoryName || null,
+      communityId: d.communityId || null,
+      communityName: d.communityName || null,
       votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
       optionsCount: d.polls?.[0]?.options?.length || (d.polls?.[0]?.optionLabels?.length) || 0,
       createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
@@ -195,6 +210,8 @@ export async function fetchDecisions(token) {
             })) || [],
           }
         : null,
+      comparisonFactors: d.comparisonFactors || [],
+      optionScores: d.optionScores || [],
     }));
   }
   return [];
@@ -210,6 +227,10 @@ export async function fetchDecisionById(id, token) {
     title: d.title,
     description: d.description,
     status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+    categoryId: d.categoryId || null,
+    categoryName: d.categoryName || null,
+    communityId: d.communityId || null,
+    communityName: d.communityName || null,
     createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
     createdAt: d.createdAt || new Date().toISOString(),
     views: d.views || 0,
@@ -226,22 +247,28 @@ export async function fetchDecisionById(id, token) {
           })) || [],
         }
       : null,
+    comparisonFactors: d.comparisonFactors || [],
+    optionScores: d.optionScores || [],
+    options: d.options || [],
   };
 }
 
 /**
- * Create a new decision (with optional embedded poll).
+ * Create a new decision (with optional embedded poll and MCDA factors).
  */
 export async function createDecisionApi(decisionData, token, currentUser) {
   const backendPayload = {
     title: decisionData.title,
     description: decisionData.description,
     visibility: decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC',
+    categoryId: decisionData.categoryId || null,
+    communityId: decisionData.communityId || null,
     pollType: decisionData.pollQuestion ? 'SINGLE_CHOICE' : null,
     pollQuestion: decisionData.pollQuestion || null,
     isAnonymous: false,
     optionLabels: decisionData.pollOptions || [],
-    communityId: decisionData.communityId || null,
+    comparisonFactorNames: decisionData.comparisonFactorNames || [],
+    optionScores: decisionData.optionScores || [],
   };
   return await request('/api/decisions', {
     method: 'POST',
@@ -433,3 +460,75 @@ export async function getCommunityDecisionsApi(communityId, token = null) {
   }
   return [];
 }
+
+/**
+ * Category API endpoints
+ */
+export async function getCategoriesApi(token = null) {
+  try {
+    const data = await request('/api/categories', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [
+      { id: 1, name: 'Technology & Engineering' },
+      { id: 2, name: 'Governance & Policy' },
+      { id: 3, name: 'Product & Design' },
+      { id: 4, name: 'Finance & Budget' },
+      { id: 5, name: 'Operations & Strategy' },
+      { id: 6, name: 'Community & Culture' },
+      { id: 7, name: 'Other' },
+    ];
+  }
+}
+
+export async function createCategoryApi(name, token = null) {
+  return await request('/api/categories', {
+    method: 'POST',
+    body: { name },
+    token,
+  });
+}
+
+/**
+ * Threaded Comment API endpoints
+ */
+export async function getCommentsByDecisionApi(decisionId, token = null) {
+  try {
+    const data = await request(`/api/comments/decision/${decisionId}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function createCommentApi(commentData, token) {
+  return await request('/api/comments', {
+    method: 'POST',
+    body: commentData,
+    token,
+  });
+}
+
+export async function replyToCommentApi(parentCommentId, commentData, token) {
+  return await request(`/api/comments/${parentCommentId}/reply`, {
+    method: 'POST',
+    body: commentData,
+    token,
+  });
+}
+
+export async function updateCommentApi(commentId, commentData, token) {
+  return await request(`/api/comments/${commentId}`, {
+    method: 'PUT',
+    body: commentData,
+    token,
+  });
+}
+
+export async function deleteCommentApi(commentId, token) {
+  return await request(`/api/comments/${commentId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+

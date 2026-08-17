@@ -35,7 +35,7 @@ export default {
         app: 'var(--shadow)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--app-font-family)', 'Inter', 'system-ui', 'sans-serif'],
       }
     },
   },

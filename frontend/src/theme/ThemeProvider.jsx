@@ -1,14 +1,31 @@
 import { createContext, useEffect, useMemo, useState } from 'react';
-import { THEMES, UI_MODES, getThemeTokens, themeOrder } from './themes';
+import { THEMES, UI_MODES, FONT_FAMILIES, FONT_SIZES, getThemeTokens, themeOrder } from './themes';
 
 export const ThemeContext = createContext(null);
 
 const STORAGE_KEY = 'decisionhub_theme_preferences';
 
-const DEFAULT_PREFERENCES = {
+export const DEFAULT_PREFERENCES = {
   theme: THEMES.default,
   uiMode: UI_MODES.royal,
+  fontFamily: 'inter',
+  fontSize: 'default',
 };
+
+function loadGoogleFont(fontKey) {
+  if (typeof document === 'undefined') return;
+  const fontConfig = FONT_FAMILIES[fontKey];
+  if (!fontConfig || !fontConfig.googleFontUrl) return;
+
+  const linkId = `google-font-${fontKey}`;
+  if (!document.getElementById(linkId)) {
+    const link = document.createElement('link');
+    link.id = linkId;
+    link.rel = 'stylesheet';
+    link.href = fontConfig.googleFontUrl;
+    document.head.appendChild(link);
+  }
+}
 
 function getStoredPreferences() {
   try {
@@ -16,13 +33,17 @@ function getStoredPreferences() {
     if (!item) return DEFAULT_PREFERENCES;
     const parsed = JSON.parse(item);
 
-    // Validate stored values against actual THEMES and UI_MODES
+    // Validate stored values against actual THEMES, UI_MODES, FONT_FAMILIES, FONT_SIZES
     const validThemes = Object.values(THEMES);
     const validModes = Object.values(UI_MODES);
+    const validFontFamilies = Object.keys(FONT_FAMILIES);
+    const validFontSizes = Object.keys(FONT_SIZES);
 
     return {
       theme: validThemes.includes(parsed.theme) ? parsed.theme : DEFAULT_PREFERENCES.theme,
       uiMode: validModes.includes(parsed.uiMode) ? parsed.uiMode : DEFAULT_PREFERENCES.uiMode,
+      fontFamily: validFontFamilies.includes(parsed.fontFamily) ? parsed.fontFamily : DEFAULT_PREFERENCES.fontFamily,
+      fontSize: validFontSizes.includes(parsed.fontSize) ? parsed.fontSize : DEFAULT_PREFERENCES.fontSize,
     };
   } catch (error) {
     console.warn('Failed to read theme preferences from localStorage:', error);
@@ -39,22 +60,8 @@ function savePreferences(preferences) {
 }
 
 export function ThemeProvider({ children }) {
-  // Initialize with validated stored preferences immediately (not just defaults)
+  // Initialize with validated stored preferences immediately
   const [preferences, setPreferencesState] = useState(() => {
-    // Auto-migrate: clear any stale old-format data on first load
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const validThemes = Object.values(THEMES);
-        const validModes = Object.values(UI_MODES);
-        if (!validThemes.includes(parsed.theme) || !validModes.includes(parsed.uiMode)) {
-          // Old stale data detected — wipe it and use defaults
-          localStorage.removeItem(STORAGE_KEY);
-          return DEFAULT_PREFERENCES;
-        }
-      }
-    } catch { /* ignore */ }
     return getStoredPreferences();
   });
 
@@ -63,7 +70,7 @@ export function ThemeProvider({ children }) {
     setPreferencesState(getStoredPreferences());
   }, []);
 
-  // Apply theme to document
+  // Apply theme & typography to document
   useEffect(() => {
     const root = document.documentElement;
     
@@ -74,10 +81,18 @@ export function ThemeProvider({ children }) {
     root.classList.add(`theme-${preferences.theme}`);
     root.dataset.uiMode = preferences.uiMode;
     root.dataset.theme = preferences.theme;
+    root.dataset.fontFamily = preferences.fontFamily;
+    root.dataset.fontSize = preferences.fontSize;
     
-    // Default font setup
-    root.style.setProperty('--app-font-family', 'Inter, system-ui, sans-serif');
-    root.style.setProperty('--app-font-size', '1rem');
+    // Dynamic Font setup
+    const activeFont = FONT_FAMILIES[preferences.fontFamily] || FONT_FAMILIES.inter;
+    const activeSize = FONT_SIZES[preferences.fontSize] || FONT_SIZES.default;
+
+    loadGoogleFont(preferences.fontFamily);
+
+    root.style.setProperty('--app-font-family', activeFont.value);
+    root.style.setProperty('--font-size-scale', activeSize.scale);
+    root.style.setProperty('--app-font-size', `calc(16px * ${activeSize.scale})`);
 
     // Get and apply CSS variables
     const themeTokens = getThemeTokens(preferences.theme, preferences.uiMode);
@@ -98,12 +113,29 @@ export function ThemeProvider({ children }) {
     setPreferences({ theme: nextTheme });
   };
 
+  const resetTypography = () => {
+    setPreferences({
+      fontFamily: DEFAULT_PREFERENCES.fontFamily,
+      fontSize: DEFAULT_PREFERENCES.fontSize,
+    });
+  };
+
+  const resetAllPreferences = () => {
+    setPreferencesState(DEFAULT_PREFERENCES);
+  };
+
   const value = useMemo(() => ({
     theme: preferences.theme,
     uiMode: preferences.uiMode,
+    fontFamily: preferences.fontFamily,
+    fontSize: preferences.fontSize,
     setTheme: (theme) => setPreferences({ theme }),
     setUiMode: (uiMode) => setPreferences({ uiMode }),
+    setFontFamily: (fontFamily) => setPreferences({ fontFamily }),
+    setFontSize: (fontSize) => setPreferences({ fontSize }),
     cycleTheme,
+    resetTypography,
+    resetAllPreferences,
   }), [preferences]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

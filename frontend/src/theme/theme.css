@@ -11,11 +11,21 @@
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --primary-soft: rgba(37, 99, 235, 0.14);
+    --primary-contrast: #ffffff;
     --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
     --overlay: rgba(15, 23, 42, 0.25);
+    
+    /* Typography variables */
+    --font-size-scale: 1;
+    --app-font-size: calc(16px * var(--font-size-scale, 1));
+    --app-font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  html {
+    font-size: calc(16px * var(--font-size-scale, 1));
   }
 
   html, body, #root {
@@ -23,6 +33,10 @@
     background-color: var(--background);
     color: var(--text-primary);
     font-family: var(--app-font-family, 'Inter', system-ui, sans-serif);
+  }
+
+  input, button, select, textarea {
+    font-family: inherit;
   }
 
   /* Universal transition for theme switches */

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../theme/useTheme';
+import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
 
 /**
  * IconSidebar — slim control rail pinned to the right edge.
@@ -84,7 +85,18 @@ const UI_MODE_COLORS = {
 };
 
 export default function IconSidebar() {
-  const { theme, uiMode, setTheme, setUiMode, cycleTheme } = useTheme();
+  const {
+    theme,
+    uiMode,
+    fontFamily,
+    fontSize,
+    setTheme,
+    setUiMode,
+    setFontFamily,
+    setFontSize,
+    cycleTheme,
+    resetTypography,
+  } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [activePanel, setActivePanel] = useState('settings');
 
@@ -97,17 +109,13 @@ export default function IconSidebar() {
 
   return (
     <>
-    <motion.aside
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="fixed right-0 top-0 z-30 hidden h-screen w-[60px] flex-col items-center justify-center gap-3 border-l border-border-default py-4 backdrop-blur-xl sm:flex"
-      style={{ backgroundColor: 'color-mix(in srgb, var(--surface) 40%, transparent)' }}
+    <aside
+      className="fixed right-0 top-0 z-40 hidden h-screen w-[60px] flex-col items-center justify-center gap-3 border-l border-border-default py-4 backdrop-blur-xl sm:flex shadow-sm pointer-events-auto"
+      style={{ backgroundColor: 'color-mix(in srgb, var(--surface) 60%, transparent)' }}
     >
       {/* DecisionHub micro-logo at top */}
-      <motion.div
-        variants={itemVariants}
-        className="mb-auto mt-3 flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary"
+      <div
+        className="mb-auto mt-3 flex h-9 w-9 items-center justify-center rounded-xl bg-primary-soft text-primary transition-transform hover:scale-105"
       >
         <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">
           <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5">
@@ -121,7 +129,7 @@ export default function IconSidebar() {
             <path d="M27 35L35 27" />
           </g>
         </svg>
-      </motion.div>
+      </div>
 
       {/* Icon buttons - centered */}
       <div className="flex flex-col items-center gap-2">
@@ -129,6 +137,8 @@ export default function IconSidebar() {
           <motion.button
             key={item.id}
             variants={itemVariants}
+            initial="hidden"
+            animate="visible"
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => {
@@ -149,7 +159,7 @@ export default function IconSidebar() {
 
       {/* Spacer to keep icons centered */}
       <div className="mt-auto mb-3" />
-    </motion.aside>
+    </aside>
 
     {isOpen && (
       <div className="fixed inset-0 z-40 backdrop-blur-sm" style={{ backgroundColor: 'var(--overlay)' }} onClick={closePanel} />
@@ -159,7 +169,7 @@ export default function IconSidebar() {
       initial={{ x: 320, opacity: 0 }}
       animate={{ x: isOpen ? 0 : 320, opacity: isOpen ? 1 : 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="fixed right-0 top-0 z-50 h-screen w-[320px] border-l border-border-default p-5 shadow-2xl backdrop-blur-xl"
+      className="fixed right-0 top-0 z-50 h-screen w-[320px] overflow-y-auto border-l border-border-default p-5 shadow-2xl backdrop-blur-xl"
       style={{ backgroundColor: 'var(--surface)', color: 'var(--text-primary)' }}
     >
       <div className="flex items-center justify-between">
@@ -179,6 +189,7 @@ export default function IconSidebar() {
       <div className="mt-6 space-y-4">
         {activePanel === 'settings' ? (
           <>
+            {/* Theme */}
             <div className="rounded-2xl border border-border-default p-4 bg-surface-alt">
               <p className="text-sm font-semibold text-text-primary">Theme</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -198,6 +209,7 @@ export default function IconSidebar() {
               </div>
             </div>
 
+            {/* UI Mode */}
             <div className="rounded-2xl border border-border-default p-4 bg-surface-alt">
               <p className="text-sm font-semibold text-text-primary">UI Mode</p>
               <p className="text-xs text-muted">Contrast and accent tone for buttons, highlights, and hero elements.</p>
@@ -221,6 +233,73 @@ export default function IconSidebar() {
                 ))}
               </div>
             </div>
+
+            {/* Font Family */}
+            <div className="rounded-2xl border border-border-default p-4 bg-surface-alt">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-text-primary">Font Family</p>
+                <span className="text-[11px] font-semibold text-muted">
+                  {FONT_FAMILIES[fontFamily]?.name || 'Default'}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-muted">Select your preferred app typography.</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {Object.values(FONT_FAMILIES).map((font) => (
+                  <button
+                    key={font.id}
+                    onClick={() => setFontFamily(font.id)}
+                    className="rounded-xl border px-3 py-2 text-xs font-semibold transition-all text-left truncate"
+                    style={{
+                      fontFamily: font.value,
+                      ...(fontFamily === font.id
+                        ? { borderColor: 'var(--primary)', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }
+                        : { borderColor: 'var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)' }),
+                    }}
+                    title={font.name}
+                  >
+                    {font.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Font Size */}
+            <div className="rounded-2xl border border-border-default p-4 bg-surface-alt">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-text-primary">Font Size</p>
+                <span className="text-[11px] font-semibold text-muted">
+                  {FONT_SIZES[fontSize]?.percentage || '100%'}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-muted">Scale text across headers, labels, and content.</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {Object.values(FONT_SIZES).map((size) => (
+                  <button
+                    key={size.id}
+                    onClick={() => setFontSize(size.id)}
+                    className="flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-semibold transition-all"
+                    style={fontSize === size.id
+                      ? { borderColor: 'var(--primary)', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }
+                      : { borderColor: 'var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)' }
+                    }
+                  >
+                    <span>{size.label}</span>
+                    <span className="text-[10px] opacity-70">{size.percentage}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reset Typography to Default */}
+            <button
+              onClick={resetTypography}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface px-4 py-2.5 text-xs font-semibold text-text-secondary transition-all hover:bg-surface-alt hover:text-text-primary"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset Typography to Default
+            </button>
           </>
         ) : activePanel === 'help' ? (
           <div className="space-y-4">

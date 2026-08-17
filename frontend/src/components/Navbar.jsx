@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';
+import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
 
 const UI_MODE_COLORS = {
   black: '#0f172a',
@@ -13,7 +14,17 @@ const UI_MODE_COLORS = {
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { theme, uiMode, setTheme, setUiMode } = useTheme();
+  const {
+    theme,
+    uiMode,
+    fontFamily,
+    fontSize,
+    setTheme,
+    setUiMode,
+    setFontFamily,
+    setFontSize,
+    resetTypography,
+  } = useTheme();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -126,13 +137,6 @@ export default function Navbar() {
 
           {/* Right: user + logout (desktop only mostly) */}
           <div className="hidden items-center gap-3 md:flex">
-            <div
-              className="hidden rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] sm:block"
-              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)' }}
-            >
-              {theme} · {uiMode}
-            </div>
-
             <div className="flex items-center gap-2.5">
               {user?.avatar ? (
                 <img
@@ -245,45 +249,117 @@ export default function Navbar() {
                 <Link to="/profile" className={mobileNavLinkClass('/profile')}>Profile Settings</Link>
               </nav>
 
-              {/* Theme & UI Mode (Replacing IconSidebar for Mobile) */}
-              <div className="mb-6 rounded-2xl border border-border-default p-4">
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">Theme Settings</p>
+              {/* Theme & Typography Settings (Replacing IconSidebar for Mobile) */}
+              <div className="mb-6 space-y-4 rounded-2xl border border-border-default p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted">Theme & Display</p>
                 
-                <div className="mb-4 grid grid-cols-3 gap-2">
-                  {['default', 'light', 'dark'].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTheme(t)}
-                      className={`rounded-xl border py-1.5 text-xs font-bold transition-all ${
-                        theme === t
-                          ? 'border-primary bg-primary-soft text-primary'
-                          : 'border-border-default bg-surface text-text-primary'
-                      }`}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+                {/* Theme */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-text-primary">Theme</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['default', 'light', 'dark'].map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setTheme(t)}
+                        className={`rounded-xl border py-1.5 text-xs font-bold transition-all ${
+                          theme === t
+                            ? 'border-primary bg-primary-soft text-primary'
+                            : 'border-border-default bg-surface text-text-primary'
+                        }`}
+                      >
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {['black', 'green', 'saffron', 'royal'].map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setUiMode(mode)}
-                      className={`flex items-center justify-center gap-1.5 rounded-xl border py-1.5 text-xs font-bold transition-all ${
-                        uiMode === mode
-                          ? 'border-primary bg-primary-soft text-primary'
-                          : 'border-border-default bg-surface text-text-primary'
-                      }`}
-                    >
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: UI_MODE_COLORS[mode] }}
-                      />
-                      {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                    </button>
-                  ))}
+                {/* UI Mode */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-text-primary">UI Accent</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['black', 'green', 'saffron', 'royal'].map((mode) => (
+                      <button
+                        key={mode}
+                        onClick={() => setUiMode(mode)}
+                        className={`flex items-center justify-center gap-1.5 rounded-xl border py-1.5 text-xs font-bold transition-all ${
+                          uiMode === mode
+                            ? 'border-primary bg-primary-soft text-primary'
+                            : 'border-border-default bg-surface text-text-primary'
+                        }`}
+                      >
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: UI_MODE_COLORS[mode] }}
+                        />
+                        {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Font Family */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-text-primary">Font Family</p>
+                    <span className="text-[10px] font-semibold text-muted">
+                      {FONT_FAMILIES[fontFamily]?.name || 'Default'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.values(FONT_FAMILIES).map((font) => (
+                      <button
+                        key={font.id}
+                        onClick={() => setFontFamily(font.id)}
+                        className={`rounded-xl border py-1.5 px-2 text-xs font-semibold transition-all truncate text-left ${
+                          fontFamily === font.id
+                            ? 'border-primary bg-primary-soft text-primary'
+                            : 'border-border-default bg-surface text-text-primary'
+                        }`}
+                        style={{ fontFamily: font.value }}
+                        title={font.name}
+                      >
+                        {font.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Font Size */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-text-primary">Font Size</p>
+                    <span className="text-[10px] font-semibold text-muted">
+                      {FONT_SIZES[fontSize]?.percentage || '100%'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.values(FONT_SIZES).map((size) => (
+                      <button
+                        key={size.id}
+                        onClick={() => setFontSize(size.id)}
+                        className={`flex items-center justify-between rounded-xl border py-1.5 px-2.5 text-xs font-semibold transition-all ${
+                          fontSize === size.id
+                            ? 'border-primary bg-primary-soft text-primary'
+                            : 'border-border-default bg-surface text-text-primary'
+                        }`}
+                      >
+                        <span>{size.label}</span>
+                        <span className="text-[10px] opacity-70">{size.percentage}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Reset */}
+                <button
+                  onClick={resetTypography}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border-default bg-surface py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-alt hover:text-text-primary"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Reset Typography
+                </button>
               </div>
 
               {/* Logout */}
