@@ -30,11 +30,22 @@ public class DashboardController {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("schemaVersion", suppliedSchema ? "supplied" : "legacy");
         response.put("summary", getSummary());
-        response.put("users", getUsers(suppliedSchema));
-        response.put("decisions", getDecisions(suppliedSchema));
-        response.put("options", jdbcTemplate.queryForList(
-                "SELECT option_id, decision_id, option_title, score, ranking FROM options ORDER BY option_id"));
+        response.put("users", convertKeysToLowerCase(getUsers(suppliedSchema)));
+        response.put("decisions", convertKeysToLowerCase(getDecisions(suppliedSchema)));
+        response.put("options", convertKeysToLowerCase(jdbcTemplate.queryForList(
+                "SELECT option_id, decision_id, option_title, score, ranking FROM options ORDER BY option_id")));
         return response;
+    }
+
+    private List<Map<String, Object>> convertKeysToLowerCase(List<Map<String, Object>> list) {
+        if (list == null) {
+            return List.of();
+        }
+        return list.stream().map(map -> {
+            Map<String, Object> lowerCaseMap = new LinkedHashMap<>();
+            map.forEach((key, value) -> lowerCaseMap.put(key.toLowerCase(), value));
+            return lowerCaseMap;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     private Map<String, Long> getSummary() {
