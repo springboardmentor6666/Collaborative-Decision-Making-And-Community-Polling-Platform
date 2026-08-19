@@ -26,7 +26,7 @@ function Home() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:8080/api/decisions",
+       "http://localhost:8080/api/decisions/my",
         {
           headers: {
             "Authorization": `Bearer ${token}`

@@ -39,12 +39,18 @@ public class DecisionServiceImpl implements DecisionService {
     private final VoteRepository voteRepository;
     private final CommunityRepository communityRepository;
     private final CurrentUserService currentUser;
+    private final com.decisionhub.backend.service.NotificationService notificationService;
+    private final com.decisionhub.backend.repository.CommentRepository commentRepository;
+    private final com.decisionhub.backend.repository.ReportRepository reportRepository;
 
     public DecisionServiceImpl(
             DecisionRepository decisionRepository,
             UserRepository userRepository,
             OptionRepository optionRepository,
-            VoteRepository voteRepository, CommunityRepository communityRepository, CurrentUserService currentUser) {
+            VoteRepository voteRepository, CommunityRepository communityRepository, CurrentUserService currentUser,
+            com.decisionhub.backend.service.NotificationService notificationService,
+            com.decisionhub.backend.repository.CommentRepository commentRepository,
+            com.decisionhub.backend.repository.ReportRepository reportRepository) {
 
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
@@ -52,6 +58,9 @@ public class DecisionServiceImpl implements DecisionService {
         this.voteRepository = voteRepository;
         this.communityRepository = communityRepository;
         this.currentUser = currentUser;
+        this.notificationService = notificationService;
+        this.commentRepository = commentRepository;
+        this.reportRepository = reportRepository;
     }
 
     // =========================================================
@@ -206,6 +215,7 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
+    @Transactional
     public void deleteDecision(Long id) {
 
         User currentUser = getCurrentUser();
@@ -225,6 +235,10 @@ public class DecisionServiceImpl implements DecisionService {
                     "You can only delete your own decision"
             );
         }
+
+        voteRepository.deleteByDecisionId(id);
+        commentRepository.deleteByDecisionId(id);
+        reportRepository.deleteByDecisionId(id);
 
         decisionRepository.delete(decision);
     }
@@ -296,6 +310,13 @@ public class DecisionServiceImpl implements DecisionService {
                 .build();
 
         try { voteRepository.saveAndFlush(vote); } catch (org.springframework.dao.DataIntegrityViolationException ex) { throw new IllegalStateException("You have already voted on this poll"); }
+
+        if (decision.getCreatedBy() != null && !decision.getCreatedBy().getId().equals(user.getId())) {
+            notificationService.notifyUser(
+                    decision.getCreatedBy(),
+                    user.getName() + " voted on your decision \"" + decision.getTitle() + "\""
+            );
+        }
 
         return VoteResponse.builder()
                 .id(vote.getId())

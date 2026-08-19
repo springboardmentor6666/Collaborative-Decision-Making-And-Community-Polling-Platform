@@ -1,6 +1,7 @@
 package com.decisionhub.backend.service.impl;
 
 import com.decisionhub.backend.dto.CommunityRequest;
+import com.decisionhub.backend.service.NotificationService;
 import com.decisionhub.backend.dto.CommunityResponse;
 import com.decisionhub.backend.entity.Community;
 import com.decisionhub.backend.entity.User;
@@ -23,12 +24,14 @@ public class CommunityServiceImpl implements CommunityService {
     private final CurrentUserService currentUser;
     private final DecisionRepository decisions;
     private final DecisionService decisionService;
+    private final NotificationService notificationService;
 
-    public CommunityServiceImpl(CommunityRepository repository, CurrentUserService currentUser, DecisionRepository decisions, DecisionService decisionService) {
+    public CommunityServiceImpl(CommunityRepository repository, CurrentUserService currentUser, DecisionRepository decisions, DecisionService decisionService, NotificationService notificationService) {
         this.repository = repository;
         this.currentUser = currentUser;
         this.decisions = decisions;
         this.decisionService = decisionService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -65,7 +68,16 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override public CommunityResponse getCommunity(Long id) { User user = currentUser.get(); return response(find(id), user); }
-    @Override public CommunityResponse join(Long id) { User user = currentUser.get(); Community community = find(id); community.getMembers().add(user); return response(repository.save(community), user); }
+    @Override public CommunityResponse join(Long id) {
+        User user = currentUser.get();
+        Community community = find(id);
+        community.getMembers().add(user);
+        Community saved = repository.save(community);
+        if (community.getOwner() != null && !community.getOwner().getId().equals(user.getId())) {
+            notificationService.notifyUser(community.getOwner(), user.getName() + " joined your community \"" + community.getCommunityName() + "\"");
+        }
+        return response(saved, user);
+    }
     @Override public CommunityResponse leave(Long id) {
         User user = currentUser.get(); Community community = find(id);
         if (community.getOwner() != null && community.getOwner().getId().equals(user.getId())) throw new IllegalStateException("The owner cannot leave their community");

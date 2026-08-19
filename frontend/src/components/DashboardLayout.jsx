@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
 function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
@@ -26,9 +27,95 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
     navigate("/");
   };
 
-  const initials = userEmail
+    const initials = userEmail
     ? userEmail.charAt(0).toUpperCase()
     : "?";
+
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:8080/api/notifications", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      setNotifications(data);
+    } catch (err) {
+      // notifications are non-critical, fail silently
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const markAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      // fail silently
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch("http://localhost:8080/api/notifications/read-all", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      // fail silently
+    }
+  };
+
+  const timeAgo = (dateString) => {
+    if (!dateString) return "";
+    const diffMs = Date.now() - new Date(dateString).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
 
   return (
     <>
@@ -317,12 +404,115 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
         }
 
 
+                .bell-wrapper {
+          position: relative;
+          flex-shrink: 0;
+        }
+
         .bell {
           font-size: 20px;
-
           cursor: pointer;
-
           flex-shrink: 0;
+          position: relative;
+        }
+
+        .bell-badge {
+          position: absolute;
+          top: -6px;
+          right: -8px;
+          background: #ef4444;
+          color: white;
+          font-size: 10px;
+          font-weight: 700;
+          min-width: 16px;
+          height: 16px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 4px;
+        }
+
+        .notification-dropdown {
+          position: absolute;
+          top: 34px;
+          right: -10px;
+          width: 320px;
+          max-height: 380px;
+          background: #14111f;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 14px;
+          box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+          overflow: hidden;
+          z-index: 50;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .notification-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 14px 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          font-size: 13px;
+          font-weight: 700;
+          color: white;
+        }
+
+        .mark-all-read {
+          font-size: 11px;
+          font-weight: 600;
+          color: #a78bfa;
+          cursor: pointer;
+        }
+
+        .notification-list {
+          overflow-y: auto;
+          max-height: 320px;
+        }
+
+        .notification-empty {
+          padding: 30px 16px;
+          text-align: center;
+          font-size: 13px;
+          color: #9c93b0;
+        }
+
+        .notification-item {
+          padding: 12px 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          cursor: pointer;
+          transition: background .15s;
+        }
+
+        .notification-item:last-child {
+          border-bottom: none;
+        }
+
+        .notification-item:hover {
+          background: rgba(255,255,255,0.04);
+        }
+
+        .notification-item.unread {
+          background: rgba(124,58,237,0.08);
+        }
+
+        .notification-item.unread .notification-message {
+          font-weight: 700;
+          color: white;
+        }
+
+        .notification-message {
+          font-size: 13px;
+          color: #d6d0e3;
+          line-height: 1.4;
+        }
+
+        .notification-time {
+          font-size: 11px;
+          color: #7d7690;
+          margin-top: 4px;
         }
 
 
@@ -665,10 +855,60 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
             </div>
 
 
-            <div className="topbar-right">
+                        <div className="topbar-right">
 
-              <div className="bell">
-                🔔
+              <div className="bell-wrapper" ref={notificationRef}>
+
+                <div
+                  className="bell"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  🔔
+                  {unreadCount > 0 && (
+                    <span className="bell-badge">{unreadCount}</span>
+                  )}
+                </div>
+
+                {showNotifications && (
+                  <div className="notification-dropdown">
+
+                    <div className="notification-header">
+                      <span>Notifications</span>
+                      {unreadCount > 0 && (
+                        <span className="mark-all-read" onClick={markAllAsRead}>
+                          Mark all as read
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="notification-list">
+
+                      {notifications.length === 0 && (
+                        <div className="notification-empty">
+                          You're all caught up. No notifications yet.
+                        </div>
+                      )}
+
+                      {notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`notification-item ${n.read ? "" : "unread"}`}
+                          onClick={() => !n.read && markAsRead(n.id)}
+                        >
+                          <div className="notification-message">
+                            {n.message}
+                          </div>
+                          <div className="notification-time">
+                            {timeAgo(n.createdAt)}
+                          </div>
+                        </div>
+                      ))}
+
+                    </div>
+
+                  </div>
+                )}
+
               </div>
 
 
