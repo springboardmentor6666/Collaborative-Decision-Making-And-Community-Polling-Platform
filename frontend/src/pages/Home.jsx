@@ -14,7 +14,7 @@ function Home() {
 
   useEffect(() => {
     fetchDecisions();
-    fetch("http://localhost:8080/api/users/profile", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+    fetch("http://localhost:8080/api/users/profile", { headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` } })
       .then(response => response.ok ? response.json() : null).then(setProfile).catch(() => setProfile(null));
   }, []);
 
@@ -23,10 +23,10 @@ function Home() {
 
     try {
 
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       const response = await fetch(
-       "http://localhost:8080/api/decisions/my",
+        "http://localhost:8080/api/decisions/my",
         {
           headers: {
             "Authorization": `Bearer ${token}`

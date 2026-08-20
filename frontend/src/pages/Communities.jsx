@@ -12,7 +12,7 @@ function Communities() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const headers = () => ({ Authorization: "Bearer " + localStorage.getItem("token") });
+  const headers = () => ({ Authorization: "Bearer " + sessionStorage.getItem("token") });
   const notify = (text, error = false) => { setIsError(error); setMessage(text); };
 
   const load = async () => {

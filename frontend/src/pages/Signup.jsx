@@ -127,9 +127,9 @@ function Signup() {
         );
 
         // Store authentication information
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("role", result.role);
-        localStorage.setItem("userEmail", user.email);
+        sessionStorage.setItem("token", result.token);
+        sessionStorage.setItem("role", result.role);
+        sessionStorage.setItem("userEmail", user.email);
 
         // Redirect to Home after showing success toast
         setTimeout(() => {

@@ -8,7 +8,7 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const headers = () => ({ Authorization: "Bearer " + localStorage.getItem("token") });
+  const headers = () => ({ Authorization: "Bearer " + sessionStorage.getItem("token") });
   const notify = (text, error = false) => { setIsError(error); setMessage(text); };
   const load = async () => {
     try { const response = await fetch("http://localhost:8080/api/users/profile", { headers: headers() }); const data = await response.json(); if (!response.ok) throw new Error(data.message); setProfile(data); setName(data.name || ""); }
@@ -20,7 +20,7 @@ function Profile() {
     event.preventDefault();
     if (!name.trim()) return notify("Name is required.", true);
     setSaving(true);
-    try { const response = await fetch("http://localhost:8080/api/users/profile", { method: "PUT", headers: { ...headers(), "Content-Type": "application/json" }, body: JSON.stringify({ name: name.trim() }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message); setProfile(data); localStorage.setItem("userName", data.name); notify("Profile updated successfully."); }
+    try { const response = await fetch("http://localhost:8080/api/users/profile", { method: "PUT", headers: { ...headers(), "Content-Type": "application/json" }, body: JSON.stringify({ name: name.trim() }) }); const data = await response.json(); if (!response.ok) throw new Error(data.message); setProfile(data); sessionStorage.setItem("userName", data.name); notify("Profile updated successfully."); }
     catch (error) { notify(error.message || "Unable to update profile.", true); } finally { setSaving(false); }
   };
   const stats = profile ? [["Decisions created", profile.decisionsCreated], ["Votes cast", profile.votesParticipated], ["Communities joined", profile.joinedCommunities]] : [];

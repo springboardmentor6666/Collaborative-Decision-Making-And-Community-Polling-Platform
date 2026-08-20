@@ -6,8 +6,8 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userEmail = localStorage.getItem("userEmail") || "";
-  const role = localStorage.getItem("role") || "USER";
+  const userEmail = sessionStorage.getItem("userEmail") || "";
+  const role = sessionStorage.getItem("role") || "USER";
 
   const navItems = [
     { label: "Dashboard", icon: "🏠", route: "/home" },
@@ -20,9 +20,9 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userEmail");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("userEmail");
 
     navigate("/");
   };
@@ -39,7 +39,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       const response = await fetch("http://localhost:8080/api/notifications", {
         headers: { Authorization: `Bearer ${token}` }
@@ -75,7 +75,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
   const markAsRead = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       await fetch(`http://localhost:8080/api/notifications/${id}/read`, {
         method: "PATCH",
@@ -92,7 +92,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       await fetch("http://localhost:8080/api/notifications/read-all", {
         method: "PATCH",

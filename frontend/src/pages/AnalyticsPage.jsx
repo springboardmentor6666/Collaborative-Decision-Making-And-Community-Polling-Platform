@@ -22,7 +22,7 @@ function AnalyticsPage() {
     try {
 
       const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
       if (!token) {
         setError("Please login to view analytics.");

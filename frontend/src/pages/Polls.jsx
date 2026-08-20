@@ -13,7 +13,7 @@ function Polls() {
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
+  const authHeaders = () => ({ Authorization: `Bearer ${sessionStorage.getItem("token")}` });
   const notify = (text, error = false) => { setIsError(error); setMessage(text); };
 
   const loadPolls = async () => {

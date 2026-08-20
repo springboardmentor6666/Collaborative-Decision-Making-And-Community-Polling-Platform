@@ -24,7 +24,7 @@ function CreateDecision() {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) return;
         fetch("http://localhost:8080/api/communities", { headers: { Authorization: `Bearer ${token}` } })
             .then(async r => r.ok ? r.json() : [])
@@ -80,7 +80,7 @@ function CreateDecision() {
 
         try {
 
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
 
             console.log("TOKEN:", token);
             console.log("DATA:", data);

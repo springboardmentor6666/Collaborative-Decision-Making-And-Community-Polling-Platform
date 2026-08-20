@@ -19,7 +19,7 @@ function OAuth2Success() {
         // If OAuth data is not present, check whether
         // we already have a logged-in user.
         if (!token) {
-            const existingToken = localStorage.getItem("token");
+            const existingToken = sessionStorage.getItem("token");
 
             if (existingToken) {
                 navigate("/home", { replace: true });
@@ -29,14 +29,14 @@ function OAuth2Success() {
         }
 
         // Save Google authentication data
-        localStorage.setItem("token", token);
+        sessionStorage.setItem("token", token);
 
         if (email) {
-            localStorage.setItem("userEmail", email);
+            sessionStorage.setItem("userEmail", email);
         }
 
         if (role) {
-            localStorage.setItem("role", role);
+            sessionStorage.setItem("role", role);
         }
 
         console.log("Google login successful!");

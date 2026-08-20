@@ -91,9 +91,9 @@ function Login() {
         setMessage(result.message || "Login successful!");
 
         // Store authentication information
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("role", result.role);
-        localStorage.setItem("userEmail", loginData.email);
+        sessionStorage.setItem("token", result.token);
+        sessionStorage.setItem("role", result.role);
+        sessionStorage.setItem("userEmail", loginData.email);
 
         // Give toast time to be visible
         setTimeout(() => {
