@@ -4,13 +4,13 @@
 
 -- 1. categories
 CREATE TABLE IF NOT EXISTS categories (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- 2. users
 CREATE TABLE IF NOT EXISTS users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- 3. user_profiles
 CREATE TABLE IF NOT EXISTS user_profiles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
     bio TEXT,
     avatar_url VARCHAR(255),
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS user_interests (
 
 -- 5. communities
 CREATE TABLE IF NOT EXISTS communities (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     category_id BIGINT,
     description TEXT,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS communities (
 
 -- 6. community_members
 CREATE TABLE IF NOT EXISTS community_members (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     community_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     role VARCHAR(20) DEFAULT 'MEMBER',          -- OWNER / ADMIN / MEMBER / MODERATOR
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS community_members (
 
 -- 7. decisions
 CREATE TABLE IF NOT EXISTS decisions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS decisions (
 
 -- 8. decision_options
 CREATE TABLE IF NOT EXISTS decision_options (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     label VARCHAR(150) NOT NULL,
     description TEXT,
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS decision_options (
 
 -- 9. comparison_factors
 CREATE TABLE IF NOT EXISTS comparison_factors (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     name VARCHAR(50) NOT NULL,                  -- Cost, Risk, Time, etc.
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS comparison_factors (
 
 -- 10. option_scores
 CREATE TABLE IF NOT EXISTS option_scores (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     option_id BIGINT NOT NULL,
     factor_id BIGINT NOT NULL,
     score INT CHECK (score BETWEEN 1 AND 10),
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS option_scores (
 
 -- 11. polls
 CREATE TABLE IF NOT EXISTS polls (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     poll_type VARCHAR(20) DEFAULT 'SINGLE',     -- SINGLE / MULTI / RATING
     question VARCHAR(255),                      -- Optional poll question text
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS polls (
 
 -- 12. poll_options
 CREATE TABLE IF NOT EXISTS poll_options (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     poll_id BIGINT NOT NULL,
     option_id BIGINT NOT NULL,
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS poll_options (
 
 -- 13. votes
 CREATE TABLE IF NOT EXISTS votes (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     poll_id BIGINT NOT NULL,
     poll_option_id BIGINT NOT NULL,
     voter_id BIGINT NULL,                       -- nullable if anonymous
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS votes (
 
 -- 14. comments
 CREATE TABLE IF NOT EXISTS comments (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
     parent_id BIGINT NULL,                      -- nullable, self-referencing
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS comments (
 
 -- 15. notifications
 CREATE TABLE IF NOT EXISTS notifications (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     type VARCHAR(30) NOT NULL,                  -- NEW_COMMENT / NEW_VOTE / etc.
     message VARCHAR(255) NOT NULL,
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- 16. moderation_flags
 CREATE TABLE IF NOT EXISTS moderation_flags (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     target_type VARCHAR(20) NOT NULL,           -- COMMENT / DECISION
     target_id BIGINT NOT NULL,
     reported_by BIGINT NOT NULL,
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS moderation_flags (
 
 -- 17. decision_impressions (Analytics: View & Reach Tracking)
 CREATE TABLE IF NOT EXISTS decision_impressions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     user_id BIGINT NULL,                            -- NULL for anonymous visitors
     user_email VARCHAR(255) NULL,                    -- Email of logged-in user (denormalized)

@@ -1,16 +1,16 @@
 -- 06. Database Design — DecisionHub
 -- Exact Official Specification Schema (Normalized to 3NF)
--- Primary schema compatible with MySQL 8.0 & PostgreSQL
+-- Compatible with PostgreSQL
 
 -- 1. categories
 CREATE TABLE IF NOT EXISTS categories (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- 2. users
 CREATE TABLE IF NOT EXISTS users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- 3. user_profiles
 CREATE TABLE IF NOT EXISTS user_profiles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE,
     bio TEXT,
     avatar_url VARCHAR(255),
@@ -42,25 +42,21 @@ CREATE TABLE IF NOT EXISTS user_interests (
 
 -- 5. communities
 CREATE TABLE IF NOT EXISTS communities (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     category_id BIGINT,
     description TEXT,
     created_by BIGINT,
-    visibility VARCHAR(10) DEFAULT 'PUBLIC',    -- PUBLIC / PRIVATE
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 6. community_members
 CREATE TABLE IF NOT EXISTS community_members (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     community_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     role VARCHAR(20) DEFAULT 'MEMBER',          -- OWNER / ADMIN / MEMBER / MODERATOR
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (community_id, user_id),
     FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -68,24 +64,21 @@ CREATE TABLE IF NOT EXISTS community_members (
 
 -- 7. decisions
 CREATE TABLE IF NOT EXISTS decisions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT,
     visibility VARCHAR(10) DEFAULT 'PUBLIC',    -- PUBLIC / PRIVATE
     category_id BIGINT,
-    community_id BIGINT NULL,                   -- NULL for general decisions, FK to communities for group decisions
-    status VARCHAR(20) DEFAULT 'OPEN',          -- OPEN / CLOSED
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE SET NULL
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
 -- 8. decision_options
 CREATE TABLE IF NOT EXISTS decision_options (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     label VARCHAR(150) NOT NULL,
     description TEXT,
@@ -94,7 +87,7 @@ CREATE TABLE IF NOT EXISTS decision_options (
 
 -- 9. comparison_factors
 CREATE TABLE IF NOT EXISTS comparison_factors (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     name VARCHAR(50) NOT NULL,                  -- Cost, Risk, Time, etc.
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
@@ -102,7 +95,7 @@ CREATE TABLE IF NOT EXISTS comparison_factors (
 
 -- 10. option_scores
 CREATE TABLE IF NOT EXISTS option_scores (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     option_id BIGINT NOT NULL,
     factor_id BIGINT NOT NULL,
     score INT CHECK (score BETWEEN 1 AND 10),
@@ -112,7 +105,7 @@ CREATE TABLE IF NOT EXISTS option_scores (
 
 -- 11. polls
 CREATE TABLE IF NOT EXISTS polls (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     poll_type VARCHAR(20) DEFAULT 'SINGLE',     -- SINGLE / MULTI / RATING
     question VARCHAR(255),                      -- Optional poll question text
@@ -123,7 +116,7 @@ CREATE TABLE IF NOT EXISTS polls (
 
 -- 12. poll_options
 CREATE TABLE IF NOT EXISTS poll_options (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     poll_id BIGINT NOT NULL,
     option_id BIGINT NOT NULL,
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
@@ -132,7 +125,7 @@ CREATE TABLE IF NOT EXISTS poll_options (
 
 -- 13. votes
 CREATE TABLE IF NOT EXISTS votes (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     poll_id BIGINT NOT NULL,
     poll_option_id BIGINT NOT NULL,
     voter_id BIGINT NULL,                       -- nullable if anonymous
@@ -146,13 +139,12 @@ CREATE TABLE IF NOT EXISTS votes (
 
 -- 14. comments
 CREATE TABLE IF NOT EXISTS comments (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
     parent_id BIGINT NULL,                      -- nullable, self-referencing
     content VARCHAR(2000) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_flagged BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -161,7 +153,7 @@ CREATE TABLE IF NOT EXISTS comments (
 
 -- 15. notifications
 CREATE TABLE IF NOT EXISTS notifications (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     type VARCHAR(30) NOT NULL,                  -- NEW_COMMENT / NEW_VOTE / etc.
     message VARCHAR(255) NOT NULL,
@@ -172,7 +164,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- 16. moderation_flags
 CREATE TABLE IF NOT EXISTS moderation_flags (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     target_type VARCHAR(20) NOT NULL,           -- COMMENT / DECISION
     target_id BIGINT NOT NULL,
     reported_by BIGINT NOT NULL,
@@ -181,35 +173,12 @@ CREATE TABLE IF NOT EXISTS moderation_flags (
     FOREIGN KEY (reported_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 17. decision_impressions (Analytics: View & Reach Tracking)
-CREATE TABLE IF NOT EXISTS decision_impressions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    decision_id BIGINT NOT NULL,
-    user_id BIGINT NULL,                            -- NULL for anonymous visitors
-    user_email VARCHAR(255) NULL,                    -- Email of logged-in user (denormalized)
-    client_ip VARCHAR(64) NULL,                      -- Client IP for anonymous tracking
-    ip_hash VARCHAR(64) NULL,                        -- Hashed IP for anonymous reach tracking
-    type VARCHAR(20) NOT NULL DEFAULT 'VIEW',       -- 'VIEW' or 'REACH'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_impression_type CHECK (type IN ('VIEW', 'REACH')),
-    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);
-
 -- Indexes for performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_decisions_owner ON decisions(owner_id);
 CREATE INDEX idx_decisions_category ON decisions(category_id);
-CREATE INDEX idx_decisions_community ON decisions(community_id);
 CREATE INDEX idx_votes_poll ON votes(poll_id);
 CREATE INDEX idx_votes_voter ON votes(voter_id);
 CREATE INDEX idx_comments_decision ON comments(decision_id);
 CREATE INDEX idx_comments_parent ON comments(parent_id);
-CREATE INDEX idx_comments_author ON comments(author_id);
-CREATE INDEX idx_comments_created_at ON comments(created_at);
-CREATE INDEX idx_communities_created_by ON communities(created_by);
-CREATE INDEX idx_communities_visibility ON communities(visibility);
 CREATE INDEX idx_community_members ON community_members(community_id, user_id);
-CREATE INDEX idx_community_members_user ON community_members(user_id);
-CREATE INDEX idx_impressions_decision ON decision_impressions (decision_id);
-CREATE INDEX idx_impressions_type ON decision_impressions (decision_id, type);

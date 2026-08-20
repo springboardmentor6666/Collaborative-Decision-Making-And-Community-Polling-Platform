@@ -1,8 +1,8 @@
 -- V3: Add Decision Impressions & Analytics
--- Compatible with MySQL 8.0
+-- Compatible with PostgreSQL
 
 CREATE TABLE IF NOT EXISTS decision_impressions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     user_id BIGINT NULL,
     user_email VARCHAR(255) NULL,
