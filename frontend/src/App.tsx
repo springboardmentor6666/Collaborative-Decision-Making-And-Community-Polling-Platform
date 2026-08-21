@@ -15,6 +15,8 @@ import EditCommunity from "./modules/communities/pages/EditCommunity";
 import Members from "./modules/communities/pages/Members";
 import CommunityAdminDashboard from "./modules/communities/pages/CommunityAdminDashboard";
 
+import ElectionDetails from "./modules/elections/pages/ElectionDetails";
+import ElectionManagementDashboard from "./modules/elections/pages/ElectionManagementDashboard";
 import DecisionFeed from "./modules/decisions/pages/DecisionFeed";
 import MyDecisions from "./modules/decisions/pages/MyDecisions";
 import CreateDecision from "./modules/decisions/pages/CreateDecision";
@@ -28,7 +30,6 @@ import { DecisionAnalyticsPage } from './modules/analytics/pages/DecisionAnalyti
 import NotificationsPage from "./modules/notifications/pages/NotificationsPage";
 import ActivityTimelinePage from "./modules/notifications/pages/ActivityTimelinePage";
 
-// Phase 9
 import { ProfilePage } from "./modules/profile/pages/ProfilePage";
 import { EditProfilePage } from "./modules/profile/pages/EditProfilePage";
 import { SettingsPage } from "./modules/profile/pages/SettingsPage";
@@ -53,6 +54,8 @@ export default function App() {
         <Route path="/communities/:id/edit" element={<EditCommunity />} />
         <Route path="/communities/:id/members" element={<Members />} />
         <Route path="/communities/:id/admin" element={<CommunityAdminDashboard />} />
+        <Route path="/communities/:id/admin/elections/:eventId" element={<ElectionManagementDashboard />} />
+        <Route path="/communities/:id/elections/:eventId" element={<ElectionDetails />} />
         
         <Route path="/decisions" element={<DecisionFeed />} />
         <Route path="/decisions/my" element={<MyDecisions />} />

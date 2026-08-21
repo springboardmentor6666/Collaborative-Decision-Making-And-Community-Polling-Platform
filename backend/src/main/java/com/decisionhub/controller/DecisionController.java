@@ -78,6 +78,7 @@ public class DecisionController {
     @GetMapping
     @Operation(summary = "Search and filter decision boards")
     public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> searchDecisions(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Long communityId,
             @RequestParam(required = false) DecisionVisibility visibility,
@@ -88,8 +89,9 @@ public class DecisionController {
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
+        Long userId = currentUser != null ? currentUser.getId() : null;
         PagedResponse<DecisionResponse> response = decisionService.searchDecisions(
-                query, communityId, visibility, status, voteType, createdById, pageable
+                query, communityId, visibility, status, voteType, createdById, userId, pageable
         );
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -97,27 +99,33 @@ public class DecisionController {
     @GetMapping("/trending")
     @Operation(summary = "Get trending public decisions")
     public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> getTrending(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PagedResponse<DecisionResponse> response = decisionService.getTrendingDecisions(PageRequest.of(page, size));
+        Long userId = currentUser != null ? currentUser.getId() : null;
+        PagedResponse<DecisionResponse> response = decisionService.getTrendingDecisions(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/popular")
     @Operation(summary = "Get popular decisions by view count")
     public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> getPopular(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PagedResponse<DecisionResponse> response = decisionService.getPopularDecisions(PageRequest.of(page, size));
+        Long userId = currentUser != null ? currentUser.getId() : null;
+        PagedResponse<DecisionResponse> response = decisionService.getPopularDecisions(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/latest")
     @Operation(summary = "Get latest published public decisions")
     public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> getLatest(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PagedResponse<DecisionResponse> response = decisionService.getLatestDecisions(PageRequest.of(page, size));
+        Long userId = currentUser != null ? currentUser.getId() : null;
+        PagedResponse<DecisionResponse> response = decisionService.getLatestDecisions(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

@@ -114,6 +114,25 @@ public class DecisionServiceImpl implements DecisionService {
         Decision decision = decisionRepository.findById(decisionId)
                 .orElseThrow(() -> new EntityNotFoundException("Decision", "id", decisionId));
 
+        if (decision.getVisibility() == DecisionVisibility.PRIVATE || 
+            (decision.getCommunity() != null && decision.getCommunity().getVisibility() == com.decisionhub.common.enums.CommunityVisibility.PRIVATE)) {
+            
+            if (requestingUserId == null) {
+                throw new ForbiddenException("You must be logged in to view this private decision.");
+            }
+            
+            boolean isAuthor = decision.getCreatedBy().getUserId().equals(requestingUserId);
+            boolean isMember = false;
+            if (decision.getCommunity() != null) {
+                isMember = communityMemberRepository.existsByCommunityCommunityIdAndUserUserIdAndStatus(
+                        decision.getCommunity().getCommunityId(), requestingUserId, com.decisionhub.common.enums.MemberStatus.ACTIVE);
+            }
+            
+            if (!isAuthor && !isMember) {
+                throw new ForbiddenException("This decision is private and you do not have access.");
+            }
+        }
+
         // Increment view count asynchronously/atomically
         decisionRepository.incrementViewCount(decisionId);
 
@@ -141,10 +160,10 @@ public class DecisionServiceImpl implements DecisionService {
     public PagedResponse<DecisionResponse> searchDecisions(
             String searchQuery, Long communityId,
             DecisionVisibility visibility, DecisionStatus status, VoteType voteType,
-            Long createdById, Pageable pageable) {
+            Long createdById, Long requestingUserId, Pageable pageable) {
 
         Page<DecisionResponse> page = decisionRepository.findAll(
-                DecisionSpecification.filterDecisions(searchQuery, communityId, visibility, status, voteType, createdById),
+                DecisionSpecification.filterDecisions(searchQuery, communityId, visibility, status, voteType, createdById, requestingUserId),
                 pageable
         ).map(this::enrichDecisionResponse);
 
@@ -153,26 +172,25 @@ public class DecisionServiceImpl implements DecisionService {
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<DecisionResponse> getTrendingDecisions(Pageable pageable) {
-        Page<DecisionResponse> page = decisionRepository.findTrendingDecisions(pageable)
+    public PagedResponse<DecisionResponse> getTrendingDecisions(Long requestingUserId, Pageable pageable) {
+        Page<DecisionResponse> page = decisionRepository.findTrendingDecisions(requestingUserId, pageable)
                 .map(this::enrichDecisionResponse);
         return PagedResponse.fromPage(page);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<DecisionResponse> getPopularDecisions(Pageable pageable) {
-        Page<DecisionResponse> page = decisionRepository.findPopularDecisions(pageable)
+    public PagedResponse<DecisionResponse> getPopularDecisions(Long requestingUserId, Pageable pageable) {
+        Page<DecisionResponse> page = decisionRepository.findPopularDecisions(requestingUserId, pageable)
                 .map(this::enrichDecisionResponse);
         return PagedResponse.fromPage(page);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<DecisionResponse> getLatestDecisions(Pageable pageable) {
-        Page<DecisionResponse> page = decisionRepository.findByVisibilityAndStatusOrderByCreatedAtDesc(
-                DecisionVisibility.PUBLIC, DecisionStatus.ACTIVE, pageable
-        ).map(this::enrichDecisionResponse);
+    public PagedResponse<DecisionResponse> getLatestDecisions(Long requestingUserId, Pageable pageable) {
+        Page<DecisionResponse> page = decisionRepository.findLatestDecisions(requestingUserId, pageable)
+                .map(this::enrichDecisionResponse);
         return PagedResponse.fromPage(page);
     }
 

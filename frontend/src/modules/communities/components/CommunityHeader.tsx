@@ -53,6 +53,15 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
           </div>
           
           <div className="flex gap-3 w-full md:w-auto">
+            {(isOwner || isAdmin || membership?.role === "MODERATOR") && (
+              <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
+                <Link to={`/communities/${community.communityId}/admin`}>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin
+                </Link>
+              </Button>
+            )}
+            
             {canEdit && (
               <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
                 <Link to={`/communities/${community.communityId}/edit`}>

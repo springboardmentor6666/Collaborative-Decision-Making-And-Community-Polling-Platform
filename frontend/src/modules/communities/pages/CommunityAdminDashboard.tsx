@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { PendingRequestsList } from '../components/PendingRequestsList';
 import { MemberManagement } from '../components/MemberManagement';
 import { AbuseReportsList } from '../components/AbuseReportsList';
+import { AdminElectionsList } from '../../elections/components/AdminElectionsList';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -45,6 +46,7 @@ export default function CommunityAdminDashboard() {
 
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">
+          <AdminElectionsList communityId={communityId} />
           <PendingRequestsList communityId={communityId} />
           <AbuseReportsList communityId={communityId} />
           <MemberManagement communityId={communityId} />

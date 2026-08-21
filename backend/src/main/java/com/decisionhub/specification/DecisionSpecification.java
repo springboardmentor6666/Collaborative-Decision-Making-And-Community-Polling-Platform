@@ -11,6 +11,12 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.decisionhub.common.enums.CommunityVisibility;
+import com.decisionhub.common.enums.MemberStatus;
+import com.decisionhub.entity.CommunityMember;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.Root;
+
 /**
  * JPA Dynamic Specification Builder for searching and filtering Decision entities.
  */
@@ -22,7 +28,8 @@ public class DecisionSpecification {
             DecisionVisibility visibility,
             DecisionStatus status,
             VoteType voteType,
-            Long createdById) {
+            Long createdById,
+            Long requestingUserId) {
 
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -53,6 +60,37 @@ public class DecisionSpecification {
             if (createdById != null) {
                 predicates.add(criteriaBuilder.equal(root.get("createdBy").get("userId"), createdById));
             }
+
+            // Privacy logic
+            jakarta.persistence.criteria.Join<Object, Object> communityJoin = root.join("community", jakarta.persistence.criteria.JoinType.LEFT);
+            Predicate isPublicDecision = criteriaBuilder.equal(root.get("visibility"), DecisionVisibility.PUBLIC);
+            Predicate isPublicCommunity = criteriaBuilder.or(
+                    criteriaBuilder.isNull(root.get("community")),
+                    criteriaBuilder.equal(communityJoin.get("visibility"), CommunityVisibility.PUBLIC)
+            );
+            Predicate publicAccess = criteriaBuilder.and(isPublicDecision, isPublicCommunity);
+
+            Predicate accessPredicate = publicAccess;
+
+            if (requestingUserId != null) {
+                Predicate isAuthor = criteriaBuilder.equal(root.get("createdBy").get("userId"), requestingUserId);
+                
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<CommunityMember> cmRoot = subquery.from(CommunityMember.class);
+                subquery.select(cmRoot.get("community").get("communityId"));
+                subquery.where(
+                        criteriaBuilder.equal(cmRoot.get("community").get("communityId"), root.get("community").get("communityId")),
+                        criteriaBuilder.equal(cmRoot.get("user").get("userId"), requestingUserId),
+                        criteriaBuilder.equal(cmRoot.get("status"), MemberStatus.ACTIVE)
+                );
+                Predicate isMember = criteriaBuilder.exists(subquery);
+                Predicate isCommunityDecision = criteriaBuilder.isNotNull(root.get("community"));
+                Predicate memberAccess = criteriaBuilder.and(isCommunityDecision, isMember);
+
+                accessPredicate = criteriaBuilder.or(publicAccess, isAuthor, memberAccess);
+            }
+
+            predicates.add(accessPredicate);
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

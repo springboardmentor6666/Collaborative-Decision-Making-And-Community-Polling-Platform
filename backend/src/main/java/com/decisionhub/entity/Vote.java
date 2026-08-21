@@ -29,7 +29,6 @@ import java.util.Objects;
         name = "vote",
         indexes = {
                 @Index(name = "idx_vote_decision", columnList = "decision_id"),
-                @Index(name = "idx_vote_option", columnList = "option_id"),
                 @Index(name = "idx_vote_user", columnList = "user_id")
         }
 )

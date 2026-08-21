@@ -26,12 +26,13 @@ public interface DecisionService {
             DecisionStatus status,
             VoteType voteType,
             Long createdById,
+            Long requestingUserId,
             Pageable pageable
     );
 
-    PagedResponse<DecisionResponse> getTrendingDecisions(Pageable pageable);
+    PagedResponse<DecisionResponse> getTrendingDecisions(Long requestingUserId, Pageable pageable);
 
-    PagedResponse<DecisionResponse> getPopularDecisions(Pageable pageable);
+    PagedResponse<DecisionResponse> getPopularDecisions(Long requestingUserId, Pageable pageable);
 
-    PagedResponse<DecisionResponse> getLatestDecisions(Pageable pageable);
+    PagedResponse<DecisionResponse> getLatestDecisions(Long requestingUserId, Pageable pageable);
 }

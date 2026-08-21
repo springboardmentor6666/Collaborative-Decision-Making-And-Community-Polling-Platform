@@ -1,0 +1,1 @@
+ALTER TABLE voting_event ADD COLUMN results_published BOOLEAN DEFAULT FALSE NOT NULL;
