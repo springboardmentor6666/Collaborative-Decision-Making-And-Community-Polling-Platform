@@ -99,7 +99,8 @@ function MyDecisions() {
                     method: "DELETE",
 
                     headers: {
-                        "Authorization": `Bearer ${token}`
+                        "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+                        "Content-Type": "application/json"
                     }
                 }
             );
