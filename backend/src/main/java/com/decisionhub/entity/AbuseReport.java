@@ -21,6 +21,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(
         name = "abuse_report",
@@ -29,6 +32,8 @@ import lombok.Setter;
                 @Index(name = "idx_abuse_report_status", columnList = "status")
         }
 )
+@SQLDelete(sql = "UPDATE abuse_report SET deleted = true WHERE report_id = ?")
+@SQLRestriction("deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
