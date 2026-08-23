@@ -66,7 +66,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/test/all").permitAll()
                 .requestMatchers("/api/dashboard/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll() // Allow H2 Console
+                .requestMatchers("/h2-console/**").permitAll()
+                // Public read access for browsing decisions and communities
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/decisions").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/decisions/{id}").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/decisions/{decisionId}/options").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/decisions/{decisionId}/comments").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/communities").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/communities/{id}").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/communities/category/{category}").permitAll()
+                .requestMatchers("/api/decisions/{decisionId}/vote/status").permitAll()
                 .requestMatchers("/api/test/user").hasAnyRole("USER", "MODERATOR", "ADMIN")
                 .requestMatchers("/api/test/mod").hasAnyRole("MODERATOR", "ADMIN")
                 .requestMatchers("/api/test/admin").hasRole("ADMIN")

@@ -22,17 +22,29 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <h2>DecisionHub</h2>
+      <h2><Link to={token ? "/dashboard" : "/"} style={{ textDecoration: "none", color: "inherit" }}>DecisionHub</Link></h2>
 
       <ul>
-        <li><Link to="/">Home</Link></li>
+        <li><Link to={token ? "/dashboard" : "/"}>Home</Link></li>
+        {token && (
+          <>
+            <li><Link to="/decisions">Decisions</Link></li>
+            <li><Link to="/communities">Communities</Link></li>
+          </>
+        )}
         <li><Link to="/database">Database</Link></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#services">Services</a></li>
-        <li><a href="#contact">Contact</a></li>
+        {!token && (
+          <>
+            <li><a href="#about">About</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </>
+        )}
         {token && user ? (
           <>
-            <li style={{ color: "#3498db", fontWeight: "bold" }}>Hi, {user.fullName}</li>
+            <li style={{ fontWeight: "bold" }}>
+              <Link to="/profile" style={{ color: "#ffd700" }}>Hi, {user.fullName}</Link>
+            </li>
             <li>
               <button onClick={handleLogout} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", font: "inherit", padding: 0 }}>
                 Logout
