@@ -655,7 +655,7 @@ color:#666;
 /* Database Overview Styles */
 .database-overview {
     min-height: calc(100vh - 72px);
-    padding: 50px 7%;
+    padding: 40px 4%;
     text-align: left;
     background: #f8fbff;
 }
@@ -693,7 +693,7 @@ color:#666;
 
 /* Dashboard Workspace Styles */
 .dashboard-container {
-    padding: 60px 8%;
+    padding: 40px 4%;
     background: #f8fbff;
     min-height: 90vh;
 }
@@ -796,7 +796,7 @@ color:#666;
 
 /* Decisions & Communities Shared Styles */
 .decisions-page-container, .communities-page-container, .profile-page-container {
-    padding: 60px 8%;
+    padding: 40px 4%;
     background: #f8fbff;
     min-height: 90vh;
 }
@@ -1011,7 +1011,7 @@ color:#666;
 
 /* Decision Details Layout */
 .decision-detail-container {
-    padding: 60px 8%;
+    padding: 40px 4%;
     background: #f8fbff;
     min-height: 90vh;
 }
@@ -1348,5 +1348,162 @@ color:#666;
     color: #ef4444;
     font-weight: bold;
     margin-bottom: 15px;
+}
+
+/* ==========================================
+   Responsive & Screen Optimization Media Queries
+   ========================================== */
+
+/* Laptop / Desktop Screens (min-width: 1025px) - max width and smooth grids */
+@media screen and (min-width: 1025px) {
+    .navbar {
+        padding: 18px 4%;
+    }
+    .container {
+        padding: 80px 4%;
+        gap: 80px;
+    }
+}
+
+/* Tablet Screens (768px to 1024px) */
+@media screen and (max-width: 1024px) {
+    .navbar {
+        padding: 15px 3%;
+    }
+    .container {
+        padding: 60px 4%;
+        flex-direction: column;
+        text-align: center;
+        gap: 45px;
+    }
+    .hero-text h1 {
+        font-size: 45px;
+    }
+    .hero-image img {
+        max-width: 380px;
+    }
+    .dashboard-container,
+    .decisions-page-container,
+    .communities-page-container,
+    .profile-page-container,
+    .decision-detail-container,
+    .database-overview {
+        padding: 30px 4%;
+    }
+    .profile-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+/* Mobile Screens (max-width: 767px) */
+@media screen and (max-width: 767px) {
+    .navbar {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .navbar ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    .container {
+        padding: 40px 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 30px;
+        min-height: auto;
+    }
+    .hero-text h1 {
+        font-size: 32px;
+    }
+    .hero-text p {
+        font-size: 16px;
+    }
+    .hero-stats {
+        gap: 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero-stats h3 {
+        font-size: 24px;
+    }
+    .hero-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .hero-buttons button {
+        width: 100%;
+    }
+    .hero-image img {
+        max-width: 260px;
+    }
+    .about, .services, .contact {
+        padding: 60px 15px;
+        min-height: auto;
+    }
+    .about h2, .services h2, .contact h2 {
+        font-size: 28px;
+    }
+    .about-cards, .service-cards {
+        gap: 20px;
+    }
+    .card, .service-card {
+        width: 100%;
+    }
+    .login-box {
+        width: 100%;
+        margin: 0 15px;
+        padding: 30px 20px;
+    }
+    .dashboard-container,
+    .decisions-page-container,
+    .communities-page-container,
+    .profile-page-container,
+    .decision-detail-container,
+    .database-overview {
+        padding: 24px 12px;
+    }
+    .dashboard-header h1 {
+        font-size: 26px;
+    }
+    .dashboard-header p {
+        font-size: 14px;
+    }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .page-header h1 {
+        font-size: 26px;
+    }
+    .decisions-grid, .communities-grid {
+        grid-template-columns: 1fr;
+    }
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    .pros-cons-grid {
+        grid-template-columns: 1fr;
+    }
+    .comment-input-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .comment-input-row button {
+        width: 100%;
+        padding: 12px;
+    }
+    .profile-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
 }
 
