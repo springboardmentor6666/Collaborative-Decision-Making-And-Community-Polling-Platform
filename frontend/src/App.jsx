@@ -11,10 +11,12 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import OAuth2Success from "./pages/OAuth2Success";
 import "./index.css";
+import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/LandingPage";
 function App() {
 
   return (
+    <ThemeProvider>
 
     <BrowserRouter>
 
@@ -42,6 +44,7 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+    </ThemeProvider>
 
   );
 

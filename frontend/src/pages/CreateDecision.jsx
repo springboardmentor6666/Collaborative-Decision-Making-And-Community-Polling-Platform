@@ -23,23 +23,56 @@ function CreateDecision() {
     const [communities, setCommunities] = useState([]);
     const [submitting, setSubmitting] = useState(false);
 
+
     useEffect(() => {
         const token = sessionStorage.getItem("token");
+
         if (!token) return;
-        fetch("http://localhost:8080/api/communities", { headers: { Authorization: `Bearer ${token}` } })
+
+        fetch(
+            "http://localhost:8080/api/communities",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
             .then(async r => r.ok ? r.json() : [])
-            .then(setCommunities).catch(() => setCommunities([]));
+            .then(setCommunities)
+            .catch(() => setCommunities([]));
+
     }, []);
-    useEffect(() => { if (!message) return; const timer = setTimeout(() => setMessage(""), 3500); return () => clearTimeout(timer); }, [message]);
+
+
+    useEffect(() => {
+
+        if (!message) return;
+
+        const timer = setTimeout(
+            () => setMessage(""),
+            3500
+        );
+
+        return () => clearTimeout(timer);
+
+    }, [message]);
 
 
     const handleChange = (e) => {
 
-        const { name, value, type, checked } = e.target;
+        const {
+            name,
+            value,
+            type,
+            checked
+        } = e.target;
 
         setDecision({
             ...decision,
-            [name]: type === "checkbox" ? checked : value
+            [name]:
+                type === "checkbox"
+                    ? checked
+                    : value
         });
 
     };
@@ -58,79 +91,171 @@ function CreateDecision() {
 
     const addOption = () => {
 
-        setOptions([...options, ""]);
+        setOptions([
+            ...options,
+            ""
+        ]);
 
     };
-    const removeOption = (index) => { if (options.length > 2) setOptions(options.filter((_, i) => i !== index)); };
+
+
+    const removeOption = (index) => {
+
+        if (options.length > 2) {
+
+            setOptions(
+                options.filter(
+                    (_, i) => i !== index
+                )
+            );
+
+        }
+
+    };
 
 
     const handleSubmit = async () => {
 
-        const cleanOptions = options.map(option => option.trim()).filter(Boolean);
-        if (!decision.title.trim() || !decision.description.trim() || cleanOptions.length < 2) {
-            setIsError(true); setMessage("Enter a title, description, and at least two options."); return;
+        const cleanOptions =
+            options
+                .map(option => option.trim())
+                .filter(Boolean);
+
+
+        if (
+            !decision.title.trim() ||
+            !decision.description.trim() ||
+            cleanOptions.length < 2
+        ) {
+
+            setIsError(true);
+
+            setMessage(
+                "Enter a title, description, and at least two options."
+            );
+
+            return;
+
         }
 
+
         const data = {
+
             ...decision,
+
             options: cleanOptions,
-            communityId: decision.communityId ? Number(decision.communityId) : null
+
+            communityId:
+                decision.communityId
+                    ? Number(decision.communityId)
+                    : null
+
         };
 
 
         try {
 
-            const token = sessionStorage.getItem("token");
+            const token =
+                sessionStorage.getItem("token");
 
-            console.log("TOKEN:", token);
-            console.log("DATA:", data);
+
+            console.log(
+                "TOKEN:",
+                token
+            );
+
+            console.log(
+                "DATA:",
+                data
+            );
 
 
             if (!token) {
 
-                setIsError(true); setMessage("Please login first.");
+                setIsError(true);
+
+                setMessage(
+                    "Please login first."
+                );
 
                 navigate("/login");
 
                 return;
+
             }
 
 
             setSubmitting(true);
+
+
             const response = await fetch(
+
                 "http://localhost:8080/api/decisions",
+
                 {
+
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${token}`
+
                     },
 
-                    body: JSON.stringify(data)
+                    body:
+                        JSON.stringify(data)
+
                 }
+
             );
 
 
-            const result = await response.json().catch(() => ({}));
+            const result =
+                await response
+                    .json()
+                    .catch(() => ({}));
 
-            console.log("STATUS:", response.status);
-            console.log("RESPONSE:", result);
+
+            console.log(
+                "STATUS:",
+                response.status
+            );
+
+            console.log(
+                "RESPONSE:",
+                result
+            );
 
 
             if (!response.ok) {
 
-                setIsError(true); setMessage(result.message || "Unable to create decision.");
+                setIsError(true);
+
+                setMessage(
+                    result.message ||
+                    "Unable to create decision."
+                );
 
                 return;
+
             }
 
 
-            setIsError(false); setMessage("Decision created successfully!");
+            setIsError(false);
+
+            setMessage(
+                "Decision created successfully!"
+            );
 
 
             setTimeout(() => {
+
                 navigate("/decisions");
+
             }, 1000);
 
 
@@ -141,9 +266,15 @@ function CreateDecision() {
                 error
             );
 
-            setIsError(true); setMessage("Server error. Could not create decision.");
+            setIsError(true);
 
-        } finally { setSubmitting(false);
+            setMessage(
+                "Server error. Could not create decision."
+            );
+
+        } finally {
+
+            setSubmitting(false);
 
         }
 
@@ -156,7 +287,12 @@ function CreateDecision() {
             pageTitle="Create Decision"
             pageSubtitle="Set up a new decision board for people to vote on."
         >
-            <Toast message={message} isError={isError} />
+
+            <Toast
+                message={message}
+                isError={isError}
+            />
+
 
             <style>{`
 
@@ -165,12 +301,18 @@ function CreateDecision() {
                 ========================= */
 
                 .create-page {
+
                     width: 100%;
-                    min-height: calc(100vh - 100px);
 
-                    padding: 5px 0 40px;
+                    min-height:
+                        calc(100vh - 100px);
 
-                    color: #f8fafc;
+                    padding:
+                        5px 0 40px;
+
+                    color:
+                        var(--app-text);
+
                 }
 
 
@@ -181,19 +323,24 @@ function CreateDecision() {
                 .form-card {
 
                     width: 100%;
+
                     max-width: 850px;
 
-                    background: #15121f;
+                    background:
+                        var(--app-card);
 
                     border:
-                        1px solid #2d2840;
+                        1px solid
+                        var(--app-border);
 
                     border-radius: 16px;
 
                     padding: 30px;
 
                     box-shadow:
-                        0 8px 30px rgba(0, 0, 0, 0.20);
+                        0 8px 30px
+                        rgba(0, 0, 0, 0.12);
+
                 }
 
 
@@ -202,34 +349,41 @@ function CreateDecision() {
                 ========================= */
 
                 .form-intro {
+
                     margin-bottom: 28px;
 
                     padding-bottom: 20px;
 
                     border-bottom:
-                        1px solid #2a2536;
+                        1px solid
+                        var(--app-border);
+
                 }
 
 
                 .form-intro h2 {
 
-                    color: #f8fafc;
+                    color:
+                        var(--app-text);
 
                     font-size: 20px;
 
                     font-weight: 600;
 
                     margin-bottom: 6px;
+
                 }
 
 
                 .form-intro p {
 
-                    color: #938ca2;
+                    color:
+                        var(--app-secondary-text);
 
                     font-size: 13px;
 
                     line-height: 1.5;
+
                 }
 
 
@@ -238,7 +392,9 @@ function CreateDecision() {
                 ========================= */
 
                 .field-group {
+
                     margin-bottom: 20px;
+
                 }
 
 
@@ -250,9 +406,11 @@ function CreateDecision() {
 
                     font-weight: 600;
 
-                    color: #ddd6fe;
+                    color:
+                        #a78bfa;
 
                     margin-bottom: 7px;
+
                 }
 
 
@@ -271,28 +429,34 @@ function CreateDecision() {
                     padding: 12px 14px;
 
                     border:
-                        1px solid #353044;
+                        1px solid
+                        var(--app-border);
 
                     border-radius: 9px;
 
                     font-size: 14px;
 
-                    color: #f3f4f6;
+                    color:
+                        var(--app-text);
 
-                    background: #1b1825;
+                    background:
+                        var(--app-card-2);
 
                     outline: none;
 
                     transition:
                         border-color 0.2s ease,
                         background 0.2s ease;
+
                 }
 
 
                 .form-card input::placeholder,
                 .form-card textarea::placeholder {
 
-                    color: #777184;
+                    color:
+                        var(--app-secondary-text);
+
                 }
 
 
@@ -300,13 +464,21 @@ function CreateDecision() {
                 .form-card textarea:focus,
                 .form-card select:focus {
 
-                    border-color: #6d4bc3;
+                    border-color:
+                        #6d4bc3;
 
-                    background: #201c2c;
+                    background:
+                        var(--app-card-2);
 
                     box-shadow:
                         0 0 0 2px
-                        rgba(109, 75, 195, 0.12);
+                        rgba(
+                            109,
+                            75,
+                            195,
+                            0.12
+                        );
+
                 }
 
 
@@ -321,6 +493,7 @@ function CreateDecision() {
                     min-height: 100px;
 
                     line-height: 1.5;
+
                 }
 
 
@@ -331,14 +504,18 @@ function CreateDecision() {
                 .form-card select {
 
                     cursor: pointer;
+
                 }
 
 
                 .form-card select option {
 
-                    background: #1b1825;
+                    background:
+                        var(--app-card);
 
-                    color: #f3f4f6;
+                    color:
+                        var(--app-text);
+
                 }
 
 
@@ -349,6 +526,7 @@ function CreateDecision() {
                 .visibility-section {
 
                     margin-bottom: 22px;
+
                 }
 
 
@@ -361,6 +539,7 @@ function CreateDecision() {
                     gap: 25px;
 
                     margin-top: 10px;
+
                 }
 
 
@@ -374,9 +553,11 @@ function CreateDecision() {
 
                     font-size: 14px;
 
-                    color: #b9b2c5;
+                    color:
+                        var(--app-secondary-text);
 
                     cursor: pointer;
+
                 }
 
 
@@ -386,15 +567,19 @@ function CreateDecision() {
 
                     height: 16px;
 
-                    accent-color: #6d4bc3;
+                    accent-color:
+                        #6d4bc3;
 
                     cursor: pointer;
+
                 }
 
 
                 .radio-option:hover {
 
-                    color: #ddd6fe;
+                    color:
+                        var(--app-text);
+
                 }
 
 
@@ -414,9 +599,11 @@ function CreateDecision() {
 
                     font-size: 14px;
 
-                    color: #b9b2c5;
+                    color:
+                        var(--app-secondary-text);
 
                     cursor: pointer;
+
                 }
 
 
@@ -426,9 +613,11 @@ function CreateDecision() {
 
                     height: 16px;
 
-                    accent-color: #6d4bc3;
+                    accent-color:
+                        #6d4bc3;
 
                     cursor: pointer;
+
                 }
 
 
@@ -442,22 +631,25 @@ function CreateDecision() {
 
                     font-weight: 600;
 
-                    color: #f3f4f6;
+                    color:
+                        var(--app-text);
 
                     margin:
-
                         26px 0 12px;
 
                     padding-bottom: 10px;
 
                     border-bottom:
-                        1px solid #2a2536;
+                        1px solid
+                        var(--app-border);
+
                 }
 
 
                 .option-input {
 
                     margin-bottom: 10px;
+
                 }
 
 
@@ -465,11 +657,13 @@ function CreateDecision() {
 
                     display: block;
 
-                    color: #8f879d;
+                    color:
+                        var(--app-secondary-text);
 
                     font-size: 11px;
 
                     margin-bottom: 5px;
+
                 }
 
 
@@ -484,6 +678,7 @@ function CreateDecision() {
                     gap: 12px;
 
                     margin-top: 14px;
+
                 }
 
 
@@ -493,14 +688,18 @@ function CreateDecision() {
 
                 .btn-add {
 
-                    background: #201a30;
+                    background:
+                        var(--app-card-2);
 
-                    color: #c4b5fd;
+                    color:
+                        #c4b5fd;
 
                     border:
-                        1px solid #493773;
+                        1px solid
+                        #493773;
 
-                    padding: 10px 17px;
+                    padding:
+                        10px 17px;
 
                     border-radius: 8px;
 
@@ -510,15 +709,20 @@ function CreateDecision() {
 
                     cursor: pointer;
 
-                    transition: 0.2s ease;
+                    transition:
+                        0.2s ease;
+
                 }
 
 
                 .btn-add:hover {
 
-                    background: #2a2140;
+                    background:
+                        var(--app-card);
 
-                    border-color: #6548a0;
+                    border-color:
+                        #6548a0;
+
                 }
 
 
@@ -537,7 +741,8 @@ function CreateDecision() {
 
                     border: none;
 
-                    padding: 13px 18px;
+                    padding:
+                        13px 18px;
 
                     border-radius: 9px;
 
@@ -549,7 +754,9 @@ function CreateDecision() {
 
                     margin-top: 24px;
 
-                    transition: 0.2s ease;
+                    transition:
+                        0.2s ease;
+
                 }
 
 
@@ -560,7 +767,23 @@ function CreateDecision() {
 
                     box-shadow:
                         0 5px 15px
-                        rgba(109, 61, 204, 0.20);
+                        rgba(
+                            109,
+                            61,
+                            204,
+                            0.20
+                        );
+
+                }
+
+
+                .btn-submit:disabled {
+
+                    opacity: 0.6;
+
+                    cursor:
+                        not-allowed;
+
                 }
 
 
@@ -572,7 +795,8 @@ function CreateDecision() {
 
                     margin-top: 16px;
 
-                    padding: 11px 14px;
+                    padding:
+                        11px 14px;
 
                     border-radius: 8px;
 
@@ -580,14 +804,18 @@ function CreateDecision() {
 
                     font-weight: 500;
 
-                    color: #c4b5fd;
+                    color:
+                        #c4b5fd;
 
-                    background: #211a32;
+                    background:
+                        var(--app-card-2);
 
                     border:
-                        1px solid #493773;
+                        1px solid
+                        #493773;
 
                     font-size: 13px;
+
                 }
 
 
@@ -597,11 +825,20 @@ function CreateDecision() {
 
                 .form-message.success {
 
-                    color: #86efac;
+                    color:
+                        #86efac;
 
-                    background: #10251d;
+                    background:
+                        rgba(
+                            16,
+                            37,
+                            29,
+                            0.75
+                        );
 
-                    border-color: #23734f;
+                    border-color:
+                        #23734f;
+
                 }
 
 
@@ -615,6 +852,7 @@ function CreateDecision() {
 
                         padding:
                             5px 0 30px;
+
                     }
 
 
@@ -623,12 +861,14 @@ function CreateDecision() {
                         padding: 22px;
 
                         border-radius: 12px;
+
                     }
 
 
                     .radio-row {
 
                         gap: 18px;
+
                     }
 
                 }
@@ -639,16 +879,20 @@ function CreateDecision() {
                     .form-card {
 
                         padding: 18px;
+
                     }
 
 
                     .radio-row {
 
-                        flex-direction: column;
+                        flex-direction:
+                            column;
 
-                        align-items: flex-start;
+                        align-items:
+                            flex-start;
 
                         gap: 12px;
+
                     }
 
                 }
@@ -659,6 +903,7 @@ function CreateDecision() {
             <div className="create-page">
 
                 <div className="form-card">
+
 
                     {/* =========================
                         FORM INTRO
@@ -698,12 +943,44 @@ function CreateDecision() {
 
                     </div>
 
+
+                    {/* =========================
+                        COMMUNITY
+                    ========================= */}
+
                     <div className="field-group">
-                        <span className="field-label">Community (optional)</span>
-                        <select name="communityId" value={decision.communityId || ""} onChange={handleChange}>
-                            <option value="">No community</option>
-                            {communities.filter(c => c.joined).map(c => <option key={c.id} value={c.id}>{c.communityName}</option>)}
+
+                        <span className="field-label">
+                            Community (optional)
+                        </span>
+
+                        <select
+                            name="communityId"
+                            value={
+                                decision.communityId || ""
+                            }
+                            onChange={handleChange}
+                        >
+
+                            <option value="">
+                                No community
+                            </option>
+
+                            {communities
+                                .filter(c => c.joined)
+                                .map(c => (
+
+                                    <option
+                                        key={c.id}
+                                        value={c.id}
+                                    >
+                                        {c.communityName}
+                                    </option>
+
+                                ))}
+
                         </select>
+
                     </div>
 
 
@@ -792,7 +1069,8 @@ function CreateDecision() {
                                     name="visibility"
                                     value="PUBLIC"
                                     checked={
-                                        decision.visibility === "PUBLIC"
+                                        decision.visibility ===
+                                        "PUBLIC"
                                     }
                                     onChange={handleChange}
                                 />
@@ -809,7 +1087,8 @@ function CreateDecision() {
                                     name="visibility"
                                     value="PRIVATE"
                                     checked={
-                                        decision.visibility === "PRIVATE"
+                                        decision.visibility ===
+                                        "PRIVATE"
                                     }
                                     onChange={handleChange}
                                 />
@@ -870,35 +1149,55 @@ function CreateDecision() {
                     </div>
 
 
-                    {options.map((option, index) => (
+                    {options.map(
+                        (option, index) => (
 
-                        <div
-                            className="option-input"
-                            key={index}
-                        >
+                            <div
+                                className="option-input"
+                                key={index}
+                            >
 
-                            <span className="option-number">
-                                Option {index + 1}
-                            </span>
+                                <span className="option-number">
+                                    Option {index + 1}
+                                </span>
 
-                            <input
-                                type="text"
-                                placeholder={
-                                    `Enter option ${index + 1}`
-                                }
-                                value={option}
-                                onChange={(e) =>
-                                    handleOptionChange(
-                                        index,
-                                        e.target.value
-                                    )
-                                }
-                            />
-                            {options.length > 2 && <button type="button" className="btn-add" onClick={() => removeOption(index)}>Remove</button>}
 
-                        </div>
+                                <input
+                                    type="text"
+                                    placeholder={
+                                        `Enter option ${index + 1}`
+                                    }
+                                    value={option}
+                                    onChange={(e) =>
+                                        handleOptionChange(
+                                            index,
+                                            e.target.value
+                                        )
+                                    }
+                                />
 
-                    ))}
+
+                                {options.length > 2 && (
+
+                                    <button
+                                        type="button"
+                                        className="btn-add"
+                                        onClick={() =>
+                                            removeOption(index)
+                                        }
+                                        style={{
+                                            marginTop: "8px"
+                                        }}
+                                    >
+                                        Remove
+                                    </button>
+
+                                )}
+
+                            </div>
+
+                        )
+                    )}
 
 
                     {/* =========================
@@ -926,8 +1225,15 @@ function CreateDecision() {
                         type="button"
                         className="btn-submit"
                         onClick={handleSubmit}
+                        disabled={submitting}
                     >
-                        {submitting ? "Creating..." : "Create Decision"}
+
+                        {
+                            submitting
+                                ? "Creating..."
+                                : "Create Decision"
+                        }
+
                     </button>
 
 
@@ -936,15 +1242,21 @@ function CreateDecision() {
                     ========================= */}
 
                     {message && (
+
                         <div
                             className={
-                                message.includes("successfully")
+                                message.includes(
+                                    "successfully"
+                                )
                                     ? "form-message success"
                                     : "form-message"
                             }
                         >
+
                             {message}
+
                         </div>
+
                     )}
 
                 </div>
@@ -952,7 +1264,9 @@ function CreateDecision() {
             </div>
 
         </DashboardLayout>
+
     );
+
 }
 
 export default CreateDecision;

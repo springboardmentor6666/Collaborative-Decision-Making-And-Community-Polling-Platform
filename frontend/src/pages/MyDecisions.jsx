@@ -4,7 +4,6 @@ import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 function MyDecisions() {
-
     const [decisions, setDecisions] = useState([]);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(true);
@@ -20,43 +19,71 @@ function MyDecisions() {
     useEffect(() => {
         fetchDecisions();
     }, []);
-    useEffect(() => { if (!message) return; const timer = setTimeout(() => setMessage(""), 3500); return () => clearTimeout(timer); }, [message]);
 
+
+    /* =========================
+       CLEAR MESSAGE
+    ========================= */
+
+    useEffect(() => {
+
+        if (!message) return;
+
+        const timer = setTimeout(
+            () => setMessage(""),
+            3500
+        );
+
+        return () => clearTimeout(timer);
+
+    }, [message]);
+
+
+    /* =========================
+       FETCH
+    ========================= */
 
     const fetchDecisions = async () => {
 
         try {
 
-            const token = sessionStorage.getItem("token");
+            const token =
+                sessionStorage.getItem("token");
 
             const response = await fetch(
                 "http://localhost:8080/api/decisions/my",
                 {
                     headers: {
-                        "Authorization": `Bearer ${token}`
+                        "Authorization":
+                            `Bearer ${token}`
                     }
                 }
             );
 
 
             if (!response.ok) {
-                throw new Error("Failed to load decisions");
+
+                throw new Error(
+                    "Failed to load decisions"
+                );
+
             }
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
             setDecisions(data);
-
 
         } catch (error) {
 
             console.error(error);
 
-            setIsError(true); setMessage(
+            setIsError(true);
+
+            setMessage(
                 "Unable to load decisions"
             );
-
 
         } finally {
 
@@ -73,23 +100,33 @@ function MyDecisions() {
 
     const deleteDecision = async (id) => {
 
-        if (!window.confirm("Delete this decision?")) {
+        if (
+            !window.confirm(
+                "Delete this decision?"
+            )
+        ) {
             return;
         }
 
 
         try {
 
-            const token = localStorage.getItem("token");
+            const token =
+                sessionStorage.getItem("token");
 
 
             if (!token) {
 
-                setIsError(true); setMessage("Please login first");
+                setIsError(true);
+
+                setMessage(
+                    "Please login first"
+                );
 
                 navigate("/login");
 
                 return;
+
             }
 
 
@@ -99,8 +136,11 @@ function MyDecisions() {
                     method: "DELETE",
 
                     headers: {
-                        "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
-                        "Content-Type": "application/json"
+                        "Authorization":
+                            `Bearer ${sessionStorage.getItem("token")}`,
+
+                        "Content-Type":
+                            "application/json"
                     }
                 }
             );
@@ -115,6 +155,7 @@ function MyDecisions() {
                 response.status
             );
 
+
             console.log(
                 "Delete response:",
                 result
@@ -123,13 +164,22 @@ function MyDecisions() {
 
             if (!response.ok) {
 
-                setIsError(true); setMessage(`Failed to delete: ${result}`);
+                setIsError(true);
+
+                setMessage(
+                    `Failed to delete: ${result}`
+                );
 
                 return;
+
             }
 
 
-            setIsError(false); setMessage("Decision deleted successfully!");
+            setIsError(false);
+
+            setMessage(
+                "Decision deleted successfully!"
+            );
 
 
             setDecisions((prev) =>
@@ -147,7 +197,11 @@ function MyDecisions() {
                 error
             );
 
-            setIsError(true); setMessage("Server error while deleting decision.");
+            setIsError(true);
+
+            setMessage(
+                "Server error while deleting decision."
+            );
 
         }
 
@@ -160,7 +214,12 @@ function MyDecisions() {
             pageTitle="My Decisions"
             pageSubtitle="View, manage and share the decision boards you've created."
         >
-            <Toast message={message} isError={isError} />
+
+            <Toast
+                message={message}
+                isError={isError}
+            />
+
 
             <style>{`
 
@@ -178,7 +237,12 @@ function MyDecisions() {
                     padding:
                         5px 0 40px;
 
-                    color: #f8fafc;
+                    color:
+                        var(--app-text);
+
+                    transition:
+                        color 0.25s ease;
+
                 }
 
 
@@ -196,25 +260,34 @@ function MyDecisions() {
                     align-items:
                         center;
 
-                    margin-bottom: 24px;
+                    margin-bottom:
+                        24px;
 
-                    gap: 15px;
+                    gap:
+                        15px;
+
                 }
 
 
                 .decision-count {
 
-                    color: #918a9f;
+                    color:
+                        var(--app-secondary-text);
 
-                    font-size: 13px;
+                    font-size:
+                        13px;
+
                 }
 
 
                 .decision-count strong {
 
-                    color: #d8b4fe;
+                    color:
+                        #8b5cf6;
 
-                    font-weight: 600;
+                    font-weight:
+                        700;
+
                 }
 
 
@@ -225,36 +298,61 @@ function MyDecisions() {
                 .create-btn {
 
                     background:
-                        #6d3dcc;
+                        linear-gradient(
+                            135deg,
+                            #6d3dcc,
+                            #7c3aed
+                        );
 
-                    color: white;
+                    color:
+                        white;
 
-                    border: none;
+                    border:
+                        none;
 
                     padding:
                         11px 18px;
 
-                    border-radius: 8px;
+                    border-radius:
+                        8px;
 
-                    font-weight: 600;
+                    font-weight:
+                        600;
 
-                    font-size: 13px;
+                    font-size:
+                        13px;
 
-                    cursor: pointer;
+                    cursor:
+                        pointer;
 
                     transition:
                         background 0.2s ease,
-                        transform 0.2s ease;
+                        transform 0.2s ease,
+                        box-shadow 0.2s ease;
+
+                    box-shadow:
+                        0 5px 16px
+                        rgba(109, 61, 204, .18);
+
                 }
 
 
                 .create-btn:hover {
 
                     background:
-                        #7848d8;
+                        linear-gradient(
+                            135deg,
+                            #7848d8,
+                            #8b5cf6
+                        );
 
                     transform:
                         translateY(-1px);
+
+                    box-shadow:
+                        0 8px 22px
+                        rgba(109, 61, 204, .25);
+
                 }
 
 
@@ -264,9 +362,11 @@ function MyDecisions() {
 
                 .decisions-grid {
 
-                    width: 100%;
+                    width:
+                        100%;
 
-                    display: grid;
+                    display:
+                        grid;
 
                     grid-template-columns:
                         repeat(
@@ -274,7 +374,9 @@ function MyDecisions() {
                             minmax(0, 1fr)
                         );
 
-                    gap: 20px;
+                    gap:
+                        20px;
+
                 }
 
 
@@ -284,15 +386,18 @@ function MyDecisions() {
 
                 .decision-card {
 
-                    position: relative;
+                    position:
+                        relative;
 
-                    min-width: 0;
+                    min-width:
+                        0;
 
                     background:
-                        #15121f;
+                        var(--app-card);
 
                     border:
-                        1px solid #2d2840;
+                        1px solid
+                        var(--app-border);
 
                     border-radius:
                         14px;
@@ -300,30 +405,45 @@ function MyDecisions() {
                     padding:
                         22px;
 
-                    overflow: hidden;
+                    overflow:
+                        hidden;
 
                     transition:
                         transform 0.2s ease,
                         border-color 0.2s ease,
-                        box-shadow 0.2s ease;
+                        box-shadow 0.2s ease,
+                        background 0.25s ease;
+
                 }
 
 
                 .decision-card::before {
 
-                    content: "";
+                    content:
+                        "";
 
-                    position: absolute;
+                    position:
+                        absolute;
 
-                    top: 0;
-                    left: 0;
+                    top:
+                        0;
 
-                    width: 100%;
+                    left:
+                        0;
 
-                    height: 3px;
+                    width:
+                        100%;
+
+                    height:
+                        3px;
 
                     background:
-                        #6d3dcc;
+                        linear-gradient(
+                            90deg,
+                            #6d3dcc,
+                            #8b5cf6
+                        );
+
                 }
 
 
@@ -333,11 +453,12 @@ function MyDecisions() {
                         translateY(-4px);
 
                     border-color:
-                        #4b3970;
+                        #8b5cf6;
 
                     box-shadow:
                         0 12px 30px
-                        rgba(0, 0, 0, 0.25);
+                        rgba(0, 0, 0, 0.10);
+
                 }
 
 
@@ -347,7 +468,8 @@ function MyDecisions() {
 
                 .decision-card-header {
 
-                    display: flex;
+                    display:
+                        flex;
 
                     align-items:
                         flex-start;
@@ -355,17 +477,19 @@ function MyDecisions() {
                     justify-content:
                         space-between;
 
-                    gap: 12px;
+                    gap:
+                        12px;
 
                     margin-bottom:
                         18px;
+
                 }
 
 
                 .decision-card h2 {
 
                     color:
-                        #f5f2f9;
+                        var(--app-text);
 
                     font-size:
                         18px;
@@ -376,20 +500,23 @@ function MyDecisions() {
                     line-height:
                         1.35;
 
-                    margin: 0;
+                    margin:
+                        0;
 
                     word-break:
                         break-word;
+
                 }
 
 
                 /* =========================
-                   VISIBILITY BADGE
+                   VISIBILITY BADGES
                 ========================= */
 
                 .visibility-badge {
 
-                    flex-shrink: 0;
+                    flex-shrink:
+                        0;
 
                     padding:
                         5px 9px;
@@ -405,32 +532,103 @@ function MyDecisions() {
 
                     letter-spacing:
                         0.2px;
+
                 }
 
 
                 .visibility-public {
 
                     color:
-                        #86efac;
+                        #15803d;
 
                     background:
-                        #10251d;
+                        rgba(
+                            34,
+                            197,
+                            94,
+                            0.10
+                        );
 
                     border:
-                        1px solid #235c43;
+                        1px solid
+                        rgba(
+                            34,
+                            197,
+                            94,
+                            0.25
+                        );
+
                 }
 
 
                 .visibility-private {
 
                     color:
+                        #dc2626;
+
+                    background:
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.08
+                        );
+
+                    border:
+                        1px solid
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.22
+                        );
+
+                }
+
+
+                /* =========================
+                   DARK THEME BADGES
+                ========================= */
+
+                [data-theme="dark"]
+                .visibility-public {
+
+                    color:
+                        #86efac;
+
+                    background:
+                        rgba(
+                            16,
+                            37,
+                            29,
+                            0.85
+                        );
+
+                    border:
+                        1px solid
+                        #235c43;
+
+                }
+
+
+                [data-theme="dark"]
+                .visibility-private {
+
+                    color:
                         #fca5a5;
 
                     background:
-                        #28191d;
+                        rgba(
+                            40,
+                            25,
+                            29,
+                            0.85
+                        );
 
                     border:
-                        1px solid #66333a;
+                        1px solid
+                        #66333a;
+
                 }
 
 
@@ -446,10 +644,12 @@ function MyDecisions() {
                     flex-direction:
                         column;
 
-                    gap: 10px;
+                    gap:
+                        10px;
 
                     margin-bottom:
                         20px;
+
                 }
 
 
@@ -461,35 +661,40 @@ function MyDecisions() {
                     align-items:
                         flex-start;
 
-                    gap: 8px;
+                    gap:
+                        8px;
 
                     font-size:
                         13px;
 
                     line-height:
                         1.5;
+
                 }
 
 
                 .detail-label {
 
                     color:
-                        #81798e;
+                        var(--app-secondary-text);
 
                     min-width:
                         80px;
 
-                    flex-shrink: 0;
+                    flex-shrink:
+                        0;
+
                 }
 
 
                 .detail-value {
 
                     color:
-                        #c8c2d2;
+                        var(--app-text);
 
                     word-break:
                         break-word;
+
                 }
 
 
@@ -498,13 +703,18 @@ function MyDecisions() {
                     display:
                         -webkit-box;
 
-                    -webkit-line-clamp: 2;
+                    -webkit-line-clamp:
+                        2;
 
                     -webkit-box-orient:
                         vertical;
 
                     overflow:
                         hidden;
+
+                    color:
+                        var(--app-secondary-text);
+
                 }
 
 
@@ -518,7 +728,9 @@ function MyDecisions() {
                         16px;
 
                     border-top:
-                        1px solid #292433;
+                        1px solid
+                        var(--app-border);
+
                 }
 
 
@@ -527,15 +739,20 @@ function MyDecisions() {
                     display:
                         flex;
 
-                    gap: 10px;
+                    gap:
+                        10px;
+
                 }
 
 
                 .card-buttons button {
 
-                    flex: 1;
+                    flex:
+                        1;
 
-                    border: none;
+                    border:
+                        1px solid
+                        transparent;
 
                     padding:
                         10px;
@@ -554,27 +771,123 @@ function MyDecisions() {
 
                     transition:
                         background 0.2s ease,
-                        border-color 0.2s ease;
+                        border-color 0.2s ease,
+                        color 0.2s ease,
+                        transform 0.2s ease;
+
                 }
 
 
                 /* =========================
-                   VIEW
+                   VIEW BUTTON
                 ========================= */
 
                 .btn-view {
 
                     background:
-                        #211a32;
+                        var(--app-card-2);
+
+                    color:
+                        #7c3aed;
+
+                    border:
+                        1px solid
+                        var(--app-border) !important;
+
+                }
+
+
+                .btn-view:hover {
+
+                    background:
+                        rgba(
+                            124,
+                            58,
+                            237,
+                            0.10
+                        );
+
+                    color:
+                        #6d28d9;
+
+                    border-color:
+                        #8b5cf6 !important;
+
+                    transform:
+                        translateY(-1px);
+
+                }
+
+
+                /* =========================
+                   DELETE BUTTON
+                ========================= */
+
+                .btn-delete {
+
+                    background:
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.08
+                        );
+
+                    color:
+                        #dc2626;
+
+                    border:
+                        1px solid
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.22
+                        ) !important;
+
+                }
+
+
+                .btn-delete:hover {
+
+                    background:
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.14
+                        );
+
+                    border-color:
+                        #ef4444 !important;
+
+                    transform:
+                        translateY(-1px);
+
+                }
+
+
+                /* =========================
+                   DARK THEME BUTTONS
+                ========================= */
+
+                [data-theme="dark"]
+                .btn-view {
 
                     color:
                         #c4b5fd;
 
+                    background:
+                        var(--app-card-2);
+
                     border:
-                        1px solid #493773 !important;
+                        1px solid
+                        #493773 !important;
+
                 }
 
 
+                [data-theme="dark"]
                 .btn-view:hover {
 
                     background:
@@ -582,13 +895,11 @@ function MyDecisions() {
 
                     border-color:
                         #6749a1 !important;
+
                 }
 
 
-                /* =========================
-                   DELETE
-                ========================= */
-
+                [data-theme="dark"]
                 .btn-delete {
 
                     background:
@@ -598,10 +909,13 @@ function MyDecisions() {
                         #fca5a5;
 
                     border:
-                        1px solid #66333a !important;
+                        1px solid
+                        #66333a !important;
+
                 }
 
 
+                [data-theme="dark"]
                 .btn-delete:hover {
 
                     background:
@@ -609,6 +923,7 @@ function MyDecisions() {
 
                     border-color:
                         #87404a !important;
+
                 }
 
 
@@ -618,13 +933,18 @@ function MyDecisions() {
 
                 .empty-state {
 
-                    width: 100%;
+                    width:
+                        100%;
+
+                    box-sizing:
+                        border-box;
 
                     background:
-                        #15121f;
+                        var(--app-card);
 
                     border:
-                        1px solid #2d2840;
+                        1px solid
+                        var(--app-border);
 
                     border-radius:
                         14px;
@@ -636,10 +956,15 @@ function MyDecisions() {
                         center;
 
                     color:
-                        #918a9f;
+                        var(--app-secondary-text);
 
                     font-size:
                         14px;
+
+                    transition:
+                        background 0.25s ease,
+                        border-color 0.25s ease;
+
                 }
 
 
@@ -656,19 +981,51 @@ function MyDecisions() {
                         12px 15px;
 
                     color:
-                        #fca5a5;
+                        #dc2626;
 
                     background:
-                        #28191d;
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.08
+                        );
 
                     border:
-                        1px solid #66333a;
+                        1px solid
+                        rgba(
+                            239,
+                            68,
+                            68,
+                            0.22
+                        );
 
                     border-radius:
                         8px;
 
                     font-size:
                         13px;
+
+                }
+
+
+                /* =========================
+                   DARK MESSAGE
+                ========================= */
+
+                [data-theme="dark"]
+                .info-message {
+
+                    color:
+                        #fca5a5;
+
+                    background:
+                        #28191d;
+
+                    border:
+                        1px solid
+                        #66333a;
+
                 }
 
 
@@ -685,6 +1042,7 @@ function MyDecisions() {
                                 2,
                                 minmax(0, 1fr)
                             );
+
                     }
 
                 }
@@ -703,12 +1061,15 @@ function MyDecisions() {
 
                         flex-direction:
                             column-reverse;
+
                     }
 
 
                     .create-btn {
 
-                        width: 100%;
+                        width:
+                            100%;
+
                     }
 
 
@@ -716,6 +1077,7 @@ function MyDecisions() {
 
                         grid-template-columns:
                             1fr;
+
                     }
 
                 }
@@ -727,6 +1089,7 @@ function MyDecisions() {
 
                         padding:
                             18px;
+
                     }
 
 
@@ -734,6 +1097,7 @@ function MyDecisions() {
 
                         flex-direction:
                             column;
+
                     }
 
 
@@ -741,6 +1105,7 @@ function MyDecisions() {
 
                         align-self:
                             flex-start;
+
                     }
 
 
@@ -749,7 +1114,9 @@ function MyDecisions() {
                         flex-direction:
                             column;
 
-                        gap: 2px;
+                        gap:
+                            2px;
+
                     }
 
 
@@ -757,6 +1124,15 @@ function MyDecisions() {
 
                         min-width:
                             auto;
+
+                    }
+
+
+                    .card-buttons {
+
+                        flex-direction:
+                            column;
+
                     }
 
                 }
@@ -797,7 +1173,9 @@ function MyDecisions() {
                             )
                         }
                     >
+
                         + Create Decision
+
                     </button>
 
                 </div>
@@ -810,7 +1188,9 @@ function MyDecisions() {
                 {loading && (
 
                     <div className="empty-state">
+
                         Loading your decisions...
+
                     </div>
 
                 )}
@@ -876,8 +1256,10 @@ function MyDecisions() {
                                                     )
                                                 }
                                             >
+
                                                 {decision.visibility ||
                                                     "PUBLIC"}
+
                                             </span>
 
                                         </div>
@@ -901,19 +1283,60 @@ function MyDecisions() {
 
                                             </div>
 
-                                            <div className="detail-row">
-                                                <span className="detail-label">Community</span>
-                                                <span className="detail-value">{decision.communityName || "Personal / public"}</span>
-                                            </div>
 
                                             <div className="detail-row">
-                                                <span className="detail-label">Options & votes</span>
-                                                <span className="detail-value">{decision.options?.length || 0} options · {decision.totalVotes || 0} votes</span>
+
+                                                <span className="detail-label">
+                                                    Community
+                                                </span>
+
+                                                <span className="detail-value">
+                                                    {decision.communityName ||
+                                                        "Personal / public"}
+                                                </span>
+
                                             </div>
 
+
                                             <div className="detail-row">
-                                                <span className="detail-label">Created</span>
-                                                <span className="detail-value">{decision.createdAt ? new Date(decision.createdAt).toLocaleDateString() : "Not available"}</span>
+
+                                                <span className="detail-label">
+                                                    Options & votes
+                                                </span>
+
+                                                <span className="detail-value">
+
+                                                    {decision.options?.length ||
+                                                        0}{" "}
+
+                                                    options ·{" "}
+
+                                                    {decision.totalVotes ||
+                                                        0}{" "}
+
+                                                    votes
+
+                                                </span>
+
+                                            </div>
+
+
+                                            <div className="detail-row">
+
+                                                <span className="detail-label">
+                                                    Created
+                                                </span>
+
+                                                <span className="detail-value">
+
+                                                    {decision.createdAt
+                                                        ? new Date(
+                                                            decision.createdAt
+                                                        ).toLocaleDateString()
+                                                        : "Not available"}
+
+                                                </span>
+
                                             </div>
 
 
@@ -924,8 +1347,10 @@ function MyDecisions() {
                                                 </span>
 
                                                 <span className="detail-value">
+
                                                     {decision.deadline ||
                                                         "No deadline"}
+
                                                 </span>
 
                                             </div>
@@ -943,8 +1368,10 @@ function MyDecisions() {
                                                         "detail-description"
                                                     }
                                                 >
+
                                                     {decision.description ||
                                                         "No description provided."}
+
                                                 </span>
 
                                             </div>
@@ -968,7 +1395,9 @@ function MyDecisions() {
                                                         )
                                                     }
                                                 >
+
                                                     View Details
+
                                                 </button>
 
 
@@ -980,7 +1409,9 @@ function MyDecisions() {
                                                         )
                                                     }
                                                 >
+
                                                     Delete
+
                                                 </button>
 
 
@@ -1004,15 +1435,20 @@ function MyDecisions() {
                 {message && (
 
                     <div className="info-message">
+
                         {message}
+
                     </div>
 
                 )}
 
+
             </div>
 
         </DashboardLayout>
+
     );
+
 }
 
 export default MyDecisions;

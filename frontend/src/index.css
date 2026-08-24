@@ -1,1 +1,134 @@
 @import "tailwindcss";
+
+/* =========================
+   DARK THEME - DEFAULT
+========================= */
+
+:root {
+  --app-bg: #0b0912;
+  --app-card: #15121f;
+  --app-card-2: #1b1825;
+
+  --app-text: #f8fafc;
+  --app-secondary-text: #a7a1b5;
+  --app-muted: #a7a1b5;
+
+  --app-border: #2d2840;
+}
+
+
+/* =========================
+   LIGHT THEME
+========================= */
+
+[data-theme="light"] {
+  --app-bg: #f8fafc;
+  --app-card: #ffffff;
+  --app-card-2: #f1f5f9;
+
+  --app-text: #111827;
+  --app-secondary-text: #6b7280;
+  --app-muted: #6b7280;
+
+  --app-border: #e5e7eb;
+}
+
+
+/* =========================
+   GLOBAL BACKGROUND
+========================= */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-height: 100%;
+
+  background-color: var(--app-bg);
+  color: var(--app-text);
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+
+body {
+  min-height: 100vh;
+}
+
+
+/* =========================
+   THEME TOGGLE
+========================= */
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+
+  background-color: var(--app-card);
+  color: var(--app-text);
+
+  cursor: pointer;
+
+  font-size: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+
+.theme-toggle:hover {
+  transform: scale(1.05);
+}
+
+
+/* =========================
+   COMMON THEME CLASSES
+========================= */
+
+.theme-bg {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+
+.theme-card {
+  background-color: var(--app-card);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+
+.theme-card-secondary {
+  background-color: var(--app-card-2);
+  color: var(--app-text);
+}
+
+
+.theme-text {
+  color: var(--app-text);
+}
+
+
+.theme-secondary-text {
+  color: var(--app-secondary-text);
+}
+
+
+.theme-border {
+  border-color: var(--app-border);
+}

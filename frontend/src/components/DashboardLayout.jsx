@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   const navigate = useNavigate();
@@ -11,12 +12,13 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   // Desktop sidebar:
   // false = expanded
   // true = collapsed
-  // Saved so it remains collapsed when navigating to another page
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    return localStorage.getItem("decisionHubSidebarCollapsed") === "true";
+    return (
+      localStorage.getItem("decisionHubSidebarCollapsed") === "true"
+    );
   });
 
-  // Mobile sidebar is completely separate from desktop state
+  // Mobile sidebar
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
@@ -117,7 +119,10 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   useEffect(() => {
     fetchNotifications();
 
-    const interval = setInterval(fetchNotifications, 30000);
+    const interval = setInterval(
+      fetchNotifications,
+      30000
+    );
 
     return () => clearInterval(interval);
   }, []);
@@ -132,7 +137,10 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
       document.removeEventListener(
@@ -203,11 +211,15 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
     if (minutes < 1) return "just now";
 
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    }
 
     const hours = Math.floor(minutes / 60);
 
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) {
+      return `${hours}h ago`;
+    }
 
     const days = Math.floor(hours / 24);
 
@@ -218,30 +230,41 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
     return location.pathname === route;
   };
 
-  // Desktop navigation
-  // IMPORTANT:
-  // This ONLY navigates.
-  // It never changes sidebarCollapsed.
   const handleDesktopNavigation = (route) => {
     navigate(route);
   };
 
-  // Mobile navigation
   const handleMobileNavigation = (route) => {
     navigate(route);
     setMobileSidebarOpen(false);
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#0b0912] text-[#f8fafc]">
-      {/* MOBILE BACKDROP */}
+    <div
+      className="
+        min-h-screen
+        w-full
+        overflow-x-hidden
+        bg-[var(--app-bg)]
+        text-[var(--app-text)]
+        transition-colors
+        duration-300
+      "
+    >
+      {/* ================= MOBILE BACKDROP ================= */}
 
       {mobileSidebarOpen && (
         <button
           type="button"
           aria-label="Close sidebar"
           onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+          className="
+            fixed inset-0
+            z-40
+            bg-black/50
+            backdrop-blur-sm
+            lg:hidden
+          "
         />
       )}
 
@@ -252,12 +275,13 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
           fixed inset-y-0 left-0 z-50
           flex h-screen flex-col
           overflow-hidden
-          bg-gradient-to-b
-          from-[#1e1b4b]
-          via-[#27235f]
-          to-[#312e81]
+
+          bg-[var(--app-card)]
+          border-r border-[var(--app-border)]
           shadow-2xl
-          transition-[width,transform] duration-300 ease-in-out
+
+          transition-[width,transform,background-color]
+          duration-300 ease-in-out
 
           w-[250px]
 
@@ -276,13 +300,14 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
           }
         `}
       >
-        {/* LOGO AREA */}
+        {/* ================= LOGO AREA ================= */}
 
         <div
           className={`
             flex h-[104px] shrink-0
             items-center
-            border-b border-white/10
+            border-b
+            border-[var(--app-border)]
             px-4
 
             ${
@@ -300,7 +325,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               text-[24px]
               font-extrabold
               tracking-tight
-              text-white
+              text-[var(--app-text)]
 
               ${
                 sidebarCollapsed
@@ -326,13 +351,15 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               hidden
               h-10 w-10
               shrink-0
-              items-center justify-center
+              items-center
+              justify-center
               rounded-xl
               text-xl
-              text-[#d4d4f7]
-              transition-all duration-200
-              hover:bg-white/10
-              hover:text-white
+              text-[var(--app-secondary-text)]
+              transition-all
+              duration-200
+              hover:bg-[var(--app-card-2)]
+              hover:text-[var(--app-text)]
               active:scale-95
               lg:flex
             "
@@ -348,13 +375,14 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
             className="
               flex h-10 w-10
               shrink-0
-              items-center justify-center
+              items-center
+              justify-center
               rounded-xl
               text-xl
-              text-[#d4d4f7]
+              text-[var(--app-secondary-text)]
               transition-all
-              hover:bg-white/10
-              hover:text-white
+              hover:bg-[var(--app-card-2)]
+              hover:text-[var(--app-text)]
               active:scale-95
               lg:hidden
             "
@@ -363,7 +391,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
           </button>
         </div>
 
-        {/* NAVIGATION */}
+        {/* ================= NAVIGATION ================= */}
 
         <nav className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-5">
           <div className="space-y-2">
@@ -374,12 +402,20 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                 <button
                   key={item.route}
                   type="button"
-                  title={sidebarCollapsed ? item.label : ""}
+                  title={
+                    sidebarCollapsed
+                      ? item.label
+                      : ""
+                  }
                   onClick={() => {
                     if (window.innerWidth >= 1024) {
-                      handleDesktopNavigation(item.route);
+                      handleDesktopNavigation(
+                        item.route
+                      );
                     } else {
-                      handleMobileNavigation(item.route);
+                      handleMobileNavigation(
+                        item.route
+                      );
                     }
                   }}
                   className={`
@@ -388,7 +424,8 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                     rounded-xl
                     py-3
                     font-medium
-                    transition-all duration-200
+                    transition-all
+                    duration-200
                     active:scale-[0.98]
 
                     ${
@@ -405,9 +442,9 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                           shadow-[0_6px_18px_rgba(79,70,229,0.30)]
                         `
                         : `
-                          text-[#d4d4f7]
-                          hover:bg-white/[0.08]
-                          hover:text-white
+                          text-[var(--app-secondary-text)]
+                          hover:bg-[var(--app-card-2)]
+                          hover:text-[var(--app-text)]
                         `
                     }
                   `}
@@ -416,10 +453,12 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                     className={`
                       flex h-8 w-8
                       shrink-0
-                      items-center justify-center
+                      items-center
+                      justify-center
                       rounded-lg
                       text-[19px]
-                      transition-transform duration-200
+                      transition-transform
+                      duration-200
                       hover:scale-110
 
                       ${
@@ -436,7 +475,8 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                     className={`
                       whitespace-nowrap
                       overflow-hidden
-                      transition-opacity duration-200
+                      transition-opacity
+                      duration-200
 
                       ${
                         sidebarCollapsed
@@ -453,12 +493,23 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
           </div>
         </nav>
 
-        {/* LOGOUT */}
+        {/* ================= LOGOUT ================= */}
 
-        <div className="shrink-0 border-t border-white/10 p-3">
+        <div
+          className="
+            shrink-0
+            border-t
+            border-[var(--app-border)]
+            p-3
+          "
+        >
           <button
             type="button"
-            title={sidebarCollapsed ? "Logout" : ""}
+            title={
+              sidebarCollapsed
+                ? "Logout"
+                : ""
+            }
             onClick={handleLogout}
             className={`
               flex w-full
@@ -467,8 +518,9 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               bg-red-500/10
               py-3
               font-semibold
-              text-[#fca5a5]
-              transition-all duration-200
+              text-red-500
+              transition-all
+              duration-200
               hover:bg-red-500/20
               active:scale-[0.98]
 
@@ -479,7 +531,15 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               }
             `}
           >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center text-lg">
+            <span
+              className="
+                flex h-8 w-8
+                shrink-0
+                items-center
+                justify-center
+                text-lg
+              "
+            >
               🚪
             </span>
 
@@ -503,8 +563,12 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
           min-h-screen
           min-w-0
           overflow-x-hidden
-          bg-[#0b0912]
-          transition-[margin] duration-300 ease-in-out
+
+          bg-[var(--app-bg)]
+          text-[var(--app-text)]
+
+          transition-[margin,background-color,color]
+          duration-300 ease-in-out
 
           ${
             sidebarCollapsed
@@ -532,25 +596,41 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
         >
           {/* LEFT SIDE */}
 
-          <div className="flex min-w-0 items-start gap-3">
+          <div
+            className="
+              flex
+              min-w-0
+              items-start
+              gap-3
+            "
+          >
             {/* MOBILE MENU */}
 
             <button
               type="button"
-              onClick={() => setMobileSidebarOpen(true)}
+              onClick={() =>
+                setMobileSidebarOpen(true)
+              }
               className="
                 flex h-10 w-10
                 shrink-0
-                items-center justify-center
+                items-center
+                justify-center
                 rounded-xl
-                border border-[#2d2840]
-                bg-[#15121f]
+
+                border
+                border-[var(--app-border)]
+
+                bg-[var(--app-card)]
                 text-xl
-                text-[#d4d4f7]
-                transition-all duration-200
-                hover:border-[#4f46e5]/70
-                hover:bg-[#1d1829]
+                text-[var(--app-text)]
+
+                transition-all
+                duration-200
+
+                hover:bg-[var(--app-card-2)]
                 active:scale-95
+
                 lg:hidden
               "
             >
@@ -566,7 +646,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                   text-[25px]
                   font-semibold
                   leading-tight
-                  text-[#f8fafc]
+                  text-[var(--app-text)]
                   sm:text-[27px]
                 "
               >
@@ -580,7 +660,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                     max-w-3xl
                     text-sm
                     leading-relaxed
-                    text-[#a7a1b5]
+                    text-[var(--app-secondary-text)]
                   "
                 >
                   {pageSubtitle}
@@ -591,8 +671,20 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
           {/* RIGHT SIDE */}
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-            {/* NOTIFICATIONS */}
+          <div
+            className="
+              flex
+              shrink-0
+              items-center
+              gap-2
+              sm:gap-4
+            "
+          >
+            {/* THEME TOGGLE */}
+
+            <ThemeToggle />
+
+            {/* ================= NOTIFICATIONS ================= */}
 
             <div
               ref={notificationRef}
@@ -601,16 +693,20 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               <button
                 type="button"
                 onClick={() =>
-                  setShowNotifications((previous) => !previous)
+                  setShowNotifications(
+                    (previous) => !previous
+                  )
                 }
                 className="
                   relative
                   flex h-10 w-10
-                  items-center justify-center
+                  items-center
+                  justify-center
                   rounded-xl
                   text-xl
-                  transition-all duration-200
-                  hover:bg-white/5
+                  transition-all
+                  duration-200
+                  hover:bg-[var(--app-card-2)]
                   active:scale-95
                 "
               >
@@ -619,9 +715,14 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                 {unreadCount > 0 && (
                   <span
                     className="
-                      absolute -right-1 -top-1
-                      flex h-5 min-w-5
-                      items-center justify-center
+                      absolute
+                      -right-1
+                      -top-1
+                      flex
+                      h-5
+                      min-w-5
+                      items-center
+                      justify-center
                       rounded-full
                       bg-red-500
                       px-1
@@ -640,27 +741,47 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
               {showNotifications && (
                 <div
                   className="
-                    absolute right-0 top-12 z-[100]
+                    absolute
+                    right-0
+                    top-12
+                    z-[100]
+
                     flex
                     w-[calc(100vw-2rem)]
                     max-w-[360px]
                     flex-col
+
                     overflow-hidden
                     rounded-2xl
-                    border border-[#2d2840]
-                    bg-[#15121f]
+
+                    border
+                    border-[var(--app-border)]
+
+                    bg-[var(--app-card)]
+                    text-[var(--app-text)]
+
                     shadow-2xl
                   "
                 >
                   <div
                     className="
-                      flex items-center
+                      flex
+                      items-center
                       justify-between
-                      border-b border-[#2d2840]
-                      px-4 py-4
+
+                      border-b
+                      border-[var(--app-border)]
+
+                      px-4
+                      py-4
                     "
                   >
-                    <span className="font-semibold text-white">
+                    <span
+                      className="
+                        font-semibold
+                        text-[var(--app-text)]
+                      "
+                    >
                       Notifications
                     </span>
 
@@ -671,9 +792,9 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                         className="
                           text-xs
                           font-semibold
-                          text-[#a78bfa]
+                          text-[#8b5cf6]
                           transition
-                          hover:text-[#c4b5fd]
+                          hover:text-[#a78bfa]
                         "
                       >
                         Mark all as read
@@ -683,78 +804,117 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
                   <div className="max-h-[350px] overflow-y-auto">
                     {notifications.length === 0 && (
-                      <div className="px-5 py-10 text-center text-sm text-[#918a9f]">
-                        You're all caught up. No notifications yet.
+                      <div
+                        className="
+                          px-5
+                          py-10
+                          text-center
+                          text-sm
+                          text-[var(--app-secondary-text)]
+                        "
+                      >
+                        You're all caught up.
+                        No notifications yet.
                       </div>
                     )}
 
-                    {notifications.map((notification) => (
-                      <button
-                        key={notification.id}
-                        type="button"
-                        onClick={() => {
-                          if (!notification.read) {
-                            markAsRead(notification.id);
-                          }
-                        }}
-                        className={`
-                          block w-full
-                          border-b border-[#282334]
-                          px-4 py-4
-                          text-left
-                          transition
-                          last:border-b-0
-                          hover:bg-white/[0.03]
-
-                          ${
-                            !notification.read
-                              ? "bg-[#4f46e5]/10"
-                              : ""
-                          }
-                        `}
-                      >
-                        <p
+                    {notifications.map(
+                      (notification) => (
+                        <button
+                          key={notification.id}
+                          type="button"
+                          onClick={() => {
+                            if (
+                              !notification.read
+                            ) {
+                              markAsRead(
+                                notification.id
+                              );
+                            }
+                          }}
                           className={`
-                            text-sm
-                            leading-relaxed
+                            block
+                            w-full
+                            border-b
+                            border-[var(--app-border)]
+                            px-4
+                            py-4
+                            text-left
+                            transition
+                            last:border-b-0
+                            hover:bg-[var(--app-card-2)]
 
                             ${
-                              notification.read
-                                ? "text-[#c7c0d3]"
-                                : "font-semibold text-white"
+                              !notification.read
+                                ? "bg-[#4f46e5]/10"
+                                : ""
                             }
                           `}
                         >
-                          {notification.message}
-                        </p>
+                          <p
+                            className={`
+                              text-sm
+                              leading-relaxed
 
-                        <span className="mt-1 block text-xs text-[#7d7690]">
-                          {timeAgo(notification.createdAt)}
-                        </span>
-                      </button>
-                    ))}
+                              ${
+                                notification.read
+                                  ? "text-[var(--app-secondary-text)]"
+                                  : "font-semibold text-[var(--app-text)]"
+                              }
+                            `}
+                          >
+                            {notification.message}
+                          </p>
+
+                          <span
+                            className="
+                              mt-1
+                              block
+                              text-xs
+                              text-[var(--app-muted)]
+                            "
+                          >
+                            {timeAgo(
+                              notification.createdAt
+                            )}
+                          </span>
+                        </button>
+                      )
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* USER */}
+            {/* ================= USER ================= */}
 
             <div
               className="
-                flex items-center gap-2
+                flex
+                items-center
+                gap-2
                 rounded-full
-                border border-[#2d2840]
-                bg-[#15121f]
-                p-1 pr-2
-                sm:gap-3 sm:pr-4
+
+                border
+                border-[var(--app-border)]
+
+                bg-[var(--app-card)]
+
+                p-1
+                pr-2
+
+                sm:gap-3
+                sm:pr-4
               "
             >
               <div
                 className="
-                  flex h-9 w-9
+                  flex
+                  h-9
+                  w-9
                   shrink-0
-                  items-center justify-center
+                  items-center
+                  justify-center
                   rounded-full
                   bg-[#4f46e5]
                   font-bold
@@ -764,18 +924,40 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                 {initials}
               </div>
 
-              <div className="hidden min-w-0 sm:block">
-                <p className="max-w-[180px] truncate text-sm font-semibold text-white">
+              <div
+                className="
+                  hidden
+                  min-w-0
+                  sm:block
+                "
+              >
+                <p
+                  className="
+                    max-w-[180px]
+                    truncate
+                    text-sm
+                    font-semibold
+                    text-[var(--app-text)]
+                  "
+                >
                   {userEmail || "Guest"}
                 </p>
 
-                <p className="text-xs capitalize text-[#9ca3af]">
+                <p
+                  className="
+                    text-xs
+                    capitalize
+                    text-[var(--app-secondary-text)]
+                  "
+                >
                   {role.toLowerCase()}
                 </p>
               </div>
             </div>
           </div>
         </header>
+
+        {/* ================= PAGE CONTENT ================= */}
 
         {children}
       </main>
