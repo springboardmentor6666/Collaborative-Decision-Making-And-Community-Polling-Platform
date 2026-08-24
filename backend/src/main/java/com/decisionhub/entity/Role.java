@@ -3,5 +3,7 @@ package com.decisionhub.entity;
 public enum Role {
     USER,
     MODERATOR,
-    ADMIN
+    ADMIN,
+    EXPERT,
+    ADVISOR
 }

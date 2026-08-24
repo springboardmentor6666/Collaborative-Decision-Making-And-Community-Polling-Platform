@@ -12,6 +12,7 @@ public class CommentResponse {
     private UserResponse author;
     private Boolean isFlagged;
     private Integer replyCount;
+    private java.util.List<CommentResponse> replies = new java.util.ArrayList<>();
 
     public CommentResponse() {
     }
@@ -91,5 +92,13 @@ public class CommentResponse {
 
     public void setReplyCount(Integer replyCount) {
         this.replyCount = replyCount;
+    }
+
+    public java.util.List<CommentResponse> getReplies() {
+        return replies;
+    }
+
+    public void setReplies(java.util.List<CommentResponse> replies) {
+        this.replies = replies;
     }
 }

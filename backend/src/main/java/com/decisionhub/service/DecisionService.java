@@ -5,10 +5,13 @@ import com.decisionhub.entity.*;
 import com.decisionhub.exception.CommunityNotFoundException;
 import com.decisionhub.exception.DecisionNotFoundException;
 import com.decisionhub.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,8 @@ public class DecisionService {
     private final CategoryRepository categoryRepository;
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
+    private final DecisionOptionRepository decisionOptionRepository;
+    private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
     private final VoteRepository voteRepository;
     private final ComparisonFactorRepository comparisonFactorRepository;
@@ -33,6 +38,8 @@ public class DecisionService {
                            CategoryRepository categoryRepository,
                            CommunityRepository communityRepository,
                            CommunityMemberRepository communityMemberRepository,
+                           DecisionOptionRepository decisionOptionRepository,
+                           PollRepository pollRepository,
                            PollOptionRepository pollOptionRepository,
                            VoteRepository voteRepository,
                            ComparisonFactorRepository comparisonFactorRepository,
@@ -43,6 +50,8 @@ public class DecisionService {
         this.categoryRepository = categoryRepository;
         this.communityRepository = communityRepository;
         this.communityMemberRepository = communityMemberRepository;
+        this.decisionOptionRepository = decisionOptionRepository;
+        this.pollRepository = pollRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
         this.comparisonFactorRepository = comparisonFactorRepository;
@@ -59,6 +68,8 @@ public class DecisionService {
         decision.setTitle(request.getTitle());
         decision.setDescription(request.getDescription());
         decision.setOwner(owner);
+        decision.setStatus(request.getStatus() != null && !request.getStatus().isBlank() 
+                ? request.getStatus().trim().toUpperCase() : "OPEN");
 
         if (request.getVisibility() != null) {
             decision.setVisibility(request.getVisibility());
@@ -159,21 +170,30 @@ public class DecisionService {
         return mapToDecisionResponse(savedDecision);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<DecisionResponse> getAllDecisions() {
         return decisionRepository.findByIsDeletedFalse().stream()
                 .map(this::mapToDecisionResponse)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
+    public Page<DecisionResponse> getDecisions(Long categoryId, String status, String search, Pageable pageable) {
+        String sanitizedStatus = (status != null && !status.isBlank()) ? status.trim() : null;
+        String sanitizedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
+
+        Page<Decision> decisionsPage = decisionRepository.findWithFilters(categoryId, sanitizedStatus, sanitizedSearch, pageable);
+        return decisionsPage.map(this::mapToDecisionResponse);
+    }
+
+    @Transactional
     public DecisionResponse getDecisionById(Long id) {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
         return mapToDecisionResponse(decision);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<DecisionResponse> getDecisionsByCommunityId(Long communityId, String userEmail) {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
@@ -199,6 +219,17 @@ public class DecisionService {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
 
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        // Owner or ADMIN authorization check
+        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to edit this decision");
+        }
+
         decision.setTitle(request.getTitle());
         decision.setDescription(request.getDescription());
         if (request.getVisibility() != null) {
@@ -207,6 +238,9 @@ public class DecisionService {
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
             decision.setCategory(category);
+        }
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            decision.setStatus(request.getStatus().trim().toUpperCase());
         }
 
         Decision updatedDecision = decisionRepository.save(decision);
@@ -217,24 +251,126 @@ public class DecisionService {
     public void deleteDecision(Long id, String userEmail) {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        // Owner, ADMIN, or MODERATOR authorization check
+        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+        boolean isModeratorOrAdmin = requestingUser.getRole() != null && (
+                "ADMIN".equalsIgnoreCase(requestingUser.getRole()) ||
+                "MODERATOR".equalsIgnoreCase(requestingUser.getRole())
+        );
+
+        if (!isOwner && !isModeratorOrAdmin) {
+            throw new AccessDeniedException("You are not authorized to delete this decision");
+        }
+
         // Soft delete
         decision.setIsDeleted(true);
         decisionRepository.save(decision);
     }
 
+    @Transactional
+    public OptionDto addOption(Long decisionId, OptionRequest request, String userEmail) {
+        Decision decision = decisionRepository.findById(decisionId)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + decisionId));
+
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        // Owner or ADMIN authorization check
+        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to add options to this decision");
+        }
+
+        checkAndApplyStatusTransition(decision);
+
+        if ("CLOSED".equalsIgnoreCase(decision.getStatus()) || "EXPIRED".equalsIgnoreCase(decision.getStatus())) {
+            throw new IllegalStateException("Cannot add options to a closed or expired decision");
+        }
+
+        DecisionOption option = new DecisionOption();
+        option.setLabel(request.getLabel().trim());
+        option.setDescription(request.getDescription());
+        option.setDecision(decision);
+
+        DecisionOption savedOption = decisionOptionRepository.save(option);
+        decision.getOptions().add(savedOption);
+
+        // If decision has existing polls, create PollOption records to wire the new option into voting
+        List<Poll> polls = pollRepository.findByDecisionId(decision.getId());
+        for (Poll poll : polls) {
+            PollOption pollOption = new PollOption();
+            pollOption.setPoll(poll);
+            pollOption.setOption(savedOption);
+            pollOptionRepository.save(pollOption);
+            poll.getPollOptions().add(pollOption);
+        }
+
+        return new OptionDto(savedOption.getId(), savedOption.getLabel(), savedOption.getDescription(), 0L);
+    }
+
+    @Transactional
+    public DecisionResponse closeDecision(Long id, String userEmail) {
+        Decision decision = decisionRepository.findById(id)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to close this decision");
+        }
+
+        decision.setStatus("CLOSED");
+        Decision updatedDecision = decisionRepository.save(decision);
+        return mapToDecisionResponse(updatedDecision);
+    }
+
+    public void checkAndApplyStatusTransition(Decision decision) {
+        if (decision == null) return;
+        String currentStatus = decision.getStatus();
+        if (currentStatus == null || "OPEN".equalsIgnoreCase(currentStatus)) {
+            // Check if any attached poll has an expired deadline
+            List<Poll> polls = pollRepository.findByDecisionId(decision.getId());
+            boolean isExpired = false;
+            for (Poll poll : polls) {
+                if (poll.getEndsAt() != null && LocalDateTime.now().isAfter(poll.getEndsAt())) {
+                    isExpired = true;
+                    break;
+                }
+            }
+            if (isExpired) {
+                decision.setStatus("EXPIRED");
+                decisionRepository.save(decision);
+            }
+        }
+    }
+
     public DecisionResponse mapToDecisionResponse(Decision decision) {
+        checkAndApplyStatusTransition(decision);
+
         List<PollResponse> pollResponses = new ArrayList<>();
         List<OptionDto> allOptions = new ArrayList<>();
 
-        if (decision.getPolls() != null) {
-            for (Poll poll : decision.getPolls()) {
+        List<Poll> polls = pollRepository.findByDecisionId(decision.getId());
+        if (polls != null && !polls.isEmpty()) {
+            for (Poll poll : polls) {
                 List<Vote> pollVotes = voteRepository.findByPollId(poll.getId());
                 Map<Long, Long> voteCounts = pollVotes.stream()
                         .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
 
                 List<OptionDto> optionDtos = new ArrayList<>();
-                if (poll.getPollOptions() != null) {
-                    optionDtos = poll.getPollOptions().stream()
+                List<PollOption> pollOptions = pollOptionRepository.findByPollId(poll.getId());
+                if (pollOptions != null) {
+                    optionDtos = pollOptions.stream()
                             .map(po -> new OptionDto(
                                     po.getOption().getId(),
                                     po.getOption().getLabel(),
@@ -253,6 +389,10 @@ public class DecisionService {
                         optionDtos
                 ));
             }
+        } else if (decision.getOptions() != null && !decision.getOptions().isEmpty()) {
+            allOptions = decision.getOptions().stream()
+                    .map(o -> new OptionDto(o.getId(), o.getLabel(), o.getDescription(), 0L))
+                    .collect(Collectors.toList());
         }
 
         // Map comparison factors
@@ -285,6 +425,7 @@ public class DecisionService {
                 decision.getTitle(),
                 decision.getDescription(),
                 decision.getVisibility(),
+                decision.getStatus() != null ? decision.getStatus() : "OPEN",
                 decision.getIsDeleted(),
                 decision.getCreatedAt(),
                 userService.mapToUserResponse(decision.getOwner()),

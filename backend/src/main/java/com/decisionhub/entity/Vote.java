@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "votes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"poll_id", "voter_id"})
+    @UniqueConstraint(columnNames = {"poll_option_id", "voter_id"})
 })
 public class Vote {
 

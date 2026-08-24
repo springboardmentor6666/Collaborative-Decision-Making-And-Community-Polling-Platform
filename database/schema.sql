@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
     provider_id VARCHAR(100),                   -- OAuth provider user ID
     profile_image VARCHAR(500),                 -- Avatar / profile picture URL
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    is_active BOOLEAN DEFAULT TRUE,
+    is_public BOOLEAN DEFAULT TRUE
 );
 
 -- 3. user_profiles
@@ -138,7 +139,7 @@ CREATE TABLE IF NOT EXISTS votes (
     voter_id BIGINT NULL,                       -- nullable if anonymous
     rating INT DEFAULT NULL CHECK (rating >= 1 AND rating <= 5), -- bounded to 1-5
     voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_user_poll_vote UNIQUE (poll_id, voter_id),
+    UNIQUE (poll_option_id, voter_id),                 -- prevents duplicate votes
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
     FOREIGN KEY (poll_option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
     FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE
@@ -213,3 +214,52 @@ CREATE INDEX idx_community_members ON community_members(community_id, user_id);
 CREATE INDEX idx_community_members_user ON community_members(user_id);
 CREATE INDEX idx_impressions_decision ON decision_impressions (decision_id);
 CREATE INDEX idx_impressions_type ON decision_impressions (decision_id, type);
+
+-- 18. suggestions
+CREATE TABLE IF NOT EXISTS suggestions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    decision_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 19. recommendations
+CREATE TABLE IF NOT EXISTS recommendations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    decision_id BIGINT NOT NULL,
+    option_id BIGINT NOT NULL,
+    expert_id BIGINT NOT NULL,
+    justification VARCHAR(2000) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES decision_options(id) ON DELETE CASCADE,
+    FOREIGN KEY (expert_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 20. community_invites
+CREATE TABLE IF NOT EXISTS community_invites (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    invitee_id BIGINT NOT NULL,
+    inviter_id BIGINT NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (community_id, invitee_id),
+    FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+    FOREIGN KEY (invitee_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (inviter_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 21. saved_decisions
+CREATE TABLE IF NOT EXISTS saved_decisions (
+    user_id BIGINT NOT NULL,
+    decision_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, decision_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
+);
+
+

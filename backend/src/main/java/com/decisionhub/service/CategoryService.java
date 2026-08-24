@@ -24,13 +24,12 @@ public class CategoryService {
     public void seedDefaultCategories() {
         if (categoryRepository.count() == 0) {
             List<String> defaultNames = Arrays.asList(
-                    "Technology & Engineering",
-                    "Governance & Policy",
-                    "Product & Design",
-                    "Finance & Budget",
-                    "Operations & Strategy",
-                    "Community & Culture",
-                    "Other"
+                    "Career",
+                    "Education",
+                    "Technology",
+                    "Travel",
+                    "Finance",
+                    "Lifestyle"
             );
             for (String name : defaultNames) {
                 if (!categoryRepository.existsByName(name)) {

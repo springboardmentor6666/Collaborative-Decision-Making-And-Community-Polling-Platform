@@ -129,7 +129,7 @@ public class CommentService {
         Integer replyCount = (comment.getReplies() != null) ? comment.getReplies().size() : 0;
         Long parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
 
-        return new CommentResponse(
+        CommentResponse response = new CommentResponse(
                 comment.getId(),
                 comment.getDecision().getId(),
                 parentId,
@@ -139,5 +139,16 @@ public class CommentService {
                 comment.getIsFlagged(),
                 replyCount
         );
+
+        if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
+            List<CommentResponse> replyResponses = comment.getReplies().stream()
+                    .map(this::mapToCommentResponse)
+                    .collect(Collectors.toList());
+            response.setReplies(replyResponses);
+        } else {
+            response.setReplies(new java.util.ArrayList<>());
+        }
+
+        return response;
     }
 }

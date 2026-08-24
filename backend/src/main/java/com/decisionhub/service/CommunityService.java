@@ -4,6 +4,7 @@ import com.decisionhub.dto.*;
 import com.decisionhub.entity.Category;
 import com.decisionhub.entity.Community;
 import com.decisionhub.entity.CommunityMember;
+import com.decisionhub.entity.CommunityInvite;
 import com.decisionhub.entity.User;
 import com.decisionhub.exception.CommunityNotFoundException;
 import com.decisionhub.repository.CategoryRepository;
@@ -11,6 +12,7 @@ import com.decisionhub.repository.CommunityMemberRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.UserRepository;
+import com.decisionhub.repository.CommunityInviteRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,19 +30,22 @@ public class CommunityService {
     private final CategoryRepository categoryRepository;
     private final DecisionRepository decisionRepository;
     private final UserService userService;
+    private final CommunityInviteRepository communityInviteRepository;
 
     public CommunityService(CommunityRepository communityRepository,
                             CommunityMemberRepository communityMemberRepository,
                             UserRepository userRepository,
                             CategoryRepository categoryRepository,
                             DecisionRepository decisionRepository,
-                            UserService userService) {
+                            UserService userService,
+                            CommunityInviteRepository communityInviteRepository) {
         this.communityRepository = communityRepository;
         this.communityMemberRepository = communityMemberRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.decisionRepository = decisionRepository;
         this.userService = userService;
+        this.communityInviteRepository = communityInviteRepository;
     }
 
     @Transactional
@@ -294,8 +299,8 @@ public class CommunityService {
         }
 
         String newRole = request.getRole() != null ? request.getRole().toUpperCase().trim() : "";
-        if (!"ADMIN".equalsIgnoreCase(newRole) && !"MEMBER".equalsIgnoreCase(newRole)) {
-            throw new IllegalArgumentException("Invalid role. Role must be ADMIN or MEMBER");
+        if (!"ADMIN".equalsIgnoreCase(newRole) && !"MEMBER".equalsIgnoreCase(newRole) && !"MODERATOR".equalsIgnoreCase(newRole)) {
+            throw new IllegalArgumentException("Invalid role. Role must be ADMIN, MODERATOR, or MEMBER");
         }
 
         if (!isOwner && isAdmin) {
@@ -446,6 +451,109 @@ public class CommunityService {
                 isMember,
                 currentUserRole,
                 decisionCount
+        );
+    }
+
+    @Transactional
+    public CommunityInviteResponse inviteUserToCommunity(Long communityId, CommunityInviteRequest request, String requesterEmail) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new CommunityNotFoundException("Community not found with id: " + communityId));
+
+        if (requesterEmail == null || requesterEmail.isBlank()) {
+            throw new AccessDeniedException("Authentication required");
+        }
+
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + requesterEmail));
+
+        // Check if requester is OWNER or ADMIN
+        CommunityMember requesterMember = communityMemberRepository.findByCommunityIdAndUserId(communityId, requester.getId())
+                .orElseThrow(() -> new AccessDeniedException("Only community owners and admins can invite users"));
+
+        if (!"OWNER".equalsIgnoreCase(requesterMember.getRole()) && !"ADMIN".equalsIgnoreCase(requesterMember.getRole())) {
+            throw new AccessDeniedException("Only community owners and admins can invite users");
+        }
+
+        // Find invitee by email
+        User invitee = userRepository.findByEmail(request.getInviteeEmail().trim())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getInviteeEmail()));
+
+        // Check if invitee is already a member
+        if (communityMemberRepository.existsByCommunityIdAndUserId(communityId, invitee.getId())) {
+            throw new IllegalArgumentException("User is already a member of this community");
+        }
+
+        // Check if there is already an active pending invite
+        if (communityInviteRepository.existsByCommunityIdAndInviteeIdAndStatus(communityId, invitee.getId(), "PENDING")) {
+            throw new IllegalArgumentException("A pending invite already exists for this user");
+        }
+
+        CommunityInvite invite = new CommunityInvite();
+        invite.setCommunity(community);
+        invite.setInvitee(invitee);
+        invite.setInviter(requester);
+        invite.setStatus("PENDING");
+
+        CommunityInvite saved = communityInviteRepository.save(invite);
+        return mapToCommunityInviteResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityInviteResponse> getPendingInvites(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        return communityInviteRepository.findByInviteeIdAndStatus(user.getId(), "PENDING").stream()
+                .map(this::mapToCommunityInviteResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CommunityResponse respondToInvite(Long inviteId, InviteResponseRequest request, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        CommunityInvite invite = communityInviteRepository.findById(inviteId)
+                .orElseThrow(() -> new IllegalArgumentException("Invite not found with id: " + inviteId));
+
+        if (!invite.getInvitee().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You are not authorized to respond to this invite");
+        }
+
+        if (!"PENDING".equalsIgnoreCase(invite.getStatus())) {
+            throw new IllegalArgumentException("Invite has already been resolved");
+        }
+
+        String response = request.getResponse().toUpperCase().trim();
+        if ("ACCEPT".equalsIgnoreCase(response)) {
+            invite.setStatus("ACCEPTED");
+            communityInviteRepository.save(invite);
+
+            // Add user as MEMBER
+            if (!communityMemberRepository.existsByCommunityIdAndUserId(invite.getCommunity().getId(), user.getId())) {
+                CommunityMember member = new CommunityMember();
+                member.setCommunity(invite.getCommunity());
+                member.setUser(user);
+                member.setRole("MEMBER");
+                communityMemberRepository.save(member);
+            }
+        } else {
+            invite.setStatus("REJECTED");
+            communityInviteRepository.save(invite);
+        }
+
+        return mapToCommunityResponse(invite.getCommunity(), userEmail);
+    }
+
+    public CommunityInviteResponse mapToCommunityInviteResponse(CommunityInvite invite) {
+        return new CommunityInviteResponse(
+                invite.getId(),
+                invite.getCommunity().getId(),
+                invite.getCommunity().getName(),
+                userService.mapToUserResponse(invite.getInvitee()),
+                userService.mapToUserResponse(invite.getInviter()),
+                invite.getStatus(),
+                invite.getCreatedAt()
         );
     }
 }

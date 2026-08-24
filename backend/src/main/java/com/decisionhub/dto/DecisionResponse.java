@@ -9,6 +9,7 @@ public class DecisionResponse {
     private String title;
     private String description;
     private String visibility;
+    private String status;
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private UserResponse owner;
@@ -31,6 +32,7 @@ public class DecisionResponse {
         this.title = title;
         this.description = description;
         this.visibility = visibility;
+        this.status = "OPEN";
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.owner = owner;
@@ -46,6 +48,25 @@ public class DecisionResponse {
         this.title = title;
         this.description = description;
         this.visibility = visibility;
+        this.status = "OPEN";
+        this.isDeleted = isDeleted;
+        this.createdAt = createdAt;
+        this.owner = owner;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.communityId = communityId;
+        this.communityName = communityName;
+        this.polls = polls;
+    }
+
+    public DecisionResponse(Long id, String title, String description, String visibility, String status,
+                            Boolean isDeleted, LocalDateTime createdAt, UserResponse owner, Long categoryId,
+                            String categoryName, Long communityId, String communityName, List<PollResponse> polls) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.visibility = visibility;
+        this.status = status;
         this.isDeleted = isDeleted;
         this.createdAt = createdAt;
         this.owner = owner;
@@ -86,6 +107,14 @@ public class DecisionResponse {
 
     public void setVisibility(String visibility) {
         this.visibility = visibility;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Boolean getIsDeleted() {

@@ -37,4 +37,10 @@ public class VoteController {
     public ResponseEntity<VoteResultResponse> getVoteResults(@PathVariable Long pollId) {
         return ResponseEntity.ok(voteService.getVoteResults(pollId));
     }
+
+    @GetMapping("/rating-summary/{pollId}")
+    @Operation(summary = "Get rating summary", description = "Retrieves average ratings and counts per option for a rating poll")
+    public ResponseEntity<com.decisionhub.dto.PollRatingSummaryResponse> getRatingSummary(@PathVariable Long pollId) {
+        return ResponseEntity.ok(voteService.getRatingSummary(pollId));
+    }
 }

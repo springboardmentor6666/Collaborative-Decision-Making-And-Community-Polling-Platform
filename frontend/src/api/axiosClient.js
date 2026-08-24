@@ -181,40 +181,50 @@ export async function logoutApi() {
 }
 
 /**
- * Fetch decisions list from backend.
+ * Fetch decisions list from backend with optional filtering, sorting, and pagination.
  */
-export async function fetchDecisions(token) {
-  const data = await request('/api/decisions', { token });
-  if (Array.isArray(data)) {
-    return data.map((d) => ({
-      id: d.id,
-      title: d.title,
-      description: d.description,
-      status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
-      categoryId: d.categoryId || null,
-      categoryName: d.categoryName || null,
-      communityId: d.communityId || null,
-      communityName: d.communityName || null,
-      votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
-      optionsCount: d.polls?.[0]?.options?.length || (d.polls?.[0]?.optionLabels?.length) || 0,
-      createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
-      createdAt: d.createdAt || new Date().toISOString(),
-      poll: d.polls?.[0]
-        ? {
-            id: d.polls[0].id,
-            question: d.polls[0].question || d.title,
-            options: d.polls[0].options?.map((o, idx) => ({
-              id: o.id || idx + 1,
-              optionText: o.label || o.optionText || `Option ${idx + 1}`,
-              voteCount: o.voteCount || 0,
-            })) || [],
-          }
-        : null,
-      comparisonFactors: d.comparisonFactors || [],
-      optionScores: d.optionScores || [],
-    }));
-  }
-  return [];
+export async function fetchDecisions(token, params = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.categoryId) queryParams.append('categoryId', params.categoryId);
+  if (params.status) queryParams.append('status', params.status);
+  if (params.search) queryParams.append('search', params.search);
+  if (params.page !== undefined) queryParams.append('page', params.page);
+  if (params.size !== undefined) queryParams.append('size', params.size);
+  if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+  if (params.sortDir) queryParams.append('sortDir', params.sortDir);
+
+  const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+  const data = await request(`/api/decisions${queryString}`, { token });
+  const items = Array.isArray(data) ? data : (data?.content || []);
+
+  return items.map((d) => ({
+    id: d.id,
+    title: d.title,
+    description: d.description,
+    status: d.status || (d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN'),
+    categoryId: d.categoryId || null,
+    categoryName: d.categoryName || null,
+    communityId: d.communityId || null,
+    communityName: d.communityName || null,
+    votesCount: d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0) || 0,
+    optionsCount: d.polls?.[0]?.options?.length || (d.polls?.[0]?.optionLabels?.length) || (d.options?.length) || 0,
+    createdBy: d.owner ? { id: d.owner.id, name: d.owner.name, email: d.owner.email } : { id: 'usr_unknown', name: 'Unknown' },
+    createdAt: d.createdAt || new Date().toISOString(),
+    poll: d.polls?.[0]
+      ? {
+          id: d.polls[0].id,
+          question: d.polls[0].question || d.title,
+          options: d.polls[0].options?.map((o, idx) => ({
+            id: o.id || idx + 1,
+            optionText: o.label || o.optionText || `Option ${idx + 1}`,
+            voteCount: o.voteCount || 0,
+          })) || [],
+        }
+      : null,
+    comparisonFactors: d.comparisonFactors || [],
+    optionScores: d.optionScores || [],
+    options: d.options || [],
+  }));
 }
 
 /**
@@ -226,7 +236,7 @@ export async function fetchDecisionById(id, token) {
     id: d.id,
     title: d.title,
     description: d.description,
-    status: d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN',
+    status: d.status || (d.visibility === 'PRIVATE' ? 'CLOSED' : 'OPEN'),
     categoryId: d.categoryId || null,
     categoryName: d.categoryName || null,
     communityId: d.communityId || null,
@@ -251,6 +261,27 @@ export async function fetchDecisionById(id, token) {
     optionScores: d.optionScores || [],
     options: d.options || [],
   };
+}
+
+/**
+ * Add an option to an existing decision.
+ */
+export async function addDecisionOptionApi(decisionId, optionData, token) {
+  return await request(`/api/decisions/${decisionId}/options`, {
+    method: 'POST',
+    body: typeof optionData === 'string' ? { label: optionData } : optionData,
+    token,
+  });
+}
+
+/**
+ * Close a decision manually.
+ */
+export async function closeDecisionApi(decisionId, token) {
+  return await request(`/api/decisions/${decisionId}/close`, {
+    method: 'PATCH',
+    token,
+  });
 }
 
 /**

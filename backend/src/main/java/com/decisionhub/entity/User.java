@@ -42,8 +42,19 @@ public class User {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    @Column(name = "is_public")
+    private Boolean isPublic = true;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "saved_decisions",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "decision_id")
+    )
+    private Set<Decision> savedDecisions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -170,5 +181,21 @@ public class User {
 
     public void setDecisions(List<Decision> decisions) {
         this.decisions = decisions;
+    }
+
+    public Boolean getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public Set<Decision> getSavedDecisions() {
+        return savedDecisions;
+    }
+
+    public void setSavedDecisions(Set<Decision> savedDecisions) {
+        this.savedDecisions = savedDecisions;
     }
 }

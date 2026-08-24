@@ -139,4 +139,32 @@ public class CommunityController {
         DecisionResponse response = decisionService.createDecision(request, email);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @PostMapping("/{id}/invite")
+    @Operation(summary = "Invite user to community", description = "Invites a user to join a community group by their email (OWNER/ADMIN only)")
+    public ResponseEntity<CommunityInviteResponse> inviteUserToCommunity(@PathVariable Long id,
+                                                                         @Valid @RequestBody CommunityInviteRequest request,
+                                                                         Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        CommunityInviteResponse response = communityService.inviteUserToCommunity(id, request, email);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/invites/pending")
+    @Operation(summary = "Get pending invites", description = "Retrieves all pending invites for the current authenticated user")
+    public ResponseEntity<List<CommunityInviteResponse>> getPendingInvites(Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        List<CommunityInviteResponse> invites = communityService.getPendingInvites(email);
+        return ResponseEntity.ok(invites);
+    }
+
+    @PostMapping("/invites/{inviteId}/respond")
+    @Operation(summary = "Respond to invite", description = "Accepts or rejects a pending community invitation")
+    public ResponseEntity<CommunityResponse> respondToInvite(@PathVariable Long inviteId,
+                                                             @Valid @RequestBody InviteResponseRequest request,
+                                                             Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        CommunityResponse response = communityService.respondToInvite(inviteId, request, email);
+        return ResponseEntity.ok(response);
+    }
 }

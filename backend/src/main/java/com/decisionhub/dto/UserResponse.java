@@ -12,6 +12,10 @@ public class UserResponse {
     private String provider;
     private Boolean isActive;
     private LocalDateTime createdAt;
+    private String bio;
+    private String avatar;
+    private Boolean isPublic;
+    private java.util.Set<String> interests = new java.util.HashSet<>();
 
     public UserResponse() {
     }
@@ -24,6 +28,21 @@ public class UserResponse {
         this.provider = provider;
         this.isActive = isActive;
         this.createdAt = createdAt;
+    }
+
+    public UserResponse(Long id, String fullName, String email, String role, String provider, Boolean isActive, 
+                        LocalDateTime createdAt, String bio, String avatar, Boolean isPublic, java.util.Set<String> interests) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.role = role;
+        this.provider = provider;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.bio = bio;
+        this.avatar = avatar;
+        this.isPublic = isPublic;
+        this.interests = interests;
     }
 
     public Long getId() {
@@ -85,5 +104,37 @@ public class UserResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Boolean getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public java.util.Set<String> getInterests() {
+        return interests;
+    }
+
+    public void setInterests(java.util.Set<String> interests) {
+        this.interests = interests;
     }
 }

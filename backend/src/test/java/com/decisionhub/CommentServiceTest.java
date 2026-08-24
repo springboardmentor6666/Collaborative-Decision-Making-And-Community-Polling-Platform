@@ -54,6 +54,7 @@ public class CommentServiceTest {
         decisionRepository.deleteAll();
         userRepository.deleteAll();
         categoryRepository.deleteAll();
+        categoryRepository.flush();
 
         Category category = new Category();
         category.setName("Technology");

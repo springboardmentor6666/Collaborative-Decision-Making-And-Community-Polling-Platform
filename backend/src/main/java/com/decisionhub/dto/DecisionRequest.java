@@ -22,6 +22,9 @@ public class DecisionRequest {
     private Boolean isAnonymous;
     private List<String> optionLabels;
 
+    // Status field (optional, e.g., OPEN, CLOSED, EXPIRED)
+    private String status;
+
     // Multi-criteria comparison factors and option scores (optional)
     private List<String> comparisonFactorNames;
     private List<OptionScoreDto> optionScores;
@@ -118,6 +121,14 @@ public class DecisionRequest {
 
     public void setComparisonFactorNames(List<String> comparisonFactorNames) {
         this.comparisonFactorNames = comparisonFactorNames;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<OptionScoreDto> getOptionScores() {

@@ -6,6 +6,7 @@ public class OptionDto {
     private String label;
     private String description;
     private Long voteCount;
+    private Double percentage;
 
     public OptionDto() {
     }
@@ -21,6 +22,14 @@ public class OptionDto {
         this.label = label;
         this.description = description;
         this.voteCount = voteCount;
+    }
+
+    public OptionDto(Long id, String label, String description, Long voteCount, Double percentage) {
+        this.id = id;
+        this.label = label;
+        this.description = description;
+        this.voteCount = voteCount;
+        this.percentage = percentage;
     }
 
     public Long getId() {
@@ -53,5 +62,13 @@ public class OptionDto {
 
     public void setVoteCount(Long voteCount) {
         this.voteCount = voteCount;
+    }
+
+    public Double getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(Double percentage) {
+        this.percentage = percentage;
     }
 }
