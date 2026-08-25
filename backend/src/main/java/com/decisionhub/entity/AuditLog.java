@@ -26,8 +26,18 @@ public class AuditLog {
     @Column(length = 1000)
     private String details;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_id")
+    private User actor;
+
+    @Column(name = "metadata", columnDefinition = "TEXT")
+    private String metadata;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     public AuditLog() {
     }
@@ -36,6 +46,9 @@ public class AuditLog {
     protected void onCreate() {
         if (this.timestamp == null) {
             this.timestamp = LocalDateTime.now();
+        }
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
         }
     }
 
@@ -53,6 +66,14 @@ public class AuditLog {
 
     public void setAdminEmail(String adminEmail) {
         this.adminEmail = adminEmail;
+    }
+
+    public User getActor() {
+        return actor;
+    }
+
+    public void setActor(User actor) {
+        this.actor = actor;
     }
 
     public String getAction() {
@@ -87,6 +108,14 @@ public class AuditLog {
         this.details = details;
     }
 
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -94,4 +123,13 @@ public class AuditLog {
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
+
