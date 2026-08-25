@@ -24,7 +24,8 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all users", description = "Retrieves a list of all registered users")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_MODERATOR')")
+    @Operation(summary = "Get all users", description = "Retrieves a list of all registered users (Admin/Moderator only)")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

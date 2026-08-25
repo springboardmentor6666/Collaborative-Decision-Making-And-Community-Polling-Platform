@@ -12,15 +12,19 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
             scope: openid,profile,email
             redirect-uri: http://localhost:8080/login/oauth2/code/google
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/decisionhub_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:root}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/decisionhub_db;DB_CLOSE_DELAY=-1;MODE=MySQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     hibernate:
       ddl-auto: update
@@ -32,12 +36,34 @@ spring:
   flyway:
     enabled: false
 
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:noreply@decisionhub.com}
+    password: ${SPRING_MAIL_PASSWORD:password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
   expiration: 86400000
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  mail:
+    from: ${APP_MAIL_FROM:noreply@decisionhub.com}
+  firebase:
+    config-path: ${FIREBASE_CONFIG_PATH:}
+    enabled: ${FIREBASE_ENABLED:false}
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:demo}
+    api-key: ${CLOUDINARY_API_KEY:1234567890}
+    api-secret: ${CLOUDINARY_API_SECRET:secret}
+    enabled: ${CLOUDINARY_ENABLED:false}
 
 springdoc:
   api-docs:

@@ -23,14 +23,18 @@ public class CommentService {
     private final UserRepository userRepository;
     private final UserService userService;
 
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     public CommentService(CommentRepository commentRepository, 
                           DecisionRepository decisionRepository,
                           UserRepository userRepository,
-                          UserService userService) {
+                          UserService userService,
+                          org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.commentRepository = commentRepository;
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -47,6 +51,12 @@ public class CommentService {
         comment.setContent(request.getContent());
 
         Comment savedComment = commentRepository.save(comment);
+
+        if (decision.getOwner() != null && !decision.getOwner().getId().equals(author.getId())) {
+            String msg = author.getFullName() + " commented on your decision: " + decision.getTitle();
+            eventPublisher.publishEvent(new com.decisionhub.event.NotificationEvent(this, decision.getOwner(), "NEW_COMMENT", msg, "New Comment on your Decision"));
+        }
+
         return mapToCommentResponse(savedComment);
     }
 
@@ -69,6 +79,12 @@ public class CommentService {
         reply.setContent(request.getContent());
 
         Comment savedReply = commentRepository.save(reply);
+
+        if (parentComment.getAuthor() != null && !parentComment.getAuthor().getId().equals(author.getId())) {
+            String msg = author.getFullName() + " replied to your comment on decision: " + parentComment.getDecision().getTitle();
+            eventPublisher.publishEvent(new com.decisionhub.event.NotificationEvent(this, parentComment.getAuthor(), "COMMENT_REPLY", msg, "New Reply to your Comment"));
+        }
+
         return mapToCommentResponse(savedReply);
     }
 

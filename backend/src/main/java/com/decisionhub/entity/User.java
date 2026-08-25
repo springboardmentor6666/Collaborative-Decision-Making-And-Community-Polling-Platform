@@ -45,6 +45,9 @@ public class User {
     @Column(name = "is_public")
     private Boolean isPublic = true;
 
+    @Column(name = "fcm_token", length = 255)
+    private String fcmToken;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
@@ -197,5 +200,13 @@ public class User {
 
     public void setSavedDecisions(Set<Decision> savedDecisions) {
         this.savedDecisions = savedDecisions;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

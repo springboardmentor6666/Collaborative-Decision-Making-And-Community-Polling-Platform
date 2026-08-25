@@ -21,18 +21,28 @@ public class AnalyticsService {
     private final VoteRepository voteRepository;
     private final DecisionImpressionRepository decisionImpressionRepository;
 
+    private final CategoryRepository categoryRepository;
+    private final CommunityRepository communityRepository;
+    private final GeneratedReportRepository generatedReportRepository;
+
     public AnalyticsService(UserRepository userRepository,
                             DecisionRepository decisionRepository,
                             PollRepository pollRepository,
                             PollOptionRepository pollOptionRepository,
                             VoteRepository voteRepository,
-                            DecisionImpressionRepository decisionImpressionRepository) {
+                            DecisionImpressionRepository decisionImpressionRepository,
+                            CategoryRepository categoryRepository,
+                            CommunityRepository communityRepository,
+                            GeneratedReportRepository generatedReportRepository) {
         this.userRepository = userRepository;
         this.decisionRepository = decisionRepository;
         this.pollRepository = pollRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
         this.decisionImpressionRepository = decisionImpressionRepository;
+        this.categoryRepository = categoryRepository;
+        this.communityRepository = communityRepository;
+        this.generatedReportRepository = generatedReportRepository;
     }
 
     @Transactional(readOnly = true)
@@ -220,5 +230,119 @@ public class AnalyticsService {
 
         DecisionImpression impression = new DecisionImpression(decision, user, userEmail, clientIp, sanitizedType);
         decisionImpressionRepository.save(impression);
+    }
+
+    @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable("analyticsTrends")
+    public List<Map<String, Object>> getDecisionTrends() {
+        List<Decision> decisions = decisionRepository.findByIsDeletedFalse();
+        Map<String, Long> decisionCountsByDate = new TreeMap<>();
+        Map<String, Long> voteCountsByDate = new TreeMap<>();
+
+        for (Decision d : decisions) {
+            String dateKey = d.getCreatedAt() != null ? d.getCreatedAt().toLocalDate().toString() : "2026-08-25";
+            decisionCountsByDate.put(dateKey, decisionCountsByDate.getOrDefault(dateKey, 0L) + 1);
+
+            List<Poll> polls = pollRepository.findByDecisionId(d.getId());
+            for (Poll p : polls) {
+                List<Vote> votes = voteRepository.findByPollId(p.getId());
+                for (Vote v : votes) {
+                    String vDate = v.getVotedAt() != null ? v.getVotedAt().toLocalDate().toString() : dateKey;
+                    voteCountsByDate.put(vDate, voteCountsByDate.getOrDefault(vDate, 0L) + 1);
+                }
+            }
+        }
+
+        List<Map<String, Object>> trends = new ArrayList<>();
+        Set<String> allDates = new TreeSet<>(decisionCountsByDate.keySet());
+        allDates.addAll(voteCountsByDate.keySet());
+
+        for (String date : allDates) {
+            trends.add(Map.of(
+                    "date", date,
+                    "decisionsCreated", decisionCountsByDate.getOrDefault(date, 0L),
+                    "votesCast", voteCountsByDate.getOrDefault(date, 0L)
+            ));
+        }
+
+        return trends;
+    }
+
+    @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable("categories")
+    public List<Map<String, Object>> getPopularCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Category cat : categories) {
+            long decisionCount = decisionRepository.findByIsDeletedFalse().stream()
+                    .filter(d -> d.getCategory() != null && d.getCategory().getId().equals(cat.getId()))
+                    .count();
+
+            result.add(Map.of(
+                    "id", cat.getId(),
+                    "name", cat.getName(),
+                    "decisionCount", decisionCount
+            ));
+        }
+
+        result.sort((a, b) -> Long.compare((Long) b.get("decisionCount"), (Long) a.get("decisionCount")));
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getCommunityAnalytics(Long communityId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new IllegalArgumentException("Community not found with id: " + communityId));
+
+        List<Decision> communityDecisions = decisionRepository.findByCommunityIdAndIsDeletedFalse(communityId);
+        long decisionCount = communityDecisions.size();
+
+        long totalVotes = 0;
+        for (Decision d : communityDecisions) {
+            List<Poll> polls = pollRepository.findByDecisionId(d.getId());
+            for (Poll p : polls) {
+                totalVotes += voteRepository.findByPollId(p.getId()).size();
+            }
+        }
+
+        return Map.of(
+                "communityId", community.getId(),
+                "communityName", community.getName(),
+                "decisionCount", decisionCount,
+                "totalVotes", totalVotes
+        );
+    }
+
+    @Transactional
+    public Map<String, String> exportReport(String format, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        String sanitizedFormat = (format != null && "pdf".equalsIgnoreCase(format)) ? "PDF" : "CSV";
+        String reportName = "Analytics_Report_" + System.currentTimeMillis() + "." + sanitizedFormat.toLowerCase();
+
+        StringBuilder content = new StringBuilder();
+        content.append("DecisionHub Analytics Report\n");
+        content.append("Generated At: ").append(new java.util.Date()).append("\n");
+        content.append("Generated By: ").append(user.getEmail()).append("\n\n");
+        content.append("Total Users: ").append(userRepository.count()).append("\n");
+        content.append("Total Decisions: ").append(decisionRepository.count()).append("\n");
+
+        String fileUrl = "/api/files/download/" + reportName;
+
+        GeneratedReport report = new GeneratedReport();
+        report.setReportName(reportName);
+        report.setFormat(sanitizedFormat);
+        report.setFileUrl(fileUrl);
+        report.setGeneratedBy(user);
+        generatedReportRepository.save(report);
+
+        return Map.of(
+                "reportName", reportName,
+                "format", sanitizedFormat,
+                "fileUrl", fileUrl,
+                "content", content.toString()
+        );
     }
 }

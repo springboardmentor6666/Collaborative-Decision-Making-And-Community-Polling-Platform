@@ -32,6 +32,7 @@ public class DecisionService {
     private final ComparisonFactorRepository comparisonFactorRepository;
     private final OptionScoreRepository optionScoreRepository;
     private final UserService userService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public DecisionService(DecisionRepository decisionRepository,
                            UserRepository userRepository,
@@ -44,7 +45,8 @@ public class DecisionService {
                            VoteRepository voteRepository,
                            ComparisonFactorRepository comparisonFactorRepository,
                            OptionScoreRepository optionScoreRepository,
-                           UserService userService) {
+                           UserService userService,
+                           org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
@@ -57,6 +59,7 @@ public class DecisionService {
         this.comparisonFactorRepository = comparisonFactorRepository;
         this.optionScoreRepository = optionScoreRepository;
         this.userService = userService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -331,6 +334,10 @@ public class DecisionService {
 
         decision.setStatus("CLOSED");
         Decision updatedDecision = decisionRepository.save(decision);
+        if (decision.getOwner() != null) {
+            String msg = "Your decision status was updated to: " + decision.getStatus();
+            eventPublisher.publishEvent(new com.decisionhub.event.NotificationEvent(this, decision.getOwner(), "DECISION_UPDATED", msg, "Decision Status Update"));
+        }
         return mapToDecisionResponse(updatedDecision);
     }
 

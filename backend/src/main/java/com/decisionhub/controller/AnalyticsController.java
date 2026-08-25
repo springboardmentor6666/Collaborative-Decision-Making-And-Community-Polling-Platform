@@ -66,4 +66,33 @@ public class AnalyticsController {
         analyticsService.recordImpression(id, type, userEmail, clientIp);
         return ResponseEntity.ok(Map.of("message", "Impression recorded successfully"));
     }
+
+    @GetMapping("/analytics/trends")
+    @Operation(summary = "Get decision trends", description = "Retrieves decision creation and voting activity trends over time")
+    public ResponseEntity<List<Map<String, Object>>> getDecisionTrends() {
+        return ResponseEntity.ok(analyticsService.getDecisionTrends());
+    }
+
+    @GetMapping("/analytics/categories")
+    @Operation(summary = "Get popular categories", description = "Retrieves popular categories ranked by decision count")
+    public ResponseEntity<List<Map<String, Object>>> getPopularCategories() {
+        return ResponseEntity.ok(analyticsService.getPopularCategories());
+    }
+
+    @GetMapping("/analytics/communities/{id}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get community analytics", description = "Retrieves decision and vote metrics for a specific community")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Map<String, Object>> getCommunityAnalytics(@PathVariable Long id) {
+        return ResponseEntity.ok(analyticsService.getCommunityAnalytics(id));
+    }
+
+    @GetMapping("/analytics/reports/export")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Export analytics report", description = "Generates and exports an analytics report in PDF or CSV format")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Map<String, String>> exportReport(@RequestParam(value = "format", defaultValue = "csv") String format,
+                                                           Authentication authentication) {
+        return ResponseEntity.ok(analyticsService.exportReport(format, authentication.getName()));
+    }
 }

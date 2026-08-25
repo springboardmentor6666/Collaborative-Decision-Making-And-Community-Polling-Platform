@@ -27,14 +27,18 @@ public class VoteService {
     private final PollRepository pollRepository;
     private final PollOptionRepository pollOptionRepository;
 
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     public VoteService(VoteRepository voteRepository,
                        UserRepository userRepository,
                        PollRepository pollRepository,
-                       PollOptionRepository pollOptionRepository) {
+                       PollOptionRepository pollOptionRepository,
+                       org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.voteRepository = voteRepository;
         this.userRepository = userRepository;
         this.pollRepository = pollRepository;
         this.pollOptionRepository = pollOptionRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -86,6 +90,11 @@ public class VoteService {
         vote.setRating(request.getRating());
 
         Vote savedVote = voteRepository.save(vote);
+
+        if (poll.getDecision() != null && poll.getDecision().getOwner() != null && !poll.getDecision().getOwner().getId().equals(voter.getId())) {
+            String msg = voter.getFullName() + " voted on your poll for decision: " + poll.getDecision().getTitle();
+            eventPublisher.publishEvent(new com.decisionhub.event.NotificationEvent(this, poll.getDecision().getOwner(), "NEW_VOTE", msg, "New Vote Received"));
+        }
 
         return new VoteResponse(
                 savedVote.getId(),

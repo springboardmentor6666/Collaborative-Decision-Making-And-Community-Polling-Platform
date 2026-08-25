@@ -309,4 +309,39 @@ public class UserService {
                 .map(decisionService::mapToDecisionResponse)
                 .toList();
     }
+
+    @Transactional
+    public UserResponse updateUserRole(Long id, String newRole, String adminEmail) {
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        User admin = userRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + adminEmail));
+
+        if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            throw new org.springframework.security.access.AccessDeniedException("Only ADMIN users can modify roles");
+        }
+
+        String formattedRole = newRole != null ? newRole.trim().toUpperCase() : "USER";
+        targetUser.setRole(formattedRole);
+        User saved = userRepository.save(targetUser);
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public UserResponse setUserActiveStatus(Long id, boolean isActive, String adminEmail) {
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        User admin = userRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + adminEmail));
+
+        if (!"ADMIN".equalsIgnoreCase(admin.getRole()) && !"MODERATOR".equalsIgnoreCase(admin.getRole())) {
+            throw new org.springframework.security.access.AccessDeniedException("Only ADMIN or MODERATOR users can ban/deactivate users");
+        }
+
+        targetUser.setIsActive(isActive);
+        User saved = userRepository.save(targetUser);
+        return mapToUserResponse(saved);
+    }
 }
