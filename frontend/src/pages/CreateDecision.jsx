@@ -22,6 +22,8 @@ export default function CreateDecision() {
   const [categoryId, setCategoryId] = useState(null);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
+  const [pollType, setPollType] = useState('SINGLE_CHOICE');
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   // MCDA state
   const [enableMcda, setEnableMcda] = useState(false);
@@ -114,8 +116,10 @@ export default function CreateDecision() {
         description: description.trim(),
         status,
         categoryId: categoryId || null,
+        pollType: pollQuestion.trim() ? pollType : null,
         pollQuestion: pollQuestion.trim() || null,
         pollOptions: pollQuestion.trim() ? trimmedOptions : null,
+        isAnonymous: isAnonymous,
         communityId,
         comparisonFactorNames: enableMcda ? trimmedFactors : null,
         optionScores: enableMcda ? optionScoresPayload : null,
@@ -238,43 +242,111 @@ export default function CreateDecision() {
                 </div>
 
                 {pollQuestion.trim() && (
-                  <div className="space-y-3">
-                    <label className={labelClass}>Poll Options</label>
-                    {pollOptions.map((opt, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
+                  <>
+                    {/* Poll Type Selector */}
+                    <div>
+                      <label className={labelClass}>Poll Voting Type</label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {[
+                          {
+                            id: 'SINGLE_CHOICE',
+                            title: 'Single Choice',
+                            desc: 'Voters pick one option (Radio)',
+                            icon: '🔘',
+                          },
+                          {
+                            id: 'MULTIPLE',
+                            title: 'Multiple Choice',
+                            desc: 'Voters select 1 or more options',
+                            icon: '☑️',
+                          },
+                          {
+                            id: 'RATING',
+                            title: 'Rating Scale',
+                            desc: 'Voters rate options 1 to 5 stars',
+                            icon: '⭐',
+                          },
+                        ].map((t) => (
+                          <div
+                            key={t.id}
+                            onClick={() => setPollType(t.id)}
+                            className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+                              pollType === t.id
+                                ? 'border-primary bg-primary-soft shadow-xs'
+                                : 'border-border-default bg-surface hover:bg-surface-alt'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-base">{t.icon}</span>
+                              <span className="text-xs font-bold text-text-primary">{t.title}</span>
+                            </div>
+                            <p className="text-[11px] text-muted leading-tight">{t.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Anonymous Voting Toggle */}
+                    <div className="flex items-center justify-between rounded-2xl border border-border-default bg-surface-alt/60 p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface text-base">
+                          🕵️
+                        </span>
+                        <div>
+                          <p className="text-xs font-bold text-text-primary">Vote Anonymously</p>
+                          <p className="text-[11px] text-muted">Hide voter identities on public tallies for this poll.</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex cursor-pointer items-center">
                         <input
-                          type="text"
-                          required
-                          value={opt}
-                          onChange={(e) => handleOptionChange(idx, e.target.value)}
-                          placeholder={`Option ${idx + 1}`}
-                          className={`${inputClass} flex-1`}
+                          type="checkbox"
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          className="peer sr-only"
                         />
+                        <div className="h-6 w-11 rounded-full bg-border-default peer-checked:bg-primary transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+                      </label>
+                    </div>
+
+                    {/* Poll Options */}
+                    <div className="space-y-3">
+                      <label className={labelClass}>Poll Options</label>
+                      {pollOptions.map((opt, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            required
+                            value={opt}
+                            onChange={(e) => handleOptionChange(idx, e.target.value)}
+                            placeholder={`Option ${idx + 1}`}
+                            className={`${inputClass} flex-1`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOption(idx)}
+                            className="rounded-xl border border-default bg-surface p-2 text-secondary transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+
+                      {pollOptions.length < 8 && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveOption(idx)}
-                          className="rounded-xl border border-default bg-surface p-2 text-secondary transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                          onClick={handleAddOption}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                           </svg>
+                          Add another option
                         </button>
-                      </div>
-                    ))}
-
-                    {pollOptions.length < 8 && (
-                      <button
-                        type="button"
-                        onClick={handleAddOption}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add another option
-                      </button>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 

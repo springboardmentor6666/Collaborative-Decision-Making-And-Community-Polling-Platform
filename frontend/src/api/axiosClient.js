@@ -75,6 +75,7 @@ export async function loginApi(email, password) {
     id: data.user?.id || 'usr_1',
     email: data.user?.email || email,
     name: data.user?.fullName || data.user?.name || email.split('@')[0],
+    role: data.user?.role || 'USER',
     avatar: data.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email)}`,
   };
 
@@ -104,6 +105,7 @@ export async function registerApi(name, email, password) {
     id: data.user?.id || 'usr_new',
     email: data.user?.email || userEmail,
     name: data.user?.fullName || data.user?.name || fullName || userEmail.split('@')[0],
+    role: data.user?.role || 'USER',
     avatar: data.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`,
   };
 
@@ -127,6 +129,22 @@ export async function resetPasswordApi(email) {
   } catch (error) {
     return { message: 'Reset link sent to your email.' };
   }
+}
+
+/**
+ * Confirm password reset with token.
+ */
+export async function resetPasswordConfirmApi(token, newPassword) {
+  return await request('/api/auth/reset-password/confirm', {
+    method: 'POST',
+    body: { token, newPassword, password: newPassword },
+  }).catch(async () => {
+    // If /confirm endpoint differs on backend, fallback
+    return await request('/api/auth/reset-password', {
+      method: 'POST',
+      body: { token, newPassword, password: newPassword },
+    });
+  });
 }
 
 export async function googleLoginApi() {
@@ -156,7 +174,8 @@ export async function refreshSessionApi() {
   const user = {
     id: data.user?.id || 'usr_1',
     email: data.user?.email || 'demo@example.com',
-    name: data.user?.name || 'Demo User',
+    name: data.user?.fullName || data.user?.name || 'Demo User',
+    role: data.user?.role || 'USER',
     avatar: data.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo',
   };
 
@@ -288,15 +307,17 @@ export async function closeDecisionApi(decisionId, token) {
  * Create a new decision (with optional embedded poll and MCDA factors).
  */
 export async function createDecisionApi(decisionData, token, currentUser) {
+  const pollTypeSelected = decisionData.pollType || (decisionData.pollQuestion ? 'SINGLE_CHOICE' : null);
   const backendPayload = {
     title: decisionData.title,
     description: decisionData.description,
-    visibility: decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC',
+    visibility: decisionData.visibility || (decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC'),
+    status: decisionData.status || 'OPEN',
     categoryId: decisionData.categoryId || null,
     communityId: decisionData.communityId || null,
-    pollType: decisionData.pollQuestion ? 'SINGLE_CHOICE' : null,
+    pollType: pollTypeSelected,
     pollQuestion: decisionData.pollQuestion || null,
-    isAnonymous: false,
+    isAnonymous: Boolean(decisionData.isAnonymous),
     optionLabels: decisionData.pollOptions || [],
     comparisonFactorNames: decisionData.comparisonFactorNames || [],
     optionScores: decisionData.optionScores || [],
@@ -314,7 +335,13 @@ export async function createDecisionApi(decisionData, token, currentUser) {
 export async function updateDecisionApi(id, decisionData, token) {
   return await request(`/api/decisions/${id}`, {
     method: 'PUT',
-    body: decisionData,
+    body: {
+      title: decisionData.title,
+      description: decisionData.description,
+      categoryId: decisionData.categoryId || null,
+      status: decisionData.status || 'OPEN',
+      visibility: decisionData.visibility || (decisionData.status === 'CLOSED' ? 'PRIVATE' : 'PUBLIC'),
+    },
     token,
   });
 }
@@ -330,12 +357,37 @@ export async function deleteDecisionApi(id, token) {
 }
 
 /**
- * Cast a vote on a decision poll.
+ * Cast a vote on a decision poll (supports Single choice, Multi-choice, Ratings, and Anonymous).
  */
 export async function castVoteApi(voteData, token, extraData = {}) {
+  // If array of votes (multi-select / multiple ratings)
+  if (Array.isArray(voteData.votes) && voteData.votes.length > 0) {
+    const results = await Promise.all(
+      voteData.votes.map((v) =>
+        request('/api/votes', {
+          method: 'POST',
+          body: {
+            pollId: v.pollId || voteData.pollId || voteData.decisionId,
+            pollOptionId: v.pollOptionId || v.optionId,
+            rating: v.rating || null,
+            isAnonymous: Boolean(voteData.isAnonymous || v.isAnonymous),
+          },
+          token,
+        })
+      )
+    );
+    return { success: true, count: results.length };
+  }
+
+  // Single vote
   await request('/api/votes', {
     method: 'POST',
-    body: { pollId: voteData.pollId || voteData.decisionId, pollOptionId: voteData.optionId },
+    body: {
+      pollId: voteData.pollId || voteData.decisionId,
+      pollOptionId: voteData.pollOptionId || voteData.optionId,
+      rating: voteData.rating || null,
+      isAnonymous: Boolean(voteData.isAnonymous),
+    },
     token,
   });
   return { success: true };
@@ -346,6 +398,13 @@ export async function castVoteApi(voteData, token, extraData = {}) {
  */
 export async function getVoteResultsApi(pollId, token) {
   return await request(`/api/votes/result/${pollId}`, { token });
+}
+
+/**
+ * Get rating summary for RATING poll type.
+ */
+export async function getRatingSummaryApi(pollId, token) {
+  return await request(`/api/votes/rating-summary/${pollId}`, { token });
 }
 
 /**
@@ -382,6 +441,152 @@ export async function recordImpressionApi(decisionId, type = 'VIEW', token = nul
  */
 export async function getCurrentUserApi(token) {
   return await request('/api/users/me', { token });
+}
+
+/**
+ * User Interests Taxonomy APIs
+ */
+export async function getUserInterestsApi(token) {
+  try {
+    const data = await request('/api/users/me/interests', { token });
+    return Array.isArray(data) ? data : (data?.interests || []);
+  } catch {
+    return [];
+  }
+}
+
+export async function updateUserInterestsApi(categoryIds, token) {
+  return await request('/api/users/me/interests', {
+    method: 'POST',
+    body: { categoryIds },
+    token,
+  });
+}
+
+/**
+ * Update user profile (name, bio, avatar)
+ */
+export async function updateUserProfileApi(userId, profileData, token) {
+  return await request(`/api/users/${userId}`, {
+    method: 'PUT',
+    body: {
+      name: profileData.name || profileData.fullName,
+      bio: profileData.bio || '',
+      avatar: profileData.avatar || '',
+    },
+    token,
+  });
+}
+
+/**
+ * Saved Decisions / Bookmarks APIs
+ */
+export async function getSavedDecisionsApi(token) {
+  try {
+    const data = await request('/api/users/me/saved-decisions', { token });
+    const items = Array.isArray(data) ? data : [];
+    return items.map((d) => ({
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      status: d.status || 'OPEN',
+      categoryName: d.categoryName || d.category?.name || null,
+      communityName: d.communityName || d.community?.name || null,
+      votesCount: d.votesCount || (d.polls?.[0]?.options?.reduce((s, o) => s + (o.voteCount || 0), 0)) || 0,
+      optionsCount: d.optionsCount || d.options?.length || (d.polls?.[0]?.options?.length) || 0,
+      createdAt: d.createdAt || new Date().toISOString(),
+      comparisonFactors: d.comparisonFactors || [],
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function saveDecisionApi(decisionId, token) {
+  return await request('/api/users/me/saved-decisions', {
+    method: 'POST',
+    body: { decisionId: Number(decisionId) },
+    token,
+  });
+}
+
+export async function unsaveDecisionApi(decisionId, token) {
+  return await request(`/api/users/me/saved-decisions/${decisionId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+/**
+ * Admin Management APIs
+ */
+export async function getAllUsersAdminApi(token) {
+  const data = await request('/api/users', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function banUserAdminApi(userId, token) {
+  return await request(`/api/admin/users/${userId}/ban`, {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function unbanUserAdminApi(userId, token) {
+  return await request(`/api/admin/users/${userId}/unban`, {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function updateUserRoleAdminApi(userId, role, token) {
+  return await request(`/api/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: { role },
+    token,
+  });
+}
+
+export async function getAuditLogsAdminApi(token) {
+  const data = await request('/api/admin/audit-logs', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getAdminSettingsApi(token) {
+  const data = await request('/api/admin/settings', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function updateAdminSettingApi(key, value, description, token) {
+  return await request('/api/admin/settings', {
+    method: 'PUT',
+    body: { key, value, description },
+    token,
+  });
+}
+
+export async function getReportsAdminApi(token) {
+  const data = await request('/api/reports', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function resolveReportAdminApi(reportId, token) {
+  return await request(`/api/reports/${reportId}/resolve`, {
+    method: 'PUT',
+    token,
+  });
+}
+
+export async function getModerationFlagsApi(token) {
+  const data = await request('/api/moderation/flags', { token });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function resolveModerationFlagApi(flagId, token) {
+  return await request(`/api/moderation/flags/${flagId}/resolve`, {
+    method: 'PUT',
+    token,
+  });
 }
 
 /**

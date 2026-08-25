@@ -20,44 +20,53 @@ frontend/
     ├── App.jsx                 # Top-level routing & layout coordinator
     ├── index.css               # Global theme tokens, variables, & utility classes
     ├── api/
-    │   └── axiosClient.js      # Central Axios client with Bearer auth & storage merging
+    │   └── axiosClient.js      # Central API client (Auth, Decisions, Votes, Admin, Interests, Bookmarks)
     ├── components/             # Reusable UI component library
+    │   ├── AdminRoute.jsx      # Role-based route guard for ADMIN users
     │   ├── AuthPageShell.jsx   # Shared layout for auth pages
     │   ├── BrandMark.jsx       # DecisionHub vector logo & branding
-    │   ├── DecisionCard.jsx    # Interactive card for decisions in feeds
+    │   ├── CategoryBadge.jsx   # Color-coded category tags
+    │   ├── CategorySelector.jsx# Interactive category picker
+    │   ├── ComparisonMatrix.jsx# MCDA factor scoring & Pros/Cons breakdown
+    │   ├── DecisionCard.jsx    # Feed card with interactive Bookmark/Save button
     │   ├── Footer.jsx          # Pinned sticky footer with navigation links
     │   ├── IconSidebar.jsx     # Right-edge quick utility & theme control rail
+    │   ├── InterestTaxonomyEditor.jsx # Interactive topic categories picker
     │   ├── Loader.jsx          # Animated spinner & skeleton loading states
-    │   ├── Navbar.jsx          # Top navigation bar with active route highlighting
+    │   ├── Navbar.jsx          # Role-aware navigation bar with active route highlighting
     │   ├── PageTransition.jsx  # Framer Motion smooth page transitions
-    │   ├── PollCard.jsx        # Option voting card with progress bars
+    │   ├── PieChart.jsx        # Animated SVG donut chart with interactive hover slices
+    │   ├── PollCard.jsx        # Single, Multiple, & 5-Star Rating poll ballot
     │   ├── ProtectedRoute.jsx  # Auth guard component redirecting unauthenticated users
     │   ├── ResultChart.jsx     # Vote distribution bar chart component
-    │   ├── Sidebar.jsx         # Left navigation drawer
     │   └── VoteButton.jsx      # Animated interactive vote button
     ├── context/
     │   └── AuthContext.jsx     # React Context for authentication state & user sessions
-    ├── layouts/
-    │   └── MainLayout.jsx      # Page layout shell wrapping Navbar, Sidebar, and Content
     ├── pages/                  # Route view components
+    │   ├── AdminPage.jsx       # /admin — Platform administration, users, moderation & logs
     │   ├── AnalysisPage.jsx    # /analysis — Voted decisions, win/loss stats & vote charts
     │   ├── AnalyticsPage.jsx   # /analytics — Creator reach, views, votes & conversion
+    │   ├── CommunitiesPage.jsx # /communities — Community hub directory
+    │   ├── CommunityDetails.jsx# /communities/:id — Group discussions & decisions
     │   ├── ContactSupport.jsx  # /contact-support — Support tickets & contact channels
-    │   ├── CreateDecision.jsx  # /decisions/create — Poll builder with dynamic options
+    │   ├── CreateCommunity.jsx # /communities/create — Community creation form
+    │   ├── CreateDecision.jsx  # /decisions/create — Poll builder with Single/Multiple/Rating types
     │   ├── DashboardPage.jsx   # /dashboard — Main feed & quick-action cards
     │   ├── DecisionDetails.jsx # /decisions/:id — Decision info, comments, attached poll
-    │   ├── ForgotPasswordPage.jsx # /forgot-password — Password recovery workflow
-    │   ├── LoginPage.jsx       # /login — Account login
-    │   ├── NotFound.jsx        # /404 — Not found fallback
-    │   ├── PrivacyPolicy.jsx   # /privacy-policy — Privacy terms & data handling
-    │   ├── Profile.jsx         # /profile — User account overview & role badges
+    │   ├── EditDecision.jsx    # /decisions/:id/edit — Modify decision fields & status
+    │   ├── ForgotPasswordPage.jsx # /forgot-password — Password recovery request
+    │   ├── OnboardingWizard.jsx# /onboarding — Post-signup profile & interest wizard
+    │   ├── Profile.jsx         # /profile — Profile info, typography, interests & saved decisions
+    │   ├── ResetPasswordPage.jsx # /reset-password — Confirm password reset with token
     │   ├── SignupPage.jsx      # /signup — User registration
-    │   ├── TermsConditions.jsx # /terms-conditions — Terms of service
-    │   └── VotePage.jsx        # /decisions/:id/vote — Interactive poll ballot
-    ├── services/
-    │   └── decisionStorage.js  # Local storage sync engine for analytics, reach & votes
+    │   └── VotePage.jsx        # /decisions/:id/vote — Interactive poll ballot (Single/Multi/Rating/Anonymous)
+    ├── services/               # API service wrappers
+    │   ├── decisionService.js  # Decision CRUD helpers
+    │   ├── userService.js      # Profile, interests, & saved decisions helpers
+    │   └── voteService.js      # Polling & voting helpers
     └── theme/
-        └── useTheme.js         # Theme switching hook (Default, Light, Dark, Accent modes)
+        ├── themes.js           # Theme and typography constants
+        └── useTheme.js         # Theme switching hook (Light, Dark, Slate, Accent modes)
 ```
 
 ---
@@ -67,18 +76,32 @@ frontend/
 | Path | Page Name | Access | Description |
 |---|---|---|---|
 | `/login` | `LoginPage` | Public | Account authentication |
-| `/signup` | `SignupPage` | Public | New user registration |
+| `/signup` | `SignupPage` | Public | New user registration (redirects to `/onboarding`) |
 | `/forgot-password` | `ForgotPasswordPage` | Public | Password reset request |
+| `/reset-password` | `ResetPasswordPage` | Public | Set new password using token parameter |
+| `/onboarding` | `OnboardingWizard` | Protected | 3-step profile, avatar, and interest setup |
 | `/dashboard` | `DashboardPage` | Protected | Community decision stream & summary |
 | `/analysis` | `AnalysisPage` | Protected | User's voted decisions, win/loss indicators & charts |
 | `/analytics` | `AnalyticsPage` | Protected | Creator impressions, reach, views, and conversion rates |
-| `/decisions/create`| `CreateDecision` | Protected | Decision poll creator with options |
+| `/decisions/create`| `CreateDecision` | Protected | Decision poll creator (Single, Multiple, Rating) |
 | `/decisions/:id` | `DecisionDetails` | Protected | Full decision details, attached poll & discussion |
-| `/decisions/:id/vote` | `VotePage` | Protected | Cast vote ballot on decision options |
-| `/profile` | `Profile` | Protected | User profile details & membership information |
+| `/decisions/:id/edit` | `EditDecision` | Protected | Update decision metadata, status, and category |
+| `/decisions/:id/vote` | `VotePage` | Protected | Cast vote ballot (Single/Multiple/Rating/Anonymous) |
+| `/admin` | `AdminPage` | Admin Only | User moderation, role management, audit logs & settings |
+| `/profile` | `Profile` | Protected | Profile overview, typography, interests & saved decisions |
+| `/communities` | `CommunitiesPage` | Protected | Browse and search platform communities |
+| `/communities/create` | `CreateCommunity` | Protected | Create a new community space |
+| `/communities/:id` | `CommunityDetails` | Protected | Community decisions, members, and details |
 | `/privacy-policy` | `PrivacyPolicy` | Protected | Privacy policy & data protection terms |
 | `/terms-conditions`| `TermsConditions`| Protected | Platform terms & conditions |
 | `/contact-support`| `ContactSupport` | Protected | Customer support & inquiry submission |
+
+---
+
+## 📊 Data Visualization & Chart Architecture
+
+DecisionHub employs custom **SVG and Framer Motion animated visualizations** (`PieChart.jsx` and `ResultChart.jsx`) engineered directly into the React component tree.
+- **Benefits**: Zero canvas overhead, full responsiveness, reactive CSS variable theming (Dark / Slate / Emerald / Royal), accessible DOM tooltips, and crisp rendering on high-DPI retina screens without external Chart.js bundle overhead.
 
 ---
 

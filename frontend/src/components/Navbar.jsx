@@ -133,6 +133,22 @@ export default function Navbar() {
             >
               Profile
             </Link>
+            {user?.role?.toUpperCase() === 'ADMIN' && (
+              <Link
+                to="/admin"
+                className={navLinkClass('/admin')}
+                style={
+                  isActive('/admin')
+                    ? { color: '#d97706', backgroundColor: '#fef3c7' }
+                    : { color: '#d97706' }
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <span>🛡️</span>
+                  <span>Admin</span>
+                </span>
+              </Link>
+            )}
           </nav>
 
           {/* Right: user + logout (desktop only mostly) */}
@@ -247,6 +263,15 @@ export default function Navbar() {
                 <Link to="/communities" className={mobileNavLinkClass('/communities')}>Communities</Link>
                 <Link to="/decisions/create" className={mobileNavLinkClass('/decisions/create')}>Create Decision</Link>
                 <Link to="/profile" className={mobileNavLinkClass('/profile')}>Profile Settings</Link>
+                {user?.role?.toUpperCase() === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    className={`${mobileNavLinkClass('/admin')} !text-amber-600 flex items-center gap-2`}
+                  >
+                    <span>🛡️</span>
+                    <span>Admin Control Center</span>
+                  </Link>
+                )}
               </nav>
 
               {/* Theme & Typography Settings (Replacing IconSidebar for Mobile) */}

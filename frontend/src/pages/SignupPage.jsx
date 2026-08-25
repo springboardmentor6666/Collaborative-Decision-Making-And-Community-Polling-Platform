@@ -44,7 +44,7 @@ export default function SignupPage() {
     try {
       setIsSubmitting(true);
       await register(name, email, password);
-      navigate('/dashboard', { replace: true });
+      navigate('/onboarding', { replace: true });
     } catch (err) {
       setFormError(err.message || 'Registration failed. Please try again.');
     } finally {
