@@ -14,6 +14,9 @@ public class GeneratedReport {
     @Column(name = "report_name", nullable = false, length = 150)
     private String reportName;
 
+    @Column(length = 50)
+    private String type;
+
     @Column(nullable = false, length = 20)
     private String format;
 
@@ -27,6 +30,9 @@ public class GeneratedReport {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public GeneratedReport() {
     }
 
@@ -34,6 +40,9 @@ public class GeneratedReport {
     protected void onCreate() {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
         }
     }
 
@@ -51,6 +60,14 @@ public class GeneratedReport {
 
     public void setReportName(String reportName) {
         this.reportName = reportName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getFormat() {
@@ -83,5 +100,13 @@ public class GeneratedReport {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

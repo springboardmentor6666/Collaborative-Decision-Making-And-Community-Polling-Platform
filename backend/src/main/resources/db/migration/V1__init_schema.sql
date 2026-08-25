@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS votes (
     voter_id BIGINT NULL,                       -- nullable if anonymous
     rating INT DEFAULT NULL CHECK (rating >= 1 AND rating <= 5), -- bounded to 1-5
     voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_user_poll_vote UNIQUE (poll_id, voter_id),
+    UNIQUE (poll_option_id, voter_id),
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
     FOREIGN KEY (poll_option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
     FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE
