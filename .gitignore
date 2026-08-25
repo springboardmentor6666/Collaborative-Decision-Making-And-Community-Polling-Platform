@@ -13,6 +13,7 @@ uploads/
 
 # --- Frontend (Node / React) ---
 frontend/node_modules/
+frontend/.vite/
 frontend/build/
 frontend/dist/
 frontend/.env.local
