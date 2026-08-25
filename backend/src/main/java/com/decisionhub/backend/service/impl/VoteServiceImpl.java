@@ -13,6 +13,7 @@ import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.repository.VoteRepository;
 import com.decisionhub.backend.service.VoteService;
 import com.decisionhub.backend.service.CurrentUserService;
+import com.decisionhub.backend.service.DecisionService;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -27,63 +28,31 @@ public class VoteServiceImpl implements VoteService {
     private final OptionRepository optionRepository;
     private final CurrentUserService currentUser;
     private final NotificationService notificationService;
+    private final DecisionService decisionService;
 
     public VoteServiceImpl(VoteRepository voteRepository,
                            UserRepository userRepository,
                            DecisionRepository decisionRepository,
                            OptionRepository optionRepository, CurrentUserService currentUser,
-                           NotificationService notificationService) {
+                           NotificationService notificationService, DecisionService decisionService) {
         this.voteRepository = voteRepository;
         this.userRepository = userRepository;
         this.decisionRepository = decisionRepository;
         this.optionRepository = optionRepository;
         this.currentUser = currentUser;
         this.notificationService = notificationService;
+        this.decisionService = decisionService;
     }
 
     @Override
     public VoteResponse castVote(VoteRequest request) {
-
-        User user = currentUser.get();
-        if (voteRepository.findByUserIdAndDecisionId(
-                user.getId(),
-                request.getDecisionId()).isPresent()) {
-
-            throw new RuntimeException("You have already voted.");
-        }
-
-        Decision decision = decisionRepository.findById(request.getDecisionId())
-                .orElseThrow(() -> new RuntimeException("Decision not found"));
-
-        Option option = optionRepository.findById(request.getOptionId())
-                .orElseThrow(() -> new RuntimeException("Option not found"));
-        if (!option.getDecision().getId().equals(decision.getId())) throw new IllegalArgumentException("Option does not belong to this decision");
-        if (decision.getDeadline() != null && decision.getDeadline().isBefore(java.time.LocalDate.now())) throw new IllegalStateException("This poll has already ended");
-
-        Vote vote = Vote.builder()
-                .user(user)
-                .decision(decision)
-                .option(option)
-                .build();
-
-        Vote savedVote;
-        try { savedVote = voteRepository.saveAndFlush(vote); } catch (org.springframework.dao.DataIntegrityViolationException e) { throw new IllegalStateException("You have already voted on this poll"); }
-
-        if (decision.getCreatedBy() != null && !decision.getCreatedBy().getId().equals(user.getId())) {
-            notificationService.notifyUser(
-                    decision.getCreatedBy(),
-                    user.getName() + " voted on your decision \"" + decision.getTitle() + "\""
-            );
-        }
-
-        return VoteResponse.builder()
-                .id(savedVote.getId())
-                .message("Vote Cast Successfully")
-                .build();
+        return decisionService.vote(request.getDecisionId(), request.getOptionId());
     }
 
     @Override
     public Map<String, Long> getVoteResults(Long decisionId) {
+
+        decisionService.getDecisionById(decisionId);
 
         Map<String, Long> result = new LinkedHashMap<>();
 

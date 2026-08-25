@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 const API = "http://localhost:8080";
 
 function Communities() {
+  const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
   const [form, setForm] = useState({
     communityName: "",
@@ -12,7 +14,7 @@ function Communities() {
   });
 
   const [opened, setOpened] = useState(null);
-  const [communityDecisions, setCommunityDecisions] = useState([]);
+  const [communityDecisions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -195,34 +197,69 @@ function Communities() {
   ========================= */
 
   const viewCommunity = async (community) => {
-    try {
-      const response = await fetch(
-        API +
-          "/api/communities/" +
-          community.id +
-          "/decisions",
-        {
-          headers: headers(),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-
-      setOpened(community);
-      setCommunityDecisions(data);
-
-    } catch (error) {
-      notify(
-        error.message ||
-          "Join this community to view its decisions.",
-        true
-      );
-    }
+    if (!community.joined) return notify("Join this community to enter its workspace.", true);
+    navigate(`/communities/${community.id}`);
   };
+
+const deleteCommunity = async (community) => {
+
+  if (!window.confirm(
+    `Delete ${community.communityName}?`
+  )) return;
+
+  try {
+
+    const response = await fetch(
+      `${API}/api/communities/${community.id}`,
+      {
+        method: "DELETE",
+        headers: headers()
+      }
+    );
+
+    const data = await response
+      .json()
+      .catch(() => ({}));
+
+    console.log(
+      "Delete status:",
+      response.status
+    );
+
+    console.log(
+      "Delete response:",
+      data
+    );
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message ||
+        "Unable to delete community."
+      );
+
+    }
+
+    notify("Community deleted.");
+
+    load();
+
+  } catch (error) {
+
+    console.error(
+      "Delete community error:",
+      error
+    );
+
+    notify(
+      error.message ||
+      "Unable to delete community.",
+      true
+    );
+
+  }
+
+};
 
 
   return (
@@ -1248,6 +1285,16 @@ function Communities() {
                             ? "Leave"
                             : "Join"}
                         </button>
+
+                        {community.owner && (
+                          <button
+                            type="button"
+                            className="leave-community"
+                            onClick={() => deleteCommunity(community)}
+                          >
+                            Delete
+                          </button>
+                        )}
 
                       </div>
 

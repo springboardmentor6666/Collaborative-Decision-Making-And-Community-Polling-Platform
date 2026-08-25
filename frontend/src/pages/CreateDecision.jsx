@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 function CreateDecision() {
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [decision, setDecision] = useState({
         title: "",
@@ -22,6 +23,12 @@ function CreateDecision() {
     const [isError, setIsError] = useState(false);
     const [communities, setCommunities] = useState([]);
     const [submitting, setSubmitting] = useState(false);
+
+
+    useEffect(() => {
+        const communityId = new URLSearchParams(location.search).get("communityId");
+        if (communityId) setDecision((current) => ({ ...current, communityId }));
+    }, [location.search]);
 
 
     useEffect(() => {
@@ -254,7 +261,11 @@ function CreateDecision() {
 
             setTimeout(() => {
 
-                navigate("/decisions");
+                navigate(
+                    decision.communityId
+                        ? `/communities/${decision.communityId}`
+                        : "/decisions"
+                );
 
             }, 1000);
 
@@ -280,7 +291,7 @@ function CreateDecision() {
 
     };
 
-
+    const today = new Date().toISOString().split("T")[0];
     return (
 
         <DashboardLayout
@@ -1117,6 +1128,7 @@ function CreateDecision() {
                             name="deadline"
                             value={decision.deadline}
                             onChange={handleChange}
+                            min={today}
                         />
 
                     </div>

@@ -5,6 +5,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "communities")
@@ -32,10 +34,29 @@ public class Community {
     private LocalDateTime createdAt;
 
     @ManyToMany
-    @JoinTable(name = "community_members", joinColumns = @JoinColumn(name = "community_id"), inverseJoinColumns = @JoinColumn(name = "user_id"), uniqueConstraints = @UniqueConstraint(name = "uk_community_member", columnNames = {"community_id", "user_id"}))
+    @JoinTable(
+            name = "community_members",
+            joinColumns = @JoinColumn(name = "community_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_community_member",
+                    columnNames = {"community_id", "user_id"}
+            )
+    )
     @Builder.Default
     private Set<User> members = new HashSet<>();
 
+    // ADD THIS
+    @OneToMany(
+            mappedBy = "community",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<Decision> decisions = new ArrayList<>();
+
     @PrePersist
-    void onCreate() { createdAt = LocalDateTime.now(); }
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

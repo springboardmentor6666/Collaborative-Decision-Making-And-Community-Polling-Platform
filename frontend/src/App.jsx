@@ -13,6 +13,7 @@ import OAuth2Success from "./pages/OAuth2Success";
 import "./index.css";
 import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/LandingPage";
+import CommunityDetail from "./pages/CommunityDetail";
 function App() {
 
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/oauth2/success" element={<OAuth2Success />} />
         <Route path="/polls" element={<Polls />} />
         <Route path="/communities" element={<Communities />} />
+        <Route path="/communities/:communityId" element={<CommunityDetail />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/profile" element={<Profile />} />
 

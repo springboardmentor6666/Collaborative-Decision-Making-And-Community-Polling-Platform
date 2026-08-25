@@ -47,6 +47,8 @@ public class Decision {
     @JoinColumn(name = "community_id")
     private Community community;
 
+
+    // Options will be deleted with the decision
     @OneToMany(
             mappedBy = "decision",
             cascade = CascadeType.ALL,
@@ -54,6 +56,17 @@ public class Decision {
     )
     @Builder.Default
     private List<Option> options = new ArrayList<>();
+
+
+    // Comments will be deleted with the decision
+    @OneToMany(
+            mappedBy = "decision",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
+
 
     @PrePersist
     public void prePersist() {

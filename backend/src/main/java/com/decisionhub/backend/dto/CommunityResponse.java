@@ -19,5 +19,6 @@ public class CommunityResponse {
     private LocalDateTime createdAt;
     private long memberCount;
     private boolean joined;
+    private boolean owner;
     private List<String> memberNames;
 }
