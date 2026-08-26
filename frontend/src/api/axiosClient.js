@@ -286,10 +286,16 @@ export async function fetchDecisionById(id, token) {
 /**
  * Add an option to an existing decision.
  */
-export async function addDecisionOptionApi(decisionId, optionData, token) {
+export async function addDecisionOptionApi(decisionId, optionText, token) {
+  const text = typeof optionText === 'object' && optionText !== null
+    ? (optionText.optionText || optionText.label || '')
+    : String(optionText || '');
   return await request(`/api/decisions/${decisionId}/options`, {
     method: 'POST',
-    body: typeof optionData === 'string' ? { label: optionData } : optionData,
+    body: {
+      optionText: text.trim(),
+      label: text.trim(),
+    },
     token,
   });
 }

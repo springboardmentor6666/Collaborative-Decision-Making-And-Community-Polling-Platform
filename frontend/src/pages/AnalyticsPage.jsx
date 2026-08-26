@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { getCreatorAnalyticsApi } from '../api/axiosClient';
+import { getCreatorAnalyticsApi, closeDecisionApi } from '../api/axiosClient';
 import {
   exportAnalyticsReportBackendOrClient,
   exportAnalyticsToPDF,
@@ -31,10 +31,43 @@ export default function AnalyticsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTab, setFilterTab] = useState('ALL'); // ALL, OPEN, CLOSED
   const [loading, setLoading] = useState(true);
+  const [closingId, setClosingId] = useState(null);
 
   useEffect(() => {
     loadData();
   }, [user?.email]);
+
+  const handleCloseDecision = async (decisionId) => {
+    if (!window.confirm('Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.')) {
+      return;
+    }
+    try {
+      setClosingId(decisionId);
+      const updated = await closeDecisionApi(decisionId, accessToken || localStorage.getItem('decisionhub_token'));
+      const newStatus = updated?.status || 'CLOSED';
+
+      setAnalyticsData((prev) => {
+        if (!prev) return prev;
+        const updatedDecisions = prev.decisions.map((d) =>
+          String(d.id) === String(decisionId) ? { ...d, status: newStatus } : d
+        );
+        return {
+          ...prev,
+          activeDecisions: updatedDecisions.filter((d) => d.status === 'OPEN').length,
+          closedDecisions: updatedDecisions.filter((d) => d.status === 'CLOSED').length,
+          decisions: updatedDecisions,
+        };
+      });
+
+      if (selectedDecision && String(selectedDecision.id) === String(decisionId)) {
+        setSelectedDecision((prev) => (prev ? { ...prev, status: newStatus } : null));
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to close decision.');
+    } finally {
+      setClosingId(null);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -390,12 +423,25 @@ export default function AnalyticsPage() {
                       </div>
 
                       {/* Footer Actions */}
-                      <div className="mt-5 flex items-center justify-between border-t border-border-default pt-4">
+                      <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border-default pt-4">
                         <span className="text-[11px] font-semibold text-muted">
                           {decConversion}% conversion
                         </span>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {dec.status === 'OPEN' && (
+                            <button
+                              onClick={() => handleCloseDecision(dec.id)}
+                              disabled={closingId === dec.id}
+                              className="inline-flex items-center gap-1 rounded-xl border border-amber-500/40 bg-amber-500/10 px-2.5 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 transition hover:bg-amber-500/20"
+                              title="Close voting and finalize decision"
+                            >
+                              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              {closingId === dec.id ? 'Closing...' : 'Close Poll'}
+                            </button>
+                          )}
                           <button
                             onClick={() => setSelectedDecision(dec)}
                             className="inline-flex items-center gap-1.5 rounded-xl bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
@@ -570,7 +616,19 @@ export default function AnalyticsPage() {
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedDecision.status === 'OPEN' && (
+                    <button
+                      onClick={() => handleCloseDecision(selectedDecision.id)}
+                      disabled={closingId === selectedDecision.id}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 transition hover:bg-amber-500/20"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      {closingId === selectedDecision.id ? 'Closing...' : 'Close Poll / Finalize'}
+                    </button>
+                  )}
                   <button
                     onClick={() => setSelectedDecision(null)}
                     className="rounded-xl border border-border-default bg-surface px-3.5 py-1.5 text-xs font-bold text-muted hover:bg-surface-alt transition"
@@ -583,12 +641,14 @@ export default function AnalyticsPage() {
                   >
                     View Details
                   </Link>
-                  <Link
-                    to={`/decisions/${selectedDecision.id}/vote`}
-                    className="rounded-xl border border-primary bg-primary-soft px-3.5 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
-                  >
-                    Voting Screen
-                  </Link>
+                  {selectedDecision.status === 'OPEN' && (
+                    <Link
+                      to={`/decisions/${selectedDecision.id}/vote`}
+                      className="rounded-xl border border-primary bg-primary-soft px-3.5 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
+                    >
+                      Voting Screen
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.div>

@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import {
   fetchDecisionById,
   deleteDecisionApi,
+  addDecisionOptionApi,
+  closeDecisionApi,
   getMyVotesAnalysisApi,
   recordImpressionApi,
   getDecisionFilesApi,
@@ -33,6 +35,12 @@ export default function DecisionDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Post-creation option addition & decision close states
+  const [showAddOptionInput, setShowAddOptionInput] = useState(false);
+  const [newOptionText, setNewOptionText] = useState('');
+  const [addingOption, setAddingOption] = useState(false);
+  const [closingDecision, setClosingDecision] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -109,7 +117,62 @@ export default function DecisionDetails() {
     }
   };
 
-  const isCreator = user && decision?.createdBy && (user.id === decision.createdBy.id || user.email === decision.createdBy.email);
+  const handleAddOption = async (e) => {
+    if (e) e.preventDefault();
+    const text = newOptionText.trim();
+    if (!text) return;
+    try {
+      setAddingOption(true);
+      const result = await addDecisionOptionApi(id, text, accessToken);
+      const createdOption = {
+        id: result?.id || Date.now(),
+        optionText: result?.optionText || result?.label || text,
+        voteCount: result?.voteCount || 0,
+      };
+
+      setDecision(prev => {
+        if (!prev) return prev;
+        const currentPoll = prev.poll || { question: prev.title, options: [] };
+        const updatedPollOptions = [...(currentPoll.options || []), createdOption];
+        return {
+          ...prev,
+          poll: {
+            ...currentPoll,
+            options: updatedPollOptions,
+          },
+          options: [...(prev.options || []), createdOption],
+          optionsCount: (prev.optionsCount || 0) + 1,
+        };
+      });
+
+      setNewOptionText('');
+      setShowAddOptionInput(false);
+    } catch (err) {
+      alert(err.message || 'Failed to add option.');
+    } finally {
+      setAddingOption(false);
+    }
+  };
+
+  const handleCloseDecision = async () => {
+    if (!window.confirm('Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.')) {
+      return;
+    }
+    try {
+      setClosingDecision(true);
+      const updated = await closeDecisionApi(id, accessToken);
+      setDecision(prev => ({
+        ...prev,
+        status: updated?.status || 'CLOSED',
+      }));
+    } catch (err) {
+      alert(err.message || 'Failed to close decision.');
+    } finally {
+      setClosingDecision(false);
+    }
+  };
+
+  const isCreator = user && decision?.createdBy && (user.id === decision.createdBy.id || user.email === decision.createdBy.email || user.role === 'ADMIN');
   const isOpen = decision?.status === 'OPEN' || decision?.status === 'OPEN_TO_VOTE' || decision?.status === 'Active';
 
   const getStatusStyle = (status) => {
@@ -197,6 +260,19 @@ export default function DecisionDetails() {
 
                     {isCreator && (
                       <div className="flex items-center gap-2">
+                        {isOpen && (
+                          <button
+                            onClick={handleCloseDecision}
+                            disabled={closingDecision}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 transition hover:bg-amber-500/20 shadow-sm"
+                            title="Close voting and mark decision as finalized"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            {closingDecision ? 'Closing...' : 'Close Poll / Finalize'}
+                          </button>
+                        )}
                         <Link
                           to={`/decisions/${id}/edit`}
                           className="rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary transition hover:bg-surface-alt"
@@ -388,15 +464,83 @@ export default function DecisionDetails() {
                 {/* Attached Poll Section */}
                 {decision.poll && (
                   <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Attached Poll</p>
                         <h2 className="mt-1 text-xl font-black text-text-primary">{decision.poll.question}</h2>
                       </div>
-                      <span className="rounded-full bg-surface-alt px-3 py-1 text-xs font-bold text-muted">
-                        {decision.poll.options?.length || 0} Options
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-surface-alt px-3 py-1 text-xs font-bold text-muted">
+                          {decision.poll.options?.length || 0} Options
+                        </span>
+                        {isOpen && isCreator && !showAddOptionInput && (
+                          <button
+                            onClick={() => setShowAddOptionInput(true)}
+                            className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-bold text-primary transition hover:bg-primary/20"
+                            title="Add an option to this poll"
+                          >
+                            <span>+ Add Option</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Inline Add Option Form */}
+                    {isOpen && isCreator && showAddOptionInput && (
+                      <form onSubmit={handleAddOption} className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-primary uppercase tracking-wider">Add New Option to Poll</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowAddOptionInput(false);
+                              setNewOptionText('');
+                            }}
+                            className="text-muted hover:text-text-primary text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={newOptionText}
+                            onChange={(e) => setNewOptionText(e.target.value)}
+                            placeholder="Enter new option label or choice..."
+                            className="app-input flex-1 py-2 px-3 text-xs bg-surface"
+                            autoFocus
+                            disabled={addingOption}
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="submit"
+                              disabled={addingOption || !newOptionText.trim()}
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50 shadow-sm"
+                            >
+                              {addingOption ? (
+                                <>
+                                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                  <span>Adding...</span>
+                                </>
+                              ) : (
+                                <span>Save Option</span>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddOptionInput(false);
+                                setNewOptionText('');
+                              }}
+                              disabled={addingOption}
+                              className="rounded-xl border border-border-default bg-surface px-3 py-2 text-xs font-semibold text-text-primary hover:bg-surface-alt transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    )}
 
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       {decision.poll.options?.map((opt, idx) => {
@@ -427,19 +571,42 @@ export default function DecisionDetails() {
                       })}
                     </div>
 
-                    {isOpen && (
-                      <div className="pt-2 flex justify-end">
+                    <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border-default">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {isOpen && isCreator && !showAddOptionInput && (
+                          <button
+                            onClick={() => setShowAddOptionInput(true)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-bold text-primary transition hover:bg-surface-alt"
+                          >
+                            <span className="font-bold">+</span> Add Option
+                          </button>
+                        )}
+                        {isOpen && isCreator && (
+                          <button
+                            onClick={handleCloseDecision}
+                            disabled={closingDecision}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 transition hover:bg-amber-500/20"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            {closingDecision ? 'Closing...' : 'Close Poll / Finalize'}
+                          </button>
+                        )}
+                      </div>
+
+                      {isOpen && (
                         <Link
                           to={`/decisions/${id}/vote`}
-                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover"
+                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover ml-auto"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                           </svg>
                           Open Voting Screen
                         </Link>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
 
