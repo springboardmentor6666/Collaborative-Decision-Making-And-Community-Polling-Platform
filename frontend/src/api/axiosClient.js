@@ -16,8 +16,9 @@ const REFRESH_TOKEN_KEY = 'dh_refresh_token';
  */
 async function request(endpoint, options = {}) {
   const { token, body, ...customConfig } = options;
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json',
+    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...customConfig.headers,
   };
 
@@ -29,11 +30,11 @@ async function request(endpoint, options = {}) {
     method: body ? 'POST' : 'GET',
     ...customConfig,
     headers,
-    credentials: 'include', // Include httpOnly cookies for refresh token if available
+    credentials: 'include',
   };
 
   if (body) {
-    config.body = JSON.stringify(body);
+    config.body = isFormData ? body : JSON.stringify(body);
   }
 
   try {
@@ -706,13 +707,12 @@ export async function getCategoriesApi(token = null) {
     return Array.isArray(data) ? data : [];
   } catch (e) {
     return [
-      { id: 1, name: 'Technology & Engineering' },
-      { id: 2, name: 'Governance & Policy' },
-      { id: 3, name: 'Product & Design' },
-      { id: 4, name: 'Finance & Budget' },
-      { id: 5, name: 'Operations & Strategy' },
-      { id: 6, name: 'Community & Culture' },
-      { id: 7, name: 'Other' },
+      { id: 1, name: 'Career' },
+      { id: 2, name: 'Education' },
+      { id: 3, name: 'Technology' },
+      { id: 4, name: 'Travel' },
+      { id: 5, name: 'Finance' },
+      { id: 6, name: 'Lifestyle' },
     ];
   }
 }
@@ -767,4 +767,224 @@ export async function deleteCommentApi(commentId, token) {
     token,
   });
 }
+
+/**
+ * Suggestions API endpoints
+ */
+export async function getSuggestionsApi(decisionId, token = null) {
+  try {
+    const data = await request(`/api/suggestions/decision/${decisionId}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function createSuggestionApi(suggestionData, token) {
+  return await request('/api/suggestions', {
+    method: 'POST',
+    body: {
+      decisionId: Number(suggestionData.decisionId),
+      content: suggestionData.content,
+    },
+    token,
+  });
+}
+
+/**
+ * Expert Recommendations API endpoints
+ */
+export async function getRecommendationsApi(decisionId, token = null) {
+  try {
+    const data = await request(`/api/recommendations/decision/${decisionId}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function createRecommendationApi(recommendationData, token) {
+  return await request('/api/recommendations', {
+    method: 'POST',
+    body: {
+      decisionId: Number(recommendationData.decisionId),
+      recommendedOptionId: Number(recommendationData.recommendedOptionId),
+      justification: recommendationData.justification,
+    },
+    token,
+  });
+}
+
+/**
+ * Notification API endpoints (Real Backend)
+ */
+export async function getNotificationsApi(token) {
+  try {
+    const data = await request('/api/notifications', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getUnreadNotificationsApi(token) {
+  try {
+    const data = await request('/api/notifications/unread', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getUnreadNotificationCountApi(token) {
+  try {
+    const data = await request('/api/notifications/count', { token });
+    return data?.unreadCount || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+export async function markNotificationAsReadApi(id, token) {
+  return await request(`/api/notifications/${id}/read`, {
+    method: 'PUT',
+    token,
+  });
+}
+
+export async function markAllNotificationsAsReadApi(token) {
+  return await request('/api/notifications/read-all', {
+    method: 'PUT',
+    token,
+  });
+}
+
+export async function deleteNotificationApi(id, token) {
+  return await request(`/api/notifications/${id}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+/**
+ * Analytics Trends, Categories, and Community API endpoints
+ */
+export async function getDecisionTrendsApi(token = null) {
+  try {
+    const data = await request('/api/analytics/trends', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getPopularCategoriesApi(token = null) {
+  try {
+    const data = await request('/api/analytics/categories', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getCommunityAnalyticsApi(communityId, token = null) {
+  return await request(`/api/analytics/communities/${communityId}`, { token });
+}
+
+export async function exportReportBackendApi(format = 'csv', token) {
+  return await request(`/api/analytics/reports/export?format=${encodeURIComponent(format)}`, { token });
+}
+
+/**
+ * File & Media Attachments API
+ */
+export async function uploadDecisionFileApi(decisionId, file, token) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return await request(`/api/files/upload/decision/${decisionId}`, {
+    method: 'POST',
+    body: formData,
+    token,
+  });
+}
+
+export async function uploadCommentFileApi(commentId, file, token) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return await request(`/api/files/upload/comment/${commentId}`, {
+    method: 'POST',
+    body: formData,
+    token,
+  });
+}
+
+export async function getDecisionFilesApi(decisionId, token = null) {
+  try {
+    const data = await request(`/api/files/decision/${decisionId}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getCommentFilesApi(commentId, token = null) {
+  try {
+    const data = await request(`/api/files/comment/${commentId}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function deleteAttachmentFileApi(fileId, token) {
+  return await request(`/api/files/${fileId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+/**
+ * Community Invitations API
+ */
+export async function inviteUserToCommunityApi(communityId, inviteeEmail, token) {
+  return await request(`/api/communities/${communityId}/invite`, {
+    method: 'POST',
+    body: { inviteeEmail },
+    token,
+  });
+}
+
+export async function getPendingCommunityInvitesApi(token) {
+  try {
+    const data = await request('/api/communities/invites/pending', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function respondToCommunityInviteApi(inviteId, response, token) {
+  return await request(`/api/communities/invites/${inviteId}/respond`, {
+    method: 'POST',
+    body: { response: response.toUpperCase() },
+    token,
+  });
+}
+
+/**
+ * User Content Moderation Flagging API
+ */
+export async function flagContentApi(targetType, targetId, reason, token) {
+  return await request('/api/moderation/flag', {
+    method: 'POST',
+    body: {
+      targetType: targetType.toUpperCase(),
+      targetId: Number(targetId),
+      reason,
+    },
+    token,
+  });
+}
+
+
 

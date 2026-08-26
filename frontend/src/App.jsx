@@ -11,6 +11,7 @@ import OnboardingWizard from './pages/OnboardingWizard';
 import DashboardPage from './pages/DashboardPage';
 import CreateDecision from './pages/CreateDecision';
 import DecisionDetails from './pages/DecisionDetails';
+import DecisionReportPage from './pages/DecisionReportPage';
 import EditDecision from './pages/EditDecision';
 import VotePage from './pages/VotePage';
 import AnalysisPage from './pages/AnalysisPage';
@@ -20,6 +21,7 @@ import AdminPage from './pages/AdminPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CreateCommunity from './pages/CreateCommunity';
 import CommunityDetails from './pages/CommunityDetails';
+import CommunityReportsPage from './pages/CommunityReportsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import ContactSupport from './pages/ContactSupport';
@@ -88,6 +90,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/decisions/:id/report"
+          element={
+            <ProtectedRoute>
+              <DecisionReportPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/decisions/:id/edit"
           element={
             <ProtectedRoute>
@@ -143,6 +153,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <CommunityDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/communities/:id/reports"
+          element={
+            <ProtectedRoute>
+              <CommunityReportsPage />
             </ProtectedRoute>
           }
         />

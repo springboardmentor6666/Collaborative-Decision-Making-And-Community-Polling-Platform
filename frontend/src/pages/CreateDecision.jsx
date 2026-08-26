@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { createDecisionApi } from '../api/axiosClient';
+import { createDecisionApi, uploadDecisionFileApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -24,6 +24,7 @@ export default function CreateDecision() {
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [pollType, setPollType] = useState('SINGLE_CHOICE');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // MCDA state
   const [enableMcda, setEnableMcda] = useState(false);
@@ -126,6 +127,18 @@ export default function CreateDecision() {
       };
 
       const created = await createDecisionApi(payload, accessToken, user);
+
+      // Upload selected file attachments if any
+      if (created?.id && selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          try {
+            await uploadDecisionFileApi(created.id, file, accessToken);
+          } catch (fileErr) {
+            console.error('Failed to attach file:', fileErr);
+          }
+        }
+      }
+
       navigate(`/decisions/${created.id}`);
     } catch (err) {
       setError(err.message || 'Failed to create decision. Please try again.');
@@ -208,6 +221,53 @@ export default function CreateDecision() {
                     placeholder="Explain the background, constraints, and goal of this decision..."
                     className={inputClass}
                   />
+                </div>
+
+                {/* File & Media Attachments */}
+                <div>
+                  <label className={labelClass}>Supporting Attachments & Documents (Optional)</label>
+                  <div className="rounded-2xl border border-dashed border-border-default bg-surface-alt/40 p-4 text-center">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-soft px-4 py-2 text-xs font-bold text-primary transition hover:bg-primary hover:text-white">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      <span>Choose Files to Attach</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (files.length > 0) {
+                            setSelectedFiles((prev) => [...prev, ...files]);
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                    <p className="mt-1.5 text-[11px] text-muted">Supports images, PDFs, spreadsheets, and documents up to 20MB</p>
+
+                    {selectedFiles.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2 text-left">
+                        {selectedFiles.map((file, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-2.5 py-1 text-xs text-text-primary"
+                          >
+                            <span className="truncate max-w-[150px] font-medium">{file.name}</span>
+                            <span className="text-[10px] text-muted">({Math.round(file.size / 1024)} KB)</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== idx))}
+                              className="text-red-500 hover:text-red-700 ml-1"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>

@@ -1,5 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
-import { fetchDecisions, getCategoriesApi } from '../api/axiosClient';
+import {
+  fetchDecisions,
+  getCategoriesApi,
+  getPopularCategoriesApi,
+  getDecisionTrendsApi,
+} from '../api/axiosClient';
 import DecisionCard from '../components/DecisionCard';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -7,10 +12,22 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 
+const MEDALS = ['🥇', '🥈', '🥉'];
+const BAR_ACCENTS = [
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-purple-500',
+  'bg-emerald-500',
+  'bg-amber-500',
+  'bg-rose-500',
+];
+
 export default function DashboardPage() {
   const { user, accessToken } = useAuth();
   const [decisions, setDecisions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [popularCategories, setPopularCategories] = useState([]);
+  const [decisionTrends, setDecisionTrends] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingDecisions, setLoadingDecisions] = useState(true);
@@ -19,13 +36,50 @@ export default function DashboardPage() {
     Promise.all([
       fetchDecisions(accessToken).catch(() => []),
       getCategoriesApi(accessToken).catch(() => []),
-    ]).then(([decData, catData]) => {
-      setDecisions(decData);
-      setCategories(catData);
+      getPopularCategoriesApi(accessToken).catch(() => []),
+      getDecisionTrendsApi(accessToken).catch(() => []),
+    ]).then(([decData, catData, popCatData, trendsData]) => {
+      setDecisions(decData || []);
+      setCategories(catData || []);
+      setPopularCategories(popCatData || []);
+      setDecisionTrends(trendsData || []);
       setLoadingDecisions(false);
     });
   }, [accessToken]);
 
+  // Derived popular categories if backend endpoint returns empty
+  const rankedCategories = useMemo(() => {
+    if (popularCategories && popularCategories.length > 0) {
+      const maxCount = Math.max(...popularCategories.map((c) => Number(c.decisionCount) || 0), 1);
+      return popularCategories.map((c) => ({
+        id: c.id,
+        name: c.name || c.categoryName || 'General',
+        count: Number(c.decisionCount) || 0,
+        pct: Math.round(((Number(c.decisionCount) || 0) / maxCount) * 100),
+      }));
+    }
+
+    // Client fallback computed from decisions & categories
+    const counts = {};
+    decisions.forEach((d) => {
+      const name = d.categoryName || 'General';
+      counts[name] = (counts[name] || 0) + 1;
+    });
+
+    const list = Object.keys(counts).map((name, idx) => ({
+      id: idx + 1,
+      name,
+      count: counts[name],
+    }));
+    list.sort((a, b) => b.count - a.count);
+    const maxCount = Math.max(...list.map((c) => c.count), 1);
+    return list.map((c) => ({
+      ...c,
+      pct: Math.round((c.count / maxCount) * 100),
+    }));
+  }, [popularCategories, decisions]);
+
+  // Derived filtered decisions
   const filteredDecisions = useMemo(() => {
     return decisions.filter((d) => {
       const matchesSearch =
@@ -42,6 +96,11 @@ export default function DashboardPage() {
     });
   }, [decisions, searchQuery, selectedCategory]);
 
+  // Max trends for SVG scaling
+  const maxTrendDecisions = Math.max(...decisionTrends.map((t) => Number(t.decisionsCreated) || 0), 1);
+  const maxTrendVotes = Math.max(...decisionTrends.map((t) => Number(t.votesCast) || 0), 1);
+  const maxTrendVal = Math.max(maxTrendDecisions, maxTrendVotes, 5);
+
   return (
     <div className="page-shell min-h-screen flex flex-col sm:pr-[60px]">
       <Navbar />
@@ -52,8 +111,10 @@ export default function DashboardPage() {
             {/* Header */}
             <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-black tracking-tight text-primary">Dashboard</h1>
-                <p className="mt-1 text-secondary">Welcome back, {user?.name || user?.email}!</p>
+                <h1 className="text-3xl font-black tracking-tight text-primary">Decision Dashboard</h1>
+                <p className="mt-1 text-secondary">
+                  Welcome back, {user?.name || user?.email}! Collective intelligence & polling insights.
+                </p>
               </div>
               <div className="flex items-center gap-3">
                 <Link
@@ -111,10 +172,192 @@ export default function DashboardPage() {
               </Link>
             </div>
 
+            {/* Analytics Widgets Section: Popular Categories & Decision Trends & Activity Timeline */}
+            <div className="mb-8 grid gap-4 lg:grid-cols-3">
+              {/* Widget 1: Popular Categories Ranking */}
+              <div className="rounded-3xl border border-border-default bg-surface p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-3 border-b border-border-default">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-sm text-text-primary">Popular Categories</h3>
+                    </div>
+                    <span className="text-[11px] font-semibold text-muted">Ranked by volume</span>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {rankedCategories.slice(0, 5).map((cat, idx) => (
+                      <div
+                        key={cat.id || idx}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={`group cursor-pointer rounded-2xl p-2.5 transition-all border ${
+                          selectedCategory === cat.name
+                            ? 'border-primary bg-primary-soft/40'
+                            : 'border-transparent hover:border-border-default hover:bg-surface-alt'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-xs mb-1.5">
+                          <div className="flex items-center gap-2 font-bold text-text-primary">
+                            <span className="text-sm">{MEDALS[idx] || `#${idx + 1}`}</span>
+                            <span className="group-hover:text-primary transition">{cat.name}</span>
+                          </div>
+                          <span className="font-extrabold text-muted">
+                            {cat.count} <span className="font-normal text-[10px]">polls</span>
+                          </span>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-surface-alt">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${BAR_ACCENTS[idx % BAR_ACCENTS.length]}`}
+                            style={{ width: `${Math.max(cat.pct, 8)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {rankedCategories.length === 0 && (
+                      <p className="text-xs text-muted text-center py-6">No category ranking data available.</p>
+                    )}
+                  </div>
+                </div>
+
+                {selectedCategory !== 'ALL' && (
+                  <button
+                    onClick={() => setSelectedCategory('ALL')}
+                    className="mt-3 w-full rounded-xl border border-border-default py-1.5 text-xs font-bold text-primary hover:bg-surface-alt transition"
+                  >
+                    Reset Filter (Show All)
+                  </button>
+                )}
+              </div>
+
+              {/* Widget 2: Decision Trends Line Chart */}
+              <div className="rounded-3xl border border-border-default bg-surface p-5 shadow-sm flex flex-col justify-between lg:col-span-2">
+                <div>
+                  <div className="flex items-center justify-between pb-3 border-b border-border-default">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-primary">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-sm text-text-primary">Platform Decision & Voting Trends</h3>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] font-bold">
+                      <span className="flex items-center gap-1 text-primary">
+                        <span className="h-2 w-2 rounded-full bg-primary" /> Decisions
+                      </span>
+                      <span className="flex items-center gap-1 text-emerald-600">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500" /> Votes
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* SVG Line Chart */}
+                  <div className="mt-4">
+                    {decisionTrends.length > 0 ? (
+                      <div className="h-44 w-full">
+                        <svg viewBox="0 0 500 150" className="h-full w-full overflow-visible">
+                          {/* Horizontal Grid lines */}
+                          {[0, 37.5, 75, 112.5, 150].map((y, i) => (
+                            <line
+                              key={i}
+                              x1="0"
+                              y1={y}
+                              x2="500"
+                              y2={y}
+                              stroke="var(--border)"
+                              strokeDasharray="3 3"
+                              strokeWidth="0.8"
+                              opacity="0.5"
+                            />
+                          ))}
+
+                          {/* Points calculations */}
+                          {(() => {
+                            const step = decisionTrends.length > 1 ? 500 / (decisionTrends.length - 1) : 250;
+                            const decisionPoints = decisionTrends.map((t, idx) => {
+                              const x = idx * step;
+                              const y = 140 - ((Number(t.decisionsCreated) || 0) / maxTrendVal) * 120;
+                              return `${x},${y}`;
+                            });
+                            const votePoints = decisionTrends.map((t, idx) => {
+                              const x = idx * step;
+                              const y = 140 - ((Number(t.votesCast) || 0) / maxTrendVal) * 120;
+                              return `${x},${y}`;
+                            });
+
+                            return (
+                              <>
+                                {/* Decisions Line */}
+                                <polyline
+                                  fill="none"
+                                  stroke="#2563eb"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  points={decisionPoints.join(' ')}
+                                />
+                                {/* Votes Line */}
+                                <polyline
+                                  fill="none"
+                                  stroke="#10b981"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  points={votePoints.join(' ')}
+                                />
+
+                                {/* Dots */}
+                                {decisionTrends.map((t, idx) => {
+                                  const x = idx * step;
+                                  const dy = 140 - ((Number(t.decisionsCreated) || 0) / maxTrendVal) * 120;
+                                  const vy = 140 - ((Number(t.votesCast) || 0) / maxTrendVal) * 120;
+                                  return (
+                                    <g key={idx}>
+                                      <circle cx={x} cy={dy} r="3.5" fill="#2563eb" className="stroke-white stroke-2" />
+                                      <circle cx={x} cy={vy} r="3.5" fill="#10b981" className="stroke-white stroke-2" />
+                                    </g>
+                                  );
+                                })}
+                              </>
+                            );
+                          })()}
+                        </svg>
+
+                        {/* X-axis labels */}
+                        <div className="flex justify-between text-[10px] text-muted font-semibold mt-2">
+                          {decisionTrends.map((t, idx) => (
+                            <span key={idx}>{t.date?.slice(5) || `Day ${idx + 1}`}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Minimal fallback visual when backend trends array is empty */
+                      <div className="py-8 text-center rounded-2xl border border-dashed border-border-default bg-surface-alt/30">
+                        <p className="text-xs font-bold text-text-primary">Historical trends will populate as decisions are published.</p>
+                        <p className="text-[11px] text-muted mt-0.5">Real-time telemetry records new decisions & cast votes daily.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Timeline Strip */}
+                <div className="mt-3 flex items-center justify-between text-[11px] text-muted border-t border-border-default pt-2.5">
+                  <span>📊 Total Platform Decisions: <strong className="text-text-primary">{decisions.length}</strong></span>
+                  <span>🗳️ Cumulative Votes: <strong className="text-text-primary">{decisions.reduce((sum, d) => sum + (d.votesCount || 0), 0)}</strong></span>
+                </div>
+              </div>
+            </div>
+
             {/* Filter & Search Bar Side-by-Side */}
             <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-text-primary">All Decisions</h2>
+                <h2 className="text-lg font-bold text-text-primary">
+                  {selectedCategory === 'ALL' ? 'All Community Decisions' : `${selectedCategory} Decisions`}
+                </h2>
                 <span className="rounded-full bg-surface-alt px-2.5 py-0.5 text-xs font-bold text-muted">
                   {filteredDecisions.length}
                 </span>
@@ -197,3 +440,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

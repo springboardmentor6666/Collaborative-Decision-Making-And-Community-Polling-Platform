@@ -3,9 +3,17 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { getCreatorAnalyticsApi } from '../api/axiosClient';
+import {
+  exportAnalyticsReportBackendOrClient,
+  exportAnalyticsToPDF,
+  exportAnalyticsToCSV,
+  exportSingleDecisionAnalyticsPDF,
+  exportSingleDecisionAnalyticsCSV,
+} from '../utils/exportUtils';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import PieChart from '../components/PieChart';
 
 const BAR_COLORS = [
   '#2563eb', // Blue
@@ -17,7 +25,7 @@ const BAR_COLORS = [
 ];
 
 export default function AnalyticsPage() {
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [selectedDecision, setSelectedDecision] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,7 +39,7 @@ export default function AnalyticsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await getCreatorAnalyticsApi(localStorage.getItem('decisionhub_token'));
+      const data = await getCreatorAnalyticsApi(accessToken || localStorage.getItem('decisionhub_token'));
       const mapped = {
         totalDecisions: data.totalDecisionsPublished || 0,
         totalViews: data.totalViews || 0,
@@ -109,15 +117,37 @@ export default function AnalyticsPage() {
                 </p>
               </div>
 
-              <Link
-                to="/decisions/create"
-                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                </svg>
-                New Decision
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => exportAnalyticsReportBackendOrClient('pdf', analyticsData, user, accessToken)}
+                  className="inline-flex items-center gap-1.5 rounded-2xl border border-border-default bg-surface px-4 py-2.5 text-xs font-bold text-text-primary transition hover:bg-surface-alt hover:border-primary/40 shadow-sm"
+                  title="Export Creator Analytics Summary as PDF"
+                >
+                  <svg className="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Export PDF Report
+                </button>
+                <button
+                  onClick={() => exportAnalyticsReportBackendOrClient('csv', analyticsData, user, accessToken)}
+                  className="inline-flex items-center gap-1.5 rounded-2xl border border-border-default bg-surface px-4 py-2.5 text-xs font-bold text-text-primary transition hover:bg-surface-alt hover:border-emerald-500/40 shadow-sm"
+                  title="Export Creator Analytics to Excel / CSV"
+                >
+                  <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export CSV / Excel
+                </button>
+                <Link
+                  to="/decisions/create"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  New Decision
+                </Link>
+              </div>
             </div>
 
             {/* KPI Cards: Reach, Views, Voted, Conversion */}
@@ -334,6 +364,22 @@ export default function AnalyticsPage() {
                           </div>
                         </div>
 
+                        {/* Visual Vote Distribution Pie Chart Preview */}
+                        {votes > 0 && dec.poll?.options?.length > 0 && (
+                          <div className="mt-4 rounded-xl border border-border-default/60 bg-surface-alt/40 p-3">
+                            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted">
+                              Vote Distribution Breakdown
+                            </p>
+                            <PieChart
+                              options={dec.poll.options}
+                              totalVotes={votes}
+                              winningOption={leader?.optionText}
+                              size={120}
+                              showLegend={true}
+                            />
+                          </div>
+                        )}
+
                         {/* Leading Option */}
                         {leader && votes > 0 && (
                           <p className="mt-3 text-xs text-muted">
@@ -481,73 +527,69 @@ export default function AnalyticsPage() {
                 </h3>
               </div>
 
-              {/* Options Vote Distribution Chart */}
+              {/* Options Vote Distribution Donut/Pie Chart */}
               <div className="mb-6 rounded-2xl border border-border-default bg-surface p-5 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-text-primary">Option Vote Distribution</h4>
+                <div className="mb-4 flex items-center justify-between border-b border-border-default pb-3">
+                  <h4 className="text-sm font-bold text-text-primary">Vote Distribution Breakdown</h4>
                   <span className="text-xs font-semibold text-muted">
                     {selectedDecision.votesCount || 0} total votes
                   </span>
                 </div>
 
-                <div className="space-y-4">
-                  {selectedDecision.poll?.options?.map((opt, idx) => {
-                    const total = selectedDecision.votesCount || 0;
-                    const pct = total > 0 ? Math.round(((opt.voteCount || 0) / total) * 100) : 0;
-                    const color = BAR_COLORS[idx % BAR_COLORS.length];
-
-                    return (
-                      <div key={opt.id || idx} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: color }}
-                            />
-                            <span className="font-bold text-text-primary">{opt.optionText}</span>
-                          </div>
-                          <span className="font-bold text-text-primary">
-                            {pct}%{' '}
-                            <span className="font-normal text-muted">({opt.voteCount || 0} votes)</span>
-                          </span>
-                        </div>
-
-                        {/* Bar */}
-                        <div className="h-3 w-full overflow-hidden rounded-full bg-surface-alt">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${pct}%` }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: color }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <PieChart
+                  options={selectedDecision.poll?.options || []}
+                  totalVotes={selectedDecision.votesCount || 0}
+                  winningOption={selectedDecision.poll?.options?.reduce((max, opt) => (opt.voteCount > (max?.voteCount || 0) ? opt : max), null)?.optionText}
+                  size={200}
+                  showLegend={true}
+                />
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 border-t border-border-default pt-4">
-                <button
-                  onClick={() => setSelectedDecision(null)}
-                  className="rounded-xl border border-border-default bg-surface px-4 py-2 text-xs font-bold text-muted hover:bg-surface-alt"
-                >
-                  Close
-                </button>
-                <Link
-                  to={`/decisions/${selectedDecision.id}`}
-                  className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover"
-                >
-                  View Decision Details
-                </Link>
-                <Link
-                  to={`/decisions/${selectedDecision.id}/vote`}
-                  className="rounded-xl border border-primary bg-primary-soft px-4 py-2 text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
-                >
-                  Open Voting Session
-                </Link>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => exportSingleDecisionAnalyticsPDF(selectedDecision)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-bold text-text-primary hover:bg-surface-alt transition"
+                    title="Export decision analytics as PDF"
+                  >
+                    <svg className="h-3.5 w-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    PDF
+                  </button>
+                  <button
+                    onClick={() => exportSingleDecisionAnalyticsCSV(selectedDecision)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-bold text-text-primary hover:bg-surface-alt transition"
+                    title="Export decision analytics as Excel / CSV"
+                  >
+                    <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedDecision(null)}
+                    className="rounded-xl border border-border-default bg-surface px-3.5 py-1.5 text-xs font-bold text-muted hover:bg-surface-alt transition"
+                  >
+                    Close
+                  </button>
+                  <Link
+                    to={`/decisions/${selectedDecision.id}`}
+                    className="rounded-xl bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-primary-hover shadow-sm"
+                  >
+                    View Details
+                  </Link>
+                  <Link
+                    to={`/decisions/${selectedDecision.id}/vote`}
+                    className="rounded-xl border border-primary bg-primary-soft px-3.5 py-1.5 text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
+                  >
+                    Voting Screen
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </div>

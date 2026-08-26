@@ -11,7 +11,8 @@ import {
   updateCommunityApi,
   deleteCommunityApi,
   transferOwnershipApi,
-  getCommunityDecisionsApi
+  getCommunityDecisionsApi,
+  inviteUserToCommunityApi,
 } from '../api/axiosClient';
 import DecisionCard from '../components/DecisionCard';
 import Navbar from '../components/Navbar';
@@ -43,6 +44,33 @@ export default function CommunityDetails() {
   const [transferError, setTransferError] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Invite modal state
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
+  const [inviteError, setInviteError] = useState(null);
+
+  const handleSendInvite = async (e) => {
+    e.preventDefault();
+    if (!inviteEmail.trim() || inviteLoading) return;
+    setInviteLoading(true);
+    setInviteError(null);
+    try {
+      await inviteUserToCommunityApi(id, inviteEmail.trim(), accessToken);
+      setInviteSuccess(true);
+      setTimeout(() => {
+        setInviteSuccess(false);
+        setShowInviteModal(false);
+        setInviteEmail('');
+      }, 1500);
+    } catch (err) {
+      setInviteError(err.message || 'Failed to send community invite.');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -91,7 +119,15 @@ export default function CommunityDetails() {
   const handleJoin = async () => {
     setActionLoading(true);
     try {
-      await joinCommunityApi(id, accessToken);
+      const res = await joinCommunityApi(id, accessToken);
+      setCommunity((prev) => ({
+        ...prev,
+        ...(res || {}),
+        isMember: true,
+        member: true,
+        currentUserRole: res?.currentUserRole || 'MEMBER',
+        memberCount: (prev?.memberCount || 0) + 1,
+      }));
       await fetchData();
     } catch (err) {
       alert(err.message || 'Failed to join community.');
@@ -105,6 +141,13 @@ export default function CommunityDetails() {
     setActionLoading(true);
     try {
       await leaveCommunityApi(id, accessToken);
+      setCommunity((prev) => ({
+        ...prev,
+        isMember: false,
+        member: false,
+        currentUserRole: null,
+        memberCount: Math.max((prev?.memberCount || 1) - 1, 0),
+      }));
       await fetchData();
     } catch (err) {
       alert(err.message || 'Failed to leave community.');
@@ -228,8 +271,14 @@ export default function CommunityDetails() {
   }
 
   const isPublic = community.visibility === 'PUBLIC';
-  const isMember = community.isMember;
-  const userRole = community.currentUserRole; // 'OWNER', 'ADMIN', 'MEMBER', or null
+  const isMember = Boolean(
+    community.isMember === true ||
+    community.member === true ||
+    (community.currentUserRole && community.currentUserRole !== 'NONE') ||
+    (user && community.createdBy && (String(community.createdBy.id) === String(user.id) || community.createdBy.email === user.email)) ||
+    members.some((m) => String(m.userId) === String(user?.id) || m.email === user?.email || String(m.user?.id) === String(user?.id) || m.user?.email === user?.email)
+  );
+  const userRole = community.currentUserRole || (isMember ? (user && community.createdBy && (String(community.createdBy.id) === String(user?.id) || community.createdBy.email === user?.email) ? 'OWNER' : 'MEMBER') : null);
   const isOwner = userRole === 'OWNER';
   const isAdmin = userRole === 'ADMIN';
 
@@ -286,6 +335,18 @@ export default function CommunityDetails() {
 
                 {/* Membership & Owner Actions */}
                 <div className="flex flex-wrap items-center gap-3">
+                  {/* Community Analytics & Reports */}
+                  <Link
+                    to={`/communities/${id}/reports`}
+                    className="inline-flex items-center gap-1.5 rounded-2xl border border-border-default bg-surface px-4 py-2.5 text-sm font-bold text-text-primary transition hover:bg-surface-alt shadow-sm"
+                    title="View Community Intelligence & Analytics Reports"
+                  >
+                    <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Community Reports
+                  </Link>
+
                   {!isMember && isPublic && (
                     <button
                       onClick={handleJoin}
@@ -487,6 +548,71 @@ export default function CommunityDetails() {
           <Footer />
         </main>
       </div>
+
+      {/* Invite Member Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-border-default bg-surface p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-text-primary">Invite User to Community</h2>
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="rounded-xl p-1 text-muted hover:bg-surface-alt"
+              >
+                ✕
+              </button>
+            </div>
+
+            {inviteSuccess ? (
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center text-sm font-bold text-emerald-600">
+                ✓ Invitation sent successfully!
+              </div>
+            ) : (
+              <form onSubmit={handleSendInvite} className="space-y-4">
+                {inviteError && (
+                  <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-600">
+                    {inviteError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1">
+                    Invitee Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="colleague@example.com"
+                    className="w-full rounded-2xl border border-border-default bg-surface p-3 text-sm text-text-primary focus:border-primary focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-muted">
+                    The user will receive an invitation to join <strong className="text-text-primary">{community.name}</strong>.
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteModal(false)}
+                    className="rounded-xl border border-border-default bg-surface px-4 py-2 text-sm font-bold text-muted hover:bg-surface-alt"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={inviteLoading}
+                    className="rounded-2xl bg-primary px-5 py-2 text-sm font-bold text-white shadow-app hover:bg-primary-hover transition disabled:opacity-60"
+                  >
+                    {inviteLoading ? 'Sending...' : 'Send Invitation'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Edit Community Modal */}
       {showEditModal && (
