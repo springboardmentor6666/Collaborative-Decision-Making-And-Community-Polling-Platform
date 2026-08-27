@@ -1,5 +1,6 @@
 package com.decisionhub.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public class CommunityResponse {
@@ -13,7 +14,10 @@ public class CommunityResponse {
     private UserResponse createdBy;
     private LocalDateTime createdAt;
     private long memberCount;
+
+    @JsonProperty("isMember")
     private boolean isMember;
+
     private String currentUserRole;
     private long decisionCount;
 
@@ -109,6 +113,7 @@ public class CommunityResponse {
         this.memberCount = memberCount;
     }
 
+    @JsonProperty("isMember")
     public boolean isMember() {
         return isMember;
     }

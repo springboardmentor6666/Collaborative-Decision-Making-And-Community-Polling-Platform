@@ -1,10 +1,12 @@
 package com.decisionhub.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 
 public class OptionRequest {
 
     @NotBlank(message = "Option label is required")
+    @JsonAlias({"optionText", "text", "name"})
     private String label;
 
     private String description;
@@ -29,6 +31,14 @@ public class OptionRequest {
         this.label = label;
     }
 
+    public String getOptionText() {
+        return label;
+    }
+
+    public void setOptionText(String optionText) {
+        this.label = optionText;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -37,3 +47,4 @@ public class OptionRequest {
         this.description = description;
     }
 }
+

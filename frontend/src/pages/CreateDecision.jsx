@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { createDecisionApi } from '../api/axiosClient';
+import { createDecisionApi, uploadDecisionFileApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -22,6 +22,9 @@ export default function CreateDecision() {
   const [categoryId, setCategoryId] = useState(null);
   const [pollQuestion, setPollQuestion] = useState('');
   const [pollOptions, setPollOptions] = useState(['', '']);
+  const [pollType, setPollType] = useState('SINGLE_CHOICE');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // MCDA state
   const [enableMcda, setEnableMcda] = useState(false);
@@ -114,14 +117,28 @@ export default function CreateDecision() {
         description: description.trim(),
         status,
         categoryId: categoryId || null,
+        pollType: pollQuestion.trim() ? pollType : null,
         pollQuestion: pollQuestion.trim() || null,
         pollOptions: pollQuestion.trim() ? trimmedOptions : null,
+        isAnonymous: isAnonymous,
         communityId,
         comparisonFactorNames: enableMcda ? trimmedFactors : null,
         optionScores: enableMcda ? optionScoresPayload : null,
       };
 
       const created = await createDecisionApi(payload, accessToken, user);
+
+      // Upload selected file attachments if any
+      if (created?.id && selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          try {
+            await uploadDecisionFileApi(created.id, file, accessToken);
+          } catch (fileErr) {
+            console.error('Failed to attach file:', fileErr);
+          }
+        }
+      }
+
       navigate(`/decisions/${created.id}`);
     } catch (err) {
       setError(err.message || 'Failed to create decision. Please try again.');
@@ -206,6 +223,53 @@ export default function CreateDecision() {
                   />
                 </div>
 
+                {/* File & Media Attachments */}
+                <div>
+                  <label className={labelClass}>Supporting Attachments & Documents (Optional)</label>
+                  <div className="rounded-2xl border border-dashed border-border-default bg-surface-alt/40 p-4 text-center">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-soft px-4 py-2 text-xs font-bold text-primary transition hover:bg-primary hover:text-white">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      <span>Choose Files to Attach</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (files.length > 0) {
+                            setSelectedFiles((prev) => [...prev, ...files]);
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                    <p className="mt-1.5 text-[11px] text-muted">Supports images, PDFs, spreadsheets, and documents up to 20MB</p>
+
+                    {selectedFiles.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2 text-left">
+                        {selectedFiles.map((file, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-2.5 py-1 text-xs text-text-primary"
+                          >
+                            <span className="truncate max-w-[150px] font-medium">{file.name}</span>
+                            <span className="text-[10px] text-muted">({Math.round(file.size / 1024)} KB)</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== idx))}
+                              className="text-red-500 hover:text-red-700 ml-1"
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className={labelClass}>Initial Status</label>
                   <select
@@ -238,43 +302,111 @@ export default function CreateDecision() {
                 </div>
 
                 {pollQuestion.trim() && (
-                  <div className="space-y-3">
-                    <label className={labelClass}>Poll Options</label>
-                    {pollOptions.map((opt, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
+                  <>
+                    {/* Poll Type Selector */}
+                    <div>
+                      <label className={labelClass}>Poll Voting Type</label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {[
+                          {
+                            id: 'SINGLE_CHOICE',
+                            title: 'Single Choice',
+                            desc: 'Voters pick one option (Radio)',
+                            icon: '🔘',
+                          },
+                          {
+                            id: 'MULTIPLE',
+                            title: 'Multiple Choice',
+                            desc: 'Voters select 1 or more options',
+                            icon: '☑️',
+                          },
+                          {
+                            id: 'RATING',
+                            title: 'Rating Scale',
+                            desc: 'Voters rate options 1 to 5 stars',
+                            icon: '⭐',
+                          },
+                        ].map((t) => (
+                          <div
+                            key={t.id}
+                            onClick={() => setPollType(t.id)}
+                            className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+                              pollType === t.id
+                                ? 'border-primary bg-primary-soft shadow-xs'
+                                : 'border-border-default bg-surface hover:bg-surface-alt'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-base">{t.icon}</span>
+                              <span className="text-xs font-bold text-text-primary">{t.title}</span>
+                            </div>
+                            <p className="text-[11px] text-muted leading-tight">{t.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Anonymous Voting Toggle */}
+                    <div className="flex items-center justify-between rounded-2xl border border-border-default bg-surface-alt/60 p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-surface text-base">
+                          🕵️
+                        </span>
+                        <div>
+                          <p className="text-xs font-bold text-text-primary">Vote Anonymously</p>
+                          <p className="text-[11px] text-muted">Hide voter identities on public tallies for this poll.</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex cursor-pointer items-center">
                         <input
-                          type="text"
-                          required
-                          value={opt}
-                          onChange={(e) => handleOptionChange(idx, e.target.value)}
-                          placeholder={`Option ${idx + 1}`}
-                          className={`${inputClass} flex-1`}
+                          type="checkbox"
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          className="peer sr-only"
                         />
+                        <div className="h-6 w-11 rounded-full bg-border-default peer-checked:bg-primary transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+                      </label>
+                    </div>
+
+                    {/* Poll Options */}
+                    <div className="space-y-3">
+                      <label className={labelClass}>Poll Options</label>
+                      {pollOptions.map((opt, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            required
+                            value={opt}
+                            onChange={(e) => handleOptionChange(idx, e.target.value)}
+                            placeholder={`Option ${idx + 1}`}
+                            className={`${inputClass} flex-1`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOption(idx)}
+                            className="rounded-xl border border-default bg-surface p-2 text-secondary transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+
+                      {pollOptions.length < 8 && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveOption(idx)}
-                          className="rounded-xl border border-default bg-surface p-2 text-secondary transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                          onClick={handleAddOption}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                           </svg>
+                          Add another option
                         </button>
-                      </div>
-                    ))}
-
-                    {pollOptions.length < 8 && (
-                      <button
-                        type="button"
-                        onClick={handleAddOption}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add another option
-                      </button>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 

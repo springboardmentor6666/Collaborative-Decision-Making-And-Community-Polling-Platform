@@ -48,6 +48,14 @@ public class OptionDto {
         this.label = label;
     }
 
+    public String getOptionText() {
+        return label;
+    }
+
+    public void setOptionText(String optionText) {
+        this.label = optionText;
+    }
+
     public String getDescription() {
         return description;
     }
