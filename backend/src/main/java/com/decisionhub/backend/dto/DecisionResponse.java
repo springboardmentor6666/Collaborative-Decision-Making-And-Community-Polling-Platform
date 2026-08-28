@@ -22,7 +22,7 @@ public class DecisionResponse {
 
     private String visibility;
 
-    private LocalDate deadline;
+    private LocalDateTime deadline;
 
     private boolean anonymous;
     private String status;

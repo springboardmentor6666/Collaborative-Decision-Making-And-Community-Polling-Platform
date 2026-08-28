@@ -7,7 +7,9 @@ const API = "http://localhost:8080";
 
 function Communities() {
   const navigate = useNavigate();
+
   const [communities, setCommunities] = useState([]);
+
   const [form, setForm] = useState({
     communityName: "",
     description: "",
@@ -15,13 +17,15 @@ function Communities() {
 
   const [opened, setOpened] = useState(null);
   const [communityDecisions] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
   const headers = () => ({
     Authorization:
-      "Bearer " + sessionStorage.getItem("token"),
+        "Bearer " + sessionStorage.getItem("token"),
   });
 
   const notify = (text, error = false) => {
@@ -37,25 +41,28 @@ function Communities() {
   const load = async () => {
     try {
       const response = await fetch(
-        API + "/api/communities",
-        {
-          headers: headers(),
-        }
+          API + "/api/communities",
+          {
+            headers: headers(),
+          }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message);
+        throw new Error(
+            data.message ||
+            "Unable to load communities."
+        );
       }
 
       setCommunities(data);
 
     } catch (error) {
       notify(
-        error.message ||
+          error.message ||
           "Unable to load communities.",
-        true
+          true
       );
     } finally {
       setLoading(false);
@@ -76,8 +83,8 @@ function Communities() {
     if (!message) return undefined;
 
     const timer = setTimeout(
-      () => setMessage(""),
-      3500
+        () => setMessage(""),
+        3500
     );
 
     return () => clearTimeout(timer);
@@ -93,29 +100,31 @@ function Communities() {
 
     if (!form.communityName.trim()) {
       return notify(
-        "Community name is required.",
-        true
+          "Community name is required.",
+          true
       );
     }
 
     try {
       const response = await fetch(
-        API + "/api/communities",
-        {
-          method: "POST",
-          headers: {
-            ...headers(),
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify(form),
-        }
+          API + "/api/communities",
+          {
+            method: "POST",
+            headers: {
+              ...headers(),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(form),
+          }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message);
+        throw new Error(
+            data.message ||
+            "Unable to create community."
+        );
       }
 
       setForm({
@@ -124,16 +133,16 @@ function Communities() {
       });
 
       notify(
-        "Community created successfully."
+          "Community created successfully."
       );
 
       load();
 
     } catch (error) {
       notify(
-        error.message ||
+          error.message ||
           "Unable to create community.",
-        true
+          true
       );
     }
   };
@@ -146,36 +155,39 @@ function Communities() {
   const membership = async (community) => {
     try {
       const action = community.joined
-        ? "leave"
-        : "join";
+          ? "leave"
+          : "join";
 
       const response = await fetch(
-        API +
+          API +
           "/api/communities/" +
           community.id +
           "/" +
           action,
-        {
-          method: "POST",
-          headers: headers(),
-        }
+          {
+            method: "POST",
+            headers: headers(),
+          }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message);
+        throw new Error(
+            data.message ||
+            "Unable to update membership."
+        );
       }
 
       notify(
-        community.joined
-          ? "Community left successfully."
-          : "Community joined successfully."
+          community.joined
+              ? "Community left successfully."
+              : "Community joined successfully."
       );
 
       if (
-        opened?.id === community.id &&
-        community.joined
+          opened?.id === community.id &&
+          community.joined
       ) {
         setOpened(null);
       }
@@ -184,9 +196,9 @@ function Communities() {
 
     } catch (error) {
       notify(
-        error.message ||
+          error.message ||
           "Unable to update membership.",
-        true
+          true
       );
     }
   };
@@ -197,84 +209,96 @@ function Communities() {
   ========================= */
 
   const viewCommunity = async (community) => {
-    if (!community.joined) return notify("Join this community to enter its workspace.", true);
-    navigate(`/communities/${community.id}`);
-  };
-
-const deleteCommunity = async (community) => {
-
-  if (!window.confirm(
-    `Delete ${community.communityName}?`
-  )) return;
-
-  try {
-
-    const response = await fetch(
-      `${API}/api/communities/${community.id}`,
-      {
-        method: "DELETE",
-        headers: headers()
-      }
-    );
-
-    const data = await response
-      .json()
-      .catch(() => ({}));
-
-    console.log(
-      "Delete status:",
-      response.status
-    );
-
-    console.log(
-      "Delete response:",
-      data
-    );
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.message ||
-        "Unable to delete community."
+    if (!community.joined) {
+      return notify(
+          "Join this community to enter its workspace.",
+          true
       );
-
     }
 
-    notify("Community deleted.");
-
-    load();
-
-  } catch (error) {
-
-    console.error(
-      "Delete community error:",
-      error
+    navigate(
+        `/communities/${community.id}`
     );
+  };
 
-    notify(
-      error.message ||
-      "Unable to delete community.",
-      true
-    );
 
-  }
+  /* =========================
+     DELETE COMMUNITY
+  ========================= */
 
-};
+  const deleteCommunity = async (community) => {
+    if (
+        !window.confirm(
+            `Delete ${community.communityName}?`
+        )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `${API}/api/communities/${community.id}`,
+          {
+            method: "DELETE",
+            headers: headers(),
+          }
+      );
+
+      const data = await response
+          .json()
+          .catch(() => ({}));
+
+      console.log(
+          "Delete status:",
+          response.status
+      );
+
+      console.log(
+          "Delete response:",
+          data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Unable to delete community."
+        );
+      }
+
+      notify(
+          "Community deleted."
+      );
+
+      load();
+
+    } catch (error) {
+      console.error(
+          "Delete community error:",
+          error
+      );
+
+      notify(
+          error.message ||
+          "Unable to delete community.",
+          true
+      );
+    }
+  };
 
 
   return (
-    <DashboardLayout
-      pageTitle="Communities"
-      pageSubtitle="Discover people, ideas, and shared decisions in one place."
-    >
+      <DashboardLayout
+          pageTitle="Communities"
+          pageSubtitle="Discover people, ideas, and shared decisions in one place."
+      >
 
-      <Toast
-        message={message}
-        isError={isError}
-      />
+        <Toast
+            message={message}
+            isError={isError}
+        />
 
 
-      <style>{`
+        <style>{`
 
         /* =========================
            MAIN PAGE
@@ -282,10 +306,14 @@ const deleteCommunity = async (community) => {
 
         .communities-page {
           max-width: 1400px;
-          margin: 0 auto;
-          padding: 4px 0 42px;
 
-          color: var(--app-text);
+          margin: 0 auto;
+
+          padding:
+            4px 0 42px;
+
+          color:
+            var(--app-text);
         }
 
 
@@ -295,14 +323,17 @@ const deleteCommunity = async (community) => {
 
         .communities-hero {
           position: relative;
+
           overflow: hidden;
 
-          display: grid;
-          grid-template-columns: 1.2fr .8fr;
+          display: flex;
 
-          gap: 25px;
+          flex-direction: column;
 
-          padding: 28px 30px;
+          gap: 0;
+
+          padding:
+            32px 32px 30px;
 
           border:
             1px solid
@@ -339,48 +370,119 @@ const deleteCommunity = async (community) => {
           background:
             rgba(99, 102, 241, 0.12);
 
-          filter: blur(50px);
+          filter:
+            blur(50px);
 
-          pointer-events: none;
+          pointer-events:
+            none;
+        }
+
+
+        /* =========================
+           HERO CONTENT
+        ========================= */
+
+        .communities-hero-content {
+          position: relative;
+
+          z-index: 1;
         }
 
 
         .communities-kicker {
-          color: #8b5cf6;
+          display: inline-flex;
 
-          font-size: 10px;
-          font-weight: 700;
+          align-items: center;
 
-          letter-spacing: 1.6px;
+          gap: 8px;
 
-          text-transform: uppercase;
+          padding:
+            10px 16px;
+
+          border:
+            1px solid
+            rgba(139, 92, 246, .35);
+
+          border-radius:
+            30px;
+
+          color:
+            #8b5cf6;
+
+          background:
+            rgba(139, 92, 246, .08);
+
+          font-size:
+            11px;
+
+          font-weight:
+            700;
+
+          letter-spacing:
+            1.5px;
+
+          text-transform:
+            uppercase;
+        }
+
+
+        .communities-kicker::before {
+          content: "";
+
+          width: 8px;
+          height: 8px;
+
+          border-radius: 50%;
+
+          background:
+            #8b5cf6;
+
+          box-shadow:
+            0 0 10px
+            rgba(139, 92, 246, .7);
         }
 
 
         .communities-hero h2 {
-          margin: 10px 0 7px;
+          max-width:
+            760px;
+
+          margin:
+            24px 0 10px;
 
           color:
             var(--app-text);
 
           font-size:
-            clamp(24px, 3vw, 32px);
+            clamp(
+              30px,
+              4vw,
+              48px
+            );
 
-          letter-spacing: -.7px;
+          line-height:
+            1.12;
+
+          letter-spacing:
+            -1.4px;
         }
 
 
         .communities-hero p {
-          max-width: 610px;
+          max-width:
+            780px;
 
-          margin: 0;
+          margin:
+            0;
 
           color:
             var(--app-secondary-text);
 
-          font-size: 13px;
+          font-size:
+            14px;
 
-          line-height: 1.65;
+          line-height:
+            1.75;
         }
 
 
@@ -389,18 +491,35 @@ const deleteCommunity = async (community) => {
         ========================= */
 
         .community-create {
-          align-self: center;
+          position: relative;
 
-          padding: 15px;
+          z-index: 2;
+
+          width: 100%;
+
+          box-sizing:
+            border-box;
+
+          margin-top:
+            28px;
+
+          padding:
+            20px;
 
           border:
             1px solid
             var(--app-border);
 
-          border-radius: 12px;
+          border-radius:
+            15px;
 
           background:
-            var(--app-card-2);
+            rgba(
+              255,
+              255,
+              255,
+              .025
+            );
 
           transition:
             background 0.25s ease,
@@ -408,17 +527,48 @@ const deleteCommunity = async (community) => {
         }
 
 
+        .community-create:hover {
+          border-color:
+            rgba(
+              139,
+              92,
+              246,
+              .35
+            );
+        }
+
+
         .community-create label {
           display: block;
 
-          margin-bottom: 8px;
+          margin-bottom:
+            5px;
 
           color:
             var(--app-text);
 
-          font-size: 11px;
+          font-size:
+            15px;
 
-          font-weight: 700;
+          font-weight:
+            700;
+        }
+
+
+        .community-create-subtitle {
+          display: block;
+
+          margin-bottom:
+            15px;
+
+          color:
+            var(--app-secondary-text);
+
+          font-size:
+            11px;
+
+          line-height:
+            1.5;
         }
 
 
@@ -426,22 +576,37 @@ const deleteCommunity = async (community) => {
           display: grid;
 
           grid-template-columns:
-            1fr 1.2fr auto;
+            minmax(180px, .8fr)
+            minmax(260px, 1.5fr)
+            auto;
 
-          gap: 8px;
+          gap:
+            10px;
+
+          align-items:
+            stretch;
         }
 
 
         .create-fields input {
-          min-width: 0;
+          min-width:
+            0;
+
+          height:
+            45px;
+
+          box-sizing:
+            border-box;
 
           border:
             1px solid
             var(--app-border);
 
-          border-radius: 8px;
+          border-radius:
+            9px;
 
-          outline: none;
+          outline:
+            none;
 
           background:
             var(--app-bg);
@@ -449,9 +614,11 @@ const deleteCommunity = async (community) => {
           color:
             var(--app-text);
 
-          padding: 10px;
+          padding:
+            0 13px;
 
-          font-size: 11px;
+          font-size:
+            11px;
 
           transition:
             border-color 0.2s ease,
@@ -469,15 +636,33 @@ const deleteCommunity = async (community) => {
         .create-fields input:focus {
           border-color:
             #7351b6;
+
+          box-shadow:
+            0 0 0 2px
+            rgba(
+              115,
+              81,
+              182,
+              .10
+            );
         }
 
 
         .create-fields button {
-          border: 0;
+          min-width:
+            150px;
 
-          border-radius: 8px;
+          height:
+            45px;
 
-          color: white;
+          border:
+            0;
+
+          border-radius:
+            9px;
+
+          color:
+            white;
 
           background:
             linear-gradient(
@@ -486,17 +671,22 @@ const deleteCommunity = async (community) => {
               #7c3aed
             );
 
-          padding: 0 13px;
+          padding:
+            0 18px;
 
-          font-size: 11px;
+          font-size:
+            11px;
 
-          font-weight: 700;
+          font-weight:
+            700;
 
-          cursor: pointer;
+          cursor:
+            pointer;
 
           transition:
             transform 0.2s ease,
-            opacity 0.2s ease;
+            opacity 0.2s ease,
+            box-shadow 0.2s ease;
         }
 
 
@@ -504,7 +694,17 @@ const deleteCommunity = async (community) => {
           transform:
             translateY(-1px);
 
-          opacity: .95;
+          opacity:
+            .95;
+
+          box-shadow:
+            0 8px 20px
+            rgba(
+              99,
+              102,
+              241,
+              .22
+            );
         }
 
 
@@ -521,17 +721,20 @@ const deleteCommunity = async (community) => {
           align-items:
             end;
 
-          margin: 26px 0 14px;
+          margin:
+            30px 0 14px;
         }
 
 
         .community-section-head h3 {
-          margin: 0;
+          margin:
+            0;
 
           color:
             var(--app-text);
 
-          font-size: 17px;
+          font-size:
+            19px;
         }
 
 
@@ -539,7 +742,8 @@ const deleteCommunity = async (community) => {
           color:
             var(--app-secondary-text);
 
-          font-size: 11px;
+          font-size:
+            11px;
         }
 
 
@@ -556,7 +760,8 @@ const deleteCommunity = async (community) => {
               minmax(0, 1fr)
             );
 
-          gap: 17px;
+          gap:
+            17px;
         }
 
 
@@ -569,13 +774,15 @@ const deleteCommunity = async (community) => {
 
           overflow: hidden;
 
-          padding: 21px;
+          padding:
+            21px;
 
           border:
             1px solid
             var(--app-border);
 
-          border-radius: 15px;
+          border-radius:
+            15px;
 
           background:
             var(--app-card);
@@ -597,7 +804,12 @@ const deleteCommunity = async (community) => {
 
           box-shadow:
             0 15px 32px
-            rgba(0, 0, 0, .15);
+            rgba(
+              0,
+              0,
+              0,
+              .15
+            );
         }
 
 
@@ -608,7 +820,8 @@ const deleteCommunity = async (community) => {
         .community-card-top {
           display: flex;
 
-          align-items: center;
+          align-items:
+            center;
 
           justify-content:
             space-between;
@@ -618,61 +831,97 @@ const deleteCommunity = async (community) => {
         .community-mark {
           display: flex;
 
-          align-items: center;
-          justify-content: center;
+          align-items:
+            center;
 
-          width: 37px;
-          height: 37px;
+          justify-content:
+            center;
+
+          width:
+            37px;
+
+          height:
+            37px;
 
           border:
             1px solid
             #473263;
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
-          color: #8b5cf6;
+          color:
+            #8b5cf6;
 
           background:
             var(--app-card-2);
 
-          font-size: 15px;
+          font-size:
+            15px;
 
-          font-weight: 800;
+          font-weight:
+            800;
         }
 
 
         .community-state {
-          border-radius: 20px;
+          border-radius:
+            20px;
 
-          padding: 5px 8px;
+          padding:
+            5px 8px;
 
-          font-size: 9px;
+          font-size:
+            9px;
 
-          font-weight: 700;
+          font-weight:
+            700;
         }
 
 
         .community-state.joined {
-          color: #16a34a;
+          color:
+            #16a34a;
 
           border:
             1px solid
-            rgba(22, 163, 74, .25);
+            rgba(
+              22,
+              163,
+              74,
+              .25
+            );
 
           background:
-            rgba(22, 163, 74, .10);
+            rgba(
+              22,
+              163,
+              74,
+              .10
+            );
         }
 
 
         .community-state.open {
-          color: #8b5cf6;
+          color:
+            #8b5cf6;
 
           border:
             1px solid
-            rgba(139, 92, 246, .25);
+            rgba(
+              139,
+              92,
+              246,
+              .25
+            );
 
           background:
-            rgba(139, 92, 246, .10);
+            rgba(
+              139,
+              92,
+              246,
+              .10
+            );
         }
 
 
@@ -687,33 +936,41 @@ const deleteCommunity = async (community) => {
           color:
             var(--app-text);
 
-          font-size: 17px;
+          font-size:
+            17px;
         }
 
 
         .community-card p {
-          min-height: 41px;
+          min-height:
+            41px;
 
-          margin: 0;
+          margin:
+            0;
 
           color:
             var(--app-secondary-text);
 
-          font-size: 12px;
+          font-size:
+            12px;
 
-          line-height: 1.6;
+          line-height:
+            1.6;
         }
 
 
         .community-owner {
-          display: block;
+          display:
+            block;
 
-          margin-top: 12px;
+          margin-top:
+            12px;
 
           color:
             var(--app-secondary-text);
 
-          font-size: 10px;
+          font-size:
+            10px;
         }
 
 
@@ -727,13 +984,17 @@ const deleteCommunity = async (community) => {
           justify-content:
             space-between;
 
-          align-items: center;
+          align-items:
+            center;
 
-          gap: 7px;
+          gap:
+            7px;
 
-          margin-top: 17px;
+          margin-top:
+            17px;
 
-          padding-top: 14px;
+          padding-top:
+            14px;
 
           border-top:
             1px solid
@@ -745,28 +1006,34 @@ const deleteCommunity = async (community) => {
           color:
             var(--app-secondary-text);
 
-          font-size: 10px;
+          font-size:
+            10px;
         }
 
 
         .community-buttons {
           display: flex;
 
-          gap: 7px;
+          gap:
+            7px;
         }
 
 
         .community-buttons button {
-          border-radius: 8px;
+          border-radius:
+            8px;
 
           padding:
             8px 10px;
 
-          font-size: 10px;
+          font-size:
+            10px;
 
-          font-weight: 700;
+          font-weight:
+            700;
 
-          cursor: pointer;
+          cursor:
+            pointer;
 
           transition:
             transform 0.2s ease,
@@ -778,7 +1045,8 @@ const deleteCommunity = async (community) => {
           transform:
             translateY(-1px);
 
-          opacity: .9;
+          opacity:
+            .9;
         }
 
 
@@ -796,9 +1064,11 @@ const deleteCommunity = async (community) => {
 
 
         .join-community {
-          color: white;
+          color:
+            white;
 
-          border: 0;
+          border:
+            0;
 
           background:
             #6840be;
@@ -811,10 +1081,20 @@ const deleteCommunity = async (community) => {
 
           border:
             1px solid
-            rgba(220, 38, 38, .35);
+            rgba(
+              220,
+              38,
+              38,
+              .35
+            );
 
           background:
-            rgba(220, 38, 38, .08);
+            rgba(
+              220,
+              38,
+              38,
+              .08
+            );
         }
 
 
@@ -823,15 +1103,18 @@ const deleteCommunity = async (community) => {
         ========================= */
 
         .community-detail {
-          margin-top: 22px;
+          margin-top:
+            22px;
 
-          padding: 23px;
+          padding:
+            23px;
 
           border:
             1px solid
             var(--app-border);
 
-          border-radius: 16px;
+          border-radius:
+            16px;
 
           background:
             var(--app-card);
@@ -848,17 +1131,20 @@ const deleteCommunity = async (community) => {
           justify-content:
             space-between;
 
-          gap: 18px;
+          gap:
+            18px;
         }
 
 
         .detail-top h3 {
-          margin: 0;
+          margin:
+            0;
 
           color:
             var(--app-text);
 
-          font-size: 19px;
+          font-size:
+            19px;
         }
 
 
@@ -869,20 +1155,26 @@ const deleteCommunity = async (community) => {
           color:
             var(--app-secondary-text);
 
-          font-size: 11px;
+          font-size:
+            11px;
         }
 
 
         .close-detail {
-          border: 0;
+          border:
+            0;
 
-          color: #8b5cf6;
+          color:
+            #8b5cf6;
 
-          background: transparent;
+          background:
+            transparent;
 
-          font-size: 11px;
+          font-size:
+            11px;
 
-          cursor: pointer;
+          cursor:
+            pointer;
         }
 
 
@@ -899,20 +1191,24 @@ const deleteCommunity = async (community) => {
               minmax(0, 1fr)
             );
 
-          gap: 10px;
+          gap:
+            10px;
 
-          margin-top: 17px;
+          margin-top:
+            17px;
         }
 
 
         .decision-strip > div {
-          padding: 13px;
+          padding:
+            13px;
 
           border:
             1px solid
             var(--app-border);
 
-          border-radius: 10px;
+          border-radius:
+            10px;
 
           background:
             var(--app-card-2);
@@ -924,26 +1220,32 @@ const deleteCommunity = async (community) => {
 
 
         .decision-strip strong {
-          display: block;
+          display:
+            block;
 
           color:
             var(--app-text);
 
-          font-size: 12px;
+          font-size:
+            12px;
         }
 
 
         .decision-strip span {
-          display: block;
+          display:
+            block;
 
-          margin-top: 6px;
+          margin-top:
+            6px;
 
           color:
             var(--app-secondary-text);
 
-          font-size: 10px;
+          font-size:
+            10px;
 
-          line-height: 1.45;
+          line-height:
+            1.45;
         }
 
 
@@ -952,13 +1254,15 @@ const deleteCommunity = async (community) => {
         ========================= */
 
         .communities-empty {
-          padding: 52px;
+          padding:
+            52px;
 
           border:
             1px dashed
             var(--app-border);
 
-          border-radius: 16px;
+          border-radius:
+            16px;
 
           color:
             var(--app-secondary-text);
@@ -966,9 +1270,11 @@ const deleteCommunity = async (community) => {
           background:
             var(--app-card);
 
-          text-align: center;
+          text-align:
+            center;
 
-          font-size: 13px;
+          font-size:
+            13px;
 
           transition:
             background 0.25s ease,
@@ -982,10 +1288,6 @@ const deleteCommunity = async (community) => {
 
         @media (max-width: 1000px) {
 
-          .communities-hero {
-            grid-template-columns: 1fr;
-          }
-
           .community-grid {
             grid-template-columns:
               repeat(
@@ -998,6 +1300,19 @@ const deleteCommunity = async (community) => {
             grid-template-columns:
               1fr 1fr;
           }
+
+          .create-fields {
+            grid-template-columns:
+              1fr 1fr;
+          }
+
+          .create-fields button {
+            grid-column:
+              span 2;
+
+            width:
+              100%;
+          }
         }
 
 
@@ -1007,400 +1322,519 @@ const deleteCommunity = async (community) => {
 
         @media (max-width: 600px) {
 
+          .communities-page {
+            padding:
+              4px 0 30px;
+          }
+
+
           .communities-hero {
             padding:
-              22px 19px;
+              24px 19px 22px;
+
+            border-radius:
+              15px;
           }
+
+
+          .communities-hero h2 {
+            margin-top:
+              20px;
+
+            font-size:
+              30px;
+
+            letter-spacing:
+              -.8px;
+          }
+
+
+          .communities-hero p {
+            font-size:
+              13px;
+          }
+
+
+          .community-create {
+            margin-top:
+              22px;
+
+            padding:
+              16px;
+          }
+
 
           .create-fields {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
 
+
           .create-fields button {
-            padding: 11px;
+            grid-column:
+              auto;
+
+            width:
+              100%;
           }
+
 
           .community-grid,
           .decision-strip {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
           }
+
 
           .community-section-head {
-            margin-top: 20px;
+            margin-top:
+              22px;
           }
+
 
           .community-card {
-            padding: 18px;
+            padding:
+              18px;
           }
+
 
           .community-actions {
-            align-items: flex-start;
-            flex-direction: column;
+            align-items:
+              flex-start;
+
+            flex-direction:
+              column;
           }
+
 
           .community-buttons {
-            width: 100%;
+            width:
+              100%;
           }
 
+
           .community-buttons button {
-            flex: 1;
+            flex:
+              1;
+          }
+
+
+          .detail-top {
+            flex-direction:
+              column;
           }
         }
 
       `}</style>
 
 
-      <div className="communities-page">
+        <div className="communities-page">
 
-        {/* =========================
+
+          {/* =========================
             HERO
         ========================= */}
 
-        <section className="communities-hero">
+          <section className="communities-hero">
 
-          <div>
+            {/* HERO CONTENT */}
+
+            <div className="communities-hero-content">
 
             <span className="communities-kicker">
-              Community hub
+              Build your community
             </span>
 
-            <h2>
-              Better decisions happen together.
-            </h2>
 
-            <p>
-              Find the right people for a topic,
-              join the conversation, and take part
-              in the decisions that matter to your
-              community.
-            </p>
-
-          </div>
+              <h2>
+                Create a space where ideas come
+                together.
+              </h2>
 
 
-          {/* CREATE COMMUNITY */}
-
-          <form
-            className="community-create"
-            onSubmit={create}
-          >
-
-            <label>
-              Create a community
-            </label>
-
-            <div className="create-fields">
-
-              <input
-                value={form.communityName}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    communityName:
-                      event.target.value,
-                  })
-                }
-                placeholder="Community name"
-                maxLength="100"
-              />
-
-
-              <input
-                value={form.description}
-                onChange={(event) =>
-                  setForm({
-                    ...form,
-                    description:
-                      event.target.value,
-                  })
-                }
-                placeholder="What is this community about?"
-                maxLength="500"
-              />
-
-
-              <button type="submit">
-                Create
-              </button>
+              <p>
+                Start your own community, bring
+                people together around a shared
+                topic, and make better decisions
+                through collaboration.
+              </p>
 
             </div>
 
-          </form>
 
-        </section>
+            {/* =========================
+              CREATE COMMUNITY
+          ========================= */}
+
+            <form
+                className="community-create"
+                onSubmit={create}
+            >
+
+              <label>
+                Start a new community
+              </label>
 
 
-        {/* =========================
+              <span className="community-create-subtitle">
+              Give your community a name and
+              describe what members can discuss
+              or decide together.
+            </span>
+
+
+              <div className="create-fields">
+
+                <input
+                    value={
+                      form.communityName
+                    }
+                    onChange={(event) =>
+                        setForm({
+                          ...form,
+                          communityName:
+                          event.target.value,
+                        })
+                    }
+                    placeholder="Community name"
+                    maxLength="100"
+                />
+
+
+                <input
+                    value={
+                      form.description
+                    }
+                    onChange={(event) =>
+                        setForm({
+                          ...form,
+                          description:
+                          event.target.value,
+                        })
+                    }
+                    placeholder="What is this community about?"
+                    maxLength="500"
+                />
+
+
+                <button type="submit">
+                  Create Community
+                </button>
+
+              </div>
+
+            </form>
+
+          </section>
+
+
+          {/* =========================
             SECTION HEADER
         ========================= */}
 
-        <div className="community-section-head">
+          <div className="community-section-head">
 
-          <h3>
-            Explore communities
-          </h3>
+            <h3>
+              Explore communities
+            </h3>
 
-          <span>
+
+            <span>
             {loading
-              ? "Loading…"
-              : communities.length +
+                ? "Loading…"
+                : communities.length +
                 " available"}
           </span>
 
-        </div>
+          </div>
 
 
-        {/* =========================
+          {/* =========================
             LOADING
         ========================= */}
 
-        {loading && (
-          <div className="communities-empty">
-            Loading communities…
-          </div>
-        )}
-
-
-        {/* =========================
-            EMPTY
-        ========================= */}
-
-        {!loading &&
-          communities.length === 0 && (
-            <div className="communities-empty">
-              No communities yet.
-              Be the first to create one.
-            </div>
+          {loading && (
+              <div className="communities-empty">
+                Loading communities…
+              </div>
           )}
 
 
-        {/* =========================
+          {/* =========================
+            EMPTY
+        ========================= */}
+
+          {!loading &&
+              communities.length === 0 && (
+
+                  <div className="communities-empty">
+                    No communities yet.
+                    <br />
+                    Be the first to create one.
+                  </div>
+
+              )}
+
+
+          {/* =========================
             COMMUNITY CARDS
         ========================= */}
 
-        {!loading &&
-          communities.length > 0 && (
+          {!loading &&
+              communities.length > 0 && (
 
-            <div className="community-grid">
+                  <div className="community-grid">
 
-              {communities.map(
-                (community) => (
+                    {communities.map(
+                        (community) => (
 
-                  <article
-                    className="community-card"
-                    key={community.id}
-                  >
+                            <article
+                                className="community-card"
+                                key={community.id}
+                            >
 
-                    {/* CARD TOP */}
+                              {/* CARD TOP */}
 
-                    <div className="community-card-top">
+                              <div className="community-card-top">
 
                       <span className="community-mark">
                         DH
                       </span>
 
 
-                      <span
-                        className={
-                          "community-state " +
-                          (
-                            community.joined
-                              ? "joined"
-                              : "open"
-                          )
-                        }
-                      >
+                                <span
+                                    className={
+                                        "community-state " +
+                                        (
+                                            community.joined
+                                                ? "joined"
+                                                : "open"
+                                        )
+                                    }
+                                >
                         {community.joined
-                          ? "Joined"
-                          : "Open"}
+                            ? "Joined"
+                            : "Open"}
                       </span>
 
-                    </div>
+                              </div>
 
 
-                    {/* TITLE */}
+                              {/* TITLE */}
 
-                    <h3>
-                      {community.communityName}
-                    </h3>
-
-
-                    {/* DESCRIPTION */}
-
-                    <p>
-                      {community.description ||
-                        "A space to share ideas and make decisions together."}
-                    </p>
+                              <h3>
+                                {
+                                  community.communityName
+                                }
+                              </h3>
 
 
-                    {/* OWNER */}
+                              {/* DESCRIPTION */}
 
-                    <span className="community-owner">
+                              <p>
+                                {
+                                    community.description ||
+                                    "A space to share ideas and make decisions together."
+                                }
+                              </p>
+
+
+                              {/* OWNER */}
+
+                              <span className="community-owner">
                       Created by{" "}
-                      {community.ownerName ||
-                        "Community owner"}
+                                {
+                                    community.ownerName ||
+                                    "Community owner"
+                                }
                     </span>
 
 
-                    {/* ACTIONS */}
+                              {/* ACTIONS */}
 
-                    <div className="community-actions">
+                              <div className="community-actions">
 
                       <span className="member-count">
-                        {community.memberCount ||
-                          0}{" "}
+
+                        {
+                            community.memberCount ||
+                            0
+                        }{" "}
+
                         members
+
                       </span>
 
 
-                      <div className="community-buttons">
+                                <div className="community-buttons">
 
-                        <button
-                          type="button"
-                          className="view-community"
-                          onClick={() =>
-                            viewCommunity(
-                              community
-                            )
-                          }
-                        >
-                          View
-                        </button>
+                                  <button
+                                      type="button"
+                                      className="view-community"
+                                      onClick={() =>
+                                          viewCommunity(
+                                              community
+                                          )
+                                      }
+                                  >
+                                    View
+                                  </button>
 
 
-                        <button
-                          type="button"
-                          className={
-                            community.joined
-                              ? "leave-community"
-                              : "join-community"
-                          }
-                          onClick={() =>
-                            membership(
-                              community
-                            )
-                          }
-                        >
-                          {community.joined
-                            ? "Leave"
-                            : "Join"}
-                        </button>
+                                  <button
+                                      type="button"
+                                      className={
+                                        community.joined
+                                            ? "leave-community"
+                                            : "join-community"
+                                      }
+                                      onClick={() =>
+                                          membership(
+                                              community
+                                          )
+                                      }
+                                  >
+                                    {community.joined
+                                        ? "Leave"
+                                        : "Join"}
+                                  </button>
 
-                        {community.owner && (
-                          <button
-                            type="button"
-                            className="leave-community"
-                            onClick={() => deleteCommunity(community)}
-                          >
-                            Delete
-                          </button>
-                        )}
 
-                      </div>
+                                  {community.owner && (
 
-                    </div>
+                                      <button
+                                          type="button"
+                                          className="leave-community"
+                                          onClick={() =>
+                                              deleteCommunity(
+                                                  community
+                                              )
+                                          }
+                                      >
+                                        Delete
+                                      </button>
 
-                  </article>
+                                  )}
 
-                )
+                                </div>
+
+                              </div>
+
+                            </article>
+
+                        )
+                    )}
+
+                  </div>
+
               )}
 
-            </div>
 
-          )}
-
-
-        {/* =========================
+          {/* =========================
             COMMUNITY DETAIL
         ========================= */}
 
-        {opened && (
+          {opened && (
 
-          <section className="community-detail">
+              <section className="community-detail">
 
-            <div className="detail-top">
+                <div className="detail-top">
 
-              <div>
+                  <div>
 
-                <h3>
-                  {opened.communityName}
-                </h3>
-
-                <p>
-                  Members:{" "}
-                  {opened.memberNames?.join(
-                    ", "
-                  ) ||
-                    "No members yet"}
-                </p>
-
-              </div>
+                    <h3>
+                      {
+                        opened.communityName
+                      }
+                    </h3>
 
 
-              <button
-                type="button"
-                className="close-detail"
-                onClick={() =>
-                  setOpened(null)
-                }
-              >
-                Close panel
-              </button>
+                    <p>
 
-            </div>
+                      Members:{" "}
+
+                      {
+                          opened.memberNames?.join(
+                              ", "
+                          ) ||
+                          "No members yet"
+                      }
+
+                    </p>
+
+                  </div>
 
 
-            <div className="decision-strip">
+                  <button
+                      type="button"
+                      className="close-detail"
+                      onClick={() =>
+                          setOpened(null)
+                      }
+                  >
+                    Close panel
+                  </button>
 
-              {communityDecisions.length ? (
+                </div>
 
-                communityDecisions.map(
-                  (decision) => (
 
-                    <div
-                      key={decision.id}
-                    >
+                <div className="decision-strip">
 
-                      <strong>
-                        {decision.title}
-                      </strong>
+                  {communityDecisions.length ? (
 
-                      <span>
-                        {decision.description}
+                      communityDecisions.map(
+                          (decision) => (
+
+                              <div
+                                  key={decision.id}
+                              >
+
+                                <strong>
+                                  {
+                                    decision.title
+                                  }
+                                </strong>
+
+
+                                <span>
+                        {
+                          decision.description
+                        }
                       </span>
 
-                    </div>
+                              </div>
 
-                  )
-                )
+                          )
+                      )
 
-              ) : (
+                  ) : (
 
-                <div>
+                      <div>
 
-                  <strong>
-                    No decisions yet
-                  </strong>
+                        <strong>
+                          No decisions yet
+                        </strong>
 
-                  <span>
+
+                        <span>
                     Community members can
                     create a decision from
                     the Create Decision page.
                   </span>
 
+                      </div>
+
+                  )}
+
                 </div>
 
-              )}
+              </section>
 
-            </div>
+          )}
 
-          </section>
+        </div>
 
-        )}
-
-      </div>
-
-    </DashboardLayout>
+      </DashboardLayout>
   );
 }
 

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class DecisionRequest {
@@ -14,7 +15,7 @@ public class DecisionRequest {
     private String description;
     private String category;
     private String visibility = "PUBLIC";
-    private LocalDate deadline;
+    private LocalDateTime deadline;
     private boolean anonymous;
 
     @NotEmpty(message = "Add at least two options")
@@ -57,11 +58,11 @@ public class DecisionRequest {
         this.visibility = visibility;
     }
 
-    public LocalDate getDeadline() {
+    public LocalDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDate deadline) {
+    public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
     }
 

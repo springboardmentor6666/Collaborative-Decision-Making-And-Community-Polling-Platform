@@ -35,7 +35,7 @@ public class Decision {
 
     private String category;
 
-    private LocalDate deadline;
+    private LocalDateTime deadline;
 
     private LocalDateTime createdAt;
 

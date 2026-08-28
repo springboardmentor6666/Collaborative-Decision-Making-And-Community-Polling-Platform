@@ -4,7 +4,6 @@ import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 function CreateDecision() {
-
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -24,12 +23,25 @@ function CreateDecision() {
     const [communities, setCommunities] = useState([]);
     const [submitting, setSubmitting] = useState(false);
 
+    /* =========================================================
+       COMMUNITY FROM URL
+    ========================================================= */
 
     useEffect(() => {
-        const communityId = new URLSearchParams(location.search).get("communityId");
-        if (communityId) setDecision((current) => ({ ...current, communityId }));
+        const communityId =
+            new URLSearchParams(location.search).get("communityId");
+
+        if (communityId) {
+            setDecision((current) => ({
+                ...current,
+                communityId
+            }));
+        }
     }, [location.search]);
 
+    /* =========================================================
+       FETCH COMMUNITIES
+    ========================================================= */
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -44,15 +56,18 @@ function CreateDecision() {
                 }
             }
         )
-            .then(async r => r.ok ? r.json() : [])
+            .then(async (response) =>
+                response.ok ? response.json() : []
+            )
             .then(setCommunities)
             .catch(() => setCommunities([]));
-
     }, []);
 
+    /* =========================================================
+       CLEAR MESSAGE
+    ========================================================= */
 
     useEffect(() => {
-
         if (!message) return;
 
         const timer = setTimeout(
@@ -61,12 +76,13 @@ function CreateDecision() {
         );
 
         return () => clearTimeout(timer);
-
     }, [message]);
 
+    /* =========================================================
+       HANDLE INPUT CHANGE
+    ========================================================= */
 
     const handleChange = (e) => {
-
         const {
             name,
             value,
@@ -81,45 +97,77 @@ function CreateDecision() {
                     ? checked
                     : value
         });
-
     };
 
+    /* =========================================================
+       HANDLE OPTION CHANGE
+    ========================================================= */
 
     const handleOptionChange = (index, value) => {
-
         const updatedOptions = [...options];
 
         updatedOptions[index] = value;
 
         setOptions(updatedOptions);
-
     };
 
+    /* =========================================================
+       ADD OPTION
+    ========================================================= */
 
     const addOption = () => {
-
         setOptions([
             ...options,
             ""
         ]);
-
     };
 
+    /* =========================================================
+       REMOVE OPTION
+    ========================================================= */
 
     const removeOption = (index) => {
-
         if (options.length > 2) {
-
             setOptions(
                 options.filter(
                     (_, i) => i !== index
                 )
             );
-
         }
-
     };
 
+    /* =========================================================
+       GET CURRENT LOCAL DATE + TIME
+       Used as minimum for datetime-local
+    ========================================================= */
+
+    const getMinDateTime = () => {
+        const now = new Date();
+
+        const year = now.getFullYear();
+
+        const month = String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+        const day = String(
+            now.getDate()
+        ).padStart(2, "0");
+
+        const hours = String(
+            now.getHours()
+        ).padStart(2, "0");
+
+        const minutes = String(
+            now.getMinutes()
+        ).padStart(2, "0");
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    /* =========================================================
+       HANDLE SUBMIT
+    ========================================================= */
 
     const handleSubmit = async () => {
 
@@ -128,13 +176,15 @@ function CreateDecision() {
                 .map(option => option.trim())
                 .filter(Boolean);
 
+        /* =====================================================
+           BASIC VALIDATION
+        ===================================================== */
 
         if (
             !decision.title.trim() ||
             !decision.description.trim() ||
             cleanOptions.length < 2
         ) {
-
             setIsError(true);
 
             setMessage(
@@ -142,12 +192,52 @@ function CreateDecision() {
             );
 
             return;
-
         }
 
+        /* =====================================================
+           DEADLINE VALIDATION
+        ===================================================== */
+
+        if (decision.deadline) {
+
+            const selectedDeadline =
+                new Date(decision.deadline);
+
+            const currentTime =
+                new Date();
+
+            if (
+                isNaN(
+                    selectedDeadline.getTime()
+                )
+            ) {
+                setIsError(true);
+
+                setMessage(
+                    "Please select a valid deadline."
+                );
+
+                return;
+            }
+
+            if (
+                selectedDeadline <= currentTime
+            ) {
+                setIsError(true);
+
+                setMessage(
+                    "Deadline must be in the future."
+                );
+
+                return;
+            }
+        }
+
+        /* =====================================================
+           REQUEST DATA
+        ===================================================== */
 
         const data = {
-
             ...decision,
 
             options: cleanOptions,
@@ -156,15 +246,12 @@ function CreateDecision() {
                 decision.communityId
                     ? Number(decision.communityId)
                     : null
-
         };
-
 
         try {
 
             const token =
                 sessionStorage.getItem("token");
-
 
             console.log(
                 "TOKEN:",
@@ -176,6 +263,9 @@ function CreateDecision() {
                 data
             );
 
+            /* =================================================
+               LOGIN CHECK
+            ================================================= */
 
             if (!token) {
 
@@ -188,44 +278,36 @@ function CreateDecision() {
                 navigate("/login");
 
                 return;
-
             }
-
 
             setSubmitting(true);
 
+            /* =================================================
+               CREATE DECISION
+            ================================================= */
 
             const response = await fetch(
-
                 "http://localhost:8080/api/decisions",
-
                 {
-
                     method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json",
 
                         "Authorization":
                             `Bearer ${token}`
-
                     },
 
                     body:
                         JSON.stringify(data)
-
                 }
-
             );
-
 
             const result =
                 await response
                     .json()
                     .catch(() => ({}));
-
 
             console.log(
                 "STATUS:",
@@ -237,6 +319,9 @@ function CreateDecision() {
                 result
             );
 
+            /* =================================================
+               ERROR RESPONSE
+            ================================================= */
 
             if (!response.ok) {
 
@@ -248,16 +333,17 @@ function CreateDecision() {
                 );
 
                 return;
-
             }
 
+            /* =================================================
+               SUCCESS
+            ================================================= */
 
             setIsError(false);
 
             setMessage(
                 "Decision created successfully!"
             );
-
 
             setTimeout(() => {
 
@@ -268,7 +354,6 @@ function CreateDecision() {
                 );
 
             }, 1000);
-
 
         } catch (error) {
 
@@ -286,14 +371,17 @@ function CreateDecision() {
         } finally {
 
             setSubmitting(false);
-
         }
-
     };
 
-    const today = new Date().toISOString().split("T")[0];
-    return (
+    /* =========================================================
+       MINIMUM DATE + TIME
+    ========================================================= */
 
+    const minDateTime =
+        getMinDateTime();
+
+    return (
         <DashboardLayout
             pageTitle="Create Decision"
             pageSubtitle="Set up a new decision board for people to vote on."
@@ -304,7 +392,6 @@ function CreateDecision() {
                 isError={isError}
             />
 
-
             <style>{`
 
                 /* =========================
@@ -312,9 +399,7 @@ function CreateDecision() {
                 ========================= */
 
                 .create-page {
-
                     width: 100%;
-
                     min-height:
                         calc(100vh - 100px);
 
@@ -323,7 +408,6 @@ function CreateDecision() {
 
                     color:
                         var(--app-text);
-
                 }
 
 
@@ -332,9 +416,7 @@ function CreateDecision() {
                 ========================= */
 
                 .form-card {
-
                     width: 100%;
-
                     max-width: 850px;
 
                     background:
@@ -351,7 +433,6 @@ function CreateDecision() {
                     box-shadow:
                         0 8px 30px
                         rgba(0, 0, 0, 0.12);
-
                 }
 
 
@@ -360,7 +441,6 @@ function CreateDecision() {
                 ========================= */
 
                 .form-intro {
-
                     margin-bottom: 28px;
 
                     padding-bottom: 20px;
@@ -368,12 +448,9 @@ function CreateDecision() {
                     border-bottom:
                         1px solid
                         var(--app-border);
-
                 }
 
-
                 .form-intro h2 {
-
                     color:
                         var(--app-text);
 
@@ -382,19 +459,15 @@ function CreateDecision() {
                     font-weight: 600;
 
                     margin-bottom: 6px;
-
                 }
 
-
                 .form-intro p {
-
                     color:
                         var(--app-secondary-text);
 
                     font-size: 13px;
 
                     line-height: 1.5;
-
                 }
 
 
@@ -403,14 +476,10 @@ function CreateDecision() {
                 ========================= */
 
                 .field-group {
-
                     margin-bottom: 20px;
-
                 }
 
-
                 .field-label {
-
                     display: block;
 
                     font-size: 13px;
@@ -421,7 +490,6 @@ function CreateDecision() {
                         #a78bfa;
 
                     margin-bottom: 7px;
-
                 }
 
 
@@ -432,6 +500,7 @@ function CreateDecision() {
                 .form-card input[type="text"],
                 .form-card input:not([type]),
                 .form-card input[type="date"],
+                .form-card input[type="datetime-local"],
                 .form-card textarea,
                 .form-card select {
 
@@ -458,16 +527,13 @@ function CreateDecision() {
                     transition:
                         border-color 0.2s ease,
                         background 0.2s ease;
-
                 }
 
 
                 .form-card input::placeholder,
                 .form-card textarea::placeholder {
-
                     color:
                         var(--app-secondary-text);
-
                 }
 
 
@@ -489,7 +555,26 @@ function CreateDecision() {
                             195,
                             0.12
                         );
+                }
 
+
+                /* =========================
+                   DATETIME INPUT
+                ========================= */
+
+                .form-card input[type="datetime-local"] {
+                    cursor: pointer;
+                }
+
+                .deadline-hint {
+                    margin-top: 7px;
+
+                    color:
+                        var(--app-secondary-text);
+
+                    font-size: 11px;
+
+                    line-height: 1.5;
                 }
 
 
@@ -504,7 +589,6 @@ function CreateDecision() {
                     min-height: 100px;
 
                     line-height: 1.5;
-
                 }
 
 
@@ -513,20 +597,15 @@ function CreateDecision() {
                 ========================= */
 
                 .form-card select {
-
                     cursor: pointer;
-
                 }
 
-
                 .form-card select option {
-
                     background:
                         var(--app-card);
 
                     color:
                         var(--app-text);
-
                 }
 
 
@@ -535,11 +614,8 @@ function CreateDecision() {
                 ========================= */
 
                 .visibility-section {
-
                     margin-bottom: 22px;
-
                 }
-
 
                 .radio-row {
 
@@ -550,9 +626,7 @@ function CreateDecision() {
                     gap: 25px;
 
                     margin-top: 10px;
-
                 }
-
 
                 .radio-option {
 
@@ -568,29 +642,22 @@ function CreateDecision() {
                         var(--app-secondary-text);
 
                     cursor: pointer;
-
                 }
-
 
                 .radio-option input {
 
                     width: 16px;
-
                     height: 16px;
 
                     accent-color:
                         #6d4bc3;
 
                     cursor: pointer;
-
                 }
 
-
                 .radio-option:hover {
-
                     color:
                         var(--app-text);
-
                 }
 
 
@@ -614,21 +681,17 @@ function CreateDecision() {
                         var(--app-secondary-text);
 
                     cursor: pointer;
-
                 }
-
 
                 .checkbox-row input {
 
                     width: 16px;
-
                     height: 16px;
 
                     accent-color:
                         #6d4bc3;
 
                     cursor: pointer;
-
                 }
 
 
@@ -653,16 +716,12 @@ function CreateDecision() {
                     border-bottom:
                         1px solid
                         var(--app-border);
-
                 }
 
 
                 .option-input {
-
                     margin-bottom: 10px;
-
                 }
-
 
                 .option-number {
 
@@ -674,7 +733,6 @@ function CreateDecision() {
                     font-size: 11px;
 
                     margin-bottom: 5px;
-
                 }
 
 
@@ -689,7 +747,6 @@ function CreateDecision() {
                     gap: 12px;
 
                     margin-top: 14px;
-
                 }
 
 
@@ -722,9 +779,7 @@ function CreateDecision() {
 
                     transition:
                         0.2s ease;
-
                 }
-
 
                 .btn-add:hover {
 
@@ -733,7 +788,6 @@ function CreateDecision() {
 
                     border-color:
                         #6548a0;
-
                 }
 
 
@@ -767,9 +821,7 @@ function CreateDecision() {
 
                     transition:
                         0.2s ease;
-
                 }
-
 
                 .btn-submit:hover {
 
@@ -784,9 +836,7 @@ function CreateDecision() {
                             204,
                             0.20
                         );
-
                 }
-
 
                 .btn-submit:disabled {
 
@@ -794,7 +844,6 @@ function CreateDecision() {
 
                     cursor:
                         not-allowed;
-
                 }
 
 
@@ -826,7 +875,6 @@ function CreateDecision() {
                         #493773;
 
                     font-size: 13px;
-
                 }
 
 
@@ -849,7 +897,6 @@ function CreateDecision() {
 
                     border-color:
                         #23734f;
-
                 }
 
 
@@ -863,25 +910,19 @@ function CreateDecision() {
 
                         padding:
                             5px 0 30px;
-
                     }
-
 
                     .form-card {
 
                         padding: 22px;
 
                         border-radius: 12px;
-
                     }
-
 
                     .radio-row {
 
                         gap: 18px;
-
                     }
-
                 }
 
 
@@ -890,9 +931,7 @@ function CreateDecision() {
                     .form-card {
 
                         padding: 18px;
-
                     }
-
 
                     .radio-row {
 
@@ -903,9 +942,7 @@ function CreateDecision() {
                             flex-start;
 
                         gap: 12px;
-
                     }
-
                 }
 
             `}</style>
@@ -914,7 +951,6 @@ function CreateDecision() {
             <div className="create-page">
 
                 <div className="form-card">
-
 
                     {/* =========================
                         FORM INTRO
@@ -1070,7 +1106,6 @@ function CreateDecision() {
                             Visibility
                         </span>
 
-
                         <div className="radio-row">
 
                             <label className="radio-option">
@@ -1124,12 +1159,17 @@ function CreateDecision() {
                         </span>
 
                         <input
-                            type="date"
+                            type="datetime-local"
                             name="deadline"
                             value={decision.deadline}
                             onChange={handleChange}
-                            min={today}
+                            min={minDateTime}
                         />
+
+                        <div className="deadline-hint">
+                            Select the exact date and time when
+                            voting should end.
+                        </div>
 
                     </div>
 
@@ -1143,7 +1183,9 @@ function CreateDecision() {
                         <input
                             type="checkbox"
                             name="anonymous"
-                            checked={decision.anonymous}
+                            checked={
+                                decision.anonymous
+                            }
                             onChange={handleChange}
                         />
 
@@ -1172,7 +1214,6 @@ function CreateDecision() {
                                 <span className="option-number">
                                     Option {index + 1}
                                 </span>
-
 
                                 <input
                                     type="text"
@@ -1276,9 +1317,7 @@ function CreateDecision() {
             </div>
 
         </DashboardLayout>
-
     );
-
 }
 
 export default CreateDecision;

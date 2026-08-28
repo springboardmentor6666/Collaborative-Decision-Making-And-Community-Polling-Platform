@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -138,7 +139,7 @@ public class DecisionServiceImpl implements DecisionService {
     @Override
     public List<DecisionResponse> getActivePublicDecisions() {
 
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
 
         return decisionRepository
                 .findAll()
@@ -264,7 +265,7 @@ public class DecisionServiceImpl implements DecisionService {
         // Check active
         if (decision.getDeadline() != null &&
                 decision.getDeadline()
-                        .isBefore(LocalDate.now())) {
+                        .isBefore(LocalDateTime.now())) {
 
             throw new RuntimeException(
                     "This poll has already ended"
@@ -404,7 +405,7 @@ public class DecisionServiceImpl implements DecisionService {
                 .communityName(decision.getCommunity() == null ? null : decision.getCommunity().getCommunityName())
                 .totalVotes(voteRepository.countByDecisionId(decision.getId()))
                 .alreadyVoted(options.stream().anyMatch(OptionResponse::isSelected))
-                .status(decision.getDeadline() != null && decision.getDeadline().isBefore(LocalDate.now()) ? "COMPLETED" : "ACTIVE")
+                .status(decision.getDeadline() != null && decision.getDeadline().isBefore(LocalDateTime.now()) ? "COMPLETED" : "ACTIVE")
                 .options(options)
                 .build();
     }
