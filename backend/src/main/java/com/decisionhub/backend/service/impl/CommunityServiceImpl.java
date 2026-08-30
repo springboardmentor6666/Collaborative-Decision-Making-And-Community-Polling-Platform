@@ -4,10 +4,12 @@ import com.decisionhub.backend.dto.CommunityRequest;
 import com.decisionhub.backend.dto.CommunityResponse;
 import com.decisionhub.backend.dto.DecisionResponse;
 import com.decisionhub.backend.entity.Community;
+import com.decisionhub.backend.entity.Role;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.repository.CommunityRepository;
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.CommunityMessageRepository;
+import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.service.CommunityService;
 import com.decisionhub.backend.service.CurrentUserService;
 import com.decisionhub.backend.service.DecisionService;
@@ -29,6 +31,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final DecisionService decisionService;
     private final NotificationService notificationService;
     private final CommunityMessageRepository messages;
+    private final UserRepository users;
 
     public CommunityServiceImpl(
             CommunityRepository repository,
@@ -36,7 +39,8 @@ public class CommunityServiceImpl implements CommunityService {
             DecisionRepository decisions,
             DecisionService decisionService,
             NotificationService notificationService,
-            CommunityMessageRepository messages
+            CommunityMessageRepository messages,
+            UserRepository users
     ) {
         this.repository = repository;
         this.currentUser = currentUser;
@@ -44,6 +48,7 @@ public class CommunityServiceImpl implements CommunityService {
         this.decisionService = decisionService;
         this.notificationService = notificationService;
         this.messages = messages;
+        this.users = users;
     }
 
 
@@ -72,6 +77,14 @@ public class CommunityServiceImpl implements CommunityService {
 
         Community saved =
                 repository.save(community);
+
+        // Notify every admin that a new community has been created
+        users.findByRole(Role.ADMIN)
+                .forEach(admin -> notificationService.notifyUser(
+                        admin,
+                        "New community created: \"" + saved.getCommunityName()
+                                + "\" by " + user.getName()
+                ));
 
         return response(saved, user);
     }

@@ -14,6 +14,11 @@ import "./index.css";
 import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/LandingPage";
 import CommunityDetail from "./pages/CommunityDetail";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminDecisions from "./pages/AdminDecisions";
+import AdminCommunities from "./pages/AdminCommunities";
+import AdminAnalytics from "./pages/AdminAnalytics";
 function App() {
 
   return (
@@ -38,6 +43,11 @@ function App() {
         <Route path="/communities/:communityId" element={<CommunityDetail />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/decisions" element={<AdminDecisions />} />
+        <Route path="/admin/communities" element={<AdminCommunities />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
 
 
 

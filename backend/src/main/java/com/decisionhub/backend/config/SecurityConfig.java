@@ -68,6 +68,11 @@ public class SecurityConfig {
                                 "/login/**"
                         ).permitAll()
 
+                        // Admin-only APIs
+                        .requestMatchers(
+                                "/api/admin/**"
+                        ).hasRole("ADMIN")
+
                         // Other APIs
                         .anyRequest().authenticated()
                 )

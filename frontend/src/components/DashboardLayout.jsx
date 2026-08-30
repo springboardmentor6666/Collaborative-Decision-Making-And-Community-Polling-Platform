@@ -26,7 +26,8 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
 
   const notificationRef = useRef(null);
 
-  const navItems = [
+  // Regular participants get the personal/participation tools.
+  const userNavItems = [
     {
       label: "Dashboard",
       icon: "🏠",
@@ -63,6 +64,44 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       route: "/profile",
     },
   ];
+
+  // Admins manage the platform rather than participate in it, so the
+  // admin nav swaps the personal tools out for the moderation/management
+  // surfaces instead of just appending an "Admin" link to the user nav.
+  const adminNavItems = [
+    {
+      label: "Admin Dashboard",
+      icon: "🛠",
+      route: "/admin",
+    },
+    {
+      label: "Manage Users",
+      icon: "🧑‍💼",
+      route: "/admin/users",
+    },
+    {
+      label: "Manage Decisions",
+      icon: "📊",
+      route: "/admin/decisions",
+    },
+    {
+      label: "Manage Communities",
+      icon: "👥",
+      route: "/admin/communities",
+    },
+    {
+      label: "Analytics",
+      icon: "📈",
+      route: "/admin/analytics",
+    },
+    {
+      label: "Profile",
+      icon: "👤",
+      route: "/profile",
+    },
+  ];
+
+  const navItems = role === "ADMIN" ? adminNavItems : userNavItems;
 
   const initials = userEmail
     ? userEmail.charAt(0).toUpperCase()
@@ -472,21 +511,23 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                   </span>
 
                   <span
-                    className={`
-                      whitespace-nowrap
-                      overflow-hidden
-                      transition-opacity
-                      duration-200
+  className={`
+    flex-1
+    min-w-0
+    truncate
+    text-left
+    transition-opacity
+    duration-200
 
-                      ${
-                        sidebarCollapsed
-                          ? "lg:hidden"
-                          : ""
-                      }
-                    `}
-                  >
-                    {item.label}
-                  </span>
+    ${
+      sidebarCollapsed
+        ? "lg:hidden"
+        : ""
+    }
+  `}
+>
+  {item.label}
+</span>
                 </button>
               );
             })}

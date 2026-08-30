@@ -8,6 +8,7 @@ import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.security.JwtService;
 import com.decisionhub.backend.service.AuthService;
+import com.decisionhub.backend.service.NotificationService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,17 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final NotificationService notificationService;
 
     public AuthServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtService jwtService) {
+                           JwtService jwtService,
+                           NotificationService notificationService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -45,6 +49,13 @@ public class AuthServiceImpl implements AuthService {
 
         // Save to Database
         userRepository.save(user);
+
+        // Notify every admin that a new user has joined
+        userRepository.findByRole(Role.ADMIN)
+                .forEach(admin -> notificationService.notifyUser(
+                        admin,
+                        "New user registered: " + user.getName() + " (" + user.getEmail() + ")"
+                ));
 
         // Generate JWT
         String token = jwtService.generateToken(user.getEmail());

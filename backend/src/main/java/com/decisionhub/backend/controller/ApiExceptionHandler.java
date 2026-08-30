@@ -58,6 +58,21 @@ public class ApiExceptionHandler {
  }
 
 
+ @ExceptionHandler(
+         org.springframework.dao.DataIntegrityViolationException.class
+ )
+ @ResponseStatus(HttpStatus.CONFLICT)
+ Map<String, String> integrity(
+         org.springframework.dao.DataIntegrityViolationException e
+ ) {
+
+  return Map.of(
+          "message",
+          "This record can't be deleted because it still has related data (decisions, votes, or communities) attached to it."
+  );
+ }
+
+
  @ExceptionHandler(IllegalStateException.class)
  @ResponseStatus(HttpStatus.CONFLICT)
  Map<String, String> conflict(
