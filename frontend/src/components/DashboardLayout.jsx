@@ -75,13 +75,28 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       route: "/admin",
     },
     {
+      label: "Create Decision",
+      icon: "➕",
+      route: "/admin/create-decision",
+    },
+    {
+      label: "My Decisions",
+      icon: "📊",
+      route: "/admin/my-decisions",
+    },
+    {
+      label: "Active Polls",
+      icon: "🗳",
+      route: "/admin/polls",
+    },
+    {
       label: "Manage Users",
       icon: "🧑‍💼",
       route: "/admin/users",
     },
     {
       label: "Manage Decisions",
-      icon: "📊",
+      icon: "📋",
       route: "/admin/decisions",
     },
     {

@@ -10,10 +10,6 @@ function AnalyticsPage() {
      FETCH DECISIONS
   ========================================================= */
 
-  useEffect(() => {
-    fetchDecisions();
-  }, []);
-
   const fetchDecisions = async () => {
     try {
       const token = sessionStorage.getItem("token");
@@ -48,6 +44,11 @@ function AnalyticsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const request = setTimeout(() => fetchDecisions(), 0);
+    return () => clearTimeout(request);
+  }, []);
 
   /* =========================================================
      DECISION STATUS
@@ -313,6 +314,14 @@ function AnalyticsPage() {
           (item) => item.count
       )
   );
+
+  const recentDecisions = [...decisions]
+      .sort((first, second) => {
+        const firstDate = new Date(first.createdAt || 0).getTime();
+        const secondDate = new Date(second.createdAt || 0).getTime();
+        return secondDate - firstDate;
+      })
+      .slice(0, 5);
 
   /* =========================================================
      LOADING
@@ -2575,7 +2584,7 @@ function AnalyticsPage() {
 
             </div>
 
-            {decisions.length === 0 ? (
+            {recentDecisions.length === 0 ? (
 
                 <div className="empty">
                   No decisions created yet.
@@ -2585,8 +2594,7 @@ function AnalyticsPage() {
 
                 <div className="recent-list">
 
-                  {decisions
-                      .slice(0, 5)
+                    {recentDecisions
                       .map((decision) => {
 
                         const status =
@@ -2618,7 +2626,9 @@ function AnalyticsPage() {
                                         "Uncategorized"}
 
                                     {decision.deadline
-                                        ? ` • Deadline: ${decision.deadline}`
+                                      ? ` • Deadline: ${new Date(
+                                        decision.deadline
+                                        ).toLocaleString()}`
                                         : ""}
 
                                   </div>

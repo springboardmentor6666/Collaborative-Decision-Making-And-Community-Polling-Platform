@@ -121,6 +121,7 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
+        @Transactional(readOnly = true)
     public List<DecisionResponse> getMyDecisions() {
 
         User user = getCurrentUser();

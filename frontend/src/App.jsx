@@ -44,6 +44,9 @@ function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/create-decision" element={<CreateDecision />} />
+        <Route path="/admin/my-decisions" element={<MyDecisions />} />
+        <Route path="/admin/polls" element={<Polls />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/decisions" element={<AdminDecisions />} />
         <Route path="/admin/communities" element={<AdminCommunities />} />

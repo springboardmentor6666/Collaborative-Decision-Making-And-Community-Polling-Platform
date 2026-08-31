@@ -40,9 +40,9 @@ function OAuth2Success() {
         }
 
         console.log("Google login successful!");
-        console.log("Redirecting to Home...");
+        console.log("Redirecting to dashboard...");
 
-        navigate("/home", { replace: true });
+        navigate(role === "ADMIN" ? "/admin" : "/home", { replace: true });
 
     }, [navigate]);
 

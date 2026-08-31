@@ -97,7 +97,7 @@ function Login() {
 
         // Give toast time to be visible
         setTimeout(() => {
-          navigate("/home");
+          navigate(result.role === "ADMIN" ? "/admin" : "/home");
         }, 1500);
       } else {
         // Backend error
