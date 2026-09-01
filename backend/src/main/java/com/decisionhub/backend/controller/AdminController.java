@@ -164,32 +164,32 @@ public class AdminController {
         }
 
         communities.findAll().stream()
-            .filter(community -> community.getOwner() != null
-                && community.getOwner().getId().equals(id))
-            .toList()
-            .forEach(community -> deleteCommunityAndDependencies(community));
+                .filter(community -> community.getOwner() != null
+                        && community.getOwner().getId().equals(id))
+                .toList()
+                .forEach(community -> deleteCommunityAndDependencies(community));
 
         decisions.findAll().stream()
-            .filter(decision -> decision.getCreatedBy() != null
-                && decision.getCreatedBy().getId().equals(id))
-            .toList()
-            .forEach(this::deleteDecisionAndDependencies);
+                .filter(decision -> decision.getCreatedBy() != null
+                        && decision.getCreatedBy().getId().equals(id))
+                .toList()
+                .forEach(this::deleteDecisionAndDependencies);
 
         comments.deleteAll(comments.findAll().stream()
-            .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(id))
-            .toList());
+                .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(id))
+                .toList());
         votes.deleteAll(votes.findAll().stream()
-            .filter(vote -> vote.getUser() != null && vote.getUser().getId().equals(id))
-            .toList());
+                .filter(vote -> vote.getUser() != null && vote.getUser().getId().equals(id))
+                .toList());
         reports.deleteAll(reports.findAll().stream()
-            .filter(report -> report.getReportedBy() != null && report.getReportedBy().getId().equals(id))
-            .toList());
+                .filter(report -> report.getReportedBy() != null && report.getReportedBy().getId().equals(id))
+                .toList());
         notifications.deleteAll(notifications.findAll().stream()
-            .filter(notification -> notification.getUser() != null && notification.getUser().getId().equals(id))
-            .toList());
+                .filter(notification -> notification.getUser() != null && notification.getUser().getId().equals(id))
+                .toList());
         communityMessages.deleteAll(communityMessages.findAll().stream()
-            .filter(message -> message.getUser() != null && message.getUser().getId().equals(id))
-            .toList());
+                .filter(message -> message.getUser() != null && message.getUser().getId().equals(id))
+                .toList());
 
         communities.findAll().forEach(community -> {
             if (community.getMembers().removeIf(member -> member.getId().equals(id))) {
@@ -202,17 +202,17 @@ public class AdminController {
 
     private void deleteDecisionAndDependencies(Decision decision) {
         reports.deleteAll(reports.findAll().stream()
-            .filter(report -> report.getDecision() != null
-                && report.getDecision().getId().equals(decision.getId()))
-            .toList());
+                .filter(report -> report.getDecision() != null
+                        && report.getDecision().getId().equals(decision.getId()))
+                .toList());
         votes.deleteAll(votes.findAll().stream()
-            .filter(vote -> vote.getDecision() != null
-                && vote.getDecision().getId().equals(decision.getId()))
-            .toList());
+                .filter(vote -> vote.getDecision() != null
+                        && vote.getDecision().getId().equals(decision.getId()))
+                .toList());
         comments.deleteAll(comments.findAll().stream()
-            .filter(comment -> comment.getDecision() != null
-                && comment.getDecision().getId().equals(decision.getId()))
-            .toList());
+                .filter(comment -> comment.getDecision() != null
+                        && comment.getDecision().getId().equals(decision.getId()))
+                .toList());
         decisions.delete(decision);
     }
 
@@ -287,8 +287,8 @@ public class AdminController {
         communities.delete(community);
     }
 
-        @GetMapping("/analytics")
-        public Map<String, Object> analytics(
+    @GetMapping("/analytics")
+    public Map<String, Object> analytics(
             @RequestParam(defaultValue = "30") int days) {
         int selectedDays = Math.max(1, Math.min(days, 3650));
         LocalDateTime since = LocalDateTime.now().minusDays(selectedDays);
@@ -305,27 +305,27 @@ public class AdminController {
         result.put("rangeDays", selectedDays);
         result.put("generatedAt", LocalDateTime.now());
         result.put("kpis", Map.of(
-            "totalUsers", allUsers.size(),
-            "activeUsers", activeUserIds(allDecisions, allVotes, allComments, since).size(),
-            "totalDecisions", scopedDecisions.size(),
-            "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
-            "totalComments", scopedComments.size(),
-            "totalCommunities", allCommunities.size(),
-            "communityMembers", allCommunities.stream().mapToInt(c -> c.getMembers().size()).sum(),
-            "pendingReports", allReports.size(),
-            "reportsSupported", false));
+                "totalUsers", allUsers.size(),
+                "activeUsers", activeUserIds(allDecisions, allVotes, allComments, since).size(),
+                "totalDecisions", scopedDecisions.size(),
+                "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
+                "totalComments", scopedComments.size(),
+                "totalCommunities", allCommunities.size(),
+                "communityMembers", allCommunities.stream().mapToInt(c -> c.getMembers().size()).sum(),
+                "pendingReports", allReports.size(),
+                "reportsSupported", false));
         result.put("activity", activitySeries(selectedDays, allUsers, allDecisions, allVotes, allComments));
         result.put("decisionSummary", Map.of(
-            "public", scopedDecisions.stream().filter(d -> "PUBLIC".equalsIgnoreCase(d.getVisibility())).count(),
-            "community", scopedDecisions.stream().filter(d -> d.getCommunity() != null).count(),
-            "total", scopedDecisions.size()));
+                "public", scopedDecisions.stream().filter(d -> "PUBLIC".equalsIgnoreCase(d.getVisibility())).count(),
+                "community", scopedDecisions.stream().filter(d -> d.getCommunity() != null).count(),
+                "total", scopedDecisions.size()));
         result.put("engagement", Map.of(
-            "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
-            "averageVotesPerDecision", average(allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(), scopedDecisions.size()),
-            "votedUsers", activeVoterIds(allVotes, since).size(),
-            "participationRate", percentage(activeVoterIds(allVotes, since).size(), allUsers.size()),
-            "averageCommentsPerDecision", average(scopedComments.size(), scopedDecisions.size()),
-            "totalComments", scopedComments.size()));
+                "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
+                "averageVotesPerDecision", average(allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(), scopedDecisions.size()),
+                "votedUsers", activeVoterIds(allVotes, since).size(),
+                "participationRate", percentage(activeVoterIds(allVotes, since).size(), allUsers.size()),
+                "averageCommentsPerDecision", average(scopedComments.size(), scopedDecisions.size()),
+                "totalComments", scopedComments.size()));
         result.put("communities", communityRows(allCommunities, allDecisions, allVotes, allComments, since));
         result.put("categories", categoryRows(scopedDecisions, allVotes, scopedComments));
         result.put("activeUsers", userRows(allUsers, allDecisions, allVotes, allComments, allCommunities, since));
@@ -336,28 +336,28 @@ public class AdminController {
         return result;
     }
 
-        private boolean after(LocalDateTime value, LocalDateTime since) { return value != null && !value.isBefore(since); }
+    private boolean after(LocalDateTime value, LocalDateTime since) { return value != null && !value.isBefore(since); }
 
-        private Set<Long> activeUserIds(List<Decision> decisionList, List<com.decisionhub.backend.entity.Vote> voteList,
-                       List<Comment> commentList, LocalDateTime since) {
+    private Set<Long> activeUserIds(List<Decision> decisionList, List<com.decisionhub.backend.entity.Vote> voteList,
+                                    List<Comment> commentList, LocalDateTime since) {
         Set<Long> ids = new HashSet<>();
         decisionList.stream().filter(d -> after(d.getCreatedAt(), since) && d.getCreatedBy() != null)
-            .forEach(d -> ids.add(d.getCreatedBy().getId()));
+                .forEach(d -> ids.add(d.getCreatedBy().getId()));
         voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).forEach(v -> ids.add(v.getUser().getId()));
         commentList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> ids.add(c.getUser().getId()));
         return ids;
-        }
+    }
 
-        private Set<Long> activeVoterIds(List<com.decisionhub.backend.entity.Vote> voteList, LocalDateTime since) {
+    private Set<Long> activeVoterIds(List<com.decisionhub.backend.entity.Vote> voteList, LocalDateTime since) {
         return voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since))
-            .map(v -> v.getUser().getId()).collect(Collectors.toSet());
-        }
+                .map(v -> v.getUser().getId()).collect(Collectors.toSet());
+    }
 
-        private double average(long numerator, long denominator) { return denominator == 0 ? 0 : Math.round((double) numerator / denominator * 100) / 100.0; }
-        private double percentage(long numerator, long denominator) { return denominator == 0 ? 0 : Math.round((double) numerator / denominator * 10000) / 100.0; }
+    private double average(long numerator, long denominator) { return denominator == 0 ? 0 : Math.round((double) numerator / denominator * 100) / 100.0; }
+    private double percentage(long numerator, long denominator) { return denominator == 0 ? 0 : Math.round((double) numerator / denominator * 10000) / 100.0; }
 
-        private List<Map<String, Object>> activitySeries(int days, List<User> userList, List<Decision> decisionList,
-                                  List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList) {
+    private List<Map<String, Object>> activitySeries(int days, List<User> userList, List<Decision> decisionList,
+                                                     List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList) {
         List<Map<String, Object>> series = new ArrayList<>();
         LocalDate today = LocalDate.now();
         for (int offset = Math.min(days - 1, 89); offset >= 0; offset--) {
@@ -366,110 +366,181 @@ public class AdminController {
             LocalDateTime end = start.plusDays(1);
             long registrations = userList.stream().filter(u -> between(u.getCreatedAt(), start, end)).count();
             long active = activeUserIds(decisionList, voteList, commentList, start.minusNanos(1)).stream()
-                .filter(id -> decisionList.stream().anyMatch(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(id) && between(d.getCreatedAt(), start, end))
-                    || voteList.stream().anyMatch(v -> v.getUser().getId().equals(id) && between(v.getDecision().getCreatedAt(), start, end))
-                    || commentList.stream().anyMatch(c -> c.getUser().getId().equals(id) && between(c.getCreatedAt(), start, end))).count();
-                long createdDecisions = decisionList.stream().filter(d -> between(d.getCreatedAt(), start, end)).count();
-                long createdVotes = voteList.stream().filter(v -> between(v.getDecision().getCreatedAt(), start, end)).count();
-                long createdComments = commentList.stream().filter(c -> between(c.getCreatedAt(), start, end)).count();
-                series.add(Map.of("date", date.toString(), "registrations", registrations, "activeUsers", active,
+                    .filter(id -> decisionList.stream().anyMatch(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(id) && between(d.getCreatedAt(), start, end))
+                            || voteList.stream().anyMatch(v -> v.getUser().getId().equals(id) && between(v.getDecision().getCreatedAt(), start, end))
+                            || commentList.stream().anyMatch(c -> c.getUser().getId().equals(id) && between(c.getCreatedAt(), start, end))).count();
+            long createdDecisions = decisionList.stream().filter(d -> between(d.getCreatedAt(), start, end)).count();
+            long createdVotes = voteList.stream().filter(v -> between(v.getDecision().getCreatedAt(), start, end)).count();
+            long createdComments = commentList.stream().filter(c -> between(c.getCreatedAt(), start, end)).count();
+            series.add(Map.of("date", date.toString(), "registrations", registrations, "activeUsers", active,
                     "decisions", createdDecisions, "votes", createdVotes, "comments", createdComments));
         }
         return series;
-        }
+    }
 
-        private boolean between(LocalDateTime value, LocalDateTime start, LocalDateTime end) { return value != null && !value.isBefore(start) && value.isBefore(end); }
+    private boolean between(LocalDateTime value, LocalDateTime start, LocalDateTime end) { return value != null && !value.isBefore(start) && value.isBefore(end); }
 
-        private List<Map<String, Object>> communityRows(List<Community> communityList, List<Decision> decisionList,
-                                                         List<com.decisionhub.backend.entity.Vote> voteList,
-                                                         List<Comment> commentList, LocalDateTime since) {
-            return communityList.stream().map(community -> {
-                List<Decision> communityDecisions = decisionList.stream()
-                        .filter(d -> d.getCommunity() != null && d.getCommunity().getId().equals(community.getId()) && after(d.getCreatedAt(), since)).toList();
-                Set<Long> decisionIds = communityDecisions.stream().map(Decision::getId).collect(Collectors.toSet());
-                Map<String, Object> row = new LinkedHashMap<>();
-                row.put("id", community.getId());
-                row.put("name", community.getCommunityName());
-                row.put("owner", community.getOwner() == null ? "Unknown" : community.getOwner().getName());
-                row.put("members", community.getMembers().size());
-                row.put("decisions", communityDecisions.size());
-                row.put("votes", voteList.stream().filter(v -> decisionIds.contains(v.getDecision().getId())).count());
-                row.put("comments", commentList.stream().filter(c -> c.getDecision() != null && decisionIds.contains(c.getDecision().getId())).count());
-                return row;
-            }).sorted((a, b) -> Long.compare(((Number) b.get("members")).longValue(), ((Number) a.get("members")).longValue())).toList();
-        }
+    private List<Map<String, Object>> communityRows(List<Community> communityList, List<Decision> decisionList,
+                                                    List<com.decisionhub.backend.entity.Vote> voteList,
+                                                    List<Comment> commentList, LocalDateTime since) {
+        return communityList.stream().map(community -> {
+            List<Decision> communityDecisions = decisionList.stream()
+                    .filter(d -> d.getCommunity() != null && d.getCommunity().getId().equals(community.getId()) && after(d.getCreatedAt(), since)).toList();
+            Set<Long> decisionIds = communityDecisions.stream().map(Decision::getId).collect(Collectors.toSet());
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", community.getId());
+            row.put("name", community.getCommunityName());
+            row.put("owner", community.getOwner() == null ? "Unknown" : community.getOwner().getName());
+            row.put("members", community.getMembers().size());
+            row.put("decisions", communityDecisions.size());
+            row.put("votes", voteList.stream().filter(v -> decisionIds.contains(v.getDecision().getId())).count());
+            row.put("comments", commentList.stream().filter(c -> c.getDecision() != null && decisionIds.contains(c.getDecision().getId())).count());
+            return row;
+        }).sorted((a, b) -> Long.compare(((Number) b.get("members")).longValue(), ((Number) a.get("members")).longValue())).toList();
+    }
 
-        private List<Map<String, Object>> categoryRows(List<Decision> decisionList, List<com.decisionhub.backend.entity.Vote> voteList,
-                                                       List<Comment> commentList) {
-            return decisionList.stream().collect(Collectors.groupingBy(d -> d.getCategory() == null || d.getCategory().isBlank() ? "Uncategorized" : d.getCategory()))
-                    .entrySet().stream().map(entry -> {
-                        Set<Long> ids = entry.getValue().stream().map(Decision::getId).collect(Collectors.toSet());
-                        return Map.<String, Object>of("category", entry.getKey(), "decisions", entry.getValue().size(),
-                                "votes", voteList.stream().filter(v -> ids.contains(v.getDecision().getId())).count(),
-                                "comments", commentList.stream().filter(c -> c.getDecision() != null && ids.contains(c.getDecision().getId())).count());
-                    }).sorted((a, b) -> Long.compare(((Number) b.get("decisions")).longValue(), ((Number) a.get("decisions")).longValue())).toList();
-        }
+    private List<Map<String, Object>> categoryRows(List<Decision> decisionList, List<com.decisionhub.backend.entity.Vote> voteList,
+                                                   List<Comment> commentList) {
+        return decisionList.stream().collect(Collectors.groupingBy(d -> d.getCategory() == null || d.getCategory().isBlank() ? "Uncategorized" : d.getCategory()))
+                .entrySet().stream().map(entry -> {
+                    Set<Long> ids = entry.getValue().stream().map(Decision::getId).collect(Collectors.toSet());
+                    return Map.<String, Object>of("category", entry.getKey(), "decisions", entry.getValue().size(),
+                            "votes", voteList.stream().filter(v -> ids.contains(v.getDecision().getId())).count(),
+                            "comments", commentList.stream().filter(c -> c.getDecision() != null && ids.contains(c.getDecision().getId())).count());
+                }).sorted((a, b) -> Long.compare(((Number) b.get("decisions")).longValue(), ((Number) a.get("decisions")).longValue())).toList();
+    }
 
-        private List<Map<String, Object>> userRows(List<User> userList, List<Decision> decisionList,
-                                                   List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList,
-                                                   List<Community> communityList, LocalDateTime since) {
-            return userList.stream().map(user -> {
-                long userDecisions = decisionList.stream().filter(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(user.getId()) && after(d.getCreatedAt(), since)).count();
-                long userVotes = voteList.stream().filter(v -> v.getUser().getId().equals(user.getId()) && after(v.getDecision().getCreatedAt(), since)).count();
-                long userComments = commentList.stream().filter(c -> c.getUser().getId().equals(user.getId()) && after(c.getCreatedAt(), since)).count();
-                long userCommunities = communityList.stream().filter(c -> c.getMembers().stream().anyMatch(member -> member.getId().equals(user.getId()))).count();
-                return Map.<String, Object>of("id", user.getId(), "name", user.getName(), "decisions", userDecisions,
-                        "votes", userVotes, "comments", userComments, "communities", userCommunities,
-                        "activity", userDecisions + userVotes + userComments);
-            }).sorted((a, b) -> Long.compare(((Number) b.get("activity")).longValue(), ((Number) a.get("activity")).longValue())).limit(10).toList();
-        }
+    private List<Map<String, Object>> userRows(List<User> userList, List<Decision> decisionList,
+                                               List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList,
+                                               List<Community> communityList, LocalDateTime since) {
+        return userList.stream().map(user -> {
+            long userDecisions = decisionList.stream().filter(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(user.getId()) && after(d.getCreatedAt(), since)).count();
+            long userVotes = voteList.stream().filter(v -> v.getUser().getId().equals(user.getId()) && after(v.getDecision().getCreatedAt(), since)).count();
+            long userComments = commentList.stream().filter(c -> c.getUser().getId().equals(user.getId()) && after(c.getCreatedAt(), since)).count();
+            long userCommunities = communityList.stream().filter(c -> c.getMembers().stream().anyMatch(member -> member.getId().equals(user.getId()))).count();
+            return Map.<String, Object>of("id", user.getId(), "name", user.getName(), "decisions", userDecisions,
+                    "votes", userVotes, "comments", userComments, "communities", userCommunities,
+                    "activity", userDecisions + userVotes + userComments);
+        }).sorted((a, b) -> Long.compare(((Number) b.get("activity")).longValue(), ((Number) a.get("activity")).longValue())).limit(10).toList();
+    }
 
-        private List<Map<String, Object>> popularDecisionRows(List<Decision> decisionList,
-                                                               List<com.decisionhub.backend.entity.Vote> voteList,
-                                                               List<Comment> commentList) {
-            return decisionList.stream().map(decision -> {
-                long decisionVotes = voteList.stream().filter(v -> v.getDecision().getId().equals(decision.getId())).count();
-                long decisionComments = commentList.stream().filter(c -> c.getDecision() != null && c.getDecision().getId().equals(decision.getId())).count();
-                return Map.<String, Object>of("id", decision.getId(), "title", decision.getTitle(),
-                        "creator", decision.getCreatedBy() == null ? "Unknown" : decision.getCreatedBy().getName(),
-                        "category", decision.getCategory() == null ? "Uncategorized" : decision.getCategory(),
-                        "type", decision.getCommunity() == null ? "PUBLIC" : "COMMUNITY", "votes", decisionVotes,
-                        "comments", decisionComments, "deadline", decision.getDeadline(), "created", decision.getCreatedAt());
-            }).sorted((a, b) -> Long.compare(((Number) b.get("votes")).longValue(), ((Number) a.get("votes")).longValue())).limit(10).toList();
-        }
+    private List<Map<String, Object>> popularDecisionRows(List<Decision> decisionList,
+                                                          List<com.decisionhub.backend.entity.Vote> voteList,
+                                                          List<Comment> commentList) {
+        return decisionList.stream().map(decision -> {
+            long decisionVotes = voteList.stream().filter(v -> v.getDecision().getId().equals(decision.getId())).count();
+            long decisionComments = commentList.stream().filter(c -> c.getDecision() != null && c.getDecision().getId().equals(decision.getId())).count();
+            return Map.<String, Object>of("id", decision.getId(), "title", decision.getTitle(),
+                    "creator", decision.getCreatedBy() == null ? "Unknown" : decision.getCreatedBy().getName(),
+                    "category", decision.getCategory() == null ? "Uncategorized" : decision.getCategory(),
+                    "type", decision.getCommunity() == null ? "PUBLIC" : "COMMUNITY", "votes", decisionVotes,
+                    "comments", decisionComments, "deadline", decision.getDeadline(), "created", decision.getCreatedAt());
+        }).sorted((a, b) -> Long.compare(((Number) b.get("votes")).longValue(), ((Number) a.get("votes")).longValue())).limit(10).toList();
+    }
 
-        private Map<String, Object> moderationRows(List<Report> reportList) {
-            List<Map<String, Object>> recent = reportList.stream().map(report -> Map.<String, Object>of(
-                    "id", report.getId(), "reason", report.getReason(),
-                    "decision", report.getDecision() == null ? "Unknown" : report.getDecision().getTitle(),
-                    "reportedBy", report.getReportedBy() == null ? "Unknown" : report.getReportedBy().getName())).limit(10).toList();
-            return Map.of("total", reportList.size(), "statusSupported", false, "recent", recent);
-        }
+    private Map<String, Object> moderationRows(List<Report> reportList) {
+        List<Map<String, Object>> recent = reportList.stream().map(report -> Map.<String, Object>of(
+                "id", report.getId(), "reason", report.getReason(),
+                "decision", report.getDecision() == null ? "Unknown" : report.getDecision().getTitle(),
+                "reportedBy", report.getReportedBy() == null ? "Unknown" : report.getReportedBy().getName())).limit(10).toList();
+        return Map.of("total", reportList.size(), "statusSupported", false, "recent", recent);
+    }
 
-        private List<Map<String, Object>> recentActivity(List<User> userList, List<Decision> decisionList,
-                                                         List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList,
-                                                         List<Community> communityList, LocalDateTime since) {
-            List<Map<String, Object>> events = new ArrayList<>();
-            userList.stream().filter(u -> after(u.getCreatedAt(), since)).forEach(u -> events.add(event("User registered", u.getName(), "", u.getCreatedAt())));
-            decisionList.stream().filter(d -> after(d.getCreatedAt(), since)).forEach(d -> events.add(event("Decision created", d.getCreatedBy() == null ? "Unknown" : d.getCreatedBy().getName(), d.getTitle(), d.getCreatedAt())));
-            commentList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Comment created", c.getUser().getName(), c.getDecision().getTitle(), c.getCreatedAt())));
-            communityList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Community created", c.getOwner() == null ? "Unknown" : c.getOwner().getName(), c.getCommunityName(), c.getCreatedAt())));
-            voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).forEach(v -> events.add(event("Vote submitted", v.getUser().getName(), v.getDecision().getTitle(), v.getDecision().getCreatedAt())));
-            return events.stream().sorted((a, b) -> String.valueOf(b.get("at")).compareTo(String.valueOf(a.get("at")))).limit(20).toList();
-        }
+    // ===================== FULL ACTIVITY LOG (paginated) =====================
 
-        private Map<String, Object> event(String type, String actor, String subject, LocalDateTime at) {
-            return Map.of("type", type, "actor", actor, "subject", subject, "at", at);
-        }
+    @GetMapping("/activity")
+    public Map<String, Object> activityLog(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String type) {
 
-        private List<String> insights(List<Community> communityList, List<Decision> allDecisionList, List<Decision> scopedDecisionList) {
-            List<String> result = new ArrayList<>();
-            allDecisionList.stream().filter(d -> d.getCategory() != null && !d.getCategory().isBlank())
-                    .collect(Collectors.groupingBy(Decision::getCategory, Collectors.counting())).entrySet().stream()
-                    .max(Map.Entry.comparingByValue()).ifPresent(entry -> result.add(entry.getKey() + " is the most active category."));
-            communityList.stream().max(Comparator.comparingInt(c -> c.getMembers().size()))
-                    .ifPresent(c -> result.add(c.getCommunityName() + " has the highest membership."));
-            if (scopedDecisionList.isEmpty()) result.add("No decision activity was recorded for this period.");
-            return result;
-        }
+        int pageNum = Math.max(0, page);
+        int pageSize = Math.max(1, Math.min(size, 100));
+
+        List<Map<String, Object>> allEvents = allActivity(
+                users.findAll(),
+                decisions.findAll(),
+                votes.findAll(),
+                comments.findAll(),
+                communities.findAll());
+
+        String filterCategory = (type == null || type.isBlank())
+                ? null
+                : type.trim().toUpperCase();
+
+        List<Map<String, Object>> filtered = filterCategory == null
+                ? allEvents
+                : allEvents.stream()
+                .filter(e -> filterCategory.equals(e.get("category")))
+                .toList();
+
+        int total = filtered.size();
+        int totalPages = total == 0 ? 0 : (int) Math.ceil(total / (double) pageSize);
+        int fromIndex = Math.min(pageNum * pageSize, total);
+        int toIndex = Math.min(fromIndex + pageSize, total);
+
+        List<Map<String, Object>> content = filtered.subList(fromIndex, toIndex);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("content", content);
+        result.put("number", pageNum);
+        result.put("size", pageSize);
+        result.put("totalElements", total);
+        result.put("totalPages", totalPages);
+        return result;
+    }
+
+    // Builds the complete, unscoped activity list (no "since" cutoff) so the
+    // dedicated activity page can page through every event ever recorded.
+    private List<Map<String, Object>> allActivity(List<User> userList, List<Decision> decisionList,
+                                                  List<com.decisionhub.backend.entity.Vote> voteList,
+                                                  List<Comment> commentList, List<Community> communityList) {
+        List<Map<String, Object>> events = new ArrayList<>();
+        userList.forEach(u -> events.add(event("User registered", "USER", u.getName(), "", u.getCreatedAt())));
+        decisionList.forEach(d -> events.add(event("Decision created", "DECISION",
+                d.getCreatedBy() == null ? "Unknown" : d.getCreatedBy().getName(), d.getTitle(), d.getCreatedAt())));
+        commentList.forEach(c -> events.add(event("Comment created", "COMMENT", c.getUser().getName(), c.getDecision().getTitle(), c.getCreatedAt())));
+        communityList.forEach(c -> events.add(event("Community created", "COMMUNITY",
+                c.getOwner() == null ? "Unknown" : c.getOwner().getName(), c.getCommunityName(), c.getCreatedAt())));
+        voteList.forEach(v -> events.add(event("Vote submitted", "VOTE", v.getUser().getName(), v.getDecision().getTitle(), v.getDecision().getCreatedAt())));
+        events.sort((a, b) -> String.valueOf(b.get("at")).compareTo(String.valueOf(a.get("at"))));
+        return events;
+    }
+
+    private List<Map<String, Object>> recentActivity(List<User> userList, List<Decision> decisionList,
+                                                     List<com.decisionhub.backend.entity.Vote> voteList, List<Comment> commentList,
+                                                     List<Community> communityList, LocalDateTime since) {
+        List<Map<String, Object>> events = new ArrayList<>();
+        userList.stream().filter(u -> after(u.getCreatedAt(), since)).forEach(u -> events.add(event("User registered", u.getName(), "", u.getCreatedAt())));
+        decisionList.stream().filter(d -> after(d.getCreatedAt(), since)).forEach(d -> events.add(event("Decision created", d.getCreatedBy() == null ? "Unknown" : d.getCreatedBy().getName(), d.getTitle(), d.getCreatedAt())));
+        commentList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Comment created", c.getUser().getName(), c.getDecision().getTitle(), c.getCreatedAt())));
+        communityList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Community created", c.getOwner() == null ? "Unknown" : c.getOwner().getName(), c.getCommunityName(), c.getCreatedAt())));
+        voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).forEach(v -> events.add(event("Vote submitted", v.getUser().getName(), v.getDecision().getTitle(), v.getDecision().getCreatedAt())));
+        return events.stream().sorted((a, b) -> String.valueOf(b.get("at")).compareTo(String.valueOf(a.get("at")))).limit(20).toList();
+    }
+
+    private Map<String, Object> event(String type, String actor, String subject, LocalDateTime at) {
+        return Map.of("type", type, "actor", actor, "subject", subject, "at", at);
+    }
+
+    private Map<String, Object> event(String type, String category, String actor, String subject, LocalDateTime at) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("type", type);
+        map.put("category", category);
+        map.put("actor", actor);
+        map.put("subject", subject);
+        map.put("at", at);
+        return map;
+    }
+
+    private List<String> insights(List<Community> communityList, List<Decision> allDecisionList, List<Decision> scopedDecisionList) {
+        List<String> result = new ArrayList<>();
+        allDecisionList.stream().filter(d -> d.getCategory() != null && !d.getCategory().isBlank())
+                .collect(Collectors.groupingBy(Decision::getCategory, Collectors.counting())).entrySet().stream()
+                .max(Map.Entry.comparingByValue()).ifPresent(entry -> result.add(entry.getKey() + " is the most active category."));
+        communityList.stream().max(Comparator.comparingInt(c -> c.getMembers().size()))
+                .ifPresent(c -> result.add(c.getCommunityName() + " has the highest membership."));
+        if (scopedDecisionList.isEmpty()) result.add("No decision activity was recorded for this period.");
+        return result;
+    }
 }

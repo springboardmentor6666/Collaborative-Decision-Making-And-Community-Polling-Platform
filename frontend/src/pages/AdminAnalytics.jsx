@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
     Activity,
     BarChart3,
@@ -42,17 +43,21 @@ function NumberValue({ value }) {
     return <>{Number(value || 0).toLocaleString()}</>;
 }
 
-function Section({ title, subtitle, children }) {
+function Section({ title, subtitle, action, children }) {
     return (
         <section className="min-w-0 rounded-2xl border border-[var(--app-border)] bg-[var(--app-card)] p-5 shadow-sm transition duration-300 hover:border-cyan-400/30">
-            <div className="mb-4">
-                <p className="text-[10px] font-bold uppercase tracking-[.18em] text-cyan-400">
-                    {subtitle}
-                </p>
+            <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-cyan-400">
+                        {subtitle}
+                    </p>
 
-                <h2 className="mt-1 text-lg font-bold text-[var(--app-text)]">
-                    {title}
-                </h2>
+                    <h2 className="mt-1 text-lg font-bold text-[var(--app-text)]">
+                        {title}
+                    </h2>
+                </div>
+
+                {action}
             </div>
 
             {children}
@@ -568,10 +573,17 @@ function AdminAnalytics() {
                 </div>
 
                 {/* Recent Activity - Top 5 */}
-                {/* Recent Activity - Top 5 */}
                 <Section
                     title="Recent activity"
                     subtitle="Top 5"
+                    action={
+                        <Link
+                            to="/admin/activity"
+                            className="shrink-0 whitespace-nowrap rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-cyan-400 transition duration-200 hover:border-cyan-400/50 hover:bg-cyan-400/10"
+                        >
+                            View all →
+                        </Link>
+                    }
                 >
                     <div className="max-w-4xl">
                         {data?.recentActivity?.length ? (

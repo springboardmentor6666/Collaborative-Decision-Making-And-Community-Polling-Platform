@@ -144,6 +144,7 @@ public class SeedDataInitializer implements CommandLineRunner {
             communities.delete(community);
         });
         users.deleteAll(demoUsers);
+        users.flush();
     }
 
     private List<User> seedUsers() {

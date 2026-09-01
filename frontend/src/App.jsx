@@ -19,6 +19,8 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminDecisions from "./pages/AdminDecisions";
 import AdminCommunities from "./pages/AdminCommunities";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminActivity from "./pages/AdminActivity";
+
 function App() {
 
   return (
@@ -51,9 +53,7 @@ function App() {
         <Route path="/admin/decisions" element={<AdminDecisions />} />
         <Route path="/admin/communities" element={<AdminCommunities />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
-
-
-
+        <Route path="/admin/activity" element={<AdminActivity />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

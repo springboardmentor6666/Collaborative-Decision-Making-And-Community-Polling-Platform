@@ -68,26 +68,11 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   // Admins manage the platform rather than participate in it, so the
   // admin nav swaps the personal tools out for the moderation/management
   // surfaces instead of just appending an "Admin" link to the user nav.
-  const adminNavItems = [
+    const adminNavItems = [
     {
       label: "Admin Dashboard",
       icon: "🛠",
       route: "/admin",
-    },
-    {
-      label: "Create Decision",
-      icon: "➕",
-      route: "/admin/create-decision",
-    },
-    {
-      label: "My Decisions",
-      icon: "📊",
-      route: "/admin/my-decisions",
-    },
-    {
-      label: "Active Polls",
-      icon: "🗳",
-      route: "/admin/polls",
     },
     {
       label: "Manage Users",
