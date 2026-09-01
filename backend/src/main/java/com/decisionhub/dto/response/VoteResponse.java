@@ -18,6 +18,9 @@ public class VoteResponse {
 
     private Long voteId;
     private Long decisionId;
+    private String decisionTitle;
+    private String decisionStatus;
+    private String voteType;
     private UserResponse voter;
     private List<SelectionResponseDto> selections;
     private LocalDateTime createdAt;
@@ -29,6 +32,8 @@ public class VoteResponse {
     @Builder
     public static class SelectionResponseDto {
         private Long optionId;
+        private String optionTitle;
         private Integer rating;
     }
 }
+

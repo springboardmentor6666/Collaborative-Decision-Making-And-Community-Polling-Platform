@@ -63,10 +63,14 @@ public class DecisionSpecification {
 
             // Privacy logic
             jakarta.persistence.criteria.Join<Object, Object> communityJoin = root.join("community", jakarta.persistence.criteria.JoinType.LEFT);
-            Predicate isPublicDecision = criteriaBuilder.equal(root.get("visibility"), DecisionVisibility.PUBLIC);
+            Predicate isPublicDecision = criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("visibility"), DecisionVisibility.PUBLIC),
+                    criteriaBuilder.isNull(root.get("visibility"))
+            );
             Predicate isPublicCommunity = criteriaBuilder.or(
                     criteriaBuilder.isNull(root.get("community")),
-                    criteriaBuilder.equal(communityJoin.get("visibility"), CommunityVisibility.PUBLIC)
+                    criteriaBuilder.equal(communityJoin.get("visibility"), CommunityVisibility.PUBLIC),
+                    criteriaBuilder.isNull(communityJoin.get("visibility"))
             );
             Predicate publicAccess = criteriaBuilder.and(isPublicDecision, isPublicCommunity);
 
@@ -79,7 +83,7 @@ public class DecisionSpecification {
                 Root<CommunityMember> cmRoot = subquery.from(CommunityMember.class);
                 subquery.select(cmRoot.get("community").get("communityId"));
                 subquery.where(
-                        criteriaBuilder.equal(cmRoot.get("community").get("communityId"), root.get("community").get("communityId")),
+                        criteriaBuilder.equal(cmRoot.get("community"), communityJoin),
                         criteriaBuilder.equal(cmRoot.get("user").get("userId"), requestingUserId),
                         criteriaBuilder.equal(cmRoot.get("status"), MemberStatus.ACTIVE)
                 );

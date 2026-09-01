@@ -80,6 +80,7 @@ public class CommunityServiceImpl implements CommunityService {
         if (request.getName() != null) community.setName(request.getName());
         if (request.getDescription() != null) community.setDescription(request.getDescription());
         if (request.getImage() != null) community.setImage(request.getImage());
+        if (request.getVisibility() != null) community.setVisibility(request.getVisibility());
 
         return communityMapper.toResponse(communityRepository.save(community));
     }
@@ -113,9 +114,8 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<CommunityResponse> getUserCommunities(Long userId, Pageable pageable) {
-        Page<CommunityResponse> page = communityMemberRepository.findByUserUserIdAndStatus(userId, MemberStatus.ACTIVE, pageable)
-                .map(member -> {
-                    Community community = member.getCommunity();
+        Page<CommunityResponse> page = communityRepository.findJoinedCommunities(userId, MemberStatus.ACTIVE, pageable)
+                .map(community -> {
                     long count = communityMemberRepository.countByCommunityCommunityIdAndStatus(community.getCommunityId(), MemberStatus.ACTIVE);
                     CommunityResponse res = communityMapper.toResponse(community);
                     res.setMemberCount(count);

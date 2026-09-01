@@ -27,20 +27,33 @@ export default function DecisionFeed() {
   const [voteTypeFilter, setVoteTypeFilter] = useState<VoteType | "">("");
 
   // Queries
-  const { data: allDecisions, isLoading: loadingAll } = useDecisions({
+  const { data: allDecisions, isLoading: loadingAll, isError: errorAll, refetch: refetchAll } = useDecisions({
     query: searchQuery || undefined,
     status: statusFilter || undefined,
     visibility: visibilityFilter || undefined,
     voteType: voteTypeFilter || undefined,
   });
   
-  const { data: trendingDecisions, isLoading: loadingTrending } = useTrendingDecisions();
-  const { data: popularDecisions, isLoading: loadingPopular } = usePopularDecisions();
-  const { data: latestDecisions, isLoading: loadingLatest } = useLatestDecisions();
+  const { data: trendingDecisions, isLoading: loadingTrending, isError: errorTrending, refetch: refetchTrending } = useTrendingDecisions();
+  const { data: popularDecisions, isLoading: loadingPopular, isError: errorPopular, refetch: refetchPopular } = usePopularDecisions();
+  const { data: latestDecisions, isLoading: loadingLatest, isError: errorLatest, refetch: refetchLatest } = useLatestDecisions();
 
-  const renderContent = (data: any, isLoading: boolean) => {
+  const renderContent = (data: any, isLoading: boolean, isError?: boolean, refetch?: () => void) => {
     if (isLoading) return <DecisionFeedSkeleton />;
     
+    if (isError) {
+      return (
+        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
+          <p className="text-red-500 mb-4 font-medium">Failed to load decisions.</p>
+          {refetch && (
+            <Button onClick={() => refetch()} variant="outline" className="border-slate-200 text-slate-700 bg-white hover:bg-slate-50">
+              Try Again
+            </Button>
+          )}
+        </div>
+      );
+    }
+
     if (!data?.content || data.content.length === 0) {
       return (
         <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
@@ -122,21 +135,21 @@ export default function DecisionFeed() {
               <div className="mb-4 text-[14px] text-slate-500 font-medium">
                 Showing results for your filters
               </div>
-              {renderContent(allDecisions, loadingAll)}
+              {renderContent(allDecisions, loadingAll, errorAll, refetchAll)}
             </div>
           ) : (
             <div className="w-full">
               <TabsContent value="all" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderContent(allDecisions, loadingAll)}
+                {renderContent(allDecisions, loadingAll, errorAll, refetchAll)}
               </TabsContent>
               <TabsContent value="trending" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderContent(trendingDecisions, loadingTrending)}
+                {renderContent(trendingDecisions, loadingTrending, errorTrending, refetchTrending)}
               </TabsContent>
               <TabsContent value="popular" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderContent(popularDecisions, loadingPopular)}
+                {renderContent(popularDecisions, loadingPopular, errorPopular, refetchPopular)}
               </TabsContent>
               <TabsContent value="latest" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                {renderContent(latestDecisions, loadingLatest)}
+                {renderContent(latestDecisions, loadingLatest, errorLatest, refetchLatest)}
               </TabsContent>
             </div>
           )}

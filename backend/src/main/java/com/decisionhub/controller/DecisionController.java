@@ -56,25 +56,6 @@ public class DecisionController {
         return ResponseEntity.ok(ApiResponse.success("Decision board updated successfully", response));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get decision board details by ID")
-    public ResponseEntity<ApiResponse<DecisionResponse>> getDecisionById(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        Long userId = currentUser != null ? currentUser.getId() : null;
-        DecisionResponse response = decisionService.getDecisionById(id, userId);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete decision board (Author only)")
-    public ResponseEntity<ApiResponse<Void>> deleteDecision(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        decisionService.deleteDecision(id, currentUser.getId());
-        return ResponseEntity.ok(ApiResponse.success("Decision board deleted successfully", null));
-    }
-
     @GetMapping
     @Operation(summary = "Search and filter decision boards")
     public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> searchDecisions(
@@ -127,5 +108,24 @@ public class DecisionController {
         Long userId = currentUser != null ? currentUser.getId() : null;
         PagedResponse<DecisionResponse> response = decisionService.getLatestDecisions(userId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get decision board details by ID")
+    public ResponseEntity<ApiResponse<DecisionResponse>> getDecisionById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        Long userId = currentUser != null ? currentUser.getId() : null;
+        DecisionResponse response = decisionService.getDecisionById(id, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete decision board (Author only)")
+    public ResponseEntity<ApiResponse<Void>> deleteDecision(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        decisionService.deleteDecision(id, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Decision board deleted successfully", null));
     }
 }

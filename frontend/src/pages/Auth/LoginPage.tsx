@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { authService } from "@/services/authService";
 
@@ -34,115 +34,128 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative bg-slate-950 flex items-center justify-center p-4 font-sans overflow-hidden">
-      
-      {/* Background Image with Dark Gradient Vignette */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-35 mix-blend-luminosity scale-105"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80')`
-        }}
-      ></div>
-
-      {/* Ambient Lighting */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-600/30 rounded-full blur-3xl pointer-events-none"></div>
-
-      {/* Crisp Glass Card */}
-      <div className="relative z-10 bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-md space-y-6 text-white">
+    <div className="min-h-screen flex bg-white font-sans text-slate-900">
+      {/* Left Section - Branding & Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay transition-transform duration-1000 hover:scale-105"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80')` }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/20"></div>
         
-        {/* Brand Header Inside Card using networking.png Logo */}
-        <div className="text-center space-y-2">
-          <img 
-            src="/networking.png" 
-            alt="DecisionHub Logo" 
-            className="w-12 h-12 object-contain mx-auto"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-          <h1 className="text-2xl font-black text-white tracking-tight">Log in to DecisionHub</h1>
-          <p className="text-slate-400 text-xs">Collaborate, analyze options, and vote on decision boards</p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm p-3 rounded-lg text-center font-semibold">
-            {error}
-          </div>
-        )}
-
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Username or Email <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="username or you@company.com"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-white font-semibold placeholder-slate-500 text-sm outline-none transition-all disabled:opacity-50"
+        <div className="relative z-10 p-12 max-w-xl text-center flex flex-col items-center">
+          <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10 mb-8 shadow-2xl">
+            <img 
+              src="/networking.png" 
+              alt="DecisionHub Logo" 
+              className="w-16 h-16 object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
+          <h2 className="text-4xl font-bold text-white mb-6 tracking-tight">Make Better Decisions, Together.</h2>
+          <p className="text-slate-300 text-lg leading-relaxed font-light">
+            Collaborate with your team, analyze options systematically, and reach consensus faster with DecisionHub.
+          </p>
+        </div>
+      </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Password <span className="text-red-400">*</span>
-              </label>
-              <Link to="/forgot-password" className="text-xs font-bold text-blue-400 hover:underline">
-                Forgot Password?
-              </Link>
-            </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isSubmitting}
-                className="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-white font-semibold placeholder-slate-500 text-sm outline-none transition-all disabled:opacity-50 pr-12"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
+      {/* Right Section - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 xl:p-24 bg-white">
+        <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+          
+          <div className="text-center lg:text-left space-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
+            <p className="text-slate-500 text-sm">Please enter your details to sign in.</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition-all text-sm mt-2 active:scale-95 disabled:opacity-70 disabled:active:scale-100 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Signing In...
-              </>
-            ) : (
-              "Sign In to Dashboard"
-            )}
-          </button>
-        </form>
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-md">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700 font-medium">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
-        <div className="pt-2 text-center text-xs text-slate-400 border-t border-slate-800">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-blue-400 font-bold hover:underline">
-            Sign up
-          </Link>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label htmlFor="identifier" className="block text-sm font-medium text-slate-700">
+                Email or Username
+              </label>
+              <input
+                id="identifier"
+                type="text"
+                required
+                placeholder="you@company.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:bg-slate-50 sm:text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                  Password
+                </label>
+                <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all disabled:opacity-50 disabled:bg-slate-50 sm:text-sm pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition-all text-sm active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 disabled:cursor-not-allowed mt-4"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+
+          <div className="pt-6 text-center text-sm text-slate-500">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-blue-600 font-medium hover:text-blue-500 hover:underline transition-colors">
+              Sign up
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

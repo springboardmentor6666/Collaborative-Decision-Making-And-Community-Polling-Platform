@@ -2,6 +2,7 @@ package com.decisionhub.service.impl;
 
 import com.decisionhub.common.enums.DecisionStatus;
 import com.decisionhub.common.enums.VoteType;
+import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.VoteRequest;
 import com.decisionhub.dto.response.OptionResponse;
 import com.decisionhub.dto.response.VoteResponse;
@@ -17,13 +18,17 @@ import com.decisionhub.exception.EntityNotFoundException;
 import com.decisionhub.exception.ForbiddenException;
 import com.decisionhub.mapper.OptionMapper;
 import com.decisionhub.mapper.UserMapper;
+import com.decisionhub.common.enums.NotificationType;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.OptionRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.repository.VoteRepository;
 import com.decisionhub.repository.VoteSelectionRepository;
+import com.decisionhub.service.NotificationService;
 import com.decisionhub.service.VoteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +52,7 @@ public class VoteServiceImpl implements VoteService {
     private final VoteSelectionRepository voteSelectionRepository;
     private final UserMapper userMapper;
     private final OptionMapper optionMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -84,6 +90,14 @@ public class VoteServiceImpl implements VoteService {
             throw new BusinessException("At least one selection is required.");
         }
 
+        long distinctOptionCount = request.getSelections().stream()
+                .map(VoteRequest.SelectionDto::getOptionId)
+                .distinct()
+                .count();
+        if (distinctOptionCount != request.getSelections().size()) {
+            throw new BusinessException("Duplicate option selections are not allowed.");
+        }
+
         if (decision.getVoteType() == VoteType.SINGLE && request.getSelections().size() > 1) {
             throw new BusinessException("Single-choice decision allows only one option.");
         }
@@ -98,8 +112,6 @@ public class VoteServiceImpl implements VoteService {
                 .decision(decision)
                 .user(voter)
                 .build();
-
-        List<VoteResponse.SelectionResponseDto> selectionResponses = new ArrayList<>();
 
         for (VoteRequest.SelectionDto sel : request.getSelections()) {
             Option option = optionRepository.findById(sel.getOptionId())
@@ -126,18 +138,20 @@ public class VoteServiceImpl implements VoteService {
                     .build();
 
             vote.getSelections().add(voteSelection);
-            selectionResponses.add(new VoteResponse.SelectionResponseDto(option.getOptionId(), rating));
         }
 
         vote = voteRepository.save(vote);
 
-        return VoteResponse.builder()
-                .voteId(vote.getVoteId())
-                .decisionId(decision.getDecisionId())
-                .voter(voter != null ? userMapper.toResponse(voter) : null)
-                .selections(selectionResponses)
-                .createdAt(vote.getCreatedAt())
-                .build();
+        if (decision.getCreatedBy() != null && voter != null && !decision.getCreatedBy().getUserId().equals(voter.getUserId())) {
+            notificationService.sendNotification(
+                    decision.getCreatedBy().getUserId(),
+                    "New Vote on " + decision.getTitle(),
+                    voter.getFullName() + " cast a vote on your decision board.",
+                    NotificationType.VOTE
+            );
+        }
+
+        return toEnrichedVoteResponse(vote);
     }
 
     @Override
@@ -162,6 +176,14 @@ public class VoteServiceImpl implements VoteService {
             throw new BusinessException("At least one selection is required.");
         }
 
+        long distinctOptionCount = request.getSelections().stream()
+                .map(VoteRequest.SelectionDto::getOptionId)
+                .distinct()
+                .count();
+        if (distinctOptionCount != request.getSelections().size()) {
+            throw new BusinessException("Duplicate option selections are not allowed.");
+        }
+
         if (decision.getVoteType() == VoteType.SINGLE && request.getSelections().size() > 1) {
             throw new BusinessException("Single-choice decision allows only one option.");
         }
@@ -176,8 +198,6 @@ public class VoteServiceImpl implements VoteService {
         voteSelectionRepository.deleteAll(vote.getSelections());
         voteSelectionRepository.flush();
         vote.getSelections().clear();
-
-        List<VoteResponse.SelectionResponseDto> selectionResponses = new ArrayList<>();
 
         for (VoteRequest.SelectionDto sel : request.getSelections()) {
             Option option = optionRepository.findById(sel.getOptionId())
@@ -204,18 +224,11 @@ public class VoteServiceImpl implements VoteService {
                     .build();
 
             vote.getSelections().add(voteSelection);
-            selectionResponses.add(new VoteResponse.SelectionResponseDto(option.getOptionId(), rating));
         }
 
         vote = voteRepository.save(vote);
 
-        return VoteResponse.builder()
-                .voteId(vote.getVoteId())
-                .decisionId(decision.getDecisionId())
-                .voter(userMapper.toResponse(vote.getUser()))
-                .selections(selectionResponses)
-                .createdAt(vote.getCreatedAt())
-                .build();
+        return toEnrichedVoteResponse(vote);
     }
 
     @Override
@@ -227,14 +240,77 @@ public class VoteServiceImpl implements VoteService {
         }
 
         Vote vote = votes.get(0);
-        List<VoteResponse.SelectionResponseDto> selections = vote.getSelections().stream()
-                .map(vs -> new VoteResponse.SelectionResponseDto(vs.getOption().getOptionId(), vs.getRating()))
-                .collect(Collectors.toList());
+        return toEnrichedVoteResponse(vote);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<VoteResponse> getUserVotesHistory(Long userId, Pageable pageable) {
+        Page<Vote> votesPage = voteRepository.findByUserUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<VoteResponse> responsePage = votesPage.map(this::toEnrichedVoteResponse);
+        return PagedResponse.fromPage(responsePage);
+    }
+
+    private VoteResponse toEnrichedVoteResponse(Vote vote) {
+        Long decisionId = null;
+        String decisionTitle = "Unknown Decision";
+        String decisionStatus = null;
+        String voteType = null;
+
+        try {
+            Decision decision = vote.getDecision();
+            if (decision != null) {
+                decisionId = decision.getDecisionId();
+                decisionTitle = decision.getTitle() != null ? decision.getTitle() : "Decision";
+                if (decision.getStatus() != null) {
+                    decisionStatus = decision.getStatus().name();
+                }
+                if (decision.getVoteType() != null) {
+                    voteType = decision.getVoteType().name();
+                }
+            }
+        } catch (Throwable t) {
+            decisionTitle = "Archived Decision";
+        }
+
+        List<VoteResponse.SelectionResponseDto> selections = new ArrayList<>();
+        if (vote.getSelections() != null) {
+            for (VoteSelection vs : vote.getSelections()) {
+                Long optionId = null;
+                String optionTitle = "Option";
+                try {
+                    Option option = vs.getOption();
+                    if (option != null) {
+                        optionId = option.getOptionId();
+                        optionTitle = option.getTitle() != null ? option.getTitle() : ("Option" + (optionId != null ? " #" + optionId : ""));
+                    }
+                } catch (Throwable t) {
+                    optionTitle = "Option (Archived)";
+                }
+
+                selections.add(VoteResponse.SelectionResponseDto.builder()
+                        .optionId(optionId)
+                        .optionTitle(optionTitle != null ? optionTitle : "Option")
+                        .rating(vs.getRating())
+                        .build());
+            }
+        }
+
+        com.decisionhub.dto.response.UserResponse voterResp = null;
+        try {
+            if (vote.getUser() != null) {
+                voterResp = userMapper.toResponse(vote.getUser());
+            }
+        } catch (Throwable ignored) {
+        }
 
         return VoteResponse.builder()
                 .voteId(vote.getVoteId())
                 .decisionId(decisionId)
-                .voter(userMapper.toResponse(vote.getUser()))
+                .decisionTitle(decisionTitle)
+                .decisionStatus(decisionStatus)
+                .voteType(voteType)
+                .voter(voterResp)
                 .selections(selections)
                 .createdAt(vote.getCreatedAt())
                 .build();

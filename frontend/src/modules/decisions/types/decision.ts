@@ -40,6 +40,7 @@ export interface DecisionResponse {
   likeCount: number;
   shareCount: number;
   totalVotes: number;
+  commentCount?: number;
   options: OptionResponse[];
   attachments: AttachmentResponse[];
   createdAt: string;

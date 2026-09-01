@@ -39,18 +39,20 @@ export default function DecisionDetails() {
   if (error || !decision) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">Decision Not Found</h2>
-        <p className="text-slate-400 mb-6">The decision you're looking for doesn't exist or has been removed.</p>
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Link to="/decisions">Back to Decisions</Link>
-        </Button>
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+          <h2 className="text-2xl font-bold text-[#0F172A] mb-2">Decision Not Found</h2>
+          <p className="text-slate-500 text-sm mb-6">The decision you're looking for doesn't exist or has been deleted by its author.</p>
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9">
+            <Link to="/decisions">Back to Decisions</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Button asChild variant="ghost" className="mb-6 -ml-4 text-slate-400 hover:text-white">
+      <Button asChild variant="ghost" className="mb-6 -ml-4 text-slate-600 hover:text-slate-900">
         <Link to="/decisions">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Decisions

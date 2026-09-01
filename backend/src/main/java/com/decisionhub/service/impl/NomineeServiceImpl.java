@@ -34,12 +34,20 @@ public class NomineeServiceImpl implements NomineeService {
     private final VotingCategoryRepository votingCategoryRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final UserRepository userRepository;
+    private final com.decisionhub.repository.CommunityRepository communityRepository;
 
     private CommunityMember verifyModeratorOrOwner(Long communityId, Long userId) {
+        com.decisionhub.entity.Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new EntityNotFoundException("Community not found"));
+
+        if (community.getOwner().getUserId().equals(userId)) {
+            return communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, userId).orElse(null);
+        }
+
         CommunityMember member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, userId)
-                .orElseThrow(() -> new ForbiddenException("Not a member of this community."));
+                .orElseThrow(() -> new ForbiddenException("Only the community owner or moderator can perform this action."));
         
-        if (member.getMemberRole() != MemberRole.OWNER && member.getMemberRole() != MemberRole.MODERATOR) {
+        if (member.getMemberRole() != MemberRole.MODERATOR && member.getMemberRole() != MemberRole.OWNER) {
             throw new ForbiddenException("Only the community owner or moderator can perform this action.");
         }
         return member;
@@ -94,8 +102,8 @@ public class NomineeServiceImpl implements NomineeService {
         nominee.setImageUrl(request.getImageUrl());
         nominee.setExternalUrl(request.getExternalUrl());
         
-        CommunityMember member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(event.getCommunity().getCommunityId(), userId).get();
-        if (member.getMemberRole() == MemberRole.OWNER || member.getMemberRole() == MemberRole.MODERATOR) {
+        CommunityMember member = verifyActiveMember(event.getCommunity().getCommunityId(), userId);
+        if (event.getCommunity().getOwner().getUserId().equals(userId) || member.getMemberRole() == MemberRole.OWNER || member.getMemberRole() == MemberRole.MODERATOR) {
             nominee.setNominationStatus(NominationStatus.APPROVED);
             nominee.setApprovedBy(user);
         } else {
@@ -136,12 +144,20 @@ public class NomineeServiceImpl implements NomineeService {
         }
         
         // Members typically only see APPROVED nominees unless they are mods, but we'll return all for mods and APPROVED for normal users
-        VotingCategory category = votingCategoryRepository.findById(categoryId).get();
+        VotingCategory category = votingCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
         CommunityMember member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(category.getVotingEvent().getCommunity().getCommunityId(), userId).orElse(null);
         
         List<Nominee> nominees = nomineeRepository.findByVotingCategoryCategoryId(categoryId);
         
-        if (member == null || (member.getMemberRole() != MemberRole.OWNER && member.getMemberRole() != MemberRole.MODERATOR)) {
+        boolean isOwnerOrMod = false;
+        if (category.getVotingEvent().getCommunity().getOwner().getUserId().equals(userId)) {
+            isOwnerOrMod = true;
+        } else if (member != null && (member.getMemberRole() == MemberRole.OWNER || member.getMemberRole() == MemberRole.MODERATOR)) {
+            isOwnerOrMod = true;
+        }
+
+        if (!isOwnerOrMod) {
             nominees = nominees.stream()
                 .filter(n -> n.getNominationStatus() == NominationStatus.APPROVED)
                 .collect(Collectors.toList());
@@ -167,7 +183,8 @@ public class NomineeServiceImpl implements NomineeService {
             throw new BusinessException("Only PENDING nominations can be approved.");
         }
 
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         nominee.setNominationStatus(NominationStatus.APPROVED);
         nominee.setApprovedBy(user);
         nomineeRepository.save(nominee);

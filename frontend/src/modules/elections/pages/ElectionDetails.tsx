@@ -124,7 +124,7 @@ function CategorySection({ category, electionStatus }: { category: VotingCategor
         <div>
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Award className="w-6 h-6 text-blue-500" />
-            {category.title}
+            {category.name}
           </h2>
           <p className="text-slate-500 mt-1">{category.description}</p>
         </div>

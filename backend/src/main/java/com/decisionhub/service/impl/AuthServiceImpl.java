@@ -46,11 +46,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new DuplicateException("Username '" + request.getUsername() + "' is already taken.");
+        String trimmedUsername = request.getUsername().trim();
+        String trimmedEmail = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByUsernameIncludingDeleted(trimmedUsername)) {
+            throw new DuplicateException("Username '" + trimmedUsername + "' is already taken. Please choose another username.");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateException("Email '" + request.getEmail() + "' is already registered.");
+        if (userRepository.existsByEmailIncludingDeleted(trimmedEmail)) {
+            throw new DuplicateException("Email '" + trimmedEmail + "' is already registered. Please sign in or use a different email.");
         }
 
         Role userRole = roleRepository.findByRoleName(RoleType.ROLE_USER)
@@ -60,6 +63,9 @@ public class AuthServiceImpl implements AuthService {
                         .build()));
 
         User user = userMapper.toEntity(request);
+        user.setUsername(trimmedUsername);
+        user.setEmail(trimmedEmail);
+        user.setFullName(request.getFullName().trim());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(userRole);
         user.setProvider(AuthProvider.LOCAL);

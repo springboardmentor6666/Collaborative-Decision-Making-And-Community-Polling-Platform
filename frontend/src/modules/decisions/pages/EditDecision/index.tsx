@@ -44,10 +44,10 @@ export default function EditDecision() {
       
       if (decision.deadline) {
         // format for datetime-local input
-        const d = new Date(decision.deadline);
-        const tzoffset = (new Date()).getTimezoneOffset() * 60000; // offset in milliseconds
-        const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
-        setDeadline(localISOTime);
+        const formatted = decision.deadline.includes('T') 
+          ? decision.deadline.substring(0, 16) 
+          : decision.deadline;
+        setDeadline(formatted);
       }
       
       if (decision.options && decision.options.length > 0) {
@@ -94,8 +94,7 @@ export default function EditDecision() {
 
     let parsedDeadline = undefined;
     if (deadline) {
-      const date = new Date(deadline);
-      parsedDeadline = date.toISOString();
+      parsedDeadline = deadline.length === 16 ? `${deadline}:00` : deadline;
     }
 
     updateDecision.mutate({

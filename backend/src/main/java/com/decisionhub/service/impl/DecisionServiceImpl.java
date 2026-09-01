@@ -41,6 +41,7 @@ public class DecisionServiceImpl implements DecisionService {
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final VoteRepository voteRepository;
+    private final com.decisionhub.repository.CommentRepository commentRepository;
     private final DecisionMapper decisionMapper;
 
     @Override
@@ -69,9 +70,11 @@ public class DecisionServiceImpl implements DecisionService {
 
         Decision decision = decisionMapper.toEntity(request);
         decision.setCreatedBy(author);
-
         decision.setCommunity(community);
         decision.setStatus(DecisionStatus.ACTIVE);
+        if (decision.getVisibility() == null) {
+            decision.setVisibility(DecisionVisibility.PUBLIC);
+        }
 
         // Map options & pros/cons
         if (request.getOptions() != null) {
@@ -104,6 +107,8 @@ public class DecisionServiceImpl implements DecisionService {
         if (request.getTitle() != null) decision.setTitle(request.getTitle());
         if (request.getDescription() != null) decision.setDescription(request.getDescription());
         if (request.getDeadline() != null) decision.setDeadline(request.getDeadline());
+        if (request.getVisibility() != null) decision.setVisibility(request.getVisibility());
+        if (request.getAllowAnonymousVote() != null) decision.setAllowAnonymousVote(request.getAllowAnonymousVote());
 
         return enrichDecisionResponse(decisionRepository.save(decision));
     }
@@ -149,8 +154,17 @@ public class DecisionServiceImpl implements DecisionService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
         boolean isAdmin = user.getRole().getRoleName() == com.decisionhub.common.enums.RoleType.ROLE_ADMIN;
 
-        if (!decision.getCreatedBy().getUserId().equals(userId) && !isAdmin) {
-            throw new ForbiddenException("Only the decision author or an admin can delete this board.");
+        boolean isAuthor = decision.getCreatedBy() != null && decision.getCreatedBy().getUserId().equals(userId);
+        boolean isCommunityOwnerOrMod = false;
+        if (decision.getCommunity() != null) {
+            isCommunityOwnerOrMod = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(
+                    decision.getCommunity().getCommunityId(), userId)
+                    .map(m -> m.getMemberRole() == com.decisionhub.common.enums.MemberRole.OWNER || m.getMemberRole() == com.decisionhub.common.enums.MemberRole.MODERATOR)
+                    .orElse(false);
+        }
+
+        if (!isAuthor && !isAdmin && !isCommunityOwnerOrMod) {
+            throw new ForbiddenException("Only the decision author, community moderator/owner, or an admin can delete this board.");
         }
         decisionRepository.delete(decision);
     }
@@ -198,6 +212,9 @@ public class DecisionServiceImpl implements DecisionService {
         DecisionResponse response = decisionMapper.toResponse(decision);
         long totalVotes = voteRepository.countByDecisionDecisionId(decision.getDecisionId());
         response.setTotalVotes(totalVotes);
+
+        long commentCount = commentRepository.countByDecisionDecisionId(decision.getDecisionId());
+        response.setCommentCount(commentCount);
 
         if (response.getOptions() != null) {
             for (var optRes : response.getOptions()) {

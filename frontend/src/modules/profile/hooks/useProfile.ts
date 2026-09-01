@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileApi, UpdateProfileRequest } from '../api/profileApi';
 import { UserResponse, DecisionResponse, PagedResponse } from '../../../types';
+import { toast } from 'sonner';
 
 export const useProfile = () => {
   return useQuery<UserResponse, Error>({
@@ -41,7 +42,13 @@ export const useSaveDecision = () => {
     mutationFn: (decisionId: number) => profileApi.saveDecision(decisionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['decisions', 'saved'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      toast.success("Decision saved to bookmarks");
     },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to save decision");
+    }
   });
 };
 
@@ -51,6 +58,12 @@ export const useUnsaveDecision = () => {
     mutationFn: (decisionId: number) => profileApi.unsaveDecision(decisionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-decisions'] });
+      queryClient.invalidateQueries({ queryKey: ['decisions', 'saved'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      toast.success("Decision removed from saved items");
     },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Failed to remove decision from saved items");
+    }
   });
 };

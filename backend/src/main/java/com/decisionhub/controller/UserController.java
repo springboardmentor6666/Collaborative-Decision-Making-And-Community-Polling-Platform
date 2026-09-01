@@ -39,6 +39,9 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "Get current authenticated user profile")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(@AuthenticationPrincipal UserPrincipal currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
         UserResponse response = userService.getUserById(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }

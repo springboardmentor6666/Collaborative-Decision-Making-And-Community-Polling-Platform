@@ -51,10 +51,10 @@ export function TrendingPolls({ decisions }: { decisions: DecisionResponse[] }) 
                 <div className="flex items-center text-xs text-muted-foreground gap-2">
                   <span className="flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    {decision.voteCount}
+                    {(decision as any).totalVotes ?? decision.voteCount ?? 0}
                   </span>
                   <span className="truncate">
-                    by {decision.createdBy?.username || 'Unknown'}
+                    by {decision.createdBy?.username || (decision as any).author?.username || 'DecisionHub'}
                   </span>
                 </div>
               </div>

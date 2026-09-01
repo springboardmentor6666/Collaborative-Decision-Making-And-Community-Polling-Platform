@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-08-21T18:15:53+0530",
+    date = "2026-09-01T21:50:48+0530",
     comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
@@ -21,8 +21,6 @@ public class DecisionMapperImpl implements DecisionMapper {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private CommunityMapper communityMapper;
     @Autowired
     private OptionMapper optionMapper;
 
@@ -35,21 +33,22 @@ public class DecisionMapperImpl implements DecisionMapper {
         DecisionResponse.DecisionResponseBuilder decisionResponse = DecisionResponse.builder();
 
         decisionResponse.createdBy( userMapper.toResponse( decision.getCreatedBy() ) );
-        decisionResponse.community( communityMapper.toResponse( decision.getCommunity() ) );
         decisionResponse.options( optionListToOptionResponseList( decision.getOptions() ) );
-        decisionResponse.allowAnonymousVote( decision.isAllowAnonymousVote() );
-        decisionResponse.createdAt( decision.getCreatedAt() );
-        decisionResponse.deadline( decision.getDeadline() );
         decisionResponse.decisionId( decision.getDecisionId() );
+        decisionResponse.title( decision.getTitle() );
         decisionResponse.description( decision.getDescription() );
+        decisionResponse.voteType( decision.getVoteType() );
+        decisionResponse.visibility( decision.getVisibility() );
+        decisionResponse.status( decision.getStatus() );
+        decisionResponse.deadline( decision.getDeadline() );
+        decisionResponse.allowAnonymousVote( decision.isAllowAnonymousVote() );
+        decisionResponse.viewCount( decision.getViewCount() );
         decisionResponse.likeCount( decision.getLikeCount() );
         decisionResponse.shareCount( decision.getShareCount() );
-        decisionResponse.status( decision.getStatus() );
-        decisionResponse.title( decision.getTitle() );
+        decisionResponse.createdAt( decision.getCreatedAt() );
         decisionResponse.updatedAt( decision.getUpdatedAt() );
-        decisionResponse.viewCount( decision.getViewCount() );
-        decisionResponse.visibility( decision.getVisibility() );
-        decisionResponse.voteType( decision.getVoteType() );
+
+        decisionResponse.community( safeCommunity(decision.getCommunity()) );
 
         return decisionResponse.build();
     }
@@ -62,14 +61,14 @@ public class DecisionMapperImpl implements DecisionMapper {
 
         Decision.DecisionBuilder decision = Decision.builder();
 
+        decision.title( request.getTitle() );
+        decision.description( request.getDescription() );
+        decision.voteType( request.getVoteType() );
+        decision.visibility( request.getVisibility() );
+        decision.deadline( request.getDeadline() );
         if ( request.getAllowAnonymousVote() != null ) {
             decision.allowAnonymousVote( request.getAllowAnonymousVote() );
         }
-        decision.deadline( request.getDeadline() );
-        decision.description( request.getDescription() );
-        decision.title( request.getTitle() );
-        decision.visibility( request.getVisibility() );
-        decision.voteType( request.getVoteType() );
 
         return decision.build();
     }

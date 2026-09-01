@@ -43,20 +43,32 @@ export const authService = {
   },
 
   getErrorMessage: (error: any) => {
-    if (!error.response) return "Network failure or server is unreachable.";
+    if (!error.response) return "Network failure or server is unreachable. Please check your connection.";
     const status = error.response.status;
     const backendMessage = error.response.data?.message;
 
-    if (backendMessage) return backendMessage;
+    // Filter out raw SQL or statement errors if any ever leaked
+    if (backendMessage && 
+        !backendMessage.includes("could not execute statement") && 
+        !backendMessage.includes("insert into") && 
+        !backendMessage.includes("SQL [") &&
+        !backendMessage.includes("returning user_id")) {
+      return backendMessage;
+    }
+
+    if (error.response.data?.validationErrors) {
+      const firstVal = Object.values(error.response.data.validationErrors)[0];
+      if (typeof firstVal === 'string') return firstVal;
+    }
 
     switch (status) {
-      case 400: return "Invalid input.";
+      case 400: return "Invalid input. Please check your entries.";
       case 401: return "Invalid email or password.";
       case 403: return "Access denied.";
       case 404: return "User not found.";
-      case 409: return "Email already exists.";
-      case 500: return "Something went wrong on the server.";
-      default: return "An unexpected error occurred.";
+      case 409: return "An account with this email or username already exists. Please sign in or use different details.";
+      case 500: return "An unexpected server error occurred. Please try again.";
+      default: return "An unexpected error occurred. Please try again.";
     }
   }
 };

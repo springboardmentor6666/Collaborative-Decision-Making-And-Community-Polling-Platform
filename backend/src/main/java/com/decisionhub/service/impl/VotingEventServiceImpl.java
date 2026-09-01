@@ -37,10 +37,17 @@ public class VotingEventServiceImpl implements VotingEventService {
     private final NomineeRepository nomineeRepository;
 
     private void verifyModeratorOrOwner(Long communityId, Long userId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new EntityNotFoundException("Community not found"));
+        
+        if (community.getOwner().getUserId().equals(userId)) {
+            return; // Owner is always allowed
+        }
+
         CommunityMember member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, userId)
                 .orElseThrow(() -> new ForbiddenException("Only the community owner or moderator can conduct a Voting Arena."));
         
-        if (member.getMemberRole() != MemberRole.OWNER && member.getMemberRole() != MemberRole.MODERATOR) {
+        if (member.getMemberRole() != MemberRole.MODERATOR && member.getMemberRole() != MemberRole.OWNER) {
             throw new ForbiddenException("Only the community owner or moderator can conduct a Voting Arena.");
         }
     }

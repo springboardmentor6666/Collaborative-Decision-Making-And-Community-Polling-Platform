@@ -32,24 +32,24 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
     @Query("SELECT COUNT(d) FROM Decision d WHERE d.createdBy.userId = :userId AND d.status = :status")
     long countByCreatedByUserIdAndStatus(@Param("userId") Long userId, @Param("status") DecisionStatus status);
 
-    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = 'ACTIVE' AND " +
-           "( (d.visibility = 'PUBLIC' AND (c IS NULL OR c.visibility = 'PUBLIC')) " +
+    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = com.decisionhub.common.enums.DecisionStatus.ACTIVE AND " +
+           "( ((d.visibility = com.decisionhub.common.enums.DecisionVisibility.PUBLIC OR d.visibility IS NULL) AND (c IS NULL OR c.visibility = com.decisionhub.common.enums.CommunityVisibility.PUBLIC OR c.visibility IS NULL)) " +
            "  OR (:userId IS NOT NULL AND d.createdBy.userId = :userId) " +
-           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community.communityId = c.communityId AND cm.user.userId = :userId AND cm.status = 'ACTIVE')) ) " +
+           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community = c AND cm.user.userId = :userId AND cm.status = com.decisionhub.common.enums.MemberStatus.ACTIVE)) ) " +
            "ORDER BY (d.viewCount + d.likeCount + d.shareCount) DESC")
     Page<Decision> findTrendingDecisions(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = 'ACTIVE' AND " +
-           "( (d.visibility = 'PUBLIC' AND (c IS NULL OR c.visibility = 'PUBLIC')) " +
+    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = com.decisionhub.common.enums.DecisionStatus.ACTIVE AND " +
+           "( ((d.visibility = com.decisionhub.common.enums.DecisionVisibility.PUBLIC OR d.visibility IS NULL) AND (c IS NULL OR c.visibility = com.decisionhub.common.enums.CommunityVisibility.PUBLIC OR c.visibility IS NULL)) " +
            "  OR (:userId IS NOT NULL AND d.createdBy.userId = :userId) " +
-           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community.communityId = c.communityId AND cm.user.userId = :userId AND cm.status = 'ACTIVE')) ) " +
+           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community = c AND cm.user.userId = :userId AND cm.status = com.decisionhub.common.enums.MemberStatus.ACTIVE)) ) " +
            "ORDER BY d.viewCount DESC")
     Page<Decision> findPopularDecisions(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = 'ACTIVE' AND " +
-           "( (d.visibility = 'PUBLIC' AND (c IS NULL OR c.visibility = 'PUBLIC')) " +
+    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = com.decisionhub.common.enums.DecisionStatus.ACTIVE AND " +
+           "( ((d.visibility = com.decisionhub.common.enums.DecisionVisibility.PUBLIC OR d.visibility IS NULL) AND (c IS NULL OR c.visibility = com.decisionhub.common.enums.CommunityVisibility.PUBLIC OR c.visibility IS NULL)) " +
            "  OR (:userId IS NOT NULL AND d.createdBy.userId = :userId) " +
-           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community.communityId = c.communityId AND cm.user.userId = :userId AND cm.status = 'ACTIVE')) ) " +
+           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community = c AND cm.user.userId = :userId AND cm.status = com.decisionhub.common.enums.MemberStatus.ACTIVE)) ) " +
            "ORDER BY d.createdAt DESC")
     Page<Decision> findLatestDecisions(@Param("userId") Long userId, Pageable pageable);
 
@@ -66,4 +66,6 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
     void incrementShareCount(@Param("decisionId") Long decisionId);
 
     List<Decision> findByStatusAndDeadlineBefore(DecisionStatus status, LocalDateTime now);
+
+    long countByCreatedAtAfter(LocalDateTime date);
 }

@@ -12,9 +12,10 @@ import { ReportButton } from "./ReportButton";
 interface DecisionCardProps {
   decision: DecisionResponse;
   isSaved?: boolean;
+  onUnsaved?: () => void;
 }
 
-export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
+export function DecisionCard({ decision, isSaved = false, onUnsaved }: DecisionCardProps) {
   const createdDate = new Date(decision.createdAt).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -42,14 +43,14 @@ export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
           <div className="flex justify-between items-start gap-4 mb-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-6 w-6 border border-slate-200">
-                <AvatarImage src={decision.createdBy.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${decision.createdBy.username}`} />
+                <AvatarImage src={decision.createdBy?.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${decision.createdBy?.username || 'user'}`} />
                 <AvatarFallback className="bg-slate-100 text-[10px] text-slate-600 font-medium">
-                  {decision.createdBy.fullName?.substring(0, 2).toUpperCase() || "U"}
+                  {decision.createdBy?.fullName?.substring(0, 2).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                 <span className="text-[14px] font-semibold text-[#0F172A]">
-                  {decision.createdBy.fullName}
+                  {decision.createdBy?.fullName || decision.createdBy?.username || "DecisionHub"}
                 </span>
                 {decision.community && (
                   <>
@@ -85,12 +86,12 @@ export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
             <div className="w-px h-3.5 bg-[#E2E8F0] my-auto hidden sm:block"></div>
             <div className="flex items-center">
               <BarChart3 className="w-4 h-4 mr-1.5 text-[#3B82F6]" />
-              <span className="text-[#64748B] mr-1">{decision.totalVotes.toLocaleString()}</span> Votes
+              <span className="text-[#64748B] mr-1">{(decision.totalVotes ?? 0).toLocaleString()}</span> Votes
             </div>
             <div className="w-px h-3.5 bg-[#E2E8F0] my-auto hidden sm:block"></div>
             <div className="flex items-center">
               <MessageSquare className="w-4 h-4 mr-1.5 text-[#60A5FA]" />
-              <span className="text-[#64748B] mr-1">0</span> Comments
+              <span className="text-[#64748B] mr-1">{(decision.commentCount ?? 0).toLocaleString()}</span> Comments
             </div>
           </div>
         </CardContent>
@@ -101,7 +102,7 @@ export function DecisionCard({ decision, isSaved = false }: DecisionCardProps) {
         
         <div className="flex items-center gap-1 text-[#64748B]">
           <ReportButton decisionId={decision.decisionId} />
-          <BookmarkButton decisionId={decision.decisionId} isSaved={isSaved} />
+          <BookmarkButton decisionId={decision.decisionId} isSaved={isSaved} onUnsaved={onUnsaved} />
           <ShareButton decisionId={decision.decisionId} title={decision.title} />
         </div>
       </CardFooter>

@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { Users, Globe, Lock, Settings, Calendar, Shield, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Users, Globe, Lock, Settings, Calendar, Shield, ArrowRight, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommunityResponse, CommunityMemberResponse } from "../types/community";
 import { JoinButton } from "./JoinButton";
 import { useAuth } from "@/context/AuthContext";
+import { useCommunityMutations } from "../hooks/useCommunityMutations";
 
 interface CommunityHeaderProps {
   community: CommunityResponse;
@@ -14,10 +15,20 @@ interface CommunityHeaderProps {
 
 export function CommunityHeader({ community, membership }: CommunityHeaderProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { deleteCommunity } = useCommunityMutations();
   
   const isOwner = user?.userId === community.owner.userId;
   const isAdmin = user?.role === "ROLE_ADMIN";
   const canEdit = isOwner || isAdmin;
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this community? This action cannot be undone.")) {
+      deleteCommunity.mutate(community.communityId, {
+        onSuccess: () => navigate("/communities")
+      });
+    }
+  };
 
   const createdDate = new Date(community.createdAt).toLocaleDateString(undefined, {
     year: 'numeric',
@@ -53,7 +64,7 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
           </div>
           
           <div className="flex gap-3 w-full md:w-auto">
-            {(isOwner || isAdmin || membership?.role === "MODERATOR") && (
+            {(isOwner || isAdmin || membership?.memberRole === "MODERATOR") && (
               <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
                 <Link to={`/communities/${community.communityId}/admin`}>
                   <Shield className="w-4 h-4 mr-2" />
@@ -71,12 +82,24 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
               </Button>
             )}
             
-            <JoinButton 
-              communityId={community.communityId} 
-              membership={membership} 
-              communityVisibility={community.visibility as any}
-              className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold" 
-            />
+            {isOwner ? (
+              <Button 
+                variant="destructive" 
+                className="flex-1 md:flex-none"
+                onClick={handleDelete}
+                disabled={deleteCommunity.isPending}
+              >
+                {deleteCommunity.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Delete Community
+              </Button>
+            ) : (
+              <JoinButton 
+                communityId={community.communityId} 
+                membership={membership} 
+                communityVisibility={community.visibility as any}
+                className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold" 
+              />
+            )}
           </div>
         </div>
 

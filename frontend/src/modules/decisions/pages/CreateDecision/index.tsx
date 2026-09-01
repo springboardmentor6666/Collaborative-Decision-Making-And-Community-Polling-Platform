@@ -76,7 +76,7 @@ export default function CreateDecision() {
         setError("Deadline must be in the future.");
         return;
       }
-      parsedDeadline = date.toISOString();
+      parsedDeadline = deadline.length === 16 ? `${deadline}:00` : deadline;
     }
 
     createDecision.mutate({

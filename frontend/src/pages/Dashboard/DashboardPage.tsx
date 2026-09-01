@@ -2,10 +2,11 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "@/api/analyticsApi";
 import { decisionApi } from "@/api/decisionApi";
+import { communityApi } from "@/modules/communities/api/communityApi";
 import { useAuth } from "@/context/AuthContext";
 import { DashboardStats } from "./components/DashboardStats";
 import { RecentDecisions } from "./components/RecentDecisions";
-import { TrendingPolls } from "./components/TrendingPolls";
+import { TrendingCommunities } from "./components/TrendingCommunities";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardPage() {
@@ -22,9 +23,9 @@ export function DashboardPage() {
     queryFn: () => decisionApi.getLatestDecisions(0, 5).then(res => res.data)
   });
 
-  const { data: trendingDecisionsData, isLoading: trendingLoading } = useQuery({
-    queryKey: ['trendingDecisions'],
-    queryFn: () => decisionApi.getTrendingDecisions(0, 5).then(res => res.data)
+  const { data: trendingCommunitiesData, isLoading: trendingLoading } = useQuery({
+    queryKey: ['trendingCommunities'],
+    queryFn: () => communityApi.searchCommunities({ page: 0, size: 5 })
   });
 
   return (
@@ -54,14 +55,14 @@ export function DashboardPage() {
           {recentLoading ? (
             <Skeleton className="h-[400px] w-full rounded-xl" />
           ) : (
-            <RecentDecisions decisions={recentDecisionsData?.data?.content || []} />
+            <RecentDecisions decisions={recentDecisionsData?.data?.content || (recentDecisionsData as any)?.content || []} />
           )}
         </div>
         <div className="lg:col-span-1">
           {trendingLoading ? (
             <Skeleton className="h-[400px] w-full rounded-xl" />
           ) : (
-            <TrendingPolls decisions={trendingDecisionsData?.data?.content || []} />
+            <TrendingCommunities communities={trendingCommunitiesData?.content || []} />
           )}
         </div>
       </div>

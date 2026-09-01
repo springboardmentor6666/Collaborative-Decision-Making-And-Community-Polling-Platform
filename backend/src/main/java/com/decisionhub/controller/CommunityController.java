@@ -57,13 +57,6 @@ public class CommunityController {
         return ResponseEntity.ok(ApiResponse.success("Community updated successfully", response));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get community details by ID")
-    public ResponseEntity<ApiResponse<CommunityResponse>> getCommunityById(@PathVariable Long id) {
-        CommunityResponse response = communityService.getCommunityById(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @GetMapping
     @Operation(summary = "Search and filter communities")
     public ResponseEntity<ApiResponse<PagedResponse<CommunityResponse>>> searchCommunities(
@@ -83,8 +76,18 @@ public class CommunityController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Pageable pageable = PageRequest.of(page, size);
         PagedResponse<CommunityResponse> response = communityService.getUserCommunities(currentUser.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get community details by ID")
+    public ResponseEntity<ApiResponse<CommunityResponse>> getCommunityById(@PathVariable Long id) {
+        CommunityResponse response = communityService.getCommunityById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -153,6 +156,9 @@ public class CommunityController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Pageable pageable = PageRequest.of(page, size);
         PagedResponse<CommunityMemberResponse> response = communityService.getPendingRequests(id, currentUser.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -193,6 +199,9 @@ public class CommunityController {
     public ResponseEntity<ApiResponse<CommunityMemberResponse>> getMembership(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.ok(ApiResponse.success(null));
+        }
         CommunityMemberResponse response = communityService.getMembership(id, currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }

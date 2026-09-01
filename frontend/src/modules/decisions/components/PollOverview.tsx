@@ -9,7 +9,7 @@ interface PollOverviewProps {
 
 export function PollOverview({ decision }: PollOverviewProps) {
   const { data: results } = useVoteResults(decision.decisionId);
-  const totalVotesCount = results?.totalVotesCount || 0;
+  const totalVotesCount = results?.totalVotesCount ?? decision.totalVotes ?? 0;
 
   const eligibleVoters = decision.community ? decision.community.memberCount : null;
   const isClosed = decision.status === "CLOSED" || decision.status === "ARCHIVED";
@@ -31,7 +31,7 @@ export function PollOverview({ decision }: PollOverviewProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
         <div className="flex flex-col">
           <span className="text-sm text-[#64748B] uppercase tracking-wider mb-1 font-semibold">Total Votes</span>
-          <span className="text-xl font-bold text-[#0F172A]">{totalVotesCount}</span>
+          <span className="text-xl font-bold text-[#0F172A]">{totalVotesCount.toLocaleString()}</span>
         </div>
         
         <div className="flex flex-col">
@@ -77,14 +77,14 @@ export function PollOverview({ decision }: PollOverviewProps) {
           </div>
         )}
 
-        {/* Milestone - e.g. 100 votes */}
-        {decision.totalVotes > 0 && !isDraft && (
+        {/* Milestone - e.g. votes reached */}
+        {totalVotesCount > 0 && !isDraft && (
           <div className="relative pl-6">
             <div className="absolute -left-2.5 top-0 w-5 h-5 bg-white border-2 border-amber-500 rounded-full flex items-center justify-center">
               <div className="w-2 h-2 bg-amber-500 rounded-full" />
             </div>
             <div className="flex flex-col">
-              <h4 className="text-sm font-semibold text-[#0F172A]">{decision.totalVotes.toLocaleString()} Votes Reached</h4>
+              <h4 className="text-sm font-semibold text-[#0F172A]">{totalVotesCount.toLocaleString()} Votes Reached</h4>
               <span className="text-xs text-[#64748B] mt-1">Community engagement active</span>
             </div>
           </div>

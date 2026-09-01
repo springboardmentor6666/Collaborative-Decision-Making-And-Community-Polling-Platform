@@ -33,7 +33,7 @@ export interface DecisionResponse {
   id: number;
   title: string;
   description: string;
-  status: 'DRAFT' | 'OPEN' | 'VOTING' | 'RESOLVED' | 'CLOSED';
+  status: 'DRAFT' | 'ACTIVE' | 'OPEN' | 'VOTING' | 'RESOLVED' | 'CLOSED' | 'ARCHIVED';
   visibility: 'PUBLIC' | 'PRIVATE' | 'COMMUNITY_ONLY';
   voteType: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'RANKED_CHOICE' | 'APPROVAL';
   options: any[]; // Depending on options structure

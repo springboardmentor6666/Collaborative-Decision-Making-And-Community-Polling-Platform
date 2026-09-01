@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -23,9 +24,9 @@ public class AnalyticsController {
 
     @GetMapping("/dashboard")
     @Operation(summary = "Get platform-wide dashboard analytics metrics")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboardStats() {
-        Map<String, Object> stats = analyticsService.getSystemDashboardStats();
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboardStats(
+            @RequestParam(required = false, defaultValue = "all") String timeRange) {
+        Map<String, Object> stats = analyticsService.getSystemDashboardStats(timeRange);
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 

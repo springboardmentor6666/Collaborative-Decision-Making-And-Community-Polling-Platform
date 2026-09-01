@@ -56,11 +56,13 @@ public class Decision extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     private User createdBy;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_id")
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     private Community community;
 
     @Column(name = "title", nullable = false, length = 150)

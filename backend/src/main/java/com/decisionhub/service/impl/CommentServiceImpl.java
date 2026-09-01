@@ -1,5 +1,6 @@
 package com.decisionhub.service.impl;
 
+import com.decisionhub.common.enums.NotificationType;
 import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.CommentRequest;
 import com.decisionhub.dto.response.CommentResponse;
@@ -13,6 +14,7 @@ import com.decisionhub.repository.CommentRepository;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.service.CommentService;
+import com.decisionhub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
     private final DecisionRepository decisionRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -53,6 +56,31 @@ public class CommentServiceImpl implements CommentService {
         comment.setEdited(false);
 
         Comment savedComment = commentRepository.save(comment);
+
+        // Notify decision creator if someone else comments
+        if (decision.getCreatedBy() != null && (author == null || !decision.getCreatedBy().getUserId().equals(author.getUserId()))) {
+            String authorName = author != null ? author.getFullName() : "A participant";
+            String preview = request.getMessage().length() > 80 ? request.getMessage().substring(0, 77) + "..." : request.getMessage();
+            notificationService.sendNotification(
+                    decision.getCreatedBy().getUserId(),
+                    "Discussion on " + decision.getTitle(),
+                    authorName + " commented: \"" + preview + "\"",
+                    NotificationType.COMMENT
+            );
+        }
+
+        // Notify parent comment author if this is a reply
+        if (parentComment != null && parentComment.getUser() != null && (author == null || !parentComment.getUser().getUserId().equals(author.getUserId()))) {
+            String authorName = author != null ? author.getFullName() : "A participant";
+            String preview = request.getMessage().length() > 80 ? request.getMessage().substring(0, 77) + "..." : request.getMessage();
+            notificationService.sendNotification(
+                    parentComment.getUser().getUserId(),
+                    "Reply on " + decision.getTitle(),
+                    authorName + " replied to your comment: \"" + preview + "\"",
+                    NotificationType.COMMENT
+            );
+        }
+
         return commentMapper.toResponse(savedComment);
     }
 
@@ -79,9 +107,9 @@ public class CommentServiceImpl implements CommentService {
 
         com.decisionhub.entity.User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
-        boolean isAdmin = user.getRole().getRoleName() == com.decisionhub.common.enums.RoleType.ROLE_ADMIN;
-
-        if ((comment.getUser() != null && !comment.getUser().getUserId().equals(userId)) && !isAdmin) {
+        boolean isAuthor = comment.getUser() != null && comment.getUser().getUserId().equals(userId);
+        boolean isAdmin = user.getRole() != null && user.getRole().getRoleName() == com.decisionhub.common.enums.RoleType.ROLE_ADMIN;
+        if (!isAuthor && !isAdmin) {
             throw new ForbiddenException("Only the author or an admin can delete this comment.");
         }
         commentRepository.delete(comment);

@@ -2,8 +2,8 @@ import api from "../../../api/axios";
 import { DashboardStats, CommunityAnalytics, DecisionAnalytics, UserAnalytics } from "../types/analytics";
 
 export const analyticsApi = {
-  getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await api.get('/analytics/dashboard');
+  getDashboardStats: async (timeRange?: string): Promise<DashboardStats> => {
+    const response = await api.get('/analytics/dashboard', { params: { timeRange } });
     return response.data.data;
   },
   getCommunityAnalytics: async (communityId: number): Promise<CommunityAnalytics> => {

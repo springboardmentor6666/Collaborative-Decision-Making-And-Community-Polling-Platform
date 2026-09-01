@@ -37,9 +37,9 @@ axiosInstance.interceptors.response.use(
       // Optional: Add logic to refresh token here.
       
       // If no refresh token logic, or if refresh fails, we can clear token:
-      // localStorage.removeItem("decisionhub_token");
-      // localStorage.removeItem("decisionhub_user");
-      // window.location.href = "/login";
+      localStorage.removeItem("decisionhub_token");
+      localStorage.removeItem("decisionhub_user");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }

@@ -6,11 +6,24 @@ import { toast } from "sonner";
 export function useVoteMutations() {
   const queryClient = useQueryClient();
 
+  const invalidateVoteQueries = (decisionId: number) => {
+    queryClient.invalidateQueries({ queryKey: ["voteResults", decisionId] });
+    queryClient.invalidateQueries({ queryKey: ["userVote", decisionId] });
+    queryClient.invalidateQueries({ queryKey: ["userVote"] });
+    queryClient.invalidateQueries({ queryKey: ["myVotes"] });
+    queryClient.invalidateQueries({ queryKey: ["decisions", "detail", decisionId] });
+    queryClient.invalidateQueries({ queryKey: ["decision", decisionId] });
+    queryClient.invalidateQueries({ queryKey: ["decisions"] });
+    queryClient.invalidateQueries({ queryKey: ["recentDecisions"] });
+    queryClient.invalidateQueries({ queryKey: ["trendingDecisions"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  };
+
   const castVote = useMutation({
     mutationFn: (request: VoteRequest) => voteApi.castVote(request),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["voteResults", data.decisionId] });
-      queryClient.invalidateQueries({ queryKey: ["decision", data.decisionId] });
+      invalidateVoteQueries(data.decisionId);
       toast.success("Vote submitted", {
         description: "Your vote has been recorded successfully.",
       });
@@ -25,8 +38,7 @@ export function useVoteMutations() {
   const castAnonymousVote = useMutation({
     mutationFn: (request: VoteRequest) => voteApi.castAnonymousVote(request),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["voteResults", data.decisionId] });
-      queryClient.invalidateQueries({ queryKey: ["decision", data.decisionId] });
+      invalidateVoteQueries(data.decisionId);
       toast.success("Anonymous vote submitted", {
         description: "Your vote has been recorded anonymously.",
       });
@@ -42,8 +54,7 @@ export function useVoteMutations() {
     mutationFn: ({ voteId, request }: { voteId: number; request: VoteRequest }) => 
       voteApi.changeVote(voteId, request),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["voteResults", data.decisionId] });
-      queryClient.invalidateQueries({ queryKey: ["decision", data.decisionId] });
+      invalidateVoteQueries(data.decisionId);
       toast.success("Vote updated", {
         description: "Your vote has been successfully updated.",
       });
@@ -61,3 +72,4 @@ export function useVoteMutations() {
     changeVote
   };
 }
+

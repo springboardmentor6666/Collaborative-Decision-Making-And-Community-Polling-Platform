@@ -18,7 +18,7 @@ import com.decisionhub.mapper.UserMapper;
 
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.SavedDecisionRepository;
-
+import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -34,12 +33,10 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
     private final DecisionRepository decisionRepository;
-
     private final SavedDecisionRepository savedDecisionRepository;
+    private final CommunityRepository communityRepository;
     private final UserMapper userMapper;
-
     private final DecisionMapper decisionMapper;
 
     @Override
@@ -77,6 +74,12 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
+        
+        List<com.decisionhub.entity.Community> communities = communityRepository.findAllByOwnerUserId(userId);
+        if (!communities.isEmpty()) {
+            communityRepository.deleteAll(communities);
+        }
+        
         userRepository.delete(user);
     }
 

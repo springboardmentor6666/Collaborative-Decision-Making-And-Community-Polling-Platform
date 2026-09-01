@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CommunityResponse } from "../types/community";
 import { JoinButton } from "./JoinButton";
+import { useAuth } from "@/context/AuthContext";
 
 interface CommunityCardProps {
   community: CommunityResponse;
@@ -13,6 +14,9 @@ interface CommunityCardProps {
 }
 
 export function CommunityCard({ community, isMember = false }: CommunityCardProps) {
+  const { user } = useAuth();
+  const isOwner = user?.userId === community.owner?.userId;
+
   return (
     <Card className="flex flex-col h-full bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden hover:shadow-md transition-shadow">
       <div 
@@ -58,7 +62,7 @@ export function CommunityCard({ community, isMember = false }: CommunityCardProp
         <Button asChild variant="default" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-none">
           <Link to={`/communities/${community.communityId}`}>View</Link>
         </Button>
-        <JoinButton communityId={community.communityId} membership={isMember ? { status: "ACTIVE" } as any : null} className="flex-1" />
+        <JoinButton communityId={community.communityId} membership={isMember ? { status: "ACTIVE" } as any : null} isOwner={isOwner} className="flex-1" />
       </CardFooter>
     </Card>
   );

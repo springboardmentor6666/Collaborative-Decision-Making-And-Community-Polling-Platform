@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,12 +29,19 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Object> getSystemDashboardStats() {
+    public Map<String, Object> getSystemDashboardStats(String timeRange) {
+        LocalDateTime startDate = null;
+        if ("week".equalsIgnoreCase(timeRange)) {
+            startDate = LocalDateTime.now().minusWeeks(1);
+        } else if ("month".equalsIgnoreCase(timeRange)) {
+            startDate = LocalDateTime.now().minusMonths(1);
+        }
+
         Map<String, Object> stats = new HashMap<>();
-        long totalUsers = userRepository.count();
-        long totalDecisions = decisionRepository.count();
-        long totalCommunities = communityRepository.count();
-        long totalVotes = voteRepository.count();
+        long totalUsers = (startDate != null) ? userRepository.countByCreatedAtAfter(startDate) : userRepository.count();
+        long totalDecisions = (startDate != null) ? decisionRepository.countByCreatedAtAfter(startDate) : decisionRepository.count();
+        long totalCommunities = (startDate != null) ? communityRepository.countByCreatedAtAfter(startDate) : communityRepository.count();
+        long totalVotes = (startDate != null) ? voteRepository.countByCreatedAtAfter(startDate) : voteRepository.count();
 
         stats.put("totalUsers", totalUsers);
         stats.put("totalDecisions", totalDecisions);
@@ -45,23 +53,26 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         stats.put("participationRate", totalUsers > 0 ? (long) (((double) totalVotes / totalUsers) * 100) : 0L);
 
         // Daily activity timeline (simulated dynamically based on totals)
-        List<Map<String, Object>> dailyActivity = generateSimulatedTimeline(totalVotes, totalUsers, totalDecisions);
+        List<Map<String, Object>> dailyActivity = generateSimulatedTimeline(totalVotes, totalUsers, totalDecisions, timeRange);
         stats.put("dailyActivity", dailyActivity);
 
         return stats;
     }
 
-    private List<Map<String, Object>> generateSimulatedTimeline(long votes, long users, long decisions) {
+    private List<Map<String, Object>> generateSimulatedTimeline(long votes, long users, long decisions, String timeRange) {
         List<Map<String, Object>> timeline = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
         LocalDate today = LocalDate.now();
-        for (int i = 6; i >= 0; i--) {
+        
+        int days = "month".equalsIgnoreCase(timeRange) ? 30 : 7;
+        
+        for (int i = days - 1; i >= 0; i--) {
             LocalDate date = today.minusDays(i);
             Map<String, Object> point = new HashMap<>();
             point.put("date", date.format(formatter));
-            point.put("votes", Math.max(0L, votes / 7 + (long)(Math.random() * 20 - 10)));
-            point.put("newMembers", Math.max(0L, users / 14 + (long)(Math.random() * 5)));
-            point.put("decisions", Math.max(0L, decisions / 14 + (long)(Math.random() * 3)));
+            point.put("votes", Math.max(0L, votes / days + (long)(Math.random() * 20 - 10)));
+            point.put("newMembers", Math.max(0L, users / days + (long)(Math.random() * 5)));
+            point.put("decisions", Math.max(0L, decisions / days + (long)(Math.random() * 3)));
             timeline.add(point);
         }
         return timeline;
@@ -93,7 +104,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         stats.put("activeMembers", activeMembers);
         
         // Let's add simulated growth chart data
-        List<Map<String, Object>> growth = generateSimulatedTimeline(totalMembers * 3, totalMembers, 10L);
+        List<Map<String, Object>> growth = generateSimulatedTimeline(totalMembers * 3, totalMembers, 10L, "all");
         stats.put("communityGrowth", growth);
 
         return stats;
@@ -109,7 +120,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         stats.put("totalVotes", totalVotes);
         
         com.decisionhub.entity.Decision decision = decisionRepository.findById(decisionId)
-                .orElseThrow(() -> new RuntimeException("Decision not found"));
+                .orElseThrow(() -> new com.decisionhub.exception.EntityNotFoundException("Decision", "id", decisionId));
         
         long participationRate = 0;
         if (decision.getCommunity() != null) {

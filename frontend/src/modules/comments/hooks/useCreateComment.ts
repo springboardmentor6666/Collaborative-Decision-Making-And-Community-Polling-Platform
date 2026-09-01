@@ -9,8 +9,10 @@ export const useCreateComment = () => {
   return useMutation({
     mutationFn: (data: CommentRequest) => commentApi.createComment(data),
     onSuccess: (_, variables) => {
-      // Invalidate the comments list to trigger a refetch
+      // Invalidate the comments list and decision details/lists to trigger a refetch
       queryClient.invalidateQueries({ queryKey: ['comments', variables.decisionId] });
+      queryClient.invalidateQueries({ queryKey: ['decision', variables.decisionId] });
+      queryClient.invalidateQueries({ queryKey: ['decisions'] });
       toast.success(variables.parentCommentId ? 'Reply posted!' : 'Comment posted!');
     },
     onError: () => {

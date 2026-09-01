@@ -3,6 +3,7 @@ import { OptionResponse } from "@/modules/decisions/types/decision";
 
 export interface SelectionDto {
   optionId: number;
+  optionTitle?: string;
   rating?: number;
 }
 
@@ -14,6 +15,9 @@ export interface VoteRequest {
 export interface VoteResponse {
   voteId: number;
   decisionId: number;
+  decisionTitle?: string;
+  decisionStatus?: string;
+  voteType?: string;
   voter?: UserResponse;
   selections: SelectionDto[];
   createdAt: string;
@@ -26,3 +30,4 @@ export interface VoteResultResponse {
   optionPercentages: Record<number, number>;
   winningOption?: OptionResponse;
 }
+

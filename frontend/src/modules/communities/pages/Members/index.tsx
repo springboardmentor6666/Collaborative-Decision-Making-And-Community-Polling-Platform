@@ -67,7 +67,7 @@ export default function Members() {
                 key={member.memberId}
                 communityId={communityId}
                 user={member.user}
-                role={member.memberRole}
+                role={community?.owner?.userId === member.user.userId ? "OWNER" : member.memberRole}
                 status={member.status}
                 joinedAt={member.joinedAt}
                 canManage={canManage}
@@ -88,7 +88,7 @@ export default function Members() {
                   key={member.memberId}
                   communityId={communityId}
                   user={member.user}
-                  role={member.memberRole}
+                  role={community?.owner?.userId === member.user.userId ? "OWNER" : member.memberRole}
                   status={member.status}
                   joinedAt={member.joinedAt}
                   canManage={canManage}

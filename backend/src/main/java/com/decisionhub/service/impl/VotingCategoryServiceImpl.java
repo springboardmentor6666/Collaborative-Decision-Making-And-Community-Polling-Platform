@@ -29,12 +29,20 @@ public class VotingCategoryServiceImpl implements VotingCategoryService {
     private final VotingCategoryRepository votingCategoryRepository;
     private final VotingEventRepository votingEventRepository;
     private final CommunityMemberRepository communityMemberRepository;
+    private final com.decisionhub.repository.CommunityRepository communityRepository;
 
     private void verifyModeratorOrOwner(Long communityId, Long userId) {
+        com.decisionhub.entity.Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new EntityNotFoundException("Community not found"));
+
+        if (community.getOwner().getUserId().equals(userId)) {
+            return; // Owner is always allowed
+        }
+
         CommunityMember member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, userId)
                 .orElseThrow(() -> new ForbiddenException("Only the community owner or moderator can manage categories."));
-        
-        if (member.getMemberRole() != MemberRole.OWNER && member.getMemberRole() != MemberRole.MODERATOR) {
+
+        if (member.getMemberRole() != MemberRole.MODERATOR && member.getMemberRole() != MemberRole.OWNER) {
             throw new ForbiddenException("Only the community owner or moderator can manage categories.");
         }
     }

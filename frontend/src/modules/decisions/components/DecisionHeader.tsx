@@ -6,8 +6,10 @@ import { Users, Calendar, BarChart3, Edit, Trash2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useDecisionMutations } from "../hooks/useDecisionMutations";
+import { useSavedDecisions } from "../hooks/useDecisions";
 import { useAuth } from "@/context/AuthContext";
 import { ReportDecisionModal } from "./ReportDecisionModal";
+import { BookmarkButton } from "./BookmarkButton";
 
 interface DecisionHeaderProps {
   decision: DecisionResponse;
@@ -17,6 +19,8 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { deleteDecision } = useDecisionMutations();
+  const { data: savedData } = useSavedDecisions({ size: 100 });
+  const isSaved = savedData?.content?.some((d: any) => d.decisionId === decision.decisionId) ?? false;
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   
   const isOwner = user?.userId === decision.createdBy.userId;
@@ -119,6 +123,13 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
         </div>
 
         <div className="flex lg:flex-col gap-3 shrink-0 relative z-10">
+          <BookmarkButton 
+            decisionId={decision.decisionId} 
+            isSaved={isSaved} 
+            variant="outline" 
+            className="w-full border-[#E2E8F0] hover:bg-slate-50 text-[#0F172A] justify-center"
+          />
+
           {isOwner ? (
             <>
               <Button asChild variant="outline" className="border-[#E2E8F0] hover:bg-slate-50 text-[#0F172A] w-full">

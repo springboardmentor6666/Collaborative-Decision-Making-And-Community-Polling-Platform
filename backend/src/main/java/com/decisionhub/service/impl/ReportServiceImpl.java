@@ -86,7 +86,7 @@ public class ReportServiceImpl implements ReportService {
                 long votes = voteRepository.countByOptionOptionId(opt.getOptionId());
                 table.addCell(opt.getTitle());
                 table.addCell(String.valueOf(votes));
-                table.addCell(opt.getTotalScore().toString());
+                table.addCell(opt.getTotalScore() != null ? opt.getTotalScore().toString() : "0");
             }
 
             document.add(table);
@@ -134,7 +134,7 @@ public class ReportServiceImpl implements ReportService {
                 row.createCell(0).setCellValue(opt.getOptionId());
                 row.createCell(1).setCellValue(opt.getTitle());
                 row.createCell(2).setCellValue(voteRepository.countByOptionOptionId(opt.getOptionId()));
-                row.createCell(3).setCellValue(opt.getTotalScore().doubleValue());
+                row.createCell(3).setCellValue(opt.getTotalScore() != null ? opt.getTotalScore().doubleValue() : 0.0);
             }
 
             workbook.write(out);

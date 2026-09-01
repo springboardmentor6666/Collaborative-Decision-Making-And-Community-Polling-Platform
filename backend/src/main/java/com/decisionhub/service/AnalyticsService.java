@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface AnalyticsService {
 
-    Map<String, Object> getSystemDashboardStats();
+    Map<String, Object> getSystemDashboardStats(String timeRange);
 
     Map<String, Object> getUserAnalytics(Long userId);
 

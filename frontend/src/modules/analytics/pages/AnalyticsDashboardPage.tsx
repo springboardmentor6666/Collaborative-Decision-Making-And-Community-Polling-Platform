@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDashboardAnalytics } from '../hooks/useDashboardAnalytics';
 import { AnalyticsCards } from '../components/AnalyticsCards';
 import { TimelineChart } from '../components/TimelineChart';
 import { AnalyticsCardsSkeleton, ChartSkeleton } from '../components/AnalyticsSkeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { AlertCircle } from 'lucide-react';
 
 export function AnalyticsDashboardPage() {
-  const { data, isLoading, error } = useDashboardAnalytics();
+  const [timeRange, setTimeRange] = useState('all');
+  const { data, isLoading, error } = useDashboardAnalytics(timeRange);
 
   if (isLoading) {
     return (
@@ -43,6 +45,18 @@ export function AnalyticsDashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Platform Analytics</h1>
           <p className="text-muted-foreground">Comprehensive overview of platform activity and growth.</p>
+        </div>
+        <div>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">Past 7 Days</SelectItem>
+              <SelectItem value="month">Past 30 Days</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

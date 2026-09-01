@@ -1,6 +1,6 @@
 import api from "@/api/axios";
 import { VoteRequest, VoteResponse, VoteResultResponse } from "../types/vote";
-import { ApiResponse } from "@/types";
+import { ApiResponse, PagedResponse } from "@/types";
 
 export const voteApi = {
   castVote: async (request: VoteRequest): Promise<VoteResponse> => {
@@ -26,5 +26,13 @@ export const voteApi = {
   getVoteResults: async (decisionId: number): Promise<VoteResultResponse> => {
     const response = await api.get<ApiResponse<VoteResultResponse>>(`/votes/decision/${decisionId}/results`);
     return response.data.data;
+  },
+
+  getMyVotes: async (page = 0, size = 20): Promise<PagedResponse<VoteResponse>> => {
+    const response = await api.get<ApiResponse<PagedResponse<VoteResponse>>>("/votes/my", {
+      params: { page, size }
+    });
+    return response.data.data;
   }
 };
+

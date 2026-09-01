@@ -1,199 +1,727 @@
-2026-08-21 18:16:02.855 [background-preinit] INFO  o.h.validator.internal.util.Version [reqId=N/A, user=N/A] - HV000001: Hibernate Validator 8.0.1.Final
-2026-08-21 18:16:02.948 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 29336 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
-2026-08-21 18:16:02.949 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
-2026-08-21 18:16:02.950 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
-2026-08-21 18:16:03.036 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-08-21 18:16:03.037 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-08-21 18:16:05.412 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-21 18:16:05.674 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 226 ms. Found 20 JPA repository interfaces.
-2026-08-21 18:16:07.215 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
-2026-08-21 18:16:07.254 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
-2026-08-21 18:16:07.257 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
-2026-08-21 18:16:07.257 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
-2026-08-21 18:16:07.340 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
-2026-08-21 18:16:07.341 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 4302 ms
-2026-08-21 18:16:08.209 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Starting...
-2026-08-21 18:16:08.563 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@27997737
-2026-08-21 18:16:08.566 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Start completed.
-2026-08-21 18:16:08.623 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
-2026-08-21 18:16:08.639 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
-2026-08-21 18:16:08.774 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 3 migrations (execution time 00:00.091s)
-2026-08-21 18:16:08.815 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 3
-2026-08-21 18:16:08.821 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
-2026-08-21 18:16:09.000 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-21 18:16:09.092 [restartedMain] INFO  org.hibernate.Version [reqId=N/A, user=N/A] - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-08-21 18:16:09.148 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
-2026-08-21 18:16:09.337 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
-2026-08-21 18:16:09.758 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-21 18:16:09.855 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-08-21 18:16:11.900 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-21 18:16:12.408 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-21 18:16:12.772 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory [reqId=N/A, user=N/A] - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-21 18:16:13.440 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
-2026-08-21 18:16:13.443 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
-2026-08-21 18:16:14.837 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
-2026-08-21 18:16:16.343 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
-2026-08-21 18:16:16.794 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
-2026-08-21 18:16:17.417 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
-2026-08-21 18:16:17.499 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
-2026-08-21 18:16:17.528 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
-2026-08-21 18:16:17.554 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 15.435 seconds (process running for 16.205)
-2026-08-21 18:16:17.581 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles and users...
-2026-08-21 18:16:17.876 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
-2026-08-21 18:16:17.882 [RMI TCP Connection(1)-192.168.31.85] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-21 18:16:17.883 [RMI TCP Connection(1)-192.168.31.85] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Initializing Servlet 'dispatcherServlet'
-2026-08-21 18:16:17.888 [RMI TCP Connection(1)-192.168.31.85] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Completed initialization in 4 ms
-2026-08-21 18:20:00.014 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
-2026-08-21 18:25:00.016 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
-2026-08-21 18:25:12.997 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bb47ff7a, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:25:13.088 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=bb47ff7a, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [91 ms]
-2026-08-21 18:25:13.102 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cba7a386, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:25:13.107 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=cba7a386, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [5 ms]
-2026-08-21 18:27:37.736 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=95095737, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.311 [http-nio-8080-exec-8] WARN  c.d.interceptor.LoggingInterceptor [reqId=95095737, user=N/A] - SLOW API ALERT: POST /api/auth/login returned 200 in 575 ms
-2026-08-21 18:27:38.422 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d5892805, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.445 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5e943829, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.451 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2c525755, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.455 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=56fb4280, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.455 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a7032f10, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:38.460 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=d5892805, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [38 ms]
-2026-08-21 18:27:38.491 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=a7032f10, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [36 ms]
-2026-08-21 18:27:38.511 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=2c525755, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [60 ms]
-2026-08-21 18:27:38.647 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=5e943829, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [202 ms]
-2026-08-21 18:27:38.647 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=56fb4280, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [192 ms]
-2026-08-21 18:27:40.892 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b40744a2, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:40.898 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=b40744a2, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
-2026-08-21 18:27:41.632 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=96830592, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:41.637 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=96830592, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
-2026-08-21 18:27:42.019 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=536ea833, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:42.034 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=536ea833, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [15 ms]
-2026-08-21 18:27:42.324 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=44faa52e, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:42.345 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=44faa52e, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [21 ms]
-2026-08-21 18:27:42.658 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3c251ad1, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:42.663 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e76e3d33, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:42.673 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=3c251ad1, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [15 ms]
-2026-08-21 18:27:42.697 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=e76e3d33, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [34 ms]
-2026-08-21 18:27:44.183 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=33cef206, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:44.183 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0eeff700, user=N/A] - HTTP Incoming Request: GET /api/communities/1 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:44.183 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=35d6e19b, user=N/A] - HTTP Incoming Request: GET /api/communities/1/membership from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:44.195 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=0eeff700, user=N/A] - HTTP Request Completed: GET /api/communities/1 -> Status 200 [12 ms]
-2026-08-21 18:27:44.198 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=35d6e19b, user=N/A] - HTTP Request Completed: GET /api/communities/1/membership -> Status 200 [15 ms]
-2026-08-21 18:27:44.237 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=33cef206, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [54 ms]
-2026-08-21 18:27:45.454 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9de3e24d, user=N/A] - HTTP Incoming Request: GET /api/abuse-reports/community/1 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:45.454 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=331dd6c7, user=N/A] - HTTP Incoming Request: GET /api/communities/1/elections from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:45.454 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c35f19a6, user=N/A] - HTTP Incoming Request: GET /api/communities/1/members from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:45.454 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=60221a00, user=N/A] - HTTP Incoming Request: GET /api/communities/1/requests from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:45.468 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=c35f19a6, user=N/A] - HTTP Request Completed: GET /api/communities/1/members -> Status 200 [14 ms]
-2026-08-21 18:27:45.468 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=60221a00, user=N/A] - HTTP Request Completed: GET /api/communities/1/requests -> Status 200 [14 ms]
-2026-08-21 18:27:45.471 [http-nio-8080-exec-2] ERROR c.d.exception.GlobalExceptionHandler [reqId=9de3e24d, user=N/A] - Access denied: Only community admins can view reports
-2026-08-21 18:27:45.474 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=331dd6c7, user=N/A] - HTTP Request Completed: GET /api/communities/1/elections -> Status 200 [20 ms]
-2026-08-21 18:27:45.482 [http-nio-8080-exec-2] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver [reqId=9de3e24d, user=N/A] - Resolved [org.springframework.security.access.AccessDeniedException: Only community admins can view reports]
-2026-08-21 18:27:45.482 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=9de3e24d, user=N/A] - HTTP Request Completed: GET /api/abuse-reports/community/1 -> Status 403 [28 ms]
-2026-08-21 18:27:46.335 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f5a49b21, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:46.335 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=19db79d4, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:46.335 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bf163671, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:46.347 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=19db79d4, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [12 ms]
-2026-08-21 18:27:46.380 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=bf163671, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [44 ms]
-2026-08-21 18:27:46.384 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=f5a49b21, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [48 ms]
-2026-08-21 18:27:46.797 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ab258c07, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:46.797 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=86a5a5b1, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:46.805 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=ab258c07, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [8 ms]
-2026-08-21 18:27:46.805 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=86a5a5b1, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [8 ms]
-2026-08-21 18:27:47.107 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=1986ed49, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.119 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=1986ed49, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [12 ms]
-2026-08-21 18:27:47.584 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4a5ac37d, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.586 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=baa09e96, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.586 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=54b3009b, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.586 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=53738130, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.634 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=53738130, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [48 ms]
-2026-08-21 18:27:47.634 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=54b3009b, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [48 ms]
-2026-08-21 18:27:47.643 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=baa09e96, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [56 ms]
-2026-08-21 18:27:47.651 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=4a5ac37d, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [67 ms]
-2026-08-21 18:27:47.843 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ee669f1a, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:47.868 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=ee669f1a, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [25 ms]
-2026-08-21 18:27:48.138 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6fbba998, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:48.147 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=6fbba998, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [9 ms]
-2026-08-21 18:27:48.415 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=51d72416, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:48.420 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=51d72416, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
-2026-08-21 18:27:48.667 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=dc402728, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:48.674 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=dc402728, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [7 ms]
-2026-08-21 18:27:49.086 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3256fbe5, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:49.090 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=3256fbe5, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
-2026-08-21 18:27:49.606 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=19d07a48, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:49.633 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=19d07a48, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [27 ms]
-2026-08-21 18:27:49.818 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e0e27474, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:49.828 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=e0e27474, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [10 ms]
-2026-08-21 18:27:50.246 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9b6d912a, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:50.246 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c6d3d5ad, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:50.246 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=158550ac, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:50.255 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=c6d3d5ad, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [9 ms]
-2026-08-21 18:27:50.281 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=158550ac, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [35 ms]
-2026-08-21 18:27:50.289 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=9b6d912a, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [43 ms]
-2026-08-21 18:27:50.810 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=79b6db37, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:50.810 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=606caf27, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:50.823 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=606caf27, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [13 ms]
-2026-08-21 18:27:50.823 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=79b6db37, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [13 ms]
-2026-08-21 18:27:51.162 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a1831856, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.177 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=a1831856, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [15 ms]
-2026-08-21 18:27:51.415 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cf3f4f8d, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.415 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=38f8f938, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.415 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9efb8949, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.415 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=289f412e, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.456 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=9efb8949, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [41 ms]
-2026-08-21 18:27:51.456 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=289f412e, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [41 ms]
-2026-08-21 18:27:51.456 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=cf3f4f8d, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [41 ms]
-2026-08-21 18:27:51.466 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=38f8f938, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [51 ms]
-2026-08-21 18:27:51.834 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2405f9d4, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:51.838 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=2405f9d4, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
-2026-08-21 18:27:52.386 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=36724f6a, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:52.386 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b1ee9f4b, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:52.395 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=36724f6a, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [9 ms]
-2026-08-21 18:27:52.395 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=b1ee9f4b, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [9 ms]
-2026-08-21 18:27:52.888 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c93c9826, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:52.888 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=84782185, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:52.888 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6f0f1816, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:52.896 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=84782185, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [8 ms]
-2026-08-21 18:27:52.917 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=6f0f1816, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [29 ms]
-2026-08-21 18:27:52.917 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=c93c9826, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [29 ms]
-2026-08-21 18:27:53.491 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=05685b92, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:53.494 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=05685b92, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
-2026-08-21 18:27:55.345 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=124c9d3a, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.345 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6799b1d2, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.345 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b32a177a, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.345 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=60b5418f, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.383 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=6799b1d2, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [38 ms]
-2026-08-21 18:27:55.383 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=b32a177a, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [38 ms]
-2026-08-21 18:27:55.383 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=124c9d3a, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [38 ms]
-2026-08-21 18:27:55.399 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=60b5418f, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [54 ms]
-2026-08-21 18:27:55.828 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=774de644, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.828 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=29f8b992, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/7 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.828 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e2ed3030, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:27:55.835 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=29f8b992, user=N/A] - HTTP Request Completed: GET /api/analytics/user/7 -> Status 200 [7 ms]
-2026-08-21 18:27:55.852 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=e2ed3030, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [24 ms]
-2026-08-21 18:27:55.852 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=774de644, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [24 ms]
-2026-08-21 18:28:04.397 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=02ea22b4, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:04.400 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=02ea22b4, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [3 ms]
-2026-08-21 18:28:08.151 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=03d3f5da, user=N/A] - HTTP Incoming Request: POST /api/auth/logout from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:08.214 [http-nio-8080-exec-3] INFO  c.d.service.impl.AuthServiceImpl [reqId=03d3f5da, user=N/A] - Token has been blacklisted for logout.
-2026-08-21 18:28:08.217 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=03d3f5da, user=N/A] - HTTP Request Completed: POST /api/auth/logout -> Status 200 [66 ms]
-2026-08-21 18:28:09.202 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=51fe6827, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:09.452 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=51fe6827, user=N/A] - HTTP Request Completed: POST /api/auth/login -> Status 200 [250 ms]
-2026-08-21 18:28:09.483 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=848643ec, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:09.483 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9fa3b046, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:09.487 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=9fa3b046, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
-2026-08-21 18:28:09.487 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=848643ec, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
-2026-08-21 18:28:11.715 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=112365da, user=N/A] - HTTP Incoming Request: POST /api/auth/logout from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:11.718 [http-nio-8080-exec-6] INFO  c.d.service.impl.AuthServiceImpl [reqId=112365da, user=N/A] - Token has been blacklisted for logout.
-2026-08-21 18:28:11.722 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=112365da, user=N/A] - HTTP Request Completed: POST /api/auth/logout -> Status 200 [7 ms]
-2026-08-21 18:28:13.602 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ae87b6a6, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:13.850 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=ae87b6a6, user=N/A] - HTTP Request Completed: POST /api/auth/login -> Status 200 [248 ms]
-2026-08-21 18:28:13.885 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=103a5ca6, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:13.885 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=25495ec7, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:13.889 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=25495ec7, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
-2026-08-21 18:28:13.895 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=103a5ca6, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [10 ms]
-2026-08-21 18:28:15.150 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=50655d93, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:15.150 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=1a3c59a6, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:15.157 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4230fadb, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/3 from IP 0:0:0:0:0:0:0:1
-2026-08-21 18:28:15.168 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=4230fadb, user=N/A] - HTTP Request Completed: GET /api/analytics/user/3 -> Status 200 [11 ms]
-2026-08-21 18:28:15.186 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=50655d93, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [36 ms]
-2026-08-21 18:28:15.186 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=1a3c59a6, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [36 ms]
+2026-09-01 21:43:06.330 [background-preinit] INFO  o.h.validator.internal.util.Version [reqId=N/A, user=N/A] - HV000001: Hibernate Validator 8.0.1.Final
+2026-09-01 21:43:06.403 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 29152 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
+2026-09-01 21:43:06.404 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-09-01 21:43:06.406 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
+2026-09-01 21:43:06.477 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-01 21:43:06.478 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor [reqId=N/A, user=N/A] - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-01 21:43:08.448 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-01 21:43:08.657 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 195 ms. Found 20 JPA repository interfaces.
+2026-09-01 21:43:09.985 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
+2026-09-01 21:43:10.002 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:43:10.004 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
+2026-09-01 21:43:10.004 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-09-01 21:43:10.106 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
+2026-09-01 21:43:10.107 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 3627 ms
+2026-09-01 21:43:10.693 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Starting...
+2026-09-01 21:43:10.935 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1e53ade9
+2026-09-01 21:43:10.937 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Start completed.
+2026-09-01 21:43:10.997 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
+2026-09-01 21:43:11.010 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
+2026-09-01 21:43:11.121 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 3 migrations (execution time 00:00.071s)
+2026-09-01 21:43:11.142 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 3
+2026-09-01 21:43:11.145 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
+2026-09-01 21:43:11.318 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-01 21:43:11.427 [restartedMain] INFO  org.hibernate.Version [reqId=N/A, user=N/A] - HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-09-01 21:43:11.478 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
+2026-09-01 21:43:11.578 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
+2026-09-01 21:43:11.804 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-01 21:43:11.871 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-01 21:43:12.181 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Community.owner' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.202 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.community' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.204 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.createdBy' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.274 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.decision' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.275 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.user' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.280 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.option' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:12.280 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.vote' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:43:13.581 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-01 21:43:14.010 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:43:14.405 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory [reqId=N/A, user=N/A] - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-01 21:43:14.920 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-01 21:43:14.923 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
+2026-09-01 21:43:16.038 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
+2026-09-01 21:43:17.067 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
+2026-09-01 21:43:17.448 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-09-01 21:43:17.928 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
+2026-09-01 21:43:17.994 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:43:18.013 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
+2026-09-01 21:43:18.033 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 12.402 seconds (process running for 13.153)
+2026-09-01 21:43:18.050 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles, users, communities and decisions...
+2026-09-01 21:43:18.190 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
+2026-09-01 21:43:18.319 [RMI TCP Connection(1)-192.168.1.10] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-01 21:43:18.319 [RMI TCP Connection(1)-192.168.1.10] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Initializing Servlet 'dispatcherServlet'
+2026-09-01 21:43:18.321 [RMI TCP Connection(1)-192.168.1.10] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Completed initialization in 2 ms
+2026-09-01 21:43:58.573 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b6d3444f, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:43:58.623 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=b6d3444f, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [50 ms]
+2026-09-01 21:43:58.640 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4c494822, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:43:58.646 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=4c494822, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [6 ms]
+2026-09-01 21:44:07.681 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e7411faa, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.237 [http-nio-8080-exec-6] WARN  c.d.interceptor.LoggingInterceptor [reqId=e7411faa, user=N/A] - SLOW API ALERT: POST /api/auth/login returned 200 in 556 ms
+2026-09-01 21:44:08.302 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b32bd507, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.318 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7528247a, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.318 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4c4516eb, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.318 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f570fd87, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.318 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9bffe438, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/3 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:08.349 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=f570fd87, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [31 ms]
+2026-09-01 21:44:08.367 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=b32bd507, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [65 ms]
+2026-09-01 21:44:08.383 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=9bffe438, user=N/A] - HTTP Request Completed: GET /api/analytics/user/3 -> Status 200 [65 ms]
+2026-09-01 21:44:08.386 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=4c4516eb, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [68 ms]
+2026-09-01 21:44:08.514 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=7528247a, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [197 ms]
+2026-09-01 21:44:18.521 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5666d8e7, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:18.521 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=477d941c, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:18.521 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0b1e23f6, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:18.521 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4956c5be, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:18.585 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=4956c5be, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [64 ms]
+2026-09-01 21:44:18.585 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=477d941c, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [64 ms]
+2026-09-01 21:44:18.585 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=0b1e23f6, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [64 ms]
+2026-09-01 21:44:18.617 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=5666d8e7, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [96 ms]
+2026-09-01 21:44:20.285 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b3465fd2, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:20.285 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0dc2ef91, user=N/A] - HTTP Incoming Request: GET /api/votes/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:20.285 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=38a14da0, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:20.294 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=38a14da0, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [9 ms]
+2026-09-01 21:44:20.321 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=b3465fd2, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [36 ms]
+2026-09-01 21:44:20.347 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=0dc2ef91, user=N/A] - HTTP Request Completed: GET /api/votes/my -> Status 200 [62 ms]
+2026-09-01 21:44:23.365 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cc41aedc, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:23.368 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=cc41aedc, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 21:44:30.075 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f38be1f6, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:30.075 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=695d00f0, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:30.086 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=f38be1f6, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [10 ms]
+2026-09-01 21:44:30.095 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=695d00f0, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [20 ms]
+2026-09-01 21:44:33.593 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3a12ea81, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:33.593 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=73f38306, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/3 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:33.593 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2c27f9e4, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:33.606 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=2c27f9e4, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [13 ms]
+2026-09-01 21:44:33.611 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=73f38306, user=N/A] - HTTP Request Completed: GET /api/analytics/user/3 -> Status 200 [18 ms]
+2026-09-01 21:44:33.643 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=3a12ea81, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [50 ms]
+2026-09-01 21:44:38.381 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6e8ab974, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:44:38.384 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=6e8ab974, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 21:45:00.012 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-09-01 21:45:08.406 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7f0065fb, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:08.412 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=7f0065fb, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [6 ms]
+2026-09-01 21:45:08.542 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=8dfe2239, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:08.542 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=18070053, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:08.549 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=8dfe2239, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [7 ms]
+2026-09-01 21:45:08.551 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=18070053, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [9 ms]
+2026-09-01 21:45:10.017 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b03ea96c, user=N/A] - HTTP Incoming Request: GET /api/communities/4 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:10.017 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0f698e8f, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:10.017 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7fe7eb0f, user=N/A] - HTTP Incoming Request: GET /api/communities/4/membership from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:10.025 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=b03ea96c, user=N/A] - HTTP Request Completed: GET /api/communities/4 -> Status 200 [8 ms]
+2026-09-01 21:45:10.028 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=7fe7eb0f, user=N/A] - HTTP Request Completed: GET /api/communities/4/membership -> Status 200 [11 ms]
+2026-09-01 21:45:10.035 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=0f698e8f, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [18 ms]
+2026-09-01 21:45:12.640 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b606f376, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:12.647 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=b606f376, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [7 ms]
+2026-09-01 21:45:15.072 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ea8e8cd1, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:15.072 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6b498827, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:15.072 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2a47aa02, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:15.072 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3de851bb, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:15.113 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=ea8e8cd1, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [41 ms]
+2026-09-01 21:45:15.113 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=3de851bb, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [41 ms]
+2026-09-01 21:45:15.113 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=6b498827, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [41 ms]
+2026-09-01 21:45:15.133 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=2a47aa02, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [61 ms]
+2026-09-01 21:45:20.311 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e37595e5, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:20.317 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=e37595e5, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [6 ms]
+2026-09-01 21:45:23.436 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=45ba78b8, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.440 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=45ba78b8, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
+2026-09-01 21:45:23.595 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=82198d18, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.627 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=82198d18, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [32 ms]
+2026-09-01 21:45:23.663 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=8064b495, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.663 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7a87c3a8, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.663 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=81e19d72, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.663 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5542a88c, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:23.672 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=5542a88c, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [9 ms]
+2026-09-01 21:45:23.672 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=81e19d72, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [9 ms]
+2026-09-01 21:45:23.673 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=8064b495, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [10 ms]
+2026-09-01 21:45:23.682 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=7a87c3a8, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [19 ms]
+2026-09-01 21:45:31.643 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3c1c51b4, user=N/A] - HTTP Incoming Request: PUT /api/votes/68 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.740 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=3c1c51b4, user=N/A] - HTTP Request Completed: PUT /api/votes/68 -> Status 200 [97 ms]
+2026-09-01 21:45:31.763 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d84d1823, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.763 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bcf913d7, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.763 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ff9294a2, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.763 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=34cb2eab, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.763 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=aee195d2, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.768 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=d84d1823, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [5 ms]
+2026-09-01 21:45:31.771 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=ff9294a2, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [8 ms]
+2026-09-01 21:45:31.775 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=aee195d2, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [12 ms]
+2026-09-01 21:45:31.783 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=34cb2eab, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [20 ms]
+2026-09-01 21:45:31.791 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=bcf913d7, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [28 ms]
+2026-09-01 21:45:31.794 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e96f89a4, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.803 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=11abfaf8, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:31.806 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=e96f89a4, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [12 ms]
+2026-09-01 21:45:31.823 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=11abfaf8, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [20 ms]
+2026-09-01 21:45:35.938 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5dadef07, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:35.938 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=237db284, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:35.950 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=237db284, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [12 ms]
+2026-09-01 21:45:35.953 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=5dadef07, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [15 ms]
+2026-09-01 21:45:37.227 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a864a735, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:37.227 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=decee663, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:37.227 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f0398f2f, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/3 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:37.239 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=f0398f2f, user=N/A] - HTTP Request Completed: GET /api/analytics/user/3 -> Status 200 [12 ms]
+2026-09-01 21:45:37.239 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=decee663, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [12 ms]
+2026-09-01 21:45:37.270 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=a864a735, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [43 ms]
+2026-09-01 21:45:38.458 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=481ec40f, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:38.462 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=481ec40f, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
+2026-09-01 21:45:40.035 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=099d5c83, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:40.035 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ab9df1c8, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:40.035 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7888d65d, user=N/A] - HTTP Incoming Request: GET /api/votes/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:40.041 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=099d5c83, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [6 ms]
+2026-09-01 21:45:40.075 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=ab9df1c8, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [40 ms]
+2026-09-01 21:45:40.082 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=7888d65d, user=N/A] - HTTP Request Completed: GET /api/votes/my -> Status 200 [47 ms]
+2026-09-01 21:45:46.103 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cd234033, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:46.103 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=87fcc15e, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:46.103 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7121da01, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:46.103 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=281aba2c, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:46.103 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6b994f93, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:46.109 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=7121da01, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [6 ms]
+2026-09-01 21:45:46.116 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=281aba2c, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [13 ms]
+2026-09-01 21:45:46.117 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=cd234033, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [14 ms]
+2026-09-01 21:45:46.120 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=87fcc15e, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [17 ms]
+2026-09-01 21:45:46.125 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=6b994f93, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [22 ms]
+2026-09-01 21:45:52.722 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c783a30a, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:52.722 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=45d1c98e, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:52.722 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5aaa3e1c, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:52.722 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=aeceb333, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:52.754 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=aeceb333, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [32 ms]
+2026-09-01 21:45:52.754 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=c783a30a, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [32 ms]
+2026-09-01 21:45:52.754 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=45d1c98e, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [32 ms]
+2026-09-01 21:45:52.763 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=5aaa3e1c, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [41 ms]
+2026-09-01 21:45:53.482 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=379a13e2, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:53.485 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=379a13e2, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 21:45:54.854 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=beec8c22, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/3 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:54.854 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=dffad211, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:54.854 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=769eb196, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:45:54.861 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=769eb196, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [7 ms]
+2026-09-01 21:45:54.861 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=beec8c22, user=N/A] - HTTP Request Completed: GET /api/analytics/user/3 -> Status 200 [7 ms]
+2026-09-01 21:45:54.879 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=dffad211, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [25 ms]
+2026-09-01 21:46:08.508 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d29594ef, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:08.512 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=d29594ef, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
+2026-09-01 21:46:10.065 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9842090f, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:10.071 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=9842090f, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [6 ms]
+2026-09-01 21:46:18.210 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4e9e8428, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:18.215 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=4e9e8428, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [5 ms]
+2026-09-01 21:46:19.594 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5818ed42, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:19.613 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=5818ed42, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [19 ms]
+2026-09-01 21:46:23.526 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=614ccd7d, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:23.528 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=614ccd7d, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 21:46:25.579 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=dbfc3261, user=N/A] - HTTP Incoming Request: GET /api/communities/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:25.586 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=dbfc3261, user=N/A] - HTTP Request Completed: GET /api/communities/my -> Status 200 [7 ms]
+2026-09-01 21:46:27.736 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=83f2cf92, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:27.759 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=83f2cf92, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [23 ms]
+2026-09-01 21:46:28.669 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d74ad3c7, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:28.669 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=39d536a9, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:28.669 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=8a65697f, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:28.669 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f98fed16, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:28.714 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=d74ad3c7, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [45 ms]
+2026-09-01 21:46:28.714 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=8a65697f, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [45 ms]
+2026-09-01 21:46:28.718 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=f98fed16, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [49 ms]
+2026-09-01 21:46:28.725 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=39d536a9, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [56 ms]
+2026-09-01 21:46:36.329 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f59f1069, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:36.329 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a8b4b563, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:36.329 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=94e197e2, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:36.329 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=07037ac3, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:36.329 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d5a57a9a, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:36.333 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=07037ac3, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [4 ms]
+2026-09-01 21:46:36.333 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=f59f1069, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [4 ms]
+2026-09-01 21:46:36.337 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=d5a57a9a, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [8 ms]
+2026-09-01 21:46:36.340 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=94e197e2, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [11 ms]
+2026-09-01 21:46:36.342 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=a8b4b563, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [13 ms]
+2026-09-01 21:46:38.540 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b46f53b7, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:38.542 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=b46f53b7, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 21:46:40.089 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b5b841c3, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:40.095 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=b5b841c3, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [6 ms]
+2026-09-01 21:46:44.182 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=163172cc, user=N/A] - HTTP Incoming Request: POST /api/comments from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:44.203 [http-nio-8080-exec-8] INFO  c.d.s.impl.NotificationServiceImpl [reqId=163172cc, user=N/A] - Dispatched notification to user ID 14: [COMMENT] Discussion on which programming language you prefer?
+2026-09-01 21:46:44.211 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=163172cc, user=N/A] - HTTP Request Completed: POST /api/comments -> Status 201 [29 ms]
+2026-09-01 21:46:44.223 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bae7cd08, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:44.237 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=bae7cd08, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [14 ms]
+2026-09-01 21:46:46.310 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=681bd2b1, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:46.310 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3098036c, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:46.310 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=123a15b7, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:46.310 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=37d45125, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:46.337 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=37d45125, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [27 ms]
+2026-09-01 21:46:46.337 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=3098036c, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [27 ms]
+2026-09-01 21:46:46.337 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=681bd2b1, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [27 ms]
+2026-09-01 21:46:46.344 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=123a15b7, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [34 ms]
+2026-09-01 21:46:48.671 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=60c7dafa, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:48.671 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4c415a20, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:48.671 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6bc1458c, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:48.671 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=866a60af, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:48.671 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=342a23f6, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:48.677 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=6bc1458c, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [6 ms]
+2026-09-01 21:46:48.681 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=866a60af, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [10 ms]
+2026-09-01 21:46:48.681 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=4c415a20, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [10 ms]
+2026-09-01 21:46:48.683 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=60c7dafa, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [12 ms]
+2026-09-01 21:46:48.685 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=342a23f6, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [14 ms]
+2026-09-01 21:46:53.553 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e55d8793, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:46:53.556 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=e55d8793, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 21:47:02.454 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=34ceaf56, user=N/A] - HTTP Incoming Request: POST /api/auth/logout from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:02.467 [http-nio-8080-exec-6] INFO  c.d.service.impl.AuthServiceImpl [reqId=34ceaf56, user=N/A] - Token has been blacklisted for logout.
+2026-09-01 21:47:02.469 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=34ceaf56, user=N/A] - HTTP Request Completed: POST /api/auth/logout -> Status 200 [15 ms]
+2026-09-01 21:47:06.729 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=1e5f207c, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:06.976 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=1e5f207c, user=N/A] - HTTP Request Completed: POST /api/auth/login -> Status 200 [247 ms]
+2026-09-01 21:47:07.017 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=8453148e, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.017 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b976adbf, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.017 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=bf566def, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.017 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0839733f, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.017 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=854038aa, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.022 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=0839733f, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [5 ms]
+2026-09-01 21:47:07.024 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=bf566def, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [7 ms]
+2026-09-01 21:47:07.024 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=b976adbf, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [7 ms]
+2026-09-01 21:47:07.030 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=854038aa, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [13 ms]
+2026-09-01 21:47:07.032 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=8453148e, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [15 ms]
+2026-09-01 21:47:07.035 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=de360341, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.040 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=988d97fa, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:07.055 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=de360341, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [20 ms]
+2026-09-01 21:47:07.061 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=988d97fa, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [21 ms]
+2026-09-01 21:47:14.100 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=19dbbf9d, user=N/A] - HTTP Incoming Request: POST /api/comments from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:14.108 [http-nio-8080-exec-9] INFO  c.d.s.impl.NotificationServiceImpl [reqId=19dbbf9d, user=N/A] - Dispatched notification to user ID 3: [COMMENT] Reply on which programming language you prefer?
+2026-09-01 21:47:14.113 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=19dbbf9d, user=N/A] - HTTP Request Completed: POST /api/comments -> Status 201 [13 ms]
+2026-09-01 21:47:14.125 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a68e22cb, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:14.132 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=a68e22cb, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [7 ms]
+2026-09-01 21:47:21.415 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=11c1aa54, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:21.415 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ee3765ff, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:21.415 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=83246093, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:21.415 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ef9e2aaa, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:21.455 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=11c1aa54, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [40 ms]
+2026-09-01 21:47:21.455 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=ee3765ff, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [40 ms]
+2026-09-01 21:47:21.455 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=83246093, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [40 ms]
+2026-09-01 21:47:21.464 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=ef9e2aaa, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [48 ms]
+2026-09-01 21:47:22.047 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f237eaf0, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:22.049 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=f237eaf0, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 21:47:37.041 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=81bf7c11, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:37.045 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=81bf7c11, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
+2026-09-01 21:47:37.071 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0860e5bf, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:37.074 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=0860e5bf, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 21:47:49.623 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cc1973e4, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:49.623 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3e2459ac, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:49.624 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=476c968a, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:49.624 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6a9f30bc, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:49.624 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fc6b4cea, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:49.632 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=cc1973e4, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [9 ms]
+2026-09-01 21:47:49.635 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=6a9f30bc, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [11 ms]
+2026-09-01 21:47:49.635 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=fc6b4cea, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [11 ms]
+2026-09-01 21:47:49.636 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=476c968a, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [12 ms]
+2026-09-01 21:47:49.638 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=3e2459ac, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [15 ms]
+2026-09-01 21:47:52.087 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f2e7d140, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:47:52.090 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=f2e7d140, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 21:48:00.793 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e6fffb4d, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:00.793 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=1091baf9, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:00.793 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ee8e3b4e, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:00.793 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b9aa10f3, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:00.815 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=1091baf9, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [22 ms]
+2026-09-01 21:48:00.815 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=b9aa10f3, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [22 ms]
+2026-09-01 21:48:00.815 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=e6fffb4d, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [22 ms]
+2026-09-01 21:48:00.822 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=ee8e3b4e, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [29 ms]
+2026-09-01 21:48:07.064 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=746e6997, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:07.071 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=746e6997, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [7 ms]
+2026-09-01 21:48:07.112 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3d7182f1, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:48:07.117 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=3d7182f1, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [5 ms]
+2026-09-01 21:50:00.014 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-09-01 21:50:26.870 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=38434841, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 21:50:26.875 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=38434841, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [5 ms]
+2026-09-01 21:50:49.843 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener [reqId=N/A, user=N/A] - Restarting due to 3 class path changes (0 additions, 0 deletions, 3 modifications)
+2026-09-01 21:50:49.848 [Thread-7] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Stopping ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:50:49.862 [Thread-7] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:50:49.865 [Thread-7] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Shutdown initiated...
+2026-09-01 21:50:49.872 [Thread-7] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-1 - Shutdown completed.
+2026-09-01 21:50:50.076 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 29152 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
+2026-09-01 21:50:50.077 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-09-01 21:50:50.078 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
+2026-09-01 21:50:50.879 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-01 21:50:51.060 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 177 ms. Found 20 JPA repository interfaces.
+2026-09-01 21:50:51.246 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
+2026-09-01 21:50:51.246 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:50:51.246 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
+2026-09-01 21:50:51.246 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-09-01 21:50:51.295 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
+2026-09-01 21:50:51.295 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 1212 ms
+2026-09-01 21:50:51.596 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-2 - Starting...
+2026-09-01 21:50:51.786 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@47f199ca
+2026-09-01 21:50:51.787 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-2 - Start completed.
+2026-09-01 21:50:51.789 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
+2026-09-01 21:50:51.790 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
+2026-09-01 21:50:51.813 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 3 migrations (execution time 00:00.015s)
+2026-09-01 21:50:51.873 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 3
+2026-09-01 21:50:51.874 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
+2026-09-01 21:50:51.918 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-01 21:50:51.929 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
+2026-09-01 21:50:51.937 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
+2026-09-01 21:50:51.949 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-01 21:50:51.961 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-01 21:50:52.011 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Community.owner' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.030 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.community' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.031 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.createdBy' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.106 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.decision' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.108 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.user' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.114 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.option' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.115 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.vote' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:52.530 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-01 21:50:52.907 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:50:53.053 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-01 21:50:53.054 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
+2026-09-01 21:50:53.489 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
+2026-09-01 21:50:54.122 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
+2026-09-01 21:50:54.386 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-09-01 21:50:54.885 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
+2026-09-01 21:50:54.925 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:50:54.932 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
+2026-09-01 21:50:54.947 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 4.959 seconds (process running for 470.068)
+2026-09-01 21:50:54.958 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles, users, communities and decisions...
+2026-09-01 21:50:54.995 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
+2026-09-01 21:50:55.001 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener [reqId=N/A, user=N/A] - Condition evaluation unchanged
+2026-09-01 21:50:56.429 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener [reqId=N/A, user=N/A] - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-01 21:50:56.430 [Thread-9] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Stopping ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:50:56.440 [Thread-9] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:50:56.441 [Thread-9] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-2 - Shutdown initiated...
+2026-09-01 21:50:56.443 [Thread-9] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-2 - Shutdown completed.
+2026-09-01 21:50:56.583 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 29152 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
+2026-09-01 21:50:56.584 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-09-01 21:50:56.584 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
+2026-09-01 21:50:57.167 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-01 21:50:57.247 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 79 ms. Found 20 JPA repository interfaces.
+2026-09-01 21:50:57.453 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
+2026-09-01 21:50:57.454 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:50:57.455 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
+2026-09-01 21:50:57.455 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-09-01 21:50:57.495 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
+2026-09-01 21:50:57.495 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 909 ms
+2026-09-01 21:50:57.637 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-3 - Starting...
+2026-09-01 21:50:57.687 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@639cd648
+2026-09-01 21:50:57.688 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-3 - Start completed.
+2026-09-01 21:50:57.691 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
+2026-09-01 21:50:57.693 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
+2026-09-01 21:50:57.714 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 3 migrations (execution time 00:00.015s)
+2026-09-01 21:50:57.762 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 3
+2026-09-01 21:50:57.763 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
+2026-09-01 21:50:57.806 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-01 21:50:57.821 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
+2026-09-01 21:50:57.827 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
+2026-09-01 21:50:57.835 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-01 21:50:57.842 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-01 21:50:57.870 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Community.owner' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.879 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.community' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.879 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.createdBy' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.923 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.decision' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.924 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.user' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.929 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.option' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:57.930 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.vote' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:50:58.646 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-01 21:50:59.069 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:50:59.199 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-01 21:50:59.200 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
+2026-09-01 21:50:59.627 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
+2026-09-01 21:51:00.108 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
+2026-09-01 21:51:00.230 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-09-01 21:51:00.453 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
+2026-09-01 21:51:00.473 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:51:00.481 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
+2026-09-01 21:51:00.486 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 3.944 seconds (process running for 475.607)
+2026-09-01 21:51:00.502 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles, users, communities and decisions...
+2026-09-01 21:51:00.538 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
+2026-09-01 21:51:00.541 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener [reqId=N/A, user=N/A] - Condition evaluation unchanged
+2026-09-01 21:51:03.066 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener [reqId=N/A, user=N/A] - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-01 21:51:03.069 [Thread-15] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Stopping ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:51:03.076 [Thread-15] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:51:03.077 [Thread-15] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-3 - Shutdown initiated...
+2026-09-01 21:51:03.081 [Thread-15] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-3 - Shutdown completed.
+2026-09-01 21:51:03.231 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Starting DecisionHubApplication using Java 21.0.12 with PID 29152 (C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\target\classes started by pabhi in C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform)
+2026-09-01 21:51:03.232 [restartedMain] DEBUG c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-09-01 21:51:03.233 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - No active profile set, falling back to 1 default profile: "default"
+2026-09-01 21:51:03.675 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-01 21:51:03.742 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate [reqId=N/A, user=N/A] - Finished Spring Data repository scanning in 66 ms. Found 20 JPA repository interfaces.
+2026-09-01 21:51:03.906 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat initialized with port 8080 (http)
+2026-09-01 21:51:03.906 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:51:03.907 [restartedMain] INFO  o.a.catalina.core.StandardService [reqId=N/A, user=N/A] - Starting service [Tomcat]
+2026-09-01 21:51:03.907 [restartedMain] INFO  o.a.catalina.core.StandardEngine [reqId=N/A, user=N/A] - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-09-01 21:51:03.944 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring embedded WebApplicationContext
+2026-09-01 21:51:03.944 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext [reqId=N/A, user=N/A] - Root WebApplicationContext: initialization completed in 708 ms
+2026-09-01 21:51:04.066 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-4 - Starting...
+2026-09-01 21:51:04.111 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool [reqId=N/A, user=N/A] - HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@19ed4cad
+2026-09-01 21:51:04.112 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource [reqId=N/A, user=N/A] - HikariPool-4 - Start completed.
+2026-09-01 21:51:04.113 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor [reqId=N/A, user=N/A] - Database: jdbc:postgresql://localhost:5432/decisionhub_db (PostgreSQL 18.4)
+2026-09-01 21:51:04.113 [restartedMain] WARN  o.f.c.i.database.base.Database [reqId=N/A, user=N/A] - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 16.
+2026-09-01 21:51:04.125 [restartedMain] INFO  o.f.core.internal.command.DbValidate [reqId=N/A, user=N/A] - Successfully validated 3 migrations (execution time 00:00.007s)
+2026-09-01 21:51:04.165 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Current version of schema "public": 3
+2026-09-01 21:51:04.165 [restartedMain] INFO  o.f.core.internal.command.DbMigrate [reqId=N/A, user=N/A] - Schema "public" is up to date. No migration necessary.
+2026-09-01 21:51:04.195 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper [reqId=N/A, user=N/A] - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-01 21:51:04.202 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator [reqId=N/A, user=N/A] - HHH000026: Second-level cache disabled
+2026-09-01 21:51:04.206 [restartedMain] INFO  o.h.e.b.internal.EnversServiceImpl [reqId=N/A, user=N/A] - Envers integration enabled? : true
+2026-09-01 21:51:04.211 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo [reqId=N/A, user=N/A] - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-01 21:51:04.217 [restartedMain] WARN  org.hibernate.orm.deprecation [reqId=N/A, user=N/A] - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-01 21:51:04.252 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Community.owner' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.259 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.community' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.259 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Decision.createdBy' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.289 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.decision' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.289 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.Vote.user' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.292 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.option' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.292 [restartedMain] WARN  o.h.boot.model.internal.ToOneBinder [reqId=N/A, user=N/A] - HHH000491: 'com.decisionhub.entity.VoteSelection.vote' uses both @NotFound and FetchType.LAZY. @ManyToOne and @OneToOne associations mapped with @NotFound are forced to EAGER fetching.
+2026-09-01 21:51:04.657 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator [reqId=N/A, user=N/A] - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-01 21:51:04.908 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean [reqId=N/A, user=N/A] - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-01 21:51:05.002 [restartedMain] DEBUG c.d.s.jwt.JwtAuthenticationFilter [reqId=N/A, user=N/A] - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-01 21:51:05.003 [restartedMain] DEBUG c.d.filter.MdcLoggingFilter [reqId=N/A, user=N/A] - Filter 'mdcLoggingFilter' configured for use
+2026-09-01 21:51:05.315 [restartedMain] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer [reqId=N/A, user=N/A] - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsServiceImpl
+2026-09-01 21:51:05.674 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver [reqId=N/A, user=N/A] - Exposing 3 endpoints beneath base path '/actuator'
+2026-09-01 21:51:05.822 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [reqId=N/A, user=N/A] - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-09-01 21:51:06.074 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer [reqId=N/A, user=N/A] - LiveReload server is running on port 35729
+2026-09-01 21:51:06.090 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol [reqId=N/A, user=N/A] - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-01 21:51:06.095 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer [reqId=N/A, user=N/A] - Tomcat started on port 8080 (http) with context path '/'
+2026-09-01 21:51:06.104 [restartedMain] INFO  c.decisionhub.DecisionHubApplication [reqId=N/A, user=N/A] - Started DecisionHubApplication in 2.926 seconds (process running for 481.225)
+2026-09-01 21:51:06.107 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Initializing database with default roles, users, communities and decisions...
+2026-09-01 21:51:06.139 [restartedMain] INFO  c.decisionhub.config.DataInitializer [reqId=N/A, user=N/A] - Database initialization completed.
+2026-09-01 21:51:06.145 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener [reqId=N/A, user=N/A] - Condition evaluation unchanged
+2026-09-01 21:55:00.008 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-09-01 22:00:00.004 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-09-01 22:00:59.480 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] [reqId=N/A, user=N/A] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-01 22:00:59.480 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Initializing Servlet 'dispatcherServlet'
+2026-09-01 22:00:59.482 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet [reqId=N/A, user=N/A] - Completed initialization in 2 ms
+2026-09-01 22:00:59.552 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=619cd0e1, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:00:59.552 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0c50a009, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:00:59.576 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=0c50a009, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [24 ms]
+2026-09-01 22:00:59.582 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=619cd0e1, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [30 ms]
+2026-09-01 22:01:00.121 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=097e94b8, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.133 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=097e94b8, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [12 ms]
+2026-09-01 22:01:00.149 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=39006e11, user=N/A] - HTTP Incoming Request: GET /api/users/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.153 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=39006e11, user=N/A] - HTTP Request Completed: GET /api/users/me -> Status 200 [4 ms]
+2026-09-01 22:01:00.303 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e5d04eae, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.304 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cb2e0232, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.364 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=46a89614, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.367 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5461f0a7, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.376 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=adb122d7, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.388 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f8a9bf06, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:01:00.397 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=46a89614, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [33 ms]
+2026-09-01 22:01:00.406 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=adb122d7, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [30 ms]
+2026-09-01 22:01:00.489 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=e5d04eae, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [186 ms]
+2026-09-01 22:01:00.494 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=cb2e0232, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [191 ms]
+2026-09-01 22:01:00.542 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=f8a9bf06, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [154 ms]
+2026-09-01 22:01:00.560 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=5461f0a7, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [193 ms]
+2026-09-01 22:02:48.095 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=38c4ebad, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:02:48.095 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3501c858, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:02:48.108 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d5dfc430, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/14 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:02:48.110 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=38c4ebad, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [15 ms]
+2026-09-01 22:02:48.123 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=d5dfc430, user=N/A] - HTTP Request Completed: GET /api/analytics/user/14 -> Status 200 [15 ms]
+2026-09-01 22:02:48.136 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=3501c858, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [41 ms]
+2026-09-01 22:03:15.442 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fc37f987, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:03:15.445 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=fc37f987, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 22:04:35.638 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5738f83e, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:35.643 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=5738f83e, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
+2026-09-01 22:04:45.462 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9118769e, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:45.465 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=9118769e, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 22:04:48.173 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=20da8bc1, user=N/A] - HTTP Incoming Request: GET /api/decisions/7 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:48.195 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=20da8bc1, user=N/A] - HTTP Request Completed: GET /api/decisions/7 -> Status 200 [22 ms]
+2026-09-01 22:04:48.233 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ae945b95, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:48.243 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ac9864ed, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/7/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:48.243 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6e6d91ed, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/7/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:48.252 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=6e6d91ed, user=N/A] - HTTP Request Completed: GET /api/votes/decision/7/me -> Status 200 [9 ms]
+2026-09-01 22:04:48.252 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=ae945b95, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [19 ms]
+2026-09-01 22:04:48.266 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=96531fb8, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/7 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:48.268 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=ac9864ed, user=N/A] - HTTP Request Completed: GET /api/votes/decision/7/results -> Status 200 [25 ms]
+2026-09-01 22:04:48.274 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=96531fb8, user=N/A] - HTTP Request Completed: GET /api/comments/decision/7 -> Status 200 [8 ms]
+2026-09-01 22:04:50.526 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=85ef8adf, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:50.526 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=127aa435, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:50.526 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5188aa75, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/14 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:50.535 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=127aa435, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [9 ms]
+2026-09-01 22:04:50.535 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=5188aa75, user=N/A] - HTTP Request Completed: GET /api/analytics/user/14 -> Status 200 [9 ms]
+2026-09-01 22:04:50.554 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=85ef8adf, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [28 ms]
+2026-09-01 22:04:53.021 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cd27f1a3, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:53.032 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=cd27f1a3, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [11 ms]
+2026-09-01 22:04:53.053 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=15bd64ae, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:53.053 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6d1ca713, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:53.053 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=26e8ae6e, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:53.053 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=da5d0a43, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:04:53.071 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=26e8ae6e, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [18 ms]
+2026-09-01 22:04:53.076 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=6d1ca713, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [23 ms]
+2026-09-01 22:04:53.079 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=da5d0a43, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [26 ms]
+2026-09-01 22:04:53.080 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=15bd64ae, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [27 ms]
+2026-09-01 22:05:00.003 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...
+2026-09-01 22:05:00.481 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b69a9366, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:00.483 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=b69a9366, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:05:05.657 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5a7d8049, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:05.660 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=5a7d8049, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [3 ms]
+2026-09-01 22:05:08.095 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c4211f19, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:08.100 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=c4211f19, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [5 ms]
+2026-09-01 22:05:08.214 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2a01e4f2, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:08.214 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f296f772, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:08.214 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=586a2938, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:08.217 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=dff64045, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:08.254 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=f296f772, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [40 ms]
+2026-09-01 22:05:08.257 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=dff64045, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [40 ms]
+2026-09-01 22:05:08.264 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=586a2938, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [50 ms]
+2026-09-01 22:05:08.290 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=2a01e4f2, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [76 ms]
+2026-09-01 22:05:09.541 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=46abdcbf, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:09.541 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b7a1848e, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/7/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:09.541 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c5a3732c, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/7/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:09.541 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0ddf06c1, user=N/A] - HTTP Incoming Request: GET /api/decisions/7 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:09.541 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6658148f, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/7 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:09.546 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=6658148f, user=N/A] - HTTP Request Completed: GET /api/comments/decision/7 -> Status 200 [5 ms]
+2026-09-01 22:05:09.546 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=b7a1848e, user=N/A] - HTTP Request Completed: GET /api/votes/decision/7/me -> Status 200 [5 ms]
+2026-09-01 22:05:09.550 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=46abdcbf, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [9 ms]
+2026-09-01 22:05:09.553 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=c5a3732c, user=N/A] - HTTP Request Completed: GET /api/votes/decision/7/results -> Status 200 [12 ms]
+2026-09-01 22:05:09.569 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=0ddf06c1, user=N/A] - HTTP Request Completed: GET /api/decisions/7 -> Status 200 [28 ms]
+2026-09-01 22:05:15.503 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7a4a6dc5, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:15.505 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=7a4a6dc5, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:05:24.572 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f3bc55fb, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/7/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:24.578 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=f3bc55fb, user=N/A] - HTTP Request Completed: GET /api/votes/decision/7/results -> Status 200 [6 ms]
+2026-09-01 22:05:30.528 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=dae6c409, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:30.533 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=dae6c409, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [5 ms]
+2026-09-01 22:05:35.672 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=005fcd49, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:35.676 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=005fcd49, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
+2026-09-01 22:05:35.792 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=64830b4a, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:35.792 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4a4f4d5c, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:35.792 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fb08e058, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:35.792 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=c0fa0b78, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:35.828 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=4a4f4d5c, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [36 ms]
+2026-09-01 22:05:35.828 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=64830b4a, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [36 ms]
+2026-09-01 22:05:35.828 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=c0fa0b78, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [36 ms]
+2026-09-01 22:05:35.834 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=fb08e058, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [42 ms]
+2026-09-01 22:05:36.973 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=40344c19, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:36.992 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=40344c19, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [19 ms]
+2026-09-01 22:05:38.614 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4763215f, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:38.619 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=4763215f, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [5 ms]
+2026-09-01 22:05:45.543 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=90697cc8, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:45.544 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=90697cc8, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [1 ms]
+2026-09-01 22:05:55.921 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=abfd2569, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:55.921 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a326023f, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:55.921 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6f308cc5, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:55.921 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2ac37232, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:05:55.947 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=2ac37232, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [26 ms]
+2026-09-01 22:05:55.947 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=abfd2569, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [26 ms]
+2026-09-01 22:05:55.947 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=a326023f, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [26 ms]
+2026-09-01 22:05:55.955 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=6f308cc5, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [34 ms]
+2026-09-01 22:06:00.557 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=1be42ead, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:00.559 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=1be42ead, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:06:02.301 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7ab20636, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:02.301 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=42e68bf2, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/17/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:02.301 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=38eb697a, user=N/A] - HTTP Incoming Request: GET /api/decisions/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:02.301 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e2f41daf, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/17 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:02.301 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fde9dc24, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:02.306 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=fde9dc24, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [5 ms]
+2026-09-01 22:06:02.312 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=e2f41daf, user=N/A] - HTTP Request Completed: GET /api/comments/decision/17 -> Status 200 [11 ms]
+2026-09-01 22:06:02.312 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=7ab20636, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/results -> Status 200 [11 ms]
+2026-09-01 22:06:02.312 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=42e68bf2, user=N/A] - HTTP Request Completed: GET /api/votes/decision/17/me -> Status 200 [11 ms]
+2026-09-01 22:06:02.319 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=38eb697a, user=N/A] - HTTP Request Completed: GET /api/decisions/17 -> Status 200 [18 ms]
+2026-09-01 22:06:05.695 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6ac963d1, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:05.698 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=6ac963d1, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [3 ms]
+2026-09-01 22:06:07.438 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=39b4939c, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:07.438 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ef0fb20d, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:07.438 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=05a947be, user=N/A] - HTTP Incoming Request: GET /api/decisions/popular from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:07.438 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6f0ab8a5, user=N/A] - HTTP Incoming Request: GET /api/decisions/trending from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:07.460 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=6f0ab8a5, user=N/A] - HTTP Request Completed: GET /api/decisions/trending -> Status 200 [22 ms]
+2026-09-01 22:06:07.460 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=ef0fb20d, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [22 ms]
+2026-09-01 22:06:07.460 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=05a947be, user=N/A] - HTTP Request Completed: GET /api/decisions/popular -> Status 200 [22 ms]
+2026-09-01 22:06:07.466 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=39b4939c, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [28 ms]
+2026-09-01 22:06:09.365 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=00c842fa, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:09.370 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=00c842fa, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [5 ms]
+2026-09-01 22:06:15.575 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=67cebe6b, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:15.577 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=67cebe6b, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:06:30.595 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=52e55dda, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:30.597 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=52e55dda, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:06:33.509 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=0d693ea6, user=N/A] - HTTP Incoming Request: POST /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.561 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=0d693ea6, user=N/A] - HTTP Request Completed: POST /api/decisions -> Status 201 [52 ms]
+2026-09-01 22:06:33.608 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=e3c2af48, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.619 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=e3c2af48, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [11 ms]
+2026-09-01 22:06:33.642 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7778dec0, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.645 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=7778dec0, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [3 ms]
+2026-09-01 22:06:33.647 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=d7a2a36a, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.647 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ef7af394, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.647 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=26f08815, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:33.651 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=26f08815, user=N/A] - HTTP Request Completed: GET /api/comments/decision/19 -> Status 200 [4 ms]
+2026-09-01 22:06:33.651 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=ef7af394, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [4 ms]
+2026-09-01 22:06:33.656 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=d7a2a36a, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/results -> Status 200 [9 ms]
+2026-09-01 22:06:35.716 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=69e94ae6, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:35.720 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=69e94ae6, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [4 ms]
+2026-09-01 22:06:37.731 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=39726c01, user=N/A] - HTTP Incoming Request: POST /api/votes from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.752 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=39726c01, user=N/A] - HTTP Request Completed: POST /api/votes -> Status 201 [21 ms]
+2026-09-01 22:06:37.765 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3dca29a7, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.765 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=63a8a6fe, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.765 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f4e06067, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.765 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=86da5e6d, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.765 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=066c69a7, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.769 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=63a8a6fe, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [4 ms]
+2026-09-01 22:06:37.770 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=3dca29a7, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
+2026-09-01 22:06:37.771 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=066c69a7, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [6 ms]
+2026-09-01 22:06:37.775 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=86da5e6d, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/results -> Status 200 [10 ms]
+2026-09-01 22:06:37.782 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7f32a3d2, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.782 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=f4e06067, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [17 ms]
+2026-09-01 22:06:37.790 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=862d9c99, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:37.790 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=7f32a3d2, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [8 ms]
+2026-09-01 22:06:37.804 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=862d9c99, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [14 ms]
+2026-09-01 22:06:45.616 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a961961b, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:45.618 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=a961961b, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:06:49.966 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=8f21acec, user=N/A] - HTTP Incoming Request: POST /api/auth/logout from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:49.968 [http-nio-8080-exec-9] INFO  c.d.service.impl.AuthServiceImpl [reqId=8f21acec, user=N/A] - Token has been blacklisted for logout.
+2026-09-01 22:06:49.971 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=8f21acec, user=N/A] - HTTP Request Completed: POST /api/auth/logout -> Status 200 [5 ms]
+2026-09-01 22:06:53.722 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2ae4278b, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.248 [http-nio-8080-exec-6] WARN  c.d.interceptor.LoggingInterceptor [reqId=2ae4278b, user=N/A] - SLOW API ALERT: POST /api/auth/login returned 200 in 526 ms
+2026-09-01 22:06:54.285 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5b7eeb6e, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.285 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=f6b684e9, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.285 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5b1b0756, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.285 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3fdf5004, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.285 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9591e153, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.285 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=11e88482, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.288 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=3fdf5004, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [3 ms]
+2026-09-01 22:06:54.288 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=5b7eeb6e, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 22:06:54.288 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=11e88482, user=N/A] - HTTP Request Completed: GET /api/comments/decision/19 -> Status 200 [3 ms]
+2026-09-01 22:06:54.288 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=9591e153, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [3 ms]
+2026-09-01 22:06:54.297 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=5b1b0756, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [11 ms]
+2026-09-01 22:06:54.298 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=f6b684e9, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/results -> Status 200 [13 ms]
+2026-09-01 22:06:54.302 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=adbb35dc, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:54.310 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=adbb35dc, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [8 ms]
+2026-09-01 22:06:58.898 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=94b642f6, user=N/A] - HTTP Incoming Request: POST /api/votes from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.912 [http-nio-8080-exec-10] INFO  c.d.s.impl.NotificationServiceImpl [reqId=94b642f6, user=N/A] - Dispatched notification to user ID 14: [VOTE] New Vote on Ananymos test
+2026-09-01 22:06:58.915 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=94b642f6, user=N/A] - HTTP Request Completed: POST /api/votes -> Status 201 [17 ms]
+2026-09-01 22:06:58.926 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=833f9c14, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.926 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=fdcf35ba, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.926 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=4a06370a, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.926 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=cb80df89, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.926 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=2fe6a0a6, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.930 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=cb80df89, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [4 ms]
+2026-09-01 22:06:58.931 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=2fe6a0a6, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
+2026-09-01 22:06:58.933 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=fdcf35ba, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [7 ms]
+2026-09-01 22:06:58.936 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=4a06370a, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/results -> Status 200 [10 ms]
+2026-09-01 22:06:58.940 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=833f9c14, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [14 ms]
+2026-09-01 22:06:58.943 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6f58444e, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.948 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=111bdb39, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:06:58.950 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=6f58444e, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [7 ms]
+2026-09-01 22:06:58.962 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=111bdb39, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [14 ms]
+2026-09-01 22:07:07.037 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9a43faa2, user=N/A] - HTTP Incoming Request: GET /api/votes/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:07.037 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=9d212b15, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:07.037 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=02c8d7e6, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:07.042 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=02c8d7e6, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [5 ms]
+2026-09-01 22:07:07.058 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=9d212b15, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [21 ms]
+2026-09-01 22:07:07.063 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=9a43faa2, user=N/A] - HTTP Request Completed: GET /api/votes/my -> Status 200 [26 ms]
+2026-09-01 22:07:09.305 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=33c6dcc4, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:09.308 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=33c6dcc4, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [3 ms]
+2026-09-01 22:07:11.801 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6923d14d, user=N/A] - HTTP Incoming Request: POST /api/auth/logout from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:11.803 [http-nio-8080-exec-3] INFO  c.d.service.impl.AuthServiceImpl [reqId=6923d14d, user=N/A] - Token has been blacklisted for logout.
+2026-09-01 22:07:11.805 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=6923d14d, user=N/A] - HTTP Request Completed: POST /api/auth/logout -> Status 200 [4 ms]
+2026-09-01 22:07:15.070 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6f934c9d, user=N/A] - HTTP Incoming Request: POST /api/auth/login from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:15.317 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=6f934c9d, user=N/A] - HTTP Request Completed: POST /api/auth/login -> Status 200 [247 ms]
+2026-09-01 22:07:15.359 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=6fa8d8cc, user=N/A] - HTTP Incoming Request: GET /api/votes/my from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:15.359 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=617855ec, user=N/A] - HTTP Incoming Request: GET /api/notifications from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:15.359 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5ae9b952, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:15.363 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=5ae9b952, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [4 ms]
+2026-09-01 22:07:15.365 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=580a003b, user=N/A] - HTTP Incoming Request: GET /api/decisions from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:15.366 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=617855ec, user=N/A] - HTTP Request Completed: GET /api/notifications -> Status 200 [7 ms]
+2026-09-01 22:07:15.374 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=6fa8d8cc, user=N/A] - HTTP Request Completed: GET /api/votes/my -> Status 200 [15 ms]
+2026-09-01 22:07:15.383 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=580a003b, user=N/A] - HTTP Request Completed: GET /api/decisions -> Status 200 [18 ms]
+2026-09-01 22:07:24.381 [http-nio-8080-exec-4] DEBUG c.d.interceptor.LoggingInterceptor [reqId=174ac39e, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:24.381 [http-nio-8080-exec-1] DEBUG c.d.interceptor.LoggingInterceptor [reqId=ce2d041d, user=N/A] - HTTP Incoming Request: GET /api/decisions/latest from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:24.381 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=7b813df3, user=N/A] - HTTP Incoming Request: GET /api/analytics/user/14 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:24.387 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=7b813df3, user=N/A] - HTTP Request Completed: GET /api/analytics/user/14 -> Status 200 [6 ms]
+2026-09-01 22:07:24.387 [http-nio-8080-exec-4] INFO  c.d.interceptor.LoggingInterceptor [reqId=174ac39e, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [6 ms]
+2026-09-01 22:07:24.407 [http-nio-8080-exec-1] INFO  c.d.interceptor.LoggingInterceptor [reqId=ce2d041d, user=N/A] - HTTP Request Completed: GET /api/decisions/latest -> Status 200 [26 ms]
+2026-09-01 22:07:26.097 [http-nio-8080-exec-8] DEBUG c.d.interceptor.LoggingInterceptor [reqId=b426d3f6, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:26.097 [http-nio-8080-exec-6] DEBUG c.d.interceptor.LoggingInterceptor [reqId=babe9c0e, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/me from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:26.097 [http-nio-8080-exec-9] DEBUG c.d.interceptor.LoggingInterceptor [reqId=3815ca9c, user=N/A] - HTTP Incoming Request: GET /api/comments/decision/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:26.097 [http-nio-8080-exec-5] DEBUG c.d.interceptor.LoggingInterceptor [reqId=a20d272f, user=N/A] - HTTP Incoming Request: GET /api/votes/decision/19/results from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:26.097 [http-nio-8080-exec-3] DEBUG c.d.interceptor.LoggingInterceptor [reqId=929c2fcd, user=N/A] - HTTP Incoming Request: GET /api/users/me/saved from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:26.101 [http-nio-8080-exec-9] INFO  c.d.interceptor.LoggingInterceptor [reqId=3815ca9c, user=N/A] - HTTP Request Completed: GET /api/comments/decision/19 -> Status 200 [4 ms]
+2026-09-01 22:07:26.101 [http-nio-8080-exec-3] INFO  c.d.interceptor.LoggingInterceptor [reqId=929c2fcd, user=N/A] - HTTP Request Completed: GET /api/users/me/saved -> Status 200 [4 ms]
+2026-09-01 22:07:26.104 [http-nio-8080-exec-6] INFO  c.d.interceptor.LoggingInterceptor [reqId=babe9c0e, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/me -> Status 200 [7 ms]
+2026-09-01 22:07:26.108 [http-nio-8080-exec-5] INFO  c.d.interceptor.LoggingInterceptor [reqId=a20d272f, user=N/A] - HTTP Request Completed: GET /api/votes/decision/19/results -> Status 200 [11 ms]
+2026-09-01 22:07:26.111 [http-nio-8080-exec-8] INFO  c.d.interceptor.LoggingInterceptor [reqId=b426d3f6, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [14 ms]
+2026-09-01 22:07:28.639 [http-nio-8080-exec-2] DEBUG c.d.interceptor.LoggingInterceptor [reqId=af639165, user=N/A] - HTTP Incoming Request: GET /api/decisions/19 from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:28.640 [http-nio-8080-exec-7] DEBUG c.d.interceptor.LoggingInterceptor [reqId=39a6c8fb, user=N/A] - HTTP Incoming Request: GET /api/communities from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:28.649 [http-nio-8080-exec-7] INFO  c.d.interceptor.LoggingInterceptor [reqId=39a6c8fb, user=N/A] - HTTP Request Completed: GET /api/communities -> Status 200 [9 ms]
+2026-09-01 22:07:28.652 [http-nio-8080-exec-2] INFO  c.d.interceptor.LoggingInterceptor [reqId=af639165, user=N/A] - HTTP Request Completed: GET /api/decisions/19 -> Status 200 [13 ms]
+2026-09-01 22:07:30.386 [http-nio-8080-exec-10] DEBUG c.d.interceptor.LoggingInterceptor [reqId=5caa9fc8, user=N/A] - HTTP Incoming Request: GET /api/notifications/unread-count from IP 0:0:0:0:0:0:0:1
+2026-09-01 22:07:30.388 [http-nio-8080-exec-10] INFO  c.d.interceptor.LoggingInterceptor [reqId=5caa9fc8, user=N/A] - HTTP Request Completed: GET /api/notifications/unread-count -> Status 200 [2 ms]
+2026-09-01 22:10:00.008 [scheduling-1] INFO  c.d.scheduler.DecisionScheduler [reqId=N/A, user=N/A] - Running DecisionScheduler: checking for expired active decision boards...

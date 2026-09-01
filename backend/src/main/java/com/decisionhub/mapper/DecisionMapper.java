@@ -15,7 +15,7 @@ import org.mapstruct.Mapping;
 public interface DecisionMapper {
 
     @Mapping(target = "createdBy", source = "createdBy")
-    @Mapping(target = "community", source = "community")
+    @Mapping(target = "community", expression = "java(safeCommunity(decision.getCommunity()))")
     @Mapping(target = "options", source = "options")
     @Mapping(target = "totalVotes", ignore = true)
     @Mapping(target = "attachments", ignore = true)
@@ -30,4 +30,22 @@ public interface DecisionMapper {
     @Mapping(target = "shareCount", ignore = true)
     @Mapping(target = "options", ignore = true)
     Decision toEntity(DecisionRequest request);
+
+    default com.decisionhub.dto.response.CommunityResponse safeCommunity(com.decisionhub.entity.Community community) {
+        if (community == null) return null;
+        try {
+            return com.decisionhub.dto.response.CommunityResponse.builder()
+                    .communityId(community.getCommunityId())
+                    .name(community.getName())
+                    .description(community.getDescription())
+                    .visibility(community.getVisibility())
+                    .image(community.getImage())
+                    .createdAt(community.getCreatedAt())
+                    .build();
+        } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

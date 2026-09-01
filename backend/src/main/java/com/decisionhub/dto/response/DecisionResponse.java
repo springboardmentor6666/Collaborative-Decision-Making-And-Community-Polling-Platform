@@ -34,6 +34,7 @@ public class DecisionResponse {
     private int likeCount;
     private int shareCount;
     private long totalVotes;
+    private long commentCount;
     private List<OptionResponse> options;
     private List<AttachmentResponse> attachments;
     private LocalDateTime createdAt;

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -25,5 +26,17 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     boolean existsByEmail(String email);
 
+    boolean existsByUsernameIgnoreCase(String username);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM app_user WHERE LOWER(email) = LOWER(:email)", nativeQuery = true)
+    boolean existsByEmailIncludingDeleted(@Param("email") String email);
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM app_user WHERE LOWER(username) = LOWER(:username)", nativeQuery = true)
+    boolean existsByUsernameIncludingDeleted(@Param("username") String username);
+
     Page<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String fullName, String username, Pageable pageable);
+
+    long countByCreatedAtAfter(LocalDateTime date);
 }

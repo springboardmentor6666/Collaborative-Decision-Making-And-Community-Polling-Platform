@@ -110,6 +110,27 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Malformed JSON", "Required request body is missing or unparseable.", request.getRequestURI(), null);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+        log.error("Database data integrity violation: {}", ex.getMessage());
+        String mostSpecific = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        String friendlyMessage = "A database conflict occurred.";
+
+        if (mostSpecific != null) {
+            String lower = mostSpecific.toLowerCase();
+            if (lower.contains("app_user_email") || (lower.contains("email") && lower.contains("key"))) {
+                friendlyMessage = "An account with this email address already exists. Please sign in or use a different email.";
+            } else if (lower.contains("app_user_username") || (lower.contains("username") && lower.contains("key"))) {
+                friendlyMessage = "This username is already taken. Please choose another username.";
+            } else if (lower.contains("unique") || lower.contains("duplicate key")) {
+                friendlyMessage = "A record with this information already exists.";
+            }
+        }
+
+        return buildErrorResponse(HttpStatus.CONFLICT, "Conflict", friendlyMessage, request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiErrorResponse> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
         log.error("HTTP method not supported: {}", ex.getMessage());
@@ -119,7 +140,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGlobalException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled internal server error: ", ex);
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "An unexpected error occurred. Please contact support.", request.getRequestURI(), null);
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "An unexpected server error occurred. Please try again later.", request.getRequestURI(), null);
     }
 
     private ResponseEntity<ApiErrorResponse> buildErrorResponse(

@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { useCommunityMutations } from "../hooks/useCommunityMutations";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { CommunityMemberResponse, CommunityVisibility } from "../types/community";
 
@@ -9,11 +10,12 @@ interface JoinButtonProps {
   communityId: number;
   membership: CommunityMemberResponse | null;
   communityVisibility?: CommunityVisibility;
+  isOwner?: boolean;
   variant?: "default" | "outline" | "secondary";
   className?: string;
 }
 
-export function JoinButton({ communityId, membership, communityVisibility, variant = "outline", className }: JoinButtonProps) {
+export function JoinButton({ communityId, membership, communityVisibility, isOwner, variant = "outline", className }: JoinButtonProps) {
   const { joinCommunity, leaveCommunity } = useCommunityMutations();
 
   const isPendingAPI = joinCommunity.isPending || leaveCommunity.isPending;
@@ -22,6 +24,10 @@ export function JoinButton({ communityId, membership, communityVisibility, varia
   const isRejected = membership?.status === "REJECTED";
 
   const handleToggleJoin = () => {
+    if (isOwner) {
+      toast.error("As the community owner, you cannot leave. You can only delete the community.");
+      return;
+    }
     if (isMember) {
       leaveCommunity.mutate(communityId);
     } else if (!isPendingApproval && !isRejected) {

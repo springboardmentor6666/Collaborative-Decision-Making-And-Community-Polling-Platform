@@ -101,7 +101,7 @@ export default function CommunityDetails() {
         <TabsContent value="elections" className="mt-0">
           <div className="mb-4 flex justify-between items-center">
             <h2 className="text-xl font-bold text-slate-900">Voting Arenas</h2>
-            {membership?.role === "MODERATOR" || membership?.role === "OWNER" ? (
+            {membership?.memberRole === "MODERATOR" || membership?.memberRole === "OWNER" ? (
               <Button asChild variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                 <Link to={`/communities/${communityId}/admin`}>
                   Manage Voting Arenas
