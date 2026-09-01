@@ -1,2700 +1,329 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
+import {
+  Activity,
+  BarChart3,
+  CheckCircle2,
+  ChevronUp,
+  Clock3,
+  Eye,
+  FileText,
+  MessageCircle,
+  RefreshCw,
+  Shield,
+  Trophy,
+  Users,
+  Vote,
+  Zap,
+} from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+const API = "http://localhost:8080";
+
+const COLORS = ["#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b", "#ec4899", "#6366f1"];
+
+const EMPTY_DATA = {
+  summary: {
+    totalDecisions: 0,
+    activeDecisions: 0,
+    completedDecisions: 0,
+    publicDecisions: 0,
+    privateDecisions: 0,
+    anonymousDecisions: 0,
+    votesCast: 0,
+    votesReceived: 0,
+    commentsWritten: 0,
+    commentsReceived: 0,
+  },
+  trend: [],
+  distribution: [],
+  categories: [],
+  options: [],
+  communities: [],
+  topDecisions: [],
+  recentDecisions: [],
+};
 
 function AnalyticsPage() {
-  const [decisions, setDecisions] = useState([]);
+  const [data, setData] = useState(EMPTY_DATA);
+  const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  /* =========================================================
-     FETCH DECISIONS
-  ========================================================= */
+  const fetchAnalytics = async (showRefresh = false) => {
+    const token = sessionStorage.getItem("token");
 
-  const fetchDecisions = async () => {
+    if (!token) {
+      setError("Please login to view analytics.");
+      setLoading(false);
+      return;
+    }
+
+    showRefresh ? setRefreshing(true) : setLoading(true);
+    setError("");
+
     try {
-      const token = sessionStorage.getItem("token");
+      const response = await fetch(`${API}/api/user/analytics?days=${days}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      if (!token) {
-        setError("Please login to view analytics.");
-        setLoading(false);
-        return;
-      }
+      if (!response.ok) throw new Error(`Analytics request failed: ${response.status}`);
 
-      const response = await fetch(
-          "http://localhost:8080/api/decisions/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch decisions");
-      }
-
-      const data = await response.json();
-
-      setDecisions(Array.isArray(data) ? data : []);
+      const result = await response.json();
+      setData({ ...EMPTY_DATA, ...result, summary: { ...EMPTY_DATA.summary, ...(result.summary || {}) } });
     } catch (err) {
       console.error(err);
-      setError("Unable to load analytics.");
-      setDecisions([]);
+      setError("Unable to load analytics. Please check whether the backend is running.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    const request = setTimeout(() => fetchDecisions(), 0);
-    return () => clearTimeout(request);
-  }, []);
+    fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days]);
 
-  /* =========================================================
-     DECISION STATUS
-  ========================================================= */
+  const summary = data.summary || EMPTY_DATA.summary;
+  const total = Number(summary.totalDecisions || 0);
+  const active = Number(summary.activeDecisions || 0);
+  const completed = Number(summary.completedDecisions || 0);
+  const votesReceived = Number(summary.votesReceived || 0);
+  const commentsReceived = Number(summary.commentsReceived || 0);
 
-  const getDecisionStatus = (deadline) => {
-    if (!deadline) {
-      return {
-        label: "ACTIVE",
-        icon: "🟢",
-        className: "status-active",
-      };
-    }
+  const participationScore = useMemo(() => {
+    if (!total) return 0;
+    return Math.round(votesReceived / total);
+  }, [total, votesReceived]);
 
-    const deadlineDate = new Date(deadline);
-    const now = new Date();
+  const completionRate = total ? Math.round((completed / total) * 100) : 0;
+  const publicRate = total ? Math.round((Number(summary.publicDecisions || 0) / total) * 100) : 0;
 
-    if (isNaN(deadlineDate.getTime())) {
-      return {
-        label: "ACTIVE",
-        icon: "🟢",
-        className: "status-active",
-      };
-    }
+  const trend = (data.trend || []).map((item) => ({
+    ...item,
+    label: formatDate(item.date),
+    decisions: Number(item.decisions || 0),
+  }));
 
-    /* EXPIRED */
+  const categoryData = (data.categories || []).slice(0, 6).map((item) => ({
+    name: item.category || "Uncategorized",
+    value: Number(item.decisions || 0),
+  }));
 
-    if (deadlineDate <= now) {
-      return {
-        label: "EXPIRED",
-        icon: "🔴",
-        className: "status-expired",
-      };
-    }
+  const distributionData = (data.distribution || []).map((item) => ({
+    name: item.name,
+    value: Number(item.value || 0),
+  }));
 
-    /* ENDING SOON - within 24 hours */
-
-    const remainingTime =
-        deadlineDate.getTime() - now.getTime();
-
-    const twentyFourHours =
-        24 * 60 * 60 * 1000;
-
-    if (remainingTime <= twentyFourHours) {
-      return {
-        label: "ENDING SOON",
-        icon: "🟠",
-        className: "status-ending",
-      };
-    }
-
-    /* ACTIVE */
-
-    return {
-      label: "ACTIVE",
-      icon: "🟢",
-      className: "status-active",
-    };
-  };
-
-  /* =========================================================
-     ANALYTICS
-  ========================================================= */
-
-  const analytics = useMemo(() => {
-    const total = decisions.length;
-
-    const active = decisions.filter((decision) => {
-      if (!decision.deadline) {
-        return true;
-      }
-
-      const deadline = new Date(decision.deadline);
-
-      return deadline >= new Date();
-    }).length;
-
-    const completed = total - active;
-
-    const publicCount = decisions.filter(
-        (decision) =>
-            decision.visibility === "PUBLIC"
-    ).length;
-
-    const privateCount = decisions.filter(
-        (decision) =>
-            decision.visibility === "PRIVATE"
-    ).length;
-
-    const anonymousCount = decisions.filter(
-        (decision) =>
-            decision.anonymous === true
-    ).length;
-
-    /* =========================
-       CATEGORY
-    ========================= */
-
-    const categoryMap = {};
-
-    decisions.forEach((decision) => {
-      const category =
-          decision.category || "Uncategorized";
-
-      categoryMap[category] =
-          (categoryMap[category] || 0) + 1;
-    });
-
-    const categories = Object.entries(categoryMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6);
-
-    /* =========================
-       MONTHLY TREND
-    ========================= */
-
-    const monthMap = {};
-
-    decisions.forEach((decision) => {
-      const rawDate =
-          decision.createdAt ||
-          decision.createdDate ||
-          decision.date;
-
-      if (!rawDate) return;
-
-      const date = new Date(rawDate);
-
-      if (isNaN(date.getTime())) return;
-
-      const key =
-          `${date.getFullYear()}-${String(
-              date.getMonth() + 1
-          ).padStart(2, "0")}`;
-
-      if (!monthMap[key]) {
-        monthMap[key] = {
-          date: new Date(
-              date.getFullYear(),
-              date.getMonth(),
-              1
-          ),
-          count: 0,
-        };
-      }
-
-      monthMap[key].count++;
-    });
-
-    const trend = Object.values(monthMap)
-        .sort((a, b) => a.date - b.date)
-        .slice(-8)
-        .map((item) => ({
-          month: item.date.toLocaleString(
-              "default",
-              {
-                month: "short",
-              }
-          ),
-          count: item.count,
-        }));
-
-    /* =========================
-       OPTIONS
-    ========================= */
-
-    const optionMap = {};
-    let totalOptions = 0;
-
-    decisions.forEach((decision) => {
-      if (!Array.isArray(decision.options)) {
-        return;
-      }
-
-      decision.options.forEach((option) => {
-        totalOptions++;
-
-        const name =
-            typeof option === "string"
-                ? option
-                : option?.optionText ||
-                option?.text ||
-                option?.name ||
-                option?.label ||
-                "Option";
-
-        optionMap[name] =
-            (optionMap[name] || 0) + 1;
-      });
-    });
-
-    const options = Object.entries(optionMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    /* =========================
-       PERCENTAGES
-    ========================= */
-
-    const publicPercentage =
-        total > 0
-            ? Math.round(
-                (publicCount / total) * 100
-            )
-            : 0;
-
-    const privatePercentage =
-        total > 0
-            ? Math.round(
-                (privateCount / total) * 100
-            )
-            : 0;
-
-    const activePercentage =
-        total > 0
-            ? Math.round(
-                (active / total) * 100
-            )
-            : 0;
-
-    const completedPercentage =
-        total > 0
-            ? Math.round(
-                (completed / total) * 100
-            )
-            : 0;
-
-    return {
-      total,
-      active,
-      completed,
-      publicCount,
-      privateCount,
-      anonymousCount,
-      categories,
-      trend,
-      options,
-      totalOptions,
-      publicPercentage,
-      privatePercentage,
-      activePercentage,
-      completedPercentage,
-    };
-  }, [decisions]);
-
-  const maxCategory = Math.max(
-      1,
-      ...analytics.categories.map(
-          ([, count]) => count
-      )
-  );
-
-  const maxOption = Math.max(
-      1,
-      ...analytics.options.map(
-          ([, count]) => count
-      )
-  );
-
-  const maxTrend = Math.max(
-      1,
-      ...analytics.trend.map(
-          (item) => item.count
-      )
-  );
-
-  const recentDecisions = [...decisions]
-      .sort((first, second) => {
-        const firstDate = new Date(first.createdAt || 0).getTime();
-        const secondDate = new Date(second.createdAt || 0).getTime();
-        return secondDate - firstDate;
-      })
-      .slice(0, 5);
-
-  /* =========================================================
-     LOADING
-  ========================================================= */
+  const topDecisions = (data.topDecisions || []).slice(0, 5);
+  const maxEngagement = Math.max(1, ...topDecisions.map((item) => Number(item.engagement || 0)));
 
   if (loading) {
     return (
-        <DashboardLayout
-            pageTitle="Analytics"
-            pageSubtitle="Understand your decision activity."
-        >
-          <style>{`
-
-          .analytics-loading {
-            min-height: 500px;
-
-            display: flex;
-            flex-direction: column;
-
-            align-items: center;
-            justify-content: center;
-
-            color: var(--app-muted);
-          }
-
-          .loading-orbit {
-            width: 55px;
-            height: 55px;
-
-            border-radius: 50%;
-
-            border: 2px solid var(--app-border);
-
-            border-top-color: #8b5cf6;
-            border-right-color: #a78bfa;
-
-            animation:
-              analyticsSpin
-              1s linear infinite;
-
-            box-shadow:
-              0 0 25px
-              rgba(139, 92, 246, .25);
-
-            margin-bottom: 18px;
-          }
-
-          .loading-text {
-            font-size: 12px;
-            letter-spacing: .8px;
-          }
-
-          @keyframes analyticsSpin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-
-        `}</style>
-
-          <div className="analytics-loading">
-            <div className="loading-orbit"></div>
-
-            <div className="loading-text">
-              ANALYZING YOUR DECISIONS...
-            </div>
-          </div>
+        <DashboardLayout pageTitle="Analytics" pageSubtitle="Understand your decisions and activity at a glance.">
+          <div className="analytics-loading"><div className="loader" /><span>ANALYZING YOUR DECISIONS...</span></div>
+          <AnalyticsStyles />
         </DashboardLayout>
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
-
   return (
-      <DashboardLayout
-          pageTitle="Analytics"
-          pageSubtitle="Understand your decisions and activity at a glance."
-      >
-        <style>{`
-
-        * {
-          box-sizing: border-box;
-        }
-
-        /* =====================================================
-           PAGE
-        ===================================================== */
-
-        .analytics-page {
-          width: 100%;
-          max-width: 1500px;
-
-          margin: 0 auto;
-
-          color: var(--app-text);
-
-          padding-bottom: 40px;
-        }
-
-        /* =====================================================
-           HERO
-        ===================================================== */
-
-        .analytics-hero {
-          position: relative;
-          overflow: hidden;
-
-          min-height: 190px;
-
-          padding: 30px;
-
-          margin-bottom: 20px;
-
-          border: 1px solid var(--app-border);
-          border-radius: 22px;
-
-          background:
-            radial-gradient(
-              circle at 85% 20%,
-              rgba(139, 92, 246, .22),
-              transparent 28%
-            ),
-            radial-gradient(
-              circle at 15% 90%,
-              rgba(59, 130, 246, .10),
-              transparent 25%
-            ),
-            var(--app-card);
-
-          box-shadow:
-            0 20px 60px rgba(0, 0, 0, .08);
-
-          transition:
-            background .25s ease,
-            border-color .25s ease;
-        }
-
-        .analytics-hero::before {
-          content: "";
-
-          position: absolute;
-
-          width: 300px;
-          height: 300px;
-
-          right: -110px;
-          top: -160px;
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .20);
-
-          border-radius: 50%;
-        }
-
-        .analytics-hero::after {
-          content: "";
-
-          position: absolute;
-
-          width: 220px;
-          height: 220px;
-
-          right: -45px;
-          top: -100px;
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .12);
-
-          border-radius: 50%;
-        }
-
-        .hero-content {
-          position: relative;
-          z-index: 2;
-        }
-
-        .hero-label {
-          display: inline-flex;
-
-          align-items: center;
-          gap: 8px;
-
-          padding: 7px 12px;
-
-          border-radius: 20px;
-
-          background:
-            rgba(139, 92, 246, .10);
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .25);
-
-          color: #8b5cf6;
-
-          font-size: 9px;
-          font-weight: 700;
-
-          letter-spacing: 1.5px;
-
-          text-transform: uppercase;
-
-          margin-bottom: 14px;
-        }
-
-        .hero-dot {
-          width: 6px;
-          height: 6px;
-
-          border-radius: 50%;
-
-          background: #8b5cf6;
-
-          box-shadow:
-            0 0 12px #8b5cf6;
-
-          animation:
-            heroPulse
-            1.8s infinite;
-        }
-
-        @keyframes heroPulse {
-
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-
-          50% {
-            opacity: .45;
-            transform: scale(.75);
-          }
-
-        }
-
-        .hero-title {
-          font-size:
-            clamp(25px, 3vw, 36px);
-
-          font-weight: 700;
-
-          letter-spacing: -1px;
-
-          margin-bottom: 8px;
-
-          color: var(--app-text);
-        }
-
-        .hero-text {
-          max-width: 620px;
-
-          color: var(--app-muted);
-
-          font-size: 13px;
-
-          line-height: 1.7;
-        }
-
-        .hero-status {
-          position: absolute;
-
-          right: 28px;
-          bottom: 25px;
-
-          display: flex;
-
-          align-items: center;
-
-          gap: 7px;
-
-          color: #10b981;
-
-          font-size: 9px;
-          font-weight: 700;
-
-          letter-spacing: 1px;
-        }
-
-        .hero-status-dot {
-          width: 6px;
-          height: 6px;
-
-          border-radius: 50%;
-
-          background: #10b981;
-
-          box-shadow:
-            0 0 12px #10b981;
-        }
-
-        /* =====================================================
-           ERROR
-        ===================================================== */
-
-        .analytics-error {
-          padding: 13px 16px;
-
-          margin-bottom: 18px;
-
-          border-radius: 11px;
-
-          background:
-            rgba(239, 68, 68, .08);
-
-          border:
-            1px solid
-            rgba(239, 68, 68, .28);
-
-          color: #dc2626;
-
-          font-size: 11px;
-        }
-
-        [data-theme="dark"]
-        .analytics-error {
-          color: #f87171;
-
-          background:
-            rgba(127, 29, 29, .15);
-        }
-
-        /* =====================================================
-           KPI
-        ===================================================== */
-
-        .kpi-grid {
-          display: grid;
-
-          grid-template-columns:
-            repeat(4, 1fr);
-
-          gap: 15px;
-
-          margin-bottom: 18px;
-        }
-
-        .kpi {
-          position: relative;
-          overflow: hidden;
-
-          min-height: 150px;
-
-          padding: 20px;
-
-          border:
-            1px solid
-            var(--app-border);
-
-          border-radius: 17px;
-
-          background: var(--app-card);
-
-          transition:
-            transform .25s ease,
-            border-color .25s ease,
-            box-shadow .25s ease;
-        }
-
-        .kpi:hover {
-          transform: translateY(-5px);
-
-          border-color:
-            rgba(139, 92, 246, .55);
-
-          box-shadow:
-            0 18px 40px
-            rgba(139, 92, 246, .10);
-        }
-
-        .kpi::before {
-          content: "";
-
-          position: absolute;
-
-          width: 120px;
-          height: 120px;
-
-          right: -60px;
-          top: -60px;
-
-          border-radius: 50%;
-
-          background:
-            rgba(139, 92, 246, .12);
-
-          filter: blur(20px);
-        }
-
-        .kpi::after {
-          content: "";
-
-          position: absolute;
-
-          left: 0;
-          bottom: 0;
-
-          width: 100%;
-          height: 2px;
-
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #8b5cf6,
-              transparent
-            );
-
-          opacity: .5;
-        }
-
-        .kpi-top {
-          position: relative;
-          z-index: 2;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            space-between;
-
-          margin-bottom: 20px;
-        }
-
-        .kpi-icon {
-          width: 40px;
-          height: 40px;
-
-          display: flex;
-
-          align-items: center;
-          justify-content: center;
-
-          border-radius: 11px;
-
-          background:
-            rgba(139, 92, 246, .10);
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .22);
-
-          font-size: 17px;
-
-          box-shadow:
-            inset 0 0 15px
-            rgba(139, 92, 246, .06);
-        }
-
-        .kpi-live {
-          display: flex;
-
-          align-items: center;
-
-          gap: 5px;
-
-          color: #10b981;
-
-          font-size: 8px;
-          font-weight: 700;
-
-          letter-spacing: .7px;
-        }
-
-        .live-dot {
-          width: 5px;
-          height: 5px;
-
-          border-radius: 50%;
-
-          background: #10b981;
-
-          box-shadow:
-            0 0 9px #10b981;
-        }
-
-        .kpi-number {
-          position: relative;
-          z-index: 2;
-
-          font-size: 30px;
-
-          font-weight: 750;
-
-          letter-spacing: -1px;
-
-          color: var(--app-text);
-
-          margin-bottom: 4px;
-        }
-
-        .kpi-label {
-          position: relative;
-          z-index: 2;
-
-          color: var(--app-muted);
-
-          font-size: 10px;
-
-          letter-spacing: .2px;
-        }
-
-        /* =====================================================
-           MAIN GRID
-        ===================================================== */
-
-        .analytics-grid {
-          display: grid;
-
-          grid-template-columns:
-            1.45fr 1fr;
-
-          gap: 18px;
-
-          margin-bottom: 18px;
-        }
-
-        .analytics-card {
-          min-width: 0;
-
-          padding: 22px;
-
-          border-radius: 17px;
-
-          border:
-            1px solid
-            var(--app-border);
-
-          background:
-            var(--app-card);
-
-          box-shadow:
-            0 10px 30px
-            rgba(0, 0, 0, .05);
-
-          transition:
-            background .25s ease,
-            border-color .25s ease,
-            transform .25s ease;
-        }
-
-        .analytics-card:hover {
-          border-color:
-            rgba(139, 92, 246, .25);
-        }
-
-        .card-header {
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            space-between;
-
-          gap: 12px;
-
-          margin-bottom: 22px;
-        }
-
-        .card-title {
-          color: var(--app-text);
-
-          font-size: 15px;
-
-          font-weight: 650;
-        }
-
-        .card-subtitle {
-          color: var(--app-muted);
-
-          font-size: 10px;
-
-          margin-top: 4px;
-        }
-
-        .card-badge {
-          flex-shrink: 0;
-
-          padding: 6px 10px;
-
-          border-radius: 7px;
-
-          background:
-            rgba(139, 92, 246, .09);
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .22);
-
-          color: #8b5cf6;
-
-          font-size: 8px;
-
-          font-weight: 700;
-
-          letter-spacing: .7px;
-        }
-
-        /* =====================================================
-           TREND CHART
-        ===================================================== */
-
-        .trend-chart {
-          position: relative;
-
-          height: 275px;
-
-          padding:
-            10px 4px 30px;
-        }
-
-        .chart-grid {
-          position: absolute;
-
-          left: 0;
-          right: 0;
-
-          top: 10px;
-          bottom: 38px;
-
-          display: flex;
-
-          flex-direction: column;
-
-          justify-content:
-            space-between;
-
-          pointer-events: none;
-        }
-
-        .chart-grid-line {
-          width: 100%;
-
-          border-top:
-            1px dashed
-            var(--app-border);
-
-          opacity: .7;
-        }
-
-        .trend-bars {
-          position: absolute;
-
-          left: 28px;
-          right: 0;
-
-          top: 10px;
-          bottom: 38px;
-
-          display: flex;
-
-          align-items: flex-end;
-
-          gap: 10px;
-        }
-
-        .trend-column {
-          flex: 1;
-
-          height: 100%;
-
-          display: flex;
-
-          flex-direction: column;
-
-          justify-content: flex-end;
-
-          align-items: center;
-
-          min-width: 0;
-        }
-
-        .trend-value {
-          color: var(--app-text);
-
-          font-size: 9px;
-
-          font-weight: 700;
-
-          margin-bottom: 7px;
-        }
-
-        .trend-bar-container {
-          width: 100%;
-
-          max-width: 42px;
-
-          height: 175px;
-
-          display: flex;
-
-          align-items: flex-end;
-
-          justify-content: center;
-        }
-
-        .trend-bar {
-          width: 100%;
-
-          min-height: 5px;
-
-          border-radius:
-            9px 9px 3px 3px;
-
-          background:
-            linear-gradient(
-              to top,
-              #5b21b6,
-              #8b5cf6,
-              #c4b5fd
-            );
-
-          box-shadow:
-            0 0 20px
-            rgba(139, 92, 246, .18);
-
-          animation:
-            barGrow .8s ease-out both;
-
-          transition:
-            filter .25s ease,
-            transform .25s ease;
-        }
-
-        .trend-bar:hover {
-          filter: brightness(1.25);
-
-          transform:
-            scaleX(1.08);
-        }
-
-        @keyframes barGrow {
-
-          from {
-            height: 0 !important;
-          }
-
-        }
-
-        .trend-month {
-          margin-top: 9px;
-
-          color: var(--app-muted);
-
-          font-size: 9px;
-        }
-
-        .trend-empty {
-          min-height: 220px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          text-align: center;
-
-          color: var(--app-muted);
-
-          font-size: 11px;
-        }
-
-        /* =====================================================
-           DONUT
-        ===================================================== */
-
-        .donut-layout {
-          min-height: 260px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          gap: 35px;
-        }
-
-        .donut {
-          position: relative;
-
-          width: 165px;
-          height: 165px;
-
-          flex-shrink: 0;
-
-          border-radius: 50%;
-
-          background:
-            conic-gradient(
-              #8b5cf6 0deg,
-              #8b5cf6 var(--public-angle),
-              #c4b5fd var(--public-angle),
-              #c4b5fd 360deg
-            );
-
-          box-shadow:
-            0 0 35px
-            rgba(139, 92, 246, .16);
-
-          animation:
-            donutAppear .8s ease-out;
-        }
-
-        .donut::before {
-          content: "";
-
-          position: absolute;
-
-          inset: -6px;
-
-          border-radius: 50%;
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .20);
-        }
-
-        .donut-inner {
-          position: absolute;
-
-          inset: 20px;
-
-          border-radius: 50%;
-
-          display: flex;
-
-          flex-direction: column;
-
-          align-items: center;
-
-          justify-content: center;
-
-          background:
-            var(--app-card);
-
-          border:
-            1px solid
-            var(--app-border);
-
-          box-shadow:
-            inset 0 0 25px
-            rgba(139, 92, 246, .05);
-        }
-
-        .donut-number {
-          color: var(--app-text);
-
-          font-size: 27px;
-
-          font-weight: 750;
-        }
-
-        .donut-label {
-          margin-top: 2px;
-
-          color: var(--app-muted);
-
-          font-size: 8px;
-
-          letter-spacing: 1px;
-        }
-
-        @keyframes donutAppear {
-
-          from {
-            opacity: 0;
-
-            transform:
-              scale(.7)
-              rotate(-90deg);
-          }
-
-          to {
-            opacity: 1;
-
-            transform:
-              scale(1)
-              rotate(0);
-          }
-
-        }
-
-        .legend {
-          display: flex;
-
-          flex-direction: column;
-
-          gap: 17px;
-        }
-
-        .legend-item {
-          display: grid;
-
-          grid-template-columns:
-            9px auto auto auto;
-
-          align-items: center;
-
-          gap: 8px;
-
-          color:
-            var(--app-secondary-text);
-
-          font-size: 10px;
-        }
-
-        .legend-item strong {
-          color: var(--app-text);
-
-          font-size: 12px;
-        }
-
-        .legend-dot {
-          width: 8px;
-          height: 8px;
-
-          border-radius: 50%;
-
-          box-shadow:
-            0 0 8px currentColor;
-        }
-
-        .legend-percent {
-          color: var(--app-muted);
-
-          font-size: 9px;
-        }
-
-        /* =====================================================
-           RANKING
-        ===================================================== */
-
-        .ranking-list {
-          display: flex;
-
-          flex-direction: column;
-
-          gap: 17px;
-        }
-
-        .ranking-item {
-          animation:
-            rankingAppear
-            .5s ease both;
-        }
-
-        .ranking-top {
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            space-between;
-
-          margin-bottom: 7px;
-
-          gap: 10px;
-        }
-
-        .ranking-name {
-          min-width: 0;
-
-          overflow: hidden;
-
-          text-overflow: ellipsis;
-
-          white-space: nowrap;
-
-          color:
-            var(--app-secondary-text);
-
-          font-size: 10px;
-        }
-
-        .ranking-count {
-          flex-shrink: 0;
-
-          color: var(--app-text);
-
-          font-size: 10px;
-
-          font-weight: 700;
-        }
-
-        .ranking-track {
-          height: 8px;
-
-          overflow: hidden;
-
-          border-radius: 20px;
-
-          background:
-            var(--app-card-2);
-
-          border:
-            1px solid
-            var(--app-border);
-        }
-
-        .ranking-fill {
-          height: 100%;
-
-          border-radius: 20px;
-
-          background:
-            linear-gradient(
-              90deg,
-              #5b21b6,
-              #8b5cf6,
-              #c4b5fd
-            );
-
-          box-shadow:
-            0 0 14px
-            rgba(139, 92, 246, .22);
-
-          animation:
-            fillGrow
-            .8s ease-out;
-        }
-
-        @keyframes fillGrow {
-
-          from {
-            width: 0 !important;
-          }
-
-        }
-
-        @keyframes rankingAppear {
-
-          from {
-            opacity: 0;
-
-            transform:
-              translateY(8px);
-          }
-
-          to {
-            opacity: 1;
-
-            transform:
-              translateY(0);
-          }
-
-        }
-
-        .rank-number {
-          width: 20px;
-          height: 20px;
-
-          display: inline-flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          margin-right: 7px;
-
-          border-radius: 6px;
-
-          background:
-            rgba(139, 92, 246, .09);
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .18);
-
-          color: #8b5cf6;
-
-          font-size: 8px;
-
-          font-weight: 700;
-        }
-
-        /* =====================================================
-           STATUS OVERVIEW
-        ===================================================== */
-
-        .status-grid {
-          display: grid;
-
-          grid-template-columns:
-            repeat(3, 1fr);
-
-          gap: 12px;
-        }
-
-        .status-card {
-          position: relative;
-
-          overflow: hidden;
-
-          padding: 17px;
-
-          border-radius: 12px;
-
-          background:
-            var(--app-card-2);
-
-          border:
-            1px solid
-            var(--app-border);
-
-          transition:
-            transform .25s ease,
-            border-color .25s ease;
-        }
-
-        .status-card:hover {
-          transform:
-            translateY(-3px);
-
-          border-color:
-            rgba(139, 92, 246, .35);
-        }
-
-        .status-card::after {
-          content: "";
-
-          position: absolute;
-
-          width: 60px;
-          height: 60px;
-
-          right: -20px;
-          top: -20px;
-
-          border-radius: 50%;
-
-          background:
-            rgba(139, 92, 246, .08);
-
-          filter: blur(10px);
-        }
-
-        .status-icon {
-          font-size: 16px;
-
-          margin-bottom: 12px;
-        }
-
-        .status-value {
-          color: var(--app-text);
-
-          font-size: 22px;
-
-          font-weight: 700;
-
-          margin-bottom: 3px;
-        }
-
-        .status-label {
-          color: var(--app-muted);
-
-          font-size: 9px;
-        }
-
-        .status-progress {
-          height: 4px;
-
-          margin-top: 12px;
-
-          border-radius: 10px;
-
-          background:
-            var(--app-border);
-
-          overflow: hidden;
-        }
-
-        .status-progress-fill {
-          height: 100%;
-
-          border-radius: 10px;
-
-          background:
-            linear-gradient(
-              90deg,
-              #6d28d9,
-              #a78bfa
-            );
-        }
-
-        /* =====================================================
-           RECENT
-        ===================================================== */
-
-        .recent-list {
-          display: flex;
-
-          flex-direction: column;
-        }
-
-        .recent-row {
-          display: flex;
-
-          align-items: center;
-
-          justify-content:
-            space-between;
-
-          gap: 15px;
-
-          padding: 14px 0;
-
-          border-bottom:
-            1px solid
-            var(--app-border);
-        }
-
-        .recent-row:last-child {
-          border-bottom: none;
-        }
-
-        .recent-left {
-          min-width: 0;
-
-          display: flex;
-
-          align-items: center;
-
-          gap: 11px;
-        }
-
-        .recent-icon {
-          width: 36px;
-          height: 36px;
-
-          min-width: 36px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          border-radius: 10px;
-
-          background:
-            rgba(139, 92, 246, .09);
-
-          border:
-            1px solid
-            rgba(139, 92, 246, .20);
-
-          font-size: 14px;
-        }
-
-        .recent-title {
-          color: var(--app-text);
-
-          font-size: 11px;
-
-          font-weight: 650;
-
-          overflow: hidden;
-
-          text-overflow: ellipsis;
-
-          white-space: nowrap;
-        }
-
-        .recent-meta {
-          color: var(--app-muted);
-
-          font-size: 9px;
-
-          margin-top: 4px;
-        }
-
-        /* =====================================================
-           VISIBILITY
-        ===================================================== */
-
-        .visibility {
-          flex-shrink: 0;
-
-          padding: 5px 9px;
-
-          border-radius: 6px;
-
-          font-size: 8px;
-
-          font-weight: 700;
-
-          letter-spacing: .3px;
-        }
-
-        .visibility-public {
-          background:
-            rgba(34, 197, 94, .09);
-
-          border:
-            1px solid
-            rgba(34, 197, 94, .22);
-
-          color: #16a34a;
-        }
-
-        .visibility-private {
-          background:
-            rgba(239, 68, 68, .08);
-
-          border:
-            1px solid
-            rgba(239, 68, 68, .20);
-
-          color: #dc2626;
-        }
-
-        [data-theme="dark"]
-        .visibility-public {
-          background:
-            rgba(16, 102, 71, .18);
-
-          border-color: #24573f;
-
-          color: #6ee7b7;
-        }
-
-        [data-theme="dark"]
-        .visibility-private {
-          background:
-            rgba(91, 48, 66, .20);
-
-          border-color: #5b3042;
-
-          color: #f0a4bd;
-        }
-
-        /* =====================================================
-           DECISION STATUS BADGES
-        ===================================================== */
-
-        .decision-status {
-          flex-shrink: 0;
-
-          display: inline-flex;
-
-          align-items: center;
-
-          gap: 5px;
-
-          padding: 5px 9px;
-
-          border-radius: 6px;
-
-          font-size: 8px;
-
-          font-weight: 700;
-
-          letter-spacing: .3px;
-
-          white-space: nowrap;
-        }
-
-        /* 🟢 ACTIVE */
-
-        .status-active {
-          background:
-            rgba(34, 197, 94, .09);
-
-          border:
-            1px solid
-            rgba(34, 197, 94, .22);
-
-          color: #16a34a;
-        }
-
-        /* 🟠 ENDING SOON */
-
-        .status-ending {
-          background:
-            rgba(245, 158, 11, .10);
-
-          border:
-            1px solid
-            rgba(245, 158, 11, .25);
-
-          color: #d97706;
-        }
-
-        /* 🔴 EXPIRED */
-
-        .status-expired {
-          background:
-            rgba(239, 68, 68, .08);
-
-          border:
-            1px solid
-            rgba(239, 68, 68, .20);
-
-          color: #dc2626;
-        }
-
-        [data-theme="dark"]
-        .status-active {
-          background:
-            rgba(16, 102, 71, .18);
-
-          border-color: #24573f;
-
-          color: #6ee7b7;
-        }
-
-        [data-theme="dark"]
-        .status-ending {
-          background:
-            rgba(120, 78, 15, .20);
-
-          border-color: #76500f;
-
-          color: #fbbf24;
-        }
-
-        [data-theme="dark"]
-        .status-expired {
-          background:
-            rgba(91, 48, 66, .20);
-
-          border-color: #5b3042;
-
-          color: #f87171;
-        }
-
-        /* =====================================================
-           EMPTY
-        ===================================================== */
-
-        .empty {
-          min-height: 150px;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          text-align: center;
-
-          color: var(--app-muted);
-
-          font-size: 11px;
-        }
-
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
-
-        @media (max-width: 1150px) {
-
-          .kpi-grid {
-            grid-template-columns:
-              repeat(2, 1fr);
-          }
-
-          .analytics-grid {
-            grid-template-columns: 1fr;
-          }
-
-        }
-
-        @media (max-width: 700px) {
-
-          .analytics-hero {
-            padding: 23px;
-          }
-
-          .hero-status {
-            position: static;
-
-            margin-top: 20px;
-          }
-
-          .analytics-card {
-            padding: 17px;
-          }
-
-          .donut-layout {
-            flex-direction: column;
-
-            gap: 22px;
-          }
-
-          .status-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .trend-chart {
-            height: 245px;
-          }
-
-          .recent-row {
-            align-items: flex-start;
-          }
-
-        }
-
-        @media (max-width: 600px) {
-
-          .recent-row {
-            flex-wrap: wrap;
-          }
-
-          .recent-left {
-            width: 100%;
-          }
-
-          .recent-row > div:last-child {
-            margin-left: 47px;
-          }
-
-        }
-
-        @media (max-width: 500px) {
-
-          .kpi-grid {
-            grid-template-columns:
-              1fr 1fr;
-
-            gap: 9px;
-          }
-
-          .kpi {
-            min-height: 130px;
-
-            padding: 14px;
-          }
-
-          .kpi-number {
-            font-size: 24px;
-          }
-
-          .kpi-icon {
-            width: 34px;
-            height: 34px;
-
-            font-size: 14px;
-          }
-
-          .card-header {
-            align-items: flex-start;
-          }
-
-          .card-badge {
-            font-size: 7px;
-          }
-
-          .visibility,
-          .decision-status {
-            font-size: 7px;
-          }
-
-        }
-
-      `}</style>
-
-        <div className="analytics-page">
-
-          {/* =====================================================
-            HERO
-        ===================================================== */}
-
+      <DashboardLayout pageTitle="Analytics" pageSubtitle="Understand your decisions and activity at a glance.">
+        <AnalyticsStyles />
+        <main className="analytics-page">
           <section className="analytics-hero">
-
-            <div className="hero-content">
-
-              <div className="hero-label">
-                <span className="hero-dot"></span>
-
-                Decision Intelligence
-              </div>
-
-              <div className="hero-title">
-                Your Decision Overview
-              </div>
-
-              <div className="hero-text">
-                Track how you create, organize and manage
-                decisions across your DecisionHub workspace.
-              </div>
-
+            <div>
+              <div className="eyebrow"><Activity size={14} /> DECISION INTELLIGENCE</div>
+              <h1>Decision Analytics</h1>
+              <p>Track participation, engagement and decision performance from one place.</p>
             </div>
-
-            <div className="hero-status">
-
-              <span className="hero-status-dot"></span>
-
-              ANALYTICS ACTIVE
-
+            <div className="hero-actions">
+              <select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Analytics period">
+                <option value={7}>Last 7 days</option>
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+                <option value={365}>Last 365 days</option>
+              </select>
+              <button className="refresh-btn" onClick={() => fetchAnalytics(true)} disabled={refreshing}>
+                <RefreshCw size={15} className={refreshing ? "spin" : ""} /> Refresh
+              </button>
             </div>
-
           </section>
 
-          {/* =====================================================
-            ERROR
-        ===================================================== */}
-
-          {error && (
-              <div className="analytics-error">
-                {error}
-              </div>
-          )}
-
-          {/* =====================================================
-            KPI
-        ===================================================== */}
-
-          <div className="kpi-grid">
-
-            <div className="kpi">
-
-              <div className="kpi-top">
-
-                <div className="kpi-icon">
-                  📊
-                </div>
-
-                <div className="kpi-live">
-
-                  <span className="live-dot"></span>
-
-                  LIVE
-
-                </div>
-
-              </div>
-
-              <div className="kpi-number">
-                {analytics.total}
-              </div>
-
-              <div className="kpi-label">
-                Total Decisions
-              </div>
-
-            </div>
-
-            <div className="kpi">
-
-              <div className="kpi-top">
-
-                <div className="kpi-icon">
-                  ⚡
-                </div>
-
-                <div className="kpi-live">
-
-                  <span className="live-dot"></span>
-
-                  {analytics.activePercentage}%
-
-                </div>
-
-              </div>
-
-              <div className="kpi-number">
-                {analytics.active}
-              </div>
-
-              <div className="kpi-label">
-                Active Decisions
-              </div>
-
-            </div>
-
-            <div className="kpi">
-
-              <div className="kpi-top">
-
-                <div className="kpi-icon">
-                  🌐
-                </div>
-
-              </div>
-
-              <div className="kpi-number">
-                {analytics.publicCount}
-              </div>
-
-              <div className="kpi-label">
-                Public Decisions
-              </div>
-
-            </div>
-
-            <div className="kpi">
-
-              <div className="kpi-top">
-
-                <div className="kpi-icon">
-                  👤
-                </div>
-
-              </div>
-
-              <div className="kpi-number">
-                {analytics.anonymousCount}
-              </div>
-
-              <div className="kpi-label">
-                Anonymous Decisions
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* =====================================================
-            TREND + VISIBILITY
-        ===================================================== */}
-
-          <div className="analytics-grid">
-
-            {/* TREND */}
-
-            <section className="analytics-card">
-
-              <div className="card-header">
-
-                <div>
-
-                  <div className="card-title">
-                    Decision Activity
-                  </div>
-
-                  <div className="card-subtitle">
-                    Decisions created over time
-                  </div>
-
-                </div>
-
-                <div className="card-badge">
-                  ACTIVITY
-                </div>
-
-              </div>
-
-              {analytics.trend.length === 0 ? (
-
-                  <div className="trend-empty">
-                    Create decisions with dates to see your
-                    activity trend.
-                  </div>
-
-              ) : (
-
-                  <div className="trend-chart">
-
-                    <div className="chart-grid">
-
-                      <div className="chart-grid-line"></div>
-                      <div className="chart-grid-line"></div>
-                      <div className="chart-grid-line"></div>
-                      <div className="chart-grid-line"></div>
-                      <div className="chart-grid-line"></div>
-
-                    </div>
-
-                    <div className="trend-bars">
-
-                      {analytics.trend.map(
-                          (item, index) => (
-
-                              <div
-                                  className="trend-column"
-                                  key={`${item.month}-${index}`}
-                              >
-
-                                <div className="trend-value">
-                                  {item.count}
-                                </div>
-
-                                <div className="trend-bar-container">
-
-                                  <div
-                                      className="trend-bar"
-                                      style={{
-                                        height:
-                                            `${Math.max(
-                                                5,
-                                                (item.count /
-                                                    maxTrend) *
-                                                165
-                                            )}px`,
-
-                                        animationDelay:
-                                            `${index * 80}ms`,
-                                      }}
-                                  />
-
-                                </div>
-
-                                <div className="trend-month">
-                                  {item.month}
-                                </div>
-
-                              </div>
-
-                          )
-                      )}
-
-                    </div>
-
-                  </div>
-
-              )}
-
-            </section>
-
-            {/* VISIBILITY */}
-
-            <section className="analytics-card">
-
-              <div className="card-header">
-
-                <div>
-
-                  <div className="card-title">
-                    Decision Visibility
-                  </div>
-
-                  <div className="card-subtitle">
-                    Public vs private decisions
-                  </div>
-
-                </div>
-
-                <div className="card-badge">
-                  DISTRIBUTION
-                </div>
-
-              </div>
-
-              <div className="donut-layout">
-
-                <div
-                    className="donut"
-                    style={{
-                      "--public-angle":
-                          `${analytics.publicPercentage * 3.6}deg`,
-                    }}
-                >
-
-                  <div className="donut-inner">
-
-                    <div className="donut-number">
-                      {analytics.total}
-                    </div>
-
-                    <div className="donut-label">
-                      TOTAL
-                    </div>
-
-                  </div>
-
-                </div>
-
-                <div className="legend">
-
-                  <div className="legend-item">
-
-                  <span
-                      className="legend-dot"
-                      style={{
-                        background: "#8b5cf6",
-                        color: "#8b5cf6",
-                      }}
-                  />
-
-                    <span>
-                    Public
-                  </span>
-
-                    <strong>
-                      {analytics.publicCount}
-                    </strong>
-
-                    <span className="legend-percent">
-                    {analytics.publicPercentage}%
-                  </span>
-
-                  </div>
-
-                  <div className="legend-item">
-
-                  <span
-                      className="legend-dot"
-                      style={{
-                        background: "#c4b5fd",
-                        color: "#c4b5fd",
-                      }}
-                  />
-
-                    <span>
-                    Private
-                  </span>
-
-                    <strong>
-                      {analytics.privateCount}
-                    </strong>
-
-                    <span className="legend-percent">
-                    {analytics.privatePercentage}%
-                  </span>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </section>
-
-          </div>
-
-          {/* =====================================================
-            CATEGORY + OPTIONS
-        ===================================================== */}
-
-          <div className="analytics-grid">
-
-            {/* CATEGORY */}
-
-            <section className="analytics-card">
-
-              <div className="card-header">
-
-                <div>
-
-                  <div className="card-title">
-                    Decision Categories
-                  </div>
-
-                  <div className="card-subtitle">
-                    Areas where you create the most decisions
-                  </div>
-
-                </div>
-
-                <div className="card-badge">
-                  TOP {analytics.categories.length}
-                </div>
-
-              </div>
-
-              {analytics.categories.length === 0 ? (
-
-                  <div className="empty">
-                    No category data available.
-                  </div>
-
-              ) : (
-
-                  <div className="ranking-list">
-
-                    {analytics.categories.map(
-                        ([category, count], index) => (
-
-                            <div
-                                className="ranking-item"
-                                key={category}
-                                style={{
-                                  animationDelay:
-                                      `${index * 70}ms`,
-                                }}
-                            >
-
-                              <div className="ranking-top">
-
-                                <div className="ranking-name">
-
-                          <span className="rank-number">
-                            {String(
-                                index + 1
-                            ).padStart(2, "0")}
-                          </span>
-
-                                  {category}
-
-                                </div>
-
-                                <div className="ranking-count">
-                                  {count}
-                                </div>
-
-                              </div>
-
-                              <div className="ranking-track">
-
-                                <div
-                                    className="ranking-fill"
-                                    style={{
-                                      width:
-                                          `${(
-                                              count /
-                                              maxCategory
-                                          ) * 100}%`,
-                                    }}
-                                />
-
-                              </div>
-
-                            </div>
-
-                        )
-                    )}
-
-                  </div>
-
-              )}
-
-            </section>
-
-            {/* OPTIONS */}
-
-            <section className="analytics-card">
-
-              <div className="card-header">
-
-                <div>
-
-                  <div className="card-title">
-                    Decision Options
-                  </div>
-
-                  <div className="card-subtitle">
-                    Most frequently used options
-                  </div>
-
-                </div>
-
-                <div className="card-badge">
-                  {analytics.totalOptions} TOTAL
-                </div>
-
-              </div>
-
-              {analytics.options.length === 0 ? (
-
-                  <div className="empty">
-                    No option data available.
-                  </div>
-
-              ) : (
-
-                  <div className="ranking-list">
-
-                    {analytics.options.map(
-                        ([option, count], index) => (
-
-                            <div
-                                className="ranking-item"
-                                key={option}
-                                style={{
-                                  animationDelay:
-                                      `${index * 70}ms`,
-                                }}
-                            >
-
-                              <div className="ranking-top">
-
-                                <div className="ranking-name">
-
-                          <span className="rank-number">
-                            {String(
-                                index + 1
-                            ).padStart(2, "0")}
-                          </span>
-
-                                  {option}
-
-                                </div>
-
-                                <div className="ranking-count">
-                                  {count}
-                                </div>
-
-                              </div>
-
-                              <div className="ranking-track">
-
-                                <div
-                                    className="ranking-fill"
-                                    style={{
-                                      width:
-                                          `${(
-                                              count /
-                                              maxOption
-                                          ) * 100}%`,
-                                    }}
-                                />
-
-                              </div>
-
-                            </div>
-
-                        )
-                    )}
-
-                  </div>
-
-              )}
-
-            </section>
-
-          </div>
-
-          {/* =====================================================
-            STATUS OVERVIEW
-        ===================================================== */}
-
-          <section className="analytics-card">
-
-            <div className="card-header">
-
-              <div>
-
-                <div className="card-title">
-                  Decision Status
-                </div>
-
-                <div className="card-subtitle">
-                  Current state of your decision boards
-                </div>
-
-              </div>
-
-              <div className="card-badge">
-                OVERVIEW
-              </div>
-
-            </div>
-
-            <div className="status-grid">
-
-              <div className="status-card">
-
-                <div className="status-icon">
-                  ⚡
-                </div>
-
-                <div className="status-value">
-                  {analytics.active}
-                </div>
-
-                <div className="status-label">
-                  Active decisions
-                </div>
-
-                <div className="status-progress">
-
-                  <div
-                      className="status-progress-fill"
-                      style={{
-                        width:
-                            `${analytics.activePercentage}%`,
-                      }}
-                  />
-
-                </div>
-
-              </div>
-
-              <div className="status-card">
-
-                <div className="status-icon">
-                  ✓
-                </div>
-
-                <div className="status-value">
-                  {analytics.completed}
-                </div>
-
-                <div className="status-label">
-                  Completed decisions
-                </div>
-
-                <div className="status-progress">
-
-                  <div
-                      className="status-progress-fill"
-                      style={{
-                        width:
-                            `${analytics.completedPercentage}%`,
-                      }}
-                  />
-
-                </div>
-
-              </div>
-
-              <div className="status-card">
-
-                <div className="status-icon">
-                  🔒
-                </div>
-
-                <div className="status-value">
-                  {analytics.privateCount}
-                </div>
-
-                <div className="status-label">
-                  Private decisions
-                </div>
-
-                <div className="status-progress">
-
-                  <div
-                      className="status-progress-fill"
-                      style={{
-                        width:
-                            `${analytics.privatePercentage}%`,
-                      }}
-                  />
-
-                </div>
-
-              </div>
-
-            </div>
-
+          {error && <div className="analytics-error">{error}</div>}
+
+          <section className="kpi-grid">
+            <Kpi icon={<FileText />} label="Total Decisions" value={total} hint={`${active} currently active`} />
+            <Kpi icon={<Vote />} label="Votes Received" value={votesReceived} hint={`${participationScore} avg. votes / decision`} />
+            <Kpi icon={<Users />} label="Votes You Cast" value={summary.votesCast} hint={`${summary.commentsWritten} comments written`} />
+            <Kpi icon={<Trophy />} label="Completion Rate" value={`${completionRate}%`} hint={`${completed} completed decisions`} />
           </section>
 
-          {/* =====================================================
-            RECENT DECISIONS
-        ===================================================== */}
+          <section className="analytics-grid two-one">
+            <Card title="Decision Activity" subtitle={`Decisions created in the last ${days} days`} icon={<BarChart3 />}>
+              {trend.length ? (
+                  <div className="chart-wrap"><ResponsiveContainer width="100%" height={280}>
+                    <AreaChart data={trend} margin={{ top: 10, right: 10, left: -18, bottom: 0 }}>
+                      <defs><linearGradient id="decisionGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.35} /><stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.02} /></linearGradient></defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" vertical={false} />
+                      <XAxis dataKey="label" tick={{ fill: "var(--app-muted)", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={25} />
+                      <YAxis allowDecimals={false} tick={{ fill: "var(--app-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Area type="monotone" dataKey="decisions" stroke="#8b5cf6" strokeWidth={3} fill="url(#decisionGradient)" />
+                    </AreaChart>
+                  </ResponsiveContainer></div>
+              ) : <Empty text="No decision activity for this period." />}
+            </Card>
 
-          <section
-              className="analytics-card"
-              style={{
-                marginTop: "18px",
-              }}
-          >
-
-            <div className="card-header">
-
-              <div>
-
-                <div className="card-title">
-                  Recent Decision Activity
-                </div>
-
-                <div className="card-subtitle">
-                  Latest boards created in your workspace
-                </div>
-
-              </div>
-
-              <div className="card-badge">
-                RECENT
-              </div>
-
-            </div>
-
-            {recentDecisions.length === 0 ? (
-
-                <div className="empty">
-                  No decisions created yet.
-                </div>
-
-            ) : (
-
-                <div className="recent-list">
-
-                    {recentDecisions
-                      .map((decision) => {
-
-                        const status =
-                            getDecisionStatus(
-                                decision.deadline
-                            );
-
-                        return (
-                            <div
-                                className="recent-row"
-                                key={decision.id}
-                            >
-
-                              <div className="recent-left">
-
-                                <div className="recent-icon">
-                                  📊
-                                </div>
-
-                                <div>
-
-                                  <div className="recent-title">
-                                    {decision.title}
-                                  </div>
-
-                                  <div className="recent-meta">
-
-                                    {decision.category ||
-                                        "Uncategorized"}
-
-                                    {decision.deadline
-                                      ? ` • Deadline: ${new Date(
-                                        decision.deadline
-                                        ).toLocaleString()}`
-                                        : ""}
-
-                                  </div>
-
-                                </div>
-
-                              </div>
-
-                              {/* VISIBILITY + STATUS */}
-
-                              <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "7px",
-                                    flexShrink: 0,
-                                  }}
-                              >
-
-                                <div
-                                    className={
-                                        "visibility " +
-                                        (
-                                            decision.visibility ===
-                                            "PRIVATE"
-                                                ? "visibility-private"
-                                                : "visibility-public"
-                                        )
-                                    }
-                                >
-                                  {decision.visibility ||
-                                      "PUBLIC"}
-                                </div>
-
-                                <div
-                                    className={
-                                      `decision-status ${status.className}`
-                                    }
-                                >
-
-                          <span>
-                            {status.icon}
-                          </span>
-
-                                  <span>
-                            {status.label}
-                          </span>
-
-                                </div>
-
-                              </div>
-
-                            </div>
-                        );
-                      })}
-
-                </div>
-
-            )}
-
+            <Card title="Decision Visibility" subtitle="How your decisions are shared" icon={<Eye />}>
+              {distributionData.length ? (
+                  <div className="donut-area">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <PieChart>
+                        <Pie data={distributionData} dataKey="value" nameKey="name" innerRadius={62} outerRadius={86} paddingAngle={4} stroke="none">
+                          {distributionData.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}
+                        </Pie>
+                        <Tooltip content={<ChartTooltip />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="donut-center"><strong>{publicRate}%</strong><span>public</span></div>
+                    <div className="legend-list">
+                      {distributionData.map((item, index) => <div className="legend-row" key={item.name}><span><i style={{ background: COLORS[index % COLORS.length] }} />{item.name}</span><b>{item.value}</b></div>)}
+                    </div>
+                  </div>
+              ) : <Empty text="No visibility data yet." />}
+            </Card>
           </section>
 
-        </div>
+          <section className="analytics-grid two-one">
+            <Card title="Most Engaged Decisions" subtitle="Ranked by votes and comments" icon={<Zap />} badge="TOP 5">
+              {topDecisions.length ? <div className="ranking-list">
+                {topDecisions.map((item, index) => {
+                  const engagement = Number(item.engagement || 0);
+                  return <div className="ranking-item" key={item.id || item.title}>
+                    <div className="ranking-head">
+                      <div className="rank-title"><span>{String(index + 1).padStart(2, "0")}</span><strong title={item.title}>{item.title}</strong></div>
+                      <b>{engagement}</b>
+                    </div>
+                    <div className="progress-track"><div style={{ width: `${(engagement / maxEngagement) * 100}%` }} /></div>
+                    <div className="ranking-meta"><span><Vote size={12} /> {item.votes || 0} votes</span><span><MessageCircle size={12} /> {item.comments || 0} comments</span></div>
+                  </div>;
+                })}
+              </div> : <Empty text="No voting activity on your decisions yet." />}
+            </Card>
 
+            <Card title="Categories" subtitle="Your decisions by category" icon={<BarChart3 />}>
+              {categoryData.length ? <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={categoryData} layout="vertical" margin={{ top: 8, right: 20, left: 10, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} hide />
+                  <YAxis type="category" dataKey="name" width={90} tick={{ fill: "var(--app-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Bar dataKey="value" fill="#06b6d4" radius={[0, 8, 8, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer> : <Empty text="No categories available." />}
+            </Card>
+          </section>
+
+          <section className="stats-strip">
+            <MiniStat icon={<Vote />} value={summary.votesReceived} label="Votes received" />
+            <MiniStat icon={<Users />} value={summary.votesCast} label="Votes you cast" />
+            <MiniStat icon={<MessageCircle />} value={commentsReceived} label="Comments received" />
+            <MiniStat icon={<Shield />} value={summary.anonymousDecisions} label="Anonymous decisions" />
+            <MiniStat icon={<Clock3 />} value={active} label="Active decisions" />
+          </section>
+
+          <section className="analytics-grid one-one">
+            <Card title="Decision Health" subtitle="Quick performance snapshot" icon={<CheckCircle2 />}>
+              <div className="health-grid">
+                <Health label="Completed" value={completed} percentage={completionRate} />
+                <Health label="Active" value={active} percentage={total ? Math.round((active / total) * 100) : 0} />
+                <Health label="Public" value={summary.publicDecisions} percentage={publicRate} />
+              </div>
+            </Card>
+
+            <Card title="Recent Decisions" subtitle="Your latest decision boards" icon={<Clock3 />} badge="RECENT">
+              {data.recentDecisions?.length ? <div className="recent-list">
+                {data.recentDecisions.map((item) => <div className="recent-row" key={item.id}>
+                  <div className="recent-icon"><BarChart3 size={17} /></div>
+                  <div className="recent-main"><strong>{item.title}</strong><span>{item.category || "Uncategorized"} · {item.visibility || "PUBLIC"}</span></div>
+                  <div className="recent-date">{formatDateTime(item.createdAt)}</div>
+                </div>)}
+              </div> : <Empty text="No decisions created yet." />}
+            </Card>
+          </section>
+        </main>
       </DashboardLayout>
   );
+}
+
+function Kpi({ icon, label, value, hint }) {
+  return <div className="kpi-card"><div className="kpi-icon">{icon}</div><div className="kpi-content"><span>{label}</span><strong>{value}</strong><small><ChevronUp size={12} /> {hint}</small></div></div>;
+}
+
+function MiniStat({ icon, value, label }) {
+  return <div className="mini-stat"><span className="mini-icon">{icon}</span><div><strong>{value}</strong><span>{label}</span></div></div>;
+}
+
+function Health({ label, value, percentage }) {
+  return <div className="health-item"><div className="health-top"><span>{label}</span><strong>{value}</strong></div><div className="progress-track"><div style={{ width: `${percentage}%` }} /></div><small>{percentage}% of decisions</small></div>;
+}
+
+function Card({ title, subtitle, icon, badge, children }) {
+  return <section className="analytics-card"><div className="card-header"><div className="card-heading"><div className="card-icon">{icon}</div><div><h2>{title}</h2><p>{subtitle}</p></div></div>{badge && <span className="card-badge">{badge}</span>}</div>{children}</section>;
+}
+
+function Empty({ text }) { return <div className="empty-state"><BarChart3 size={28} /><span>{text}</span></div>; }
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return <div className="chart-tooltip"><strong>{label || payload[0].name}</strong><span>{payload[0].value}</span></div>;
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function AnalyticsStyles() {
+  return <style>{`
+    .analytics-page{width:100%;max-width:1500px;margin:0 auto;padding:4px 0 42px;color:var(--app-text)}
+    .analytics-loading{min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--app-muted);font-size:11px;letter-spacing:1.2px}
+    .loader{width:48px;height:48px;border:2px solid var(--app-border);border-top-color:#8b5cf6;border-right-color:#06b6d4;border-radius:50%;animation:spin 1s linear infinite}
+    .spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .analytics-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:8px 2px 24px}
+    .eyebrow{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:1.5px;color:#8b5cf6;margin-bottom:8px}
+    .analytics-hero h1{font-size:28px;line-height:1.1;margin:0 0 7px;font-weight:800;letter-spacing:-.6px}.analytics-hero p{margin:0;color:var(--app-muted);font-size:13px}
+    .hero-actions{display:flex;gap:8px}.hero-actions select,.refresh-btn{height:38px;border:1px solid var(--app-border);background:var(--app-card);color:var(--app-text);border-radius:10px;padding:0 12px;font-size:12px}.refresh-btn{display:flex;align-items:center;gap:7px;cursor:pointer}.refresh-btn:disabled{opacity:.6}
+    .analytics-error{border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#ef4444;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:12px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.kpi-card{position:relative;overflow:hidden;display:flex;gap:13px;padding:18px;border:1px solid var(--app-border);background:var(--app-card);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.06)}.kpi-card:after{content:"";position:absolute;width:80px;height:80px;border-radius:50%;right:-30px;top:-35px;background:rgba(139,92,246,.08)}.kpi-icon,.card-icon,.mini-icon{display:grid;place-items:center;flex-shrink:0}.kpi-icon{width:42px;height:42px;border-radius:12px;background:rgba(139,92,246,.1);color:#8b5cf6}.kpi-icon svg{width:20px}.kpi-content{display:flex;flex-direction:column;min-width:0}.kpi-content>span{font-size:11px;color:var(--app-muted);font-weight:700}.kpi-content strong{font-size:26px;line-height:1.2;margin:3px 0}.kpi-content small{display:flex;align-items:center;gap:2px;color:#22c55e;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.analytics-grid{display:grid;gap:16px;margin-bottom:16px}.two-one{grid-template-columns:1.6fr 1fr}.one-one{grid-template-columns:1fr 1fr}.analytics-card{border:1px solid var(--app-border);background:var(--app-card);border-radius:16px;padding:18px;min-width:0}.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.card-heading{display:flex;gap:10px;align-items:center}.card-icon{width:34px;height:34px;border-radius:10px;background:rgba(139,92,246,.1);color:#8b5cf6}.card-icon svg{width:17px}.card-header h2{font-size:14px;margin:0 0 3px}.card-header p{font-size:11px;color:var(--app-muted);margin:0}.card-badge{font-size:9px;font-weight:800;letter-spacing:.8px;color:var(--app-muted);border:1px solid var(--app-border);padding:6px 8px;border-radius:7px}.chart-wrap{width:100%;height:280px}.chart-tooltip{background:var(--app-card);border:1px solid var(--app-border);box-shadow:0 10px 30px rgba(0,0,0,.12);padding:9px 11px;border-radius:9px;display:flex;flex-direction:column;gap:3px;font-size:11px}.chart-tooltip span{font-weight:800;font-size:14px}.donut-area{position:relative;min-height:280px}.donut-center{position:absolute;top:79px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none}.donut-center strong{font-size:25px}.donut-center span{font-size:10px;color:var(--app-muted)}.legend-list{display:grid;gap:8px}.legend-row{display:flex;justify-content:space-between;font-size:11px}.legend-row span{display:flex;align-items:center;gap:7px}.legend-row i{width:7px;height:7px;border-radius:50%}.legend-row b{font-weight:800}.ranking-list{display:grid;gap:15px}.ranking-item{padding-bottom:2px}.ranking-head{display:flex;justify-content:space-between;gap:12px}.rank-title{display:flex;gap:9px;align-items:center;min-width:0}.rank-title span{font-size:10px;color:#8b5cf6;font-weight:800}.rank-title strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ranking-head>b{font-size:12px}.progress-track{height:6px;background:var(--app-border);border-radius:20px;overflow:hidden;margin:8px 0 6px}.progress-track>div{height:100%;border-radius:20px;background:linear-gradient(90deg,#8b5cf6,#06b6d4);transition:width .5s ease}.ranking-meta{display:flex;gap:13px;color:var(--app-muted);font-size:10px}.ranking-meta span{display:flex;align-items:center;gap:4px}.empty-state{height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:var(--app-muted);font-size:11px;text-align:center}.stats-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}.mini-stat{display:flex;align-items:center;gap:10px;border:1px solid var(--app-border);background:var(--app-card);border-radius:13px;padding:13px}.mini-icon{width:32px;height:32px;border-radius:9px;background:rgba(6,182,212,.1);color:#06b6d4}.mini-icon svg{width:15px}.mini-stat div{display:flex;flex-direction:column}.mini-stat strong{font-size:16px}.mini-stat span{font-size:10px;color:var(--app-muted)}.health-grid{display:grid;gap:20px}.health-item small{font-size:10px;color:var(--app-muted)}.health-top{display:flex;justify-content:space-between;font-size:11px}.health-top strong{font-size:13px}.recent-list{display:grid}.recent-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--app-border)}.recent-row:last-child{border-bottom:0}.recent-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:rgba(99,102,241,.1);color:#6366f1;flex-shrink:0}.recent-main{min-width:0;display:flex;flex-direction:column;gap:3px}.recent-main strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.recent-main span,.recent-date{font-size:10px;color:var(--app-muted)}.recent-date{margin-left:auto;flex-shrink:0}
+    @media(max-width:1050px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-one,.one-one{grid-template-columns:1fr}.stats-strip{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:650px){.analytics-hero{align-items:flex-start;flex-direction:column}.hero-actions{width:100%}.hero-actions select,.refresh-btn{flex:1}.kpi-grid{grid-template-columns:1fr}.stats-strip{grid-template-columns:1fr 1fr}.analytics-card{padding:14px}.analytics-hero h1{font-size:23px}.recent-date{display:none}}
+  `}</style>;
 }
 
 export default AnalyticsPage;
