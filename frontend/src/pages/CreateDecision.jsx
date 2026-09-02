@@ -22,6 +22,8 @@ function CreateDecision() {
   const [isError, setIsError] = useState(false);
   const [communities, setCommunities] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [deadlineOpen, setDeadlineOpen] = useState(false);
+  const [draftDeadline, setDraftDeadline] = useState("");
 
   /* =========================================================
      COMMUNITY FROM URL
@@ -158,6 +160,68 @@ function CreateDecision() {
     ).padStart(2, "0");
 
     return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  /* =========================================================
+     DEADLINE PICKER
+  ========================================================= */
+
+  const openDeadlinePicker = () => {
+    setDraftDeadline(
+      decision.deadline ||
+        `${new Date().toISOString().slice(0, 10)}T23:59`
+    );
+    setDeadlineOpen(true);
+  };
+
+  const closeDeadlinePicker = () => {
+    setDeadlineOpen(false);
+  };
+
+  const applyDeadline = () => {
+    if (!draftDeadline) {
+      setIsError(true);
+      setMessage("Please select a date and time.");
+      return;
+    }
+
+    const selected = new Date(draftDeadline);
+
+    if (isNaN(selected.getTime())) {
+      setIsError(true);
+      setMessage("Please select a valid deadline.");
+      return;
+    }
+
+    if (selected <= new Date()) {
+      setIsError(true);
+      setMessage("Deadline must be in the future.");
+      return;
+    }
+
+    setDecision((current) => ({
+      ...current,
+      deadline: draftDeadline,
+    }));
+
+    setDeadlineOpen(false);
+    setIsError(false);
+    setMessage("");
+  };
+
+  const setTodayDeadline = () => {
+    const now = new Date();
+    now.setHours(23, 59, 0, 0);
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+
+    setDraftDeadline(
+      `${year}-${month}-${day}T${hours}:${minutes}`
+    );
   };
 
   /* =========================================================
@@ -315,9 +379,6 @@ function CreateDecision() {
       setSubmitting(false);
     }
   };
-
-  const minDateTime =
-    getMinDateTime();
 
   return (
     <DashboardLayout
@@ -857,6 +918,205 @@ function CreateDecision() {
         /* =====================================================
            CHECKBOX
         ===================================================== */
+
+
+        .deadline-control {
+          position: relative;
+          width: 100%;
+        }
+
+        .deadline-trigger {
+          width: 100%;
+          min-height: 43px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          box-sizing: border-box;
+          padding: 7px 11px;
+          border: 1px solid var(--app-border);
+          border-radius: 10px;
+          background: var(--app-card-2);
+          color: var(--app-text);
+          cursor: pointer;
+          text-align: left;
+          outline: none;
+          transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .deadline-trigger:hover,
+        .deadline-trigger:focus {
+          border-color: rgba(139,92,246,.60);
+          box-shadow: 0 0 0 3px rgba(139,92,246,.08);
+        }
+
+        .deadline-trigger-left {
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .deadline-calendar-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 29px;
+          height: 29px;
+          flex-shrink: 0;
+          border: 1px solid rgba(139,92,246,.20);
+          border-radius: 8px;
+          background: rgba(139,92,246,.08);
+          color: #ffffff;
+          font-size: 14px;
+          filter: grayscale(1) brightness(3);
+        }
+
+        .deadline-value {
+          min-width: 0;
+          color: var(--app-text);
+          font-size: 12px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .deadline-placeholder {
+          color: var(--app-secondary-text);
+        }
+
+        .deadline-arrow {
+          flex-shrink: 0;
+          color: #9e91b9;
+          font-size: 14px;
+        }
+
+        .deadline-popover {
+          position: absolute;
+          z-index: 50;
+          top: calc(100% + 8px);
+          left: 0;
+          right: 0;
+          padding: 14px;
+          border: 1px solid rgba(139,92,246,.22);
+          border-radius: 14px;
+          background: #171326;
+          box-shadow: 0 20px 45px rgba(0,0,0,.30);
+          animation: deadlineReveal .16s ease-out;
+        }
+
+        @keyframes deadlineReveal {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .deadline-popover-title {
+          margin-bottom: 11px;
+          color: var(--app-text);
+          font-size: 11px;
+          font-weight: 500;
+        }
+
+        .deadline-fields {
+          display: grid;
+          grid-template-columns: 1.15fr .85fr;
+          gap: 9px;
+        }
+
+        .deadline-field span {
+          display: block;
+          margin-bottom: 5px;
+          color: var(--app-secondary-text);
+          font-size: 9px;
+        }
+
+        .deadline-picker-input {
+          width: 100%;
+          min-height: 39px;
+          box-sizing: border-box;
+          padding: 8px 9px;
+          border: 1px solid rgba(139,92,246,.16);
+          border-radius: 9px;
+          background: #211a31;
+          color: #ffffff;
+          font-size: 11px;
+          color-scheme: dark;
+          outline: none;
+        }
+
+        .deadline-picker-input:focus {
+          border-color: rgba(139,92,246,.60);
+          box-shadow: 0 0 0 3px rgba(139,92,246,.08);
+        }
+
+        .deadline-picker-input::-webkit-calendar-picker-indicator {
+          opacity: 1;
+          filter: invert(1) brightness(2);
+          cursor: pointer;
+        }
+
+        .deadline-popover-footer {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 8px;
+          margin-top: 13px;
+          padding-top: 11px;
+          border-top: 1px solid rgba(255,255,255,.06);
+        }
+
+        .deadline-today,
+        .deadline-cancel,
+        .deadline-done {
+          min-height: 34px;
+          padding: 7px 11px;
+          border-radius: 9px;
+          font-family: inherit;
+          font-size: 10px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all .18s ease;
+        }
+
+        .deadline-today {
+          margin-right: auto;
+          border: 0;
+          background: transparent;
+          color: #a78bfa;
+        }
+
+        .deadline-today:hover {
+          background: rgba(139,92,246,.08);
+        }
+
+        .deadline-cancel {
+          border: 1px solid rgba(255,255,255,.08);
+          background: rgba(255,255,255,.025);
+          color: #a9a2b3;
+        }
+
+        .deadline-cancel:hover {
+          background: rgba(255,255,255,.05);
+          color: #e6e0ed;
+        }
+
+        .deadline-done {
+          border: 1px solid rgba(139,92,246,.25);
+          background: linear-gradient(135deg, #6d3dcc, #8b5cf6);
+          color: #ffffff;
+          box-shadow: 0 6px 16px rgba(124,58,237,.18);
+        }
+
+        .deadline-done:hover {
+          filter: brightness(1.06);
+          transform: translateY(-1px);
+        }
 
         .anonymous-box {
           display: flex;
@@ -1499,6 +1759,19 @@ function CreateDecision() {
               30px minmax(0,1fr) 31px;
           }
 
+          .deadline-popover {
+            padding: 12px;
+          }
+
+          .deadline-fields {
+            grid-template-columns: 1fr;
+          }
+
+          .deadline-popover-footer {
+            flex-wrap: wrap;
+          }
+
+
           .info-panel {
             padding: 18px;
           }
@@ -1840,25 +2113,151 @@ function CreateDecision() {
               {/* DEADLINE */}
 
               <div className="field-group">
-
                 <label className="field-label">
                   Voting Deadline
                 </label>
 
-                <input
-                  className="form-input"
-                  type="datetime-local"
-                  name="deadline"
-                  value={decision.deadline}
-                  onChange={handleChange}
-                  min={minDateTime}
-                />
+                <div className="deadline-control">
+                  <button
+                    type="button"
+                    className="deadline-trigger"
+                    onClick={openDeadlinePicker}
+                    aria-haspopup="dialog"
+                    aria-expanded={deadlineOpen}
+                  >
+                    <span className="deadline-trigger-left">
+                      <span
+                        className="deadline-calendar-icon"
+                        aria-hidden="true"
+                      >
+                        📅
+                      </span>
+
+                      <span
+                        className={`deadline-value ${
+                          decision.deadline
+                            ? ""
+                            : "deadline-placeholder"
+                        }`}
+                      >
+                        {decision.deadline
+                          ? new Date(
+                              decision.deadline
+                            ).toLocaleString([], {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })
+                          : "dd-mm-yyyy --:--"}
+                      </span>
+                    </span>
+
+                    <span className="deadline-arrow">
+                      {deadlineOpen ? "⌃" : "⌄"}
+                    </span>
+                  </button>
+
+                  {deadlineOpen && (
+                    <div className="deadline-popover">
+                      <div className="deadline-popover-title">
+                        Select voting deadline
+                      </div>
+
+                      <div className="deadline-fields">
+                        <div className="deadline-field">
+                          <span>Date</span>
+                          <input
+                            className="deadline-picker-input"
+                            type="date"
+                            value={
+                              draftDeadline
+                                ? draftDeadline.slice(0, 10)
+                                : ""
+                            }
+                            min={new Date()
+                              .toISOString()
+                              .slice(0, 10)}
+                            onChange={(event) => {
+                              const date =
+                                event.target.value;
+
+                              setDraftDeadline(
+                                `${date}T${
+                                  draftDeadline
+                                    ? draftDeadline.slice(
+                                        11,
+                                        16
+                                      )
+                                    : "23:59"
+                                }`
+                              );
+                            }}
+                          />
+                        </div>
+
+                        <div className="deadline-field">
+                          <span>Time</span>
+                          <input
+                            className="deadline-picker-input"
+                            type="time"
+                            value={
+                              draftDeadline
+                                ? draftDeadline.slice(11, 16)
+                                : ""
+                            }
+                            onChange={(event) => {
+                              const time =
+                                event.target.value;
+
+                              setDraftDeadline(
+                                `${
+                                  draftDeadline
+                                    ? draftDeadline.slice(
+                                        0,
+                                        10
+                                      )
+                                    : new Date()
+                                        .toISOString()
+                                        .slice(0, 10)
+                                }T${time}`
+                              );
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="deadline-popover-footer">
+                        <button
+                          type="button"
+                          className="deadline-today"
+                          onClick={setTodayDeadline}
+                        >
+                          Today
+                        </button>
+
+                        <button
+                          type="button"
+                          className="deadline-cancel"
+                          onClick={closeDeadlinePicker}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          type="button"
+                          className="deadline-done"
+                          onClick={applyDeadline}
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="field-hint">
                   Select when voting should close.
                   The deadline must be in the future.
                 </div>
-
               </div>
 
               {/* ANONYMOUS */}

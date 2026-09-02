@@ -12,6 +12,8 @@ function Polls() {
   const [comments, setComments] = useState({});
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [voteFilter, setVoteFilter] = useState("ALL");
   const [isError, setIsError] = useState(false);
 
   const authHeaders = () => ({
@@ -306,6 +308,39 @@ function Polls() {
   };
 
 
+  const categories = [
+    "ALL",
+    ...Array.from(
+      new Set(
+        decisions
+          .map((decision) => decision.category)
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b)),
+  ];
+
+  const filteredDecisions = decisions.filter((decision) => {
+    const matchesCategory =
+      categoryFilter === "ALL" ||
+      decision.category === categoryFilter;
+
+    const matchesVote =
+      voteFilter === "ALL" ||
+      (voteFilter === "VOTED" && decision.alreadyVoted) ||
+      (voteFilter === "NOT_VOTED" && !decision.alreadyVoted);
+
+    return matchesCategory && matchesVote;
+  });
+
+  const filtersActive =
+    categoryFilter !== "ALL" ||
+    voteFilter !== "ALL";
+
+  const clearFilters = () => {
+    setCategoryFilter("ALL");
+    setVoteFilter("ALL");
+  };
+
   return (
     <DashboardLayout
       pageTitle="Active Polls"
@@ -498,6 +533,123 @@ function Polls() {
           font-size: 11px;
         }
 
+
+
+        /* =========================
+           FILTER BAR
+        ========================= */
+
+        .poll-filters {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 18px;
+          padding: 13px 14px;
+          border: 1px solid var(--app-border);
+          border-radius: 14px;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(139, 92, 246, .055),
+              rgba(255, 255, 255, .02)
+            );
+          box-shadow: 0 10px 28px rgba(0, 0, 0, .08);
+        }
+
+        .poll-filter-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          margin-right: 2px;
+          color: var(--app-secondary-text);
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .poll-filter-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          box-shadow: 0 0 10px rgba(139, 92, 246, .55);
+        }
+
+        .poll-filter-select {
+          min-width: 145px;
+          padding: 9px 32px 9px 11px;
+          border: 1px solid var(--app-border);
+          border-radius: 10px;
+          background: var(--app-card-2);
+          color: var(--app-text);
+          font-size: 11px;
+          font-weight: 400;
+          outline: none;
+          cursor: pointer;
+          transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+
+        .poll-filter-select:hover {
+          border-color: rgba(139, 92, 246, .32);
+          background: rgba(139, 92, 246, .06);
+        }
+
+        .poll-filter-select:focus {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, .10);
+        }
+
+
+        .poll-filter-select {
+          color-scheme: dark;
+        }
+
+        .poll-filter-select option,
+        .poll-filter-select optgroup {
+          background: #171425;
+          color: #f3effb;
+          font-weight: 400;
+        }
+
+        .poll-filter-select option:checked,
+        .poll-filter-select option:hover {
+          background: #3b2a68;
+          color: #ffffff;
+        }
+
+        .poll-filter-reset {
+          margin-left: auto;
+          padding: 9px 11px;
+          border: 1px solid rgba(248, 113, 113, .14);
+          border-radius: 10px;
+          background: rgba(239, 68, 68, .055);
+          color: #f28b8b;
+          font-size: 10px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all .2s ease;
+        }
+
+        .poll-filter-reset:hover {
+          border-color: rgba(248, 113, 113, .30);
+          background: rgba(239, 68, 68, .10);
+          color: #f5a2a2;
+        }
+
+        .poll-filter-result {
+          width: 100%;
+          margin-top: 1px;
+          padding: 2px 1px 0;
+          color: var(--app-secondary-text);
+          font-size: 10px;
+        }
+
+        .poll-filter-result strong {
+          color: var(--app-text);
+          font-weight: 500;
+        }
 
         /* =========================
            POLL GRID
@@ -1228,6 +1380,27 @@ function Polls() {
             min-height: 38px;
           }
 
+
+          .poll-filters {
+            align-items: stretch;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .poll-filter-label {
+            margin-right: 0;
+          }
+
+          .poll-filter-select,
+          .poll-filter-reset {
+            width: 100%;
+            box-sizing: border-box;
+          }
+
+          .poll-filter-reset {
+            margin-left: 0;
+          }
+
         }
 
       `}</style>
@@ -1279,6 +1452,56 @@ function Polls() {
         </section>
 
 
+
+        {/* FILTERS */}
+        {!loading && decisions.length > 0 && (
+          <div className="poll-filters">
+            <span className="poll-filter-label">
+              <span className="poll-filter-dot" />
+              Filter polls
+            </span>
+
+            <select
+              className="poll-filter-select"
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              aria-label="Filter by category"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category === "ALL" ? "All categories" : category}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="poll-filter-select"
+              value={voteFilter}
+              onChange={(event) => setVoteFilter(event.target.value)}
+              aria-label="Filter by voting status"
+            >
+              <option value="ALL">All voting status</option>
+              <option value="NOT_VOTED">Not voted</option>
+              <option value="VOTED">Already voted</option>
+            </select>
+
+            {filtersActive && (
+              <button
+                type="button"
+                className="poll-filter-reset"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
+            )}
+
+            <div className="poll-filter-result">
+              Showing <strong>{filteredDecisions.length}</strong> of{" "}
+              <strong>{decisions.length}</strong> polls
+            </div>
+          </div>
+        )}
+
         {/* =========================
             LOADING
         ========================= */}
@@ -1319,16 +1542,35 @@ function Polls() {
           )}
 
 
+
+        {!loading &&
+          decisions.length > 0 &&
+          filteredDecisions.length === 0 && (
+            <div className="poll-empty">
+              <strong>No polls match these filters.</strong>
+              Try another category or voting status.
+              <div style={{ marginTop: "14px" }}>
+                <button
+                  type="button"
+                  className="poll-filter-reset"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </button>
+              </div>
+            </div>
+          )}
+
         {/* =========================
             POLLS
         ========================= */}
 
         {!loading &&
-          decisions.length > 0 && (
+          filteredDecisions.length > 0 && (
 
             <div className="polls-grid">
 
-              {decisions.map(
+              {filteredDecisions.map(
                 (decision) => {
 
                   const discussionOpen =
