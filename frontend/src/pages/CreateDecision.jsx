@@ -1,1323 +1,2141 @@
+
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 function CreateDecision() {
-    const navigate = useNavigate();
-    const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const [decision, setDecision] = useState({
-        title: "",
-        description: "",
-        category: "",
-        visibility: "PUBLIC",
-        deadline: "",
-        anonymous: false
+  const [decision, setDecision] = useState({
+    title: "",
+    description: "",
+    category: "",
+    visibility: "PUBLIC",
+    deadline: "",
+    anonymous: false,
+  });
+
+  const [options, setOptions] = useState(["", ""]);
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [communities, setCommunities] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  /* =========================================================
+     COMMUNITY FROM URL
+  ========================================================= */
+
+  useEffect(() => {
+    const communityId =
+      new URLSearchParams(location.search).get("communityId");
+
+    if (communityId) {
+      setDecision((current) => ({
+        ...current,
+        communityId,
+      }));
+    }
+  }, [location.search]);
+
+  /* =========================================================
+     FETCH COMMUNITIES
+  ========================================================= */
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("http://localhost:8080/api/communities", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (response) =>
+        response.ok ? response.json() : []
+      )
+      .then(setCommunities)
+      .catch(() => setCommunities([]));
+  }, []);
+
+  /* =========================================================
+     CLEAR MESSAGE
+  ========================================================= */
+
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, [message]);
+
+  /* =========================================================
+     HANDLE INPUT CHANGE
+  ========================================================= */
+
+  const handleChange = (e) => {
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = e.target;
+
+    setDecision({
+      ...decision,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     });
+  };
 
-    const [options, setOptions] = useState(["", ""]);
+  /* =========================================================
+     HANDLE OPTION CHANGE
+  ========================================================= */
 
-    const [message, setMessage] = useState("");
-    const [isError, setIsError] = useState(false);
-    const [communities, setCommunities] = useState([]);
-    const [submitting, setSubmitting] = useState(false);
+  const handleOptionChange = (index, value) => {
+    const updatedOptions = [...options];
 
-    /* =========================================================
-       COMMUNITY FROM URL
-    ========================================================= */
+    updatedOptions[index] = value;
 
-    useEffect(() => {
-        const communityId =
-            new URLSearchParams(location.search).get("communityId");
+    setOptions(updatedOptions);
+  };
 
-        if (communityId) {
-            setDecision((current) => ({
-                ...current,
-                communityId
-            }));
-        }
-    }, [location.search]);
+  /* =========================================================
+     ADD OPTION
+  ========================================================= */
 
-    /* =========================================================
-       FETCH COMMUNITIES
-    ========================================================= */
+  const addOption = () => {
+    setOptions([
+      ...options,
+      "",
+    ]);
+  };
 
-    useEffect(() => {
-        const token = sessionStorage.getItem("token");
+  /* =========================================================
+     REMOVE OPTION
+  ========================================================= */
 
-        if (!token) return;
-
-        fetch(
-            "http://localhost:8080/api/communities",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
+  const removeOption = (index) => {
+    if (options.length > 2) {
+      setOptions(
+        options.filter(
+          (_, i) => i !== index
         )
-            .then(async (response) =>
-                response.ok ? response.json() : []
-            )
-            .then(setCommunities)
-            .catch(() => setCommunities([]));
-    }, []);
+      );
+    }
+  };
 
-    /* =========================================================
-       CLEAR MESSAGE
-    ========================================================= */
+  /* =========================================================
+     GET MIN DATE TIME
+  ========================================================= */
 
-    useEffect(() => {
-        if (!message) return;
+  const getMinDateTime = () => {
+    const now = new Date();
 
-        const timer = setTimeout(
-            () => setMessage(""),
-            3500
+    const year = now.getFullYear();
+
+    const month = String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      now.getDate()
+    ).padStart(2, "0");
+
+    const hours = String(
+      now.getHours()
+    ).padStart(2, "0");
+
+    const minutes = String(
+      now.getMinutes()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  /* =========================================================
+     HANDLE SUBMIT
+  ========================================================= */
+
+  const handleSubmit = async () => {
+    const cleanOptions =
+      options
+        .map((option) => option.trim())
+        .filter(Boolean);
+
+    /* BASIC VALIDATION */
+
+    if (
+      !decision.title.trim() ||
+      !decision.description.trim() ||
+      cleanOptions.length < 2
+    ) {
+      setIsError(true);
+
+      setMessage(
+        "Enter a title, description, and at least two options."
+      );
+
+      return;
+    }
+
+    /* DEADLINE VALIDATION */
+
+    if (decision.deadline) {
+      const selectedDeadline =
+        new Date(decision.deadline);
+
+      const currentTime =
+        new Date();
+
+      if (
+        isNaN(
+          selectedDeadline.getTime()
+        )
+      ) {
+        setIsError(true);
+
+        setMessage(
+          "Please select a valid deadline."
         );
 
-        return () => clearTimeout(timer);
-    }, [message]);
+        return;
+      }
 
-    /* =========================================================
-       HANDLE INPUT CHANGE
-    ========================================================= */
+      if (
+        selectedDeadline <= currentTime
+      ) {
+        setIsError(true);
 
-    const handleChange = (e) => {
-        const {
-            name,
-            value,
-            type,
-            checked
-        } = e.target;
+        setMessage(
+          "Deadline must be in the future."
+        );
 
-        setDecision({
-            ...decision,
-            [name]:
-                type === "checkbox"
-                    ? checked
-                    : value
-        });
+        return;
+      }
+    }
+
+    /* REQUEST DATA */
+
+    const data = {
+      ...decision,
+
+      options: cleanOptions,
+
+      communityId:
+        decision.communityId
+          ? Number(decision.communityId)
+          : null,
     };
 
-    /* =========================================================
-       HANDLE OPTION CHANGE
-    ========================================================= */
+    try {
+      const token =
+        sessionStorage.getItem("token");
 
-    const handleOptionChange = (index, value) => {
-        const updatedOptions = [...options];
+      if (!token) {
+        setIsError(true);
 
-        updatedOptions[index] = value;
+        setMessage(
+          "Please login first."
+        );
 
-        setOptions(updatedOptions);
-    };
+        navigate("/login");
 
-    /* =========================================================
-       ADD OPTION
-    ========================================================= */
+        return;
+      }
 
-    const addOption = () => {
-        setOptions([
-            ...options,
-            ""
-        ]);
-    };
+      setSubmitting(true);
 
-    /* =========================================================
-       REMOVE OPTION
-    ========================================================= */
+      const response = await fetch(
+        "http://localhost:8080/api/decisions",
+        {
+          method: "POST",
 
-    const removeOption = (index) => {
-        if (options.length > 2) {
-            setOptions(
-                options.filter(
-                    (_, i) => i !== index
-                )
-            );
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          body: JSON.stringify(data),
         }
-    };
+      );
 
-    /* =========================================================
-       GET CURRENT LOCAL DATE + TIME
-       Used as minimum for datetime-local
-    ========================================================= */
+      const result =
+        await response
+          .json()
+          .catch(() => ({}));
 
-    const getMinDateTime = () => {
-        const now = new Date();
+      if (!response.ok) {
+        setIsError(true);
 
-        const year = now.getFullYear();
+        setMessage(
+          result.message ||
+          "Unable to create decision."
+        );
 
-        const month = String(
-            now.getMonth() + 1
-        ).padStart(2, "0");
+        return;
+      }
 
-        const day = String(
-            now.getDate()
-        ).padStart(2, "0");
+      setIsError(false);
 
-        const hours = String(
-            now.getHours()
-        ).padStart(2, "0");
+      setMessage(
+        "Decision created successfully!"
+      );
 
-        const minutes = String(
-            now.getMinutes()
-        ).padStart(2, "0");
+      setTimeout(() => {
+        navigate(
+          decision.communityId
+            ? `/communities/${decision.communityId}`
+            : "/decisions"
+        );
+      }, 1000);
 
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
+    } catch (error) {
+      console.error(
+        "Create decision error:",
+        error
+      );
 
-    /* =========================================================
-       HANDLE SUBMIT
-    ========================================================= */
+      setIsError(true);
 
-    const handleSubmit = async () => {
+      setMessage(
+        "Server error. Could not create decision."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-        const cleanOptions =
-            options
-                .map(option => option.trim())
-                .filter(Boolean);
+  const minDateTime =
+    getMinDateTime();
+
+  return (
+    <DashboardLayout
+      pageTitle="Create Decision"
+      pageSubtitle="Build a decision board and let your community make the choice together."
+    >
+
+      <Toast
+        message={message}
+        isError={isError}
+      />
+
+      <style>{`
 
         /* =====================================================
-           BASIC VALIDATION
+           PAGE
         ===================================================== */
 
-        if (
-            !decision.title.trim() ||
-            !decision.description.trim() ||
-            cleanOptions.length < 2
-        ) {
-            setIsError(true);
-
-            setMessage(
-                "Enter a title, description, and at least two options."
-            );
-
-            return;
+        .create-page {
+          width: 100%;
+          min-width: 0;
+          padding: 5px 0 35px;
+          color: var(--app-text);
         }
 
-        /* =====================================================
-           DEADLINE VALIDATION
-        ===================================================== */
-
-        if (decision.deadline) {
-
-            const selectedDeadline =
-                new Date(decision.deadline);
-
-            const currentTime =
-                new Date();
-
-            if (
-                isNaN(
-                    selectedDeadline.getTime()
-                )
-            ) {
-                setIsError(true);
-
-                setMessage(
-                    "Please select a valid deadline."
-                );
-
-                return;
-            }
-
-            if (
-                selectedDeadline <= currentTime
-            ) {
-                setIsError(true);
-
-                setMessage(
-                    "Deadline must be in the future."
-                );
-
-                return;
-            }
+        .create-wrapper {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
         }
 
         /* =====================================================
-           REQUEST DATA
+           FUTURISTIC HEADER
         ===================================================== */
 
-        const data = {
-            ...decision,
+        .create-hero {
+          position: relative;
+          overflow: hidden;
 
-            options: cleanOptions,
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-            communityId:
-                decision.communityId
-                    ? Number(decision.communityId)
-                    : null
-        };
+          gap: 20px;
 
-        try {
+          margin-bottom: 22px;
+          padding: 24px 26px;
 
-            const token =
-                sessionStorage.getItem("token");
+          border:
+            1px solid
+            rgba(139,92,246,.24);
 
-            console.log(
-                "TOKEN:",
-                token
+          border-radius: 20px;
+
+          background:
+            radial-gradient(
+              circle at 90% 20%,
+              rgba(139,92,246,.20),
+              transparent 30%
+            ),
+            radial-gradient(
+              circle at 5% 100%,
+              rgba(168,85,247,.10),
+              transparent 35%
+            ),
+            linear-gradient(
+              135deg,
+              var(--app-card),
+              var(--app-card-2)
             );
 
-            console.log(
-                "DATA:",
-                data
-            );
-
-            /* =================================================
-               LOGIN CHECK
-            ================================================= */
-
-            if (!token) {
-
-                setIsError(true);
-
-                setMessage(
-                    "Please login first."
-                );
-
-                navigate("/login");
-
-                return;
-            }
-
-            setSubmitting(true);
-
-            /* =================================================
-               CREATE DECISION
-            ================================================= */
-
-            const response = await fetch(
-                "http://localhost:8080/api/decisions",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        "Authorization":
-                            `Bearer ${token}`
-                    },
-
-                    body:
-                        JSON.stringify(data)
-                }
-            );
-
-            const result =
-                await response
-                    .json()
-                    .catch(() => ({}));
-
-            console.log(
-                "STATUS:",
-                response.status
-            );
-
-            console.log(
-                "RESPONSE:",
-                result
-            );
-
-            /* =================================================
-               ERROR RESPONSE
-            ================================================= */
-
-            if (!response.ok) {
-
-                setIsError(true);
-
-                setMessage(
-                    result.message ||
-                    "Unable to create decision."
-                );
-
-                return;
-            }
-
-            /* =================================================
-               SUCCESS
-            ================================================= */
-
-            setIsError(false);
-
-            setMessage(
-                "Decision created successfully!"
-            );
-
-            setTimeout(() => {
-
-                navigate(
-                    decision.communityId
-                        ? `/communities/${decision.communityId}`
-                        : "/decisions"
-                );
-
-            }, 1000);
-
-        } catch (error) {
-
-            console.error(
-                "Create decision error:",
-                error
-            );
-
-            setIsError(true);
-
-            setMessage(
-                "Server error. Could not create decision."
-            );
-
-        } finally {
-
-            setSubmitting(false);
+          box-shadow:
+            0 18px 55px
+            rgba(0,0,0,.06);
         }
-    };
 
-    /* =========================================================
-       MINIMUM DATE + TIME
-    ========================================================= */
+        .create-hero::after {
+          content: "";
 
-    const minDateTime =
-        getMinDateTime();
+          position: absolute;
 
-    return (
-        <DashboardLayout
-            pageTitle="Create Decision"
-            pageSubtitle="Set up a new decision board for people to vote on."
-        >
+          left: 0;
+          right: 42%;
 
-            <Toast
-                message={message}
-                isError={isError}
-            />
+          bottom: 0;
 
-            <style>{`
+          height: 2px;
 
-                /* =========================
-                   PAGE
-                ========================= */
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              #8b5cf6,
+              #c084fc,
+              transparent
+            );
 
-                .create-page {
-                    width: 100%;
-                    min-height:
-                        calc(100vh - 100px);
+          box-shadow:
+            0 0 15px
+            rgba(139,92,246,.65);
+        }
 
-                    padding:
-                        5px 0 40px;
+        .create-hero-content {
+          position: relative;
+          z-index: 2;
 
-                    color:
-                        var(--app-text);
-                }
+          min-width: 0;
+        }
 
+        .create-eyebrow {
+          display: flex;
+          align-items: center;
 
-                /* =========================
-                   FORM CARD
-                ========================= */
+          gap: 8px;
 
-                .form-card {
-                    width: 100%;
-                    max-width: 850px;
+          margin-bottom: 8px;
 
-                    background:
-                        var(--app-card);
+          color: #a78bfa;
 
-                    border:
-                        1px solid
-                        var(--app-border);
+          font-size: 9px;
+          font-weight: 850;
 
-                    border-radius: 16px;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+        }
 
-                    padding: 30px;
+        .create-dot {
+          width: 6px;
+          height: 6px;
 
-                    box-shadow:
-                        0 8px 30px
-                        rgba(0, 0, 0, 0.12);
-                }
+          border-radius: 50%;
 
+          background: #8b5cf6;
 
-                /* =========================
-                   FORM INTRO
-                ========================= */
+          box-shadow:
+            0 0 8px
+            rgba(139,92,246,.9);
+        }
 
-                .form-intro {
-                    margin-bottom: 28px;
+        .create-hero-title {
+          margin: 0;
 
-                    padding-bottom: 20px;
+          color: var(--app-text);
 
-                    border-bottom:
-                        1px solid
-                        var(--app-border);
-                }
+          font-size:
+            clamp(22px, 4vw, 30px);
 
-                .form-intro h2 {
-                    color:
-                        var(--app-text);
+          line-height: 1.15;
 
-                    font-size: 20px;
+          font-weight: 850;
 
-                    font-weight: 600;
+          letter-spacing: -.035em;
+        }
 
-                    margin-bottom: 6px;
-                }
+        .create-hero-description {
+          max-width: 650px;
 
-                .form-intro p {
-                    color:
-                        var(--app-secondary-text);
+          margin: 8px 0 0;
 
-                    font-size: 13px;
+          color:
+            var(--app-secondary-text);
 
-                    line-height: 1.5;
-                }
+          font-size: 12px;
 
+          line-height: 1.6;
+        }
 
-                /* =========================
-                   FIELD GROUP
-                ========================= */
+        .create-hero-icon {
+          position: relative;
 
-                .field-group {
-                    margin-bottom: 20px;
-                }
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-                .field-label {
-                    display: block;
+          width: 68px;
+          height: 68px;
 
-                    font-size: 13px;
+          flex-shrink: 0;
 
-                    font-weight: 600;
+          border:
+            1px solid
+            rgba(139,92,246,.28);
 
-                    color:
-                        #a78bfa;
+          border-radius: 18px;
 
-                    margin-bottom: 7px;
-                }
+          background:
+            rgba(139,92,246,.08);
 
+          color: #c4b5fd;
 
-                /* =========================
-                   INPUTS
-                ========================= */
+          font-size: 28px;
 
-                .form-card input[type="text"],
-                .form-card input:not([type]),
-                .form-card input[type="date"],
-                .form-card input[type="datetime-local"],
-                .form-card textarea,
-                .form-card select {
+          box-shadow:
+            0 0 30px
+            rgba(139,92,246,.10);
+        }
 
-                    width: 100%;
+        /* =====================================================
+           MAIN GRID
+        ===================================================== */
 
-                    padding: 12px 14px;
+        .create-grid {
+          display: grid;
 
-                    border:
-                        1px solid
-                        var(--app-border);
+          grid-template-columns:
+            minmax(0, 1.6fr)
+            minmax(280px, .75fr);
 
-                    border-radius: 9px;
+          gap: 18px;
 
-                    font-size: 14px;
+          align-items: start;
+        }
 
-                    color:
-                        var(--app-text);
+        /* =====================================================
+           FORM CARD
+        ===================================================== */
 
-                    background:
-                        var(--app-card-2);
+        .form-card {
+          width: 100%;
+          min-width: 0;
 
-                    outline: none;
+          padding: 25px;
 
-                    transition:
-                        border-color 0.2s ease,
-                        background 0.2s ease;
-                }
+          border:
+            1px solid
+            var(--app-border);
 
+          border-radius: 18px;
 
-                .form-card input::placeholder,
-                .form-card textarea::placeholder {
-                    color:
-                        var(--app-secondary-text);
-                }
+          background:
+            linear-gradient(
+              145deg,
+              var(--app-card),
+              var(--app-card-2)
+            );
 
+          box-shadow:
+            0 12px 38px
+            rgba(0,0,0,.055);
+        }
 
-                .form-card input:focus,
-                .form-card textarea:focus,
-                .form-card select:focus {
+        .form-card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
-                    border-color:
-                        #6d4bc3;
+          gap: 15px;
 
-                    background:
-                        var(--app-card-2);
+          margin-bottom: 24px;
 
-                    box-shadow:
-                        0 0 0 2px
-                        rgba(
-                            109,
-                            75,
-                            195,
-                            0.12
-                        );
-                }
+          padding-bottom: 17px;
 
+          border-bottom:
+            1px solid
+            var(--app-border);
+        }
 
-                /* =========================
-                   DATETIME INPUT
-                ========================= */
+        .form-card-title {
+          margin: 0;
 
-                .form-card input[type="datetime-local"] {
-                    cursor: pointer;
-                }
+          color: var(--app-text);
 
-                .deadline-hint {
-                    margin-top: 7px;
+          font-size: 17px;
+          font-weight: 800;
+        }
 
-                    color:
-                        var(--app-secondary-text);
+        .form-card-subtitle {
+          margin: 4px 0 0;
 
-                    font-size: 11px;
+          color:
+            var(--app-secondary-text);
 
-                    line-height: 1.5;
-                }
+          font-size: 10px;
+          line-height: 1.5;
+        }
 
+        .step-badge {
+          flex-shrink: 0;
 
-                /* =========================
-                   TEXTAREA
-                ========================= */
+          padding: 6px 9px;
 
-                .form-card textarea {
+          border:
+            1px solid
+            rgba(139,92,246,.20);
 
-                    resize: vertical;
+          border-radius: 999px;
 
-                    min-height: 100px;
+          background:
+            rgba(139,92,246,.06);
 
-                    line-height: 1.5;
-                }
+          color: #a78bfa;
 
+          font-size: 8px;
+          font-weight: 850;
 
-                /* =========================
-                   SELECT
-                ========================= */
+          letter-spacing: .1em;
+        }
 
-                .form-card select {
-                    cursor: pointer;
-                }
+        /* =====================================================
+           FORM FIELD
+        ===================================================== */
 
-                .form-card select option {
-                    background:
-                        var(--app-card);
+        .field-group {
+          margin-bottom: 18px;
+        }
 
-                    color:
-                        var(--app-text);
-                }
+        .field-label {
+          display: flex;
+          align-items: center;
 
+          gap: 6px;
 
-                /* =========================
-                   VISIBILITY
-                ========================= */
+          margin-bottom: 7px;
 
-                .visibility-section {
-                    margin-bottom: 22px;
-                }
+          color: var(--app-text);
 
-                .radio-row {
+          font-size: 11px;
+          font-weight: 750;
+        }
 
-                    display: flex;
+        .required {
+          color: #a78bfa;
+        }
 
-                    align-items: center;
+        .field-hint {
+          margin-top: 6px;
 
-                    gap: 25px;
+          color:
+            var(--app-secondary-text);
 
-                    margin-top: 10px;
-                }
+          font-size: 9px;
 
-                .radio-option {
+          line-height: 1.5;
+        }
 
-                    display: flex;
+        /* =====================================================
+           INPUTS
+        ===================================================== */
 
-                    align-items: center;
+        .form-input,
+        .form-textarea,
+        .form-select {
 
-                    gap: 8px;
+          width: 100%;
+          min-width: 0;
 
-                    font-size: 14px;
+          box-sizing: border-box;
 
-                    color:
-                        var(--app-secondary-text);
+          padding:
+            11px 13px;
 
-                    cursor: pointer;
-                }
+          border:
+            1px solid
+            var(--app-border);
 
-                .radio-option input {
+          border-radius: 10px;
 
-                    width: 16px;
-                    height: 16px;
+          outline: none;
 
-                    accent-color:
-                        #6d4bc3;
+          color:
+            var(--app-text);
 
-                    cursor: pointer;
-                }
+          background:
+            var(--app-card-2);
 
-                .radio-option:hover {
-                    color:
-                        var(--app-text);
-                }
+          font-family: inherit;
 
+          font-size: 12px;
 
-                /* =========================
-                   CHECKBOX
-                ========================= */
+          transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
+            background .2s ease;
+        }
 
-                .checkbox-row {
+        .form-input {
+          height: 43px;
+        }
 
-                    display: flex;
+        .form-textarea {
+          min-height: 105px;
 
-                    align-items: center;
+          resize: vertical;
 
-                    gap: 10px;
+          line-height: 1.6;
+        }
 
-                    margin-bottom: 26px;
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+          color:
+            var(--app-secondary-text);
 
-                    font-size: 14px;
+          opacity: .75;
+        }
 
-                    color:
-                        var(--app-secondary-text);
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
 
-                    cursor: pointer;
-                }
+          border-color:
+            rgba(139,92,246,.65);
 
-                .checkbox-row input {
+          background:
+            var(--app-card-2);
 
-                    width: 16px;
-                    height: 16px;
+          box-shadow:
+            0 0 0 3px
+            rgba(139,92,246,.09),
+            0 0 20px
+            rgba(139,92,246,.05);
+        }
 
-                    accent-color:
-                        #6d4bc3;
+        .form-select {
+          height: 43px;
 
-                    cursor: pointer;
-                }
+          cursor: pointer;
+        }
 
+        .form-select option {
+          background:
+            var(--app-card);
 
-                /* =========================
-                   OPTIONS SECTION
-                ========================= */
+          color:
+            var(--app-text);
+        }
 
-                .section-heading {
+        /* =====================================================
+           TWO COLUMN FIELDS
+        ===================================================== */
 
-                    font-size: 16px;
+        .form-two-column {
+          display: grid;
 
-                    font-weight: 600;
+          grid-template-columns:
+            repeat(2, minmax(0,1fr));
 
-                    color:
-                        var(--app-text);
+          gap: 14px;
+        }
 
-                    margin:
-                        26px 0 12px;
+        /* =====================================================
+           VISIBILITY
+        ===================================================== */
 
-                    padding-bottom: 10px;
+        .visibility-box {
+          display: grid;
 
-                    border-bottom:
-                        1px solid
-                        var(--app-border);
-                }
+          grid-template-columns:
+            repeat(2, minmax(0,1fr));
 
+          gap: 10px;
 
-                .option-input {
-                    margin-bottom: 10px;
-                }
+          margin-top: 7px;
+        }
 
-                .option-number {
+        .visibility-option {
+          position: relative;
 
-                    display: block;
+          display: flex;
+          align-items: center;
 
-                    color:
-                        var(--app-secondary-text);
+          gap: 10px;
 
-                    font-size: 11px;
+          min-width: 0;
 
-                    margin-bottom: 5px;
-                }
+          padding: 12px;
 
+          border:
+            1px solid
+            var(--app-border);
 
-                /* =========================
-                   BUTTON ROW
-                ========================= */
+          border-radius: 11px;
 
-                .btn-row {
+          background:
+            var(--app-card-2);
 
-                    display: flex;
+          cursor: pointer;
 
-                    gap: 12px;
+          transition:
+            border-color .2s ease,
+            background .2s ease,
+            transform .2s ease;
+        }
 
-                    margin-top: 14px;
-                }
+        .visibility-option:hover {
+          transform: translateY(-1px);
 
+          border-color:
+            rgba(139,92,246,.30);
+        }
 
-                /* =========================
-                   ADD OPTION
-                ========================= */
+        .visibility-option.selected {
+          border-color:
+            rgba(139,92,246,.55);
 
-                .btn-add {
+          background:
+            rgba(139,92,246,.08);
 
-                    background:
-                        var(--app-card-2);
+          box-shadow:
+            inset 0 0 20px
+            rgba(139,92,246,.035);
+        }
 
-                    color:
-                        #c4b5fd;
+        .visibility-option input {
+          width: 15px;
+          height: 15px;
 
-                    border:
-                        1px solid
-                        #493773;
+          flex-shrink: 0;
 
-                    padding:
-                        10px 17px;
+          accent-color:
+            #8b5cf6;
 
-                    border-radius: 8px;
+          cursor: pointer;
+        }
 
-                    font-weight: 600;
+        .visibility-content {
+          min-width: 0;
+        }
 
-                    font-size: 13px;
+        .visibility-title {
+          color: var(--app-text);
 
-                    cursor: pointer;
+          font-size: 11px;
+          font-weight: 750;
+        }
 
-                    transition:
-                        0.2s ease;
-                }
+        .visibility-description {
+          margin-top: 2px;
 
-                .btn-add:hover {
+          color:
+            var(--app-secondary-text);
 
-                    background:
-                        var(--app-card);
+          font-size: 8px;
 
-                    border-color:
-                        #6548a0;
-                }
+          line-height: 1.4;
+        }
 
+        /* =====================================================
+           CHECKBOX
+        ===================================================== */
 
-                /* =========================
-                   SUBMIT
-                ========================= */
+        .anonymous-box {
+          display: flex;
+          align-items: center;
 
-                .btn-submit {
+          gap: 11px;
 
-                    width: 100%;
+          margin-top: 4px;
+          padding: 13px;
 
-                    background:
-                        #6d3dcc;
+          border:
+            1px solid
+            var(--app-border);
 
-                    color: white;
+          border-radius: 11px;
 
-                    border: none;
+          background:
+            rgba(139,92,246,.025);
 
-                    padding:
-                        13px 18px;
+          cursor: pointer;
+        }
 
-                    border-radius: 9px;
+        .anonymous-box input {
+          width: 16px;
+          height: 16px;
 
-                    font-weight: 600;
+          flex-shrink: 0;
 
-                    font-size: 14px;
+          accent-color:
+            #8b5cf6;
 
-                    cursor: pointer;
+          cursor: pointer;
+        }
 
-                    margin-top: 24px;
+        .anonymous-content {
+          min-width: 0;
+        }
 
-                    transition:
-                        0.2s ease;
-                }
+        .anonymous-title {
+          color: var(--app-text);
 
-                .btn-submit:hover {
+          font-size: 11px;
+          font-weight: 700;
+        }
 
-                    background:
-                        #7848d8;
+        .anonymous-description {
+          margin-top: 2px;
 
-                    box-shadow:
-                        0 5px 15px
-                        rgba(
-                            109,
-                            61,
-                            204,
-                            0.20
-                        );
-                }
+          color:
+            var(--app-secondary-text);
 
-                .btn-submit:disabled {
+          font-size: 8px;
+        }
 
-                    opacity: 0.6;
+        /* =====================================================
+           OPTIONS
+        ===================================================== */
 
-                    cursor:
-                        not-allowed;
-                }
+        .options-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
+          gap: 10px;
 
-                /* =========================
-                   MESSAGE
-                ========================= */
+          margin-top: 24px;
+          margin-bottom: 11px;
 
-                .form-message {
+          padding-bottom: 10px;
 
-                    margin-top: 16px;
+          border-bottom:
+            1px solid
+            var(--app-border);
+        }
 
-                    padding:
-                        11px 14px;
+        .options-title {
+          margin: 0;
 
-                    border-radius: 8px;
+          color: var(--app-text);
 
-                    text-align: center;
+          font-size: 13px;
+          font-weight: 800;
+        }
 
-                    font-weight: 500;
+        .options-count {
+          color: #a78bfa;
 
-                    color:
-                        #c4b5fd;
+          font-size: 8px;
+          font-weight: 800;
 
-                    background:
-                        var(--app-card-2);
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
 
-                    border:
-                        1px solid
-                        #493773;
+        .option-item {
+          display: grid;
 
-                    font-size: 13px;
-                }
+          grid-template-columns:
+            30px minmax(0,1fr) auto;
 
+          align-items: center;
 
-                /* =========================
-                   SUCCESS MESSAGE
-                ========================= */
+          gap: 9px;
 
-                .form-message.success {
+          margin-bottom: 9px;
 
-                    color:
-                        #86efac;
+          padding: 9px;
 
-                    background:
-                        rgba(
-                            16,
-                            37,
-                            29,
-                            0.75
-                        );
+          border:
+            1px solid
+            var(--app-border);
 
-                    border-color:
-                        #23734f;
-                }
+          border-radius: 11px;
 
+          background:
+            var(--app-card-2);
 
-                /* =========================
-                   RESPONSIVE
-                ========================= */
+          transition:
+            border-color .2s ease,
+            box-shadow .2s ease;
+        }
 
-                @media (max-width: 700px) {
+        .option-item:focus-within {
+          border-color:
+            rgba(139,92,246,.40);
 
-                    .create-page {
+          box-shadow:
+            0 0 18px
+            rgba(139,92,246,.05);
+        }
 
-                        padding:
-                            5px 0 30px;
-                    }
+        .option-number {
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-                    .form-card {
+          width: 30px;
+          height: 30px;
 
-                        padding: 22px;
+          border:
+            1px solid
+            rgba(139,92,246,.18);
 
-                        border-radius: 12px;
-                    }
+          border-radius: 8px;
 
-                    .radio-row {
+          background:
+            rgba(139,92,246,.07);
 
-                        gap: 18px;
-                    }
-                }
+          color: #a78bfa;
 
+          font-size: 9px;
+          font-weight: 850;
+        }
 
-                @media (max-width: 450px) {
+        .option-input {
+          width: 100%;
+          min-width: 0;
 
-                    .form-card {
+          height: 38px;
 
-                        padding: 18px;
-                    }
+          padding:
+            0 10px;
 
-                    .radio-row {
+          border:
+            1px solid
+            var(--app-border);
 
-                        flex-direction:
-                            column;
+          border-radius: 8px;
 
-                        align-items:
-                            flex-start;
+          outline: none;
 
-                        gap: 12px;
-                    }
-                }
+          color:
+            var(--app-text);
 
-            `}</style>
+          background:
+            var(--app-card);
 
+          font-family: inherit;
 
-            <div className="create-page">
+          font-size: 11px;
+        }
 
-                <div className="form-card">
+        .option-input:focus {
+          border-color:
+            rgba(139,92,246,.55);
 
-                    {/* =========================
-                        FORM INTRO
-                    ========================= */}
+          box-shadow:
+            0 0 0 2px
+            rgba(139,92,246,.07);
+        }
 
-                    <div className="form-intro">
+        .remove-option {
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-                        <h2>
-                            Create a New Decision
-                        </h2>
+          width: 31px;
+          height: 31px;
 
-                        <p>
-                            Add the details below and give people
-                            clear options to vote on.
-                        </p>
+          border:
+            1px solid
+            rgba(239,68,68,.20);
 
-                    </div>
+          border-radius: 8px;
 
+          background:
+            rgba(239,68,68,.06);
 
-                    {/* =========================
-                        TITLE
-                    ========================= */}
+          color: #f87171;
 
-                    <div className="field-group">
+          font-size: 15px;
 
-                        <span className="field-label">
-                            Decision Title
-                        </span>
+          cursor: pointer;
 
-                        <input
-                            type="text"
-                            name="title"
-                            placeholder="e.g. Which framework should we use?"
-                            value={decision.title}
-                            onChange={handleChange}
-                        />
+          transition:
+            background .2s ease,
+            transform .2s ease;
+        }
 
-                    </div>
+        .remove-option:hover {
+          transform: scale(1.04);
 
+          background:
+            rgba(239,68,68,.12);
+        }
 
-                    {/* =========================
-                        COMMUNITY
-                    ========================= */}
+        .add-option {
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-                    <div className="field-group">
+          width: 100%;
 
-                        <span className="field-label">
-                            Community (optional)
-                        </span>
+          margin-top: 5px;
 
-                        <select
-                            name="communityId"
-                            value={
-                                decision.communityId || ""
-                            }
-                            onChange={handleChange}
-                        >
+          padding: 10px;
 
-                            <option value="">
-                                No community
-                            </option>
+          border:
+            1px dashed
+            rgba(139,92,246,.35);
 
-                            {communities
-                                .filter(c => c.joined)
-                                .map(c => (
+          border-radius: 9px;
 
-                                    <option
-                                        key={c.id}
-                                        value={c.id}
-                                    >
-                                        {c.communityName}
-                                    </option>
+          background:
+            rgba(139,92,246,.035);
 
-                                ))}
+          color: #a78bfa;
 
-                        </select>
+          font-size: 10px;
+          font-weight: 750;
 
-                    </div>
+          cursor: pointer;
 
+          transition:
+            background .2s ease,
+            border-color .2s ease;
+        }
 
-                    {/* =========================
-                        DESCRIPTION
-                    ========================= */}
+        .add-option:hover {
+          background:
+            rgba(139,92,246,.08);
 
-                    <div className="field-group">
+          border-color:
+            rgba(139,92,246,.60);
+        }
 
-                        <span className="field-label">
-                            Description
-                        </span>
+        /* =====================================================
+           SUBMIT
+        ===================================================== */
 
-                        <textarea
-                            name="description"
-                            placeholder="Add some context for people voting..."
-                            value={decision.description}
-                            onChange={handleChange}
-                        />
+        .submit-button {
+          position: relative;
+          overflow: hidden;
 
-                    </div>
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
+          gap: 8px;
 
-                    {/* =========================
-                        CATEGORY
-                    ========================= */}
+          width: 100%;
 
-                    <div className="field-group">
+          min-height: 46px;
 
-                        <span className="field-label">
-                            Category
-                        </span>
+          margin-top: 22px;
 
-                        <select
-                            name="category"
-                            value={decision.category}
-                            onChange={handleChange}
-                        >
+          border: none;
 
-                            <option value="">
-                                Select Category
-                            </option>
+          border-radius: 11px;
 
-                            <option value="Career">
-                                Career
-                            </option>
+          background:
+            linear-gradient(
+              135deg,
+              #7c3aed,
+              #8b5cf6,
+              #a855f7
+            );
 
-                            <option value="Technology">
-                                Technology
-                            </option>
+          color: white;
 
-                            <option value="Education">
-                                Education
-                            </option>
+          font-size: 12px;
+          font-weight: 800;
 
-                            <option value="Travel">
-                                Travel
-                            </option>
+          letter-spacing: .01em;
 
-                            <option value="Finance">
-                                Finance
-                            </option>
+          cursor: pointer;
 
-                        </select>
+          box-shadow:
+            0 10px 25px
+            rgba(124,58,237,.20);
 
-                    </div>
+          transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            filter .2s ease;
+        }
 
+        .submit-button::before {
+          content: "";
 
-                    {/* =========================
-                        VISIBILITY
-                    ========================= */}
+          position: absolute;
 
-                    <div className="visibility-section">
+          top: 0;
+          left: -100%;
 
-                        <span className="field-label">
-                            Visibility
-                        </span>
+          width: 70%;
+          height: 100%;
 
-                        <div className="radio-row">
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(255,255,255,.18),
+              transparent
+            );
 
-                            <label className="radio-option">
+          transform: skewX(-20deg);
 
-                                <input
-                                    type="radio"
-                                    name="visibility"
-                                    value="PUBLIC"
-                                    checked={
-                                        decision.visibility ===
-                                        "PUBLIC"
-                                    }
-                                    onChange={handleChange}
-                                />
+          transition:
+            left .55s ease;
+        }
 
-                                Public
+        .submit-button:hover::before {
+          left: 140%;
+        }
 
-                            </label>
+        .submit-button:hover {
+          transform:
+            translateY(-2px);
 
+          filter:
+            brightness(1.05);
 
-                            <label className="radio-option">
+          box-shadow:
+            0 15px 35px
+            rgba(124,58,237,.28);
+        }
 
-                                <input
-                                    type="radio"
-                                    name="visibility"
-                                    value="PRIVATE"
-                                    checked={
-                                        decision.visibility ===
-                                        "PRIVATE"
-                                    }
-                                    onChange={handleChange}
-                                />
+        .submit-button:disabled {
+          opacity: .55;
 
-                                Private
+          cursor:
+            not-allowed;
 
-                            </label>
+          transform: none;
 
-                        </div>
+          box-shadow: none;
+        }
 
-                    </div>
+        /* =====================================================
+           SIDE PANEL
+        ===================================================== */
 
+        .info-panel {
+          position: sticky;
+          top: 20px;
 
-                    {/* =========================
-                        DEADLINE
-                    ========================= */}
+          overflow: hidden;
 
-                    <div className="field-group">
+          padding: 20px;
 
-                        <span className="field-label">
-                            Deadline
-                        </span>
+          border:
+            1px solid
+            var(--app-border);
 
-                        <input
-                            type="datetime-local"
-                            name="deadline"
-                            value={decision.deadline}
-                            onChange={handleChange}
-                            min={minDateTime}
-                        />
+          border-radius: 18px;
 
-                        <div className="deadline-hint">
-                            Select the exact date and time when
-                            voting should end.
-                        </div>
+          background:
+            linear-gradient(
+              145deg,
+              var(--app-card),
+              var(--app-card-2)
+            );
 
-                    </div>
+          box-shadow:
+            0 12px 35px
+            rgba(0,0,0,.045);
+        }
 
+        .info-panel::before {
+          content: "";
 
-                    {/* =========================
-                        ANONYMOUS VOTING
-                    ========================= */}
+          position: absolute;
 
-                    <label className="checkbox-row">
+          width: 150px;
+          height: 150px;
 
-                        <input
-                            type="checkbox"
-                            name="anonymous"
-                            checked={
-                                decision.anonymous
-                            }
-                            onChange={handleChange}
-                        />
+          right: -80px;
+          top: -80px;
 
-                        Allow Anonymous Voting
+          border-radius: 50%;
 
-                    </label>
+          background:
+            rgba(139,92,246,.09);
 
+          filter: blur(15px);
 
-                    {/* =========================
-                        OPTIONS
-                    ========================= */}
+          pointer-events: none;
+        }
 
-                    <div className="section-heading">
-                        Voting Options
-                    </div>
+        .info-title {
+          position: relative;
+          z-index: 2;
 
+          margin: 0 0 4px;
 
-                    {options.map(
-                        (option, index) => (
+          color: var(--app-text);
 
-                            <div
-                                className="option-input"
-                                key={index}
-                            >
+          font-size: 14px;
+          font-weight: 800;
+        }
 
-                                <span className="option-number">
-                                    Option {index + 1}
-                                </span>
+        .info-subtitle {
+          position: relative;
+          z-index: 2;
 
-                                <input
-                                    type="text"
-                                    placeholder={
-                                        `Enter option ${index + 1}`
-                                    }
-                                    value={option}
-                                    onChange={(e) =>
-                                        handleOptionChange(
-                                            index,
-                                            e.target.value
-                                        )
-                                    }
-                                />
+          margin: 0 0 18px;
 
+          color:
+            var(--app-secondary-text);
 
-                                {options.length > 2 && (
+          font-size: 9px;
 
-                                    <button
-                                        type="button"
-                                        className="btn-add"
-                                        onClick={() =>
-                                            removeOption(index)
-                                        }
-                                        style={{
-                                            marginTop: "8px"
-                                        }}
-                                    >
-                                        Remove
-                                    </button>
+          line-height: 1.55;
+        }
 
-                                )}
+        .info-step {
+          position: relative;
+          z-index: 2;
 
-                            </div>
+          display: flex;
+          align-items: flex-start;
 
-                        )
-                    )}
+          gap: 11px;
 
+          margin-bottom: 15px;
+        }
 
-                    {/* =========================
-                        ADD OPTION
-                    ========================= */}
+        .info-step-number {
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-                    <div className="btn-row">
+          width: 27px;
+          height: 27px;
 
-                        <button
-                            type="button"
-                            className="btn-add"
-                            onClick={addOption}
-                        >
-                            + Add Option
-                        </button>
+          flex-shrink: 0;
 
-                    </div>
+          border:
+            1px solid
+            rgba(139,92,246,.20);
 
+          border-radius: 8px;
 
-                    {/* =========================
-                        SUBMIT
-                    ========================= */}
+          background:
+            rgba(139,92,246,.07);
 
-                    <button
-                        type="button"
-                        className="btn-submit"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                    >
+          color: #a78bfa;
 
-                        {
-                            submitting
-                                ? "Creating..."
-                                : "Create Decision"
-                        }
+          font-size: 9px;
+          font-weight: 850;
+        }
 
-                    </button>
+        .info-step-content {
+          min-width: 0;
+        }
 
+        .info-step-title {
+          color: var(--app-text);
 
-                    {/* =========================
-                        MESSAGE
-                    ========================= */}
+          font-size: 10px;
+          font-weight: 750;
+        }
 
-                    {message && (
+        .info-step-text {
+          margin-top: 3px;
 
-                        <div
-                            className={
-                                message.includes(
-                                    "successfully"
-                                )
-                                    ? "form-message success"
-                                    : "form-message"
-                            }
-                        >
+          color:
+            var(--app-secondary-text);
 
-                            {message}
+          font-size: 8px;
 
-                        </div>
+          line-height: 1.5;
+        }
 
-                    )}
+        .info-tip {
+          position: relative;
+          z-index: 2;
 
-                </div>
+          margin-top: 18px;
+          padding: 12px;
+
+          border:
+            1px solid
+            rgba(139,92,246,.17);
+
+          border-radius: 10px;
+
+          background:
+            rgba(139,92,246,.05);
+
+          color:
+            var(--app-secondary-text);
+
+          font-size: 8px;
+
+          line-height: 1.55;
+        }
+
+        .info-tip strong {
+          color: #a78bfa;
+        }
+
+        /* =====================================================
+           COPYRIGHT
+        ===================================================== */
+
+        .create-footer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          flex-wrap: wrap;
+
+          gap: 7px;
+
+          margin-top: 35px;
+          padding-top: 18px;
+
+          border-top:
+            1px solid
+            var(--app-border);
+
+          color:
+            var(--app-secondary-text);
+
+          font-size: 8px;
+
+          text-align: center;
+        }
+
+        .footer-brand {
+          color: #a78bfa;
+          font-weight: 750;
+        }
+
+        .footer-dot {
+          width: 4px;
+          height: 4px;
+
+          border-radius: 50%;
+
+          background: #8b5cf6;
+
+          box-shadow:
+            0 0 7px
+            rgba(139,92,246,.7);
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+          .create-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .info-panel {
+            position: relative;
+            top: auto;
+          }
+        }
+
+        @media (max-width: 650px) {
+
+          .create-page {
+            padding-bottom: 25px;
+          }
+
+          .create-hero {
+            padding: 19px;
+            border-radius: 17px;
+          }
+
+          .create-hero-icon {
+            width: 52px;
+            height: 52px;
+
+            border-radius: 14px;
+
+            font-size: 22px;
+          }
+
+          .create-hero-title {
+            font-size: 23px;
+          }
+
+          .create-hero-description {
+            font-size: 10px;
+          }
+
+          .form-card {
+            padding: 19px;
+            border-radius: 16px;
+          }
+
+          .form-two-column {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .visibility-box {
+            grid-template-columns: 1fr;
+          }
+
+          .option-item {
+            grid-template-columns:
+              30px minmax(0,1fr) 31px;
+          }
+
+          .info-panel {
+            padding: 18px;
+          }
+        }
+
+        @media (max-width: 450px) {
+
+          .create-hero {
+            padding: 16px;
+          }
+
+          .create-hero-icon {
+            display: none;
+          }
+
+          .form-card {
+            padding: 16px;
+          }
+
+          .form-card-header {
+            align-items: flex-start;
+          }
+
+          .step-badge {
+            display: none;
+          }
+
+          .form-input,
+          .form-select {
+            height: 42px;
+          }
+
+          .option-item {
+            gap: 7px;
+            padding: 7px;
+          }
+
+          .option-number {
+            width: 28px;
+            height: 28px;
+          }
+
+          .remove-option {
+            width: 29px;
+            height: 29px;
+          }
+
+          .create-footer {
+            padding-left: 8px;
+            padding-right: 8px;
+          }
+        }
+
+      `}</style>
+
+      <div className="create-page">
+
+        <div className="create-wrapper">
+
+          {/* =================================================
+              HERO
+          ================================================= */}
+
+          <section className="create-hero">
+
+            <div className="create-hero-content">
+
+              <div className="create-eyebrow">
+                <span className="create-dot" />
+                Decision Builder
+              </div>
+
+              <h1 className="create-hero-title">
+                Create a New Decision
+              </h1>
+
+              <p className="create-hero-description">
+                Set up your question, provide clear options,
+                and let your community make the decision
+                together.
+              </p>
 
             </div>
 
-        </DashboardLayout>
-    );
+            <div className="create-hero-icon">
+              ✦
+            </div>
+
+          </section>
+
+          {/* =================================================
+              MAIN CONTENT
+          ================================================= */}
+
+          <div className="create-grid">
+
+            {/* =================================================
+                FORM
+            ================================================= */}
+
+            <div className="form-card">
+
+              <div className="form-card-header">
+
+                <div>
+                  <h2 className="form-card-title">
+                    Decision Details
+                  </h2>
+
+                  <p className="form-card-subtitle">
+                    Give voters everything they need to
+                    understand your decision.
+                  </p>
+                </div>
+
+                <span className="step-badge">
+                  STEP 01
+                </span>
+
+              </div>
+
+              {/* TITLE */}
+
+              <div className="field-group">
+
+                <label className="field-label">
+                  Decision Title
+                  <span className="required">*</span>
+                </label>
+
+                <input
+                  className="form-input"
+                  type="text"
+                  name="title"
+                  placeholder="e.g. Which framework should we use?"
+                  value={decision.title}
+                  onChange={handleChange}
+                />
+
+              </div>
+
+              {/* COMMUNITY + CATEGORY */}
+
+              <div className="form-two-column">
+
+                <div className="field-group">
+
+                  <label className="field-label">
+                    Community
+                  </label>
+
+                  <select
+                    className="form-select"
+                    name="communityId"
+                    value={
+                      decision.communityId || ""
+                    }
+                    onChange={handleChange}
+                  >
+
+                    <option value="">
+                      No community
+                    </option>
+
+                    {communities
+                      .filter(
+                        (c) => c.joined
+                      )
+                      .map((c) => (
+
+                        <option
+                          key={c.id}
+                          value={c.id}
+                        >
+                          {c.communityName}
+                        </option>
+
+                      ))}
+
+                  </select>
+
+                  <div className="field-hint">
+                    Optional — connect this decision
+                    to one of your communities.
+                  </div>
+
+                </div>
+
+                <div className="field-group">
+
+                  <label className="field-label">
+                    Category
+                  </label>
+
+                  <select
+                    className="form-select"
+                    name="category"
+                    value={decision.category}
+                    onChange={handleChange}
+                  >
+
+                    <option value="">
+                      Select Category
+                    </option>
+
+                    <option value="Career">
+                      Career
+                    </option>
+
+                    <option value="Technology">
+                      Technology
+                    </option>
+
+                    <option value="Education">
+                      Education
+                    </option>
+
+                    <option value="Travel">
+                      Travel
+                    </option>
+
+                    <option value="Finance">
+                      Finance
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+              {/* DESCRIPTION */}
+
+              <div className="field-group">
+
+                <label className="field-label">
+                  Description
+                  <span className="required">*</span>
+                </label>
+
+                <textarea
+                  className="form-textarea"
+                  name="description"
+                  placeholder="Add some context so people can make an informed decision..."
+                  value={decision.description}
+                  onChange={handleChange}
+                />
+
+              </div>
+
+              {/* VISIBILITY */}
+
+              <div className="field-group">
+
+                <label className="field-label">
+                  Visibility
+                </label>
+
+                <div className="visibility-box">
+
+                  <label
+                    className={`
+                      visibility-option
+                      ${
+                        decision.visibility ===
+                        "PUBLIC"
+                          ? "selected"
+                          : ""
+                      }
+                    `}
+                  >
+
+                    <input
+                      type="radio"
+                      name="visibility"
+                      value="PUBLIC"
+                      checked={
+                        decision.visibility ===
+                        "PUBLIC"
+                      }
+                      onChange={handleChange}
+                    />
+
+                    <div className="visibility-content">
+
+                      <div className="visibility-title">
+                        🌐 Public
+                      </div>
+
+                      <div className="visibility-description">
+                        Anyone can discover and vote.
+                      </div>
+
+                    </div>
+
+                  </label>
+
+                  <label
+                    className={`
+                      visibility-option
+                      ${
+                        decision.visibility ===
+                        "PRIVATE"
+                          ? "selected"
+                          : ""
+                      }
+                    `}
+                  >
+
+                    <input
+                      type="radio"
+                      name="visibility"
+                      value="PRIVATE"
+                      checked={
+                        decision.visibility ===
+                        "PRIVATE"
+                      }
+                      onChange={handleChange}
+                    />
+
+                    <div className="visibility-content">
+
+                      <div className="visibility-title">
+                        🔒 Private
+                      </div>
+
+                      <div className="visibility-description">
+                        Keep the decision restricted.
+                      </div>
+
+                    </div>
+
+                  </label>
+
+                </div>
+
+              </div>
+
+              {/* DEADLINE */}
+
+              <div className="field-group">
+
+                <label className="field-label">
+                  Voting Deadline
+                </label>
+
+                <input
+                  className="form-input"
+                  type="datetime-local"
+                  name="deadline"
+                  value={decision.deadline}
+                  onChange={handleChange}
+                  min={minDateTime}
+                />
+
+                <div className="field-hint">
+                  Select when voting should close.
+                  The deadline must be in the future.
+                </div>
+
+              </div>
+
+              {/* ANONYMOUS */}
+
+              <label className="anonymous-box">
+
+                <input
+                  type="checkbox"
+                  name="anonymous"
+                  checked={
+                    decision.anonymous
+                  }
+                  onChange={handleChange}
+                />
+
+                <div className="anonymous-content">
+
+                  <div className="anonymous-title">
+                    Allow Anonymous Voting
+                  </div>
+
+                  <div className="anonymous-description">
+                    Voters can participate without
+                    displaying their identity.
+                  </div>
+
+                </div>
+
+              </label>
+
+              {/* OPTIONS */}
+
+              <div className="options-header">
+
+                <h3 className="options-title">
+                  Voting Options
+                </h3>
+
+                <span className="options-count">
+                  {options.length} OPTIONS
+                </span>
+
+              </div>
+
+              {options.map(
+                (option, index) => (
+
+                  <div
+                    className="option-item"
+                    key={index}
+                  >
+
+                    <div className="option-number">
+                      {index + 1}
+                    </div>
+
+                    <input
+                      className="option-input"
+                      type="text"
+                      placeholder={
+                        `Enter option ${index + 1}`
+                      }
+                      value={option}
+                      onChange={(e) =>
+                        handleOptionChange(
+                          index,
+                          e.target.value
+                        )
+                      }
+                    />
+
+                    {options.length > 2 ? (
+
+                      <button
+                        type="button"
+                        className="remove-option"
+                        onClick={() =>
+                          removeOption(index)
+                        }
+                        title="Remove option"
+                      >
+                        ×
+                      </button>
+
+                    ) : (
+
+                      <div
+                        style={{
+                          width: "31px",
+                        }}
+                      />
+
+                    )}
+
+                  </div>
+
+                )
+              )}
+
+              {/* ADD OPTION */}
+
+              <button
+                type="button"
+                className="add-option"
+                onClick={addOption}
+              >
+                ＋ Add Another Option
+              </button>
+
+              {/* SUBMIT */}
+
+              <button
+                type="button"
+                className="submit-button"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+
+                {submitting ? (
+                  <>
+                    <span>◌</span>
+                    Creating Decision...
+                  </>
+                ) : (
+                  <>
+                    <span>✦</span>
+                    Create Decision
+                  </>
+                )}
+
+              </button>
+
+            </div>
+
+            {/* =================================================
+                INFORMATION PANEL
+            ================================================= */}
+
+            <aside className="info-panel">
+
+              <h3 className="info-title">
+                How it works
+              </h3>
+
+              <p className="info-subtitle">
+                Create a clear decision and let people
+                contribute their opinions.
+              </p>
+
+              <div className="info-step">
+
+                <div className="info-step-number">
+                  01
+                </div>
+
+                <div className="info-step-content">
+
+                  <div className="info-step-title">
+                    Ask a clear question
+                  </div>
+
+                  <div className="info-step-text">
+                    Write a simple title and provide
+                    enough context.
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="info-step">
+
+                <div className="info-step-number">
+                  02
+                </div>
+
+                <div className="info-step-content">
+
+                  <div className="info-step-title">
+                    Add your options
+                  </div>
+
+                  <div className="info-step-text">
+                    Give voters at least two meaningful
+                    choices.
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="info-step">
+
+                <div className="info-step-number">
+                  03
+                </div>
+
+                <div className="info-step-content">
+
+                  <div className="info-step-title">
+                    Set voting rules
+                  </div>
+
+                  <div className="info-step-text">
+                    Choose visibility, deadline and
+                    anonymous voting.
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="info-step">
+
+                <div className="info-step-number">
+                  04
+                </div>
+
+                <div className="info-step-content">
+
+                  <div className="info-step-title">
+                    Publish & collaborate
+                  </div>
+
+                  <div className="info-step-text">
+                    Share the decision and collect
+                    community opinions.
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="info-tip">
+                <strong>Tip:</strong>{" "}
+                Keep options short and distinct.
+                Clear options make voting easier
+                and produce better results.
+              </div>
+
+            </aside>
+
+          </div>
+
+          {/* =================================================
+              COPYRIGHT
+          ================================================= */}
+
+          <footer className="create-footer">
+
+            <span>
+              © 2026
+            </span>
+
+            <span className="footer-brand">
+              Collaborative Decision Making
+            </span>
+
+            <span className="footer-dot" />
+
+            <span>
+              Community Polling Platform
+            </span>
+
+            <span>
+              • All Rights Reserved
+            </span>
+
+          </footer>
+
+        </div>
+
+      </div>
+
+    </DashboardLayout>
+  );
 }
 
 export default CreateDecision;
+

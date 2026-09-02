@@ -31,7 +31,9 @@ function AdminUsers() {
 
   useEffect(() => {
     if (!message) return undefined;
+
     const timer = setTimeout(() => setMessage(""), 3500);
+
     return () => clearTimeout(timer);
   }, [message]);
 
@@ -80,6 +82,7 @@ function AdminUsers() {
       }
 
       notify(`${user.name}'s role is now ${nextRole}.`);
+
       setUsers((current) =>
         current.map((u) =>
           u.id === user.id ? { ...u, role: nextRole } : u
@@ -96,6 +99,7 @@ function AdminUsers() {
     const confirmed = window.confirm(
       `Delete ${name}? This cannot be undone.`
     );
+
     if (!confirmed) return;
 
     try {
@@ -111,6 +115,7 @@ function AdminUsers() {
       }
 
       notify("User deleted.");
+
       setUsers((current) => current.filter((u) => u.id !== id));
     } catch (err) {
       notify(err.message, true);
@@ -119,7 +124,9 @@ function AdminUsers() {
 
   const filteredUsers = users.filter((u) => {
     const term = search.trim().toLowerCase();
+
     if (!term) return true;
+
     return (
       u.name?.toLowerCase().includes(term) ||
       u.email?.toLowerCase().includes(term)
@@ -134,7 +141,20 @@ function AdminUsers() {
       <Toast message={message} isError={isError} />
 
       <style>{`
-        .admin-users-page { max-width: 1100px; }
+        /* ================================
+           MAIN CONTAINER
+        ================================= */
+
+        .admin-users-page {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+
+        /* ================================
+           BACK LINK
+        ================================= */
+
         .admin-back-link {
           display: inline-block;
           color: #8b5cf6;
@@ -142,45 +162,116 @@ function AdminUsers() {
           font-weight: 700;
           text-decoration: none;
           margin-bottom: 16px;
+          transition: color 0.2s ease;
         }
-        .admin-search {
+
+        .admin-back-link:hover {
+          color: #a855f7;
+        }
+
+        /* ================================
+           SEARCH
+        ================================= */
+
+        .admin-search-wrapper {
           width: 100%;
-          max-width: 320px;
-          padding: 10px 12px;
-          border: 1px solid var(--app-border);
-          border-radius: 8px;
-          background: var(--app-card-2);
-          color: var(--app-text);
           margin-bottom: 18px;
         }
-        .admin-users-table {
+
+        .admin-search {
           width: 100%;
-          border-collapse: collapse;
+          max-width: 360px;
+          box-sizing: border-box;
+          padding: 11px 13px;
+          border: 1px solid var(--app-border);
+          border-radius: 9px;
+          background: var(--app-card-2);
+          color: var(--app-text);
+          font-size: 13px;
+          outline: none;
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+
+        .admin-search::placeholder {
+          color: var(--app-secondary-text);
+        }
+
+        .admin-search:focus {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+        }
+
+        /* ================================
+           TABLE CONTAINER
+        ================================= */
+
+        .admin-table-wrapper {
+          width: 100%;
+          overflow-x: auto;
           border: 1px solid var(--app-border);
           border-radius: 12px;
-          overflow: hidden;
+          background: var(--app-card);
+          -webkit-overflow-scrolling: touch;
         }
-        .admin-users-table th, .admin-users-table td {
+
+        .admin-users-table {
+          width: 100%;
+          min-width: 700px;
+          border-collapse: collapse;
+        }
+
+        .admin-users-table th,
+        .admin-users-table td {
           text-align: left;
-          padding: 12px 14px;
+          padding: 13px 14px;
           font-size: 13px;
           border-bottom: 1px solid var(--app-border);
           color: var(--app-text);
         }
+
         .admin-users-table th {
           color: var(--app-secondary-text);
           font-weight: 700;
           background: var(--app-card-2);
+          white-space: nowrap;
         }
+
+        .admin-users-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+
+        .admin-users-table tbody tr {
+          transition: background 0.2s ease;
+        }
+
+        .admin-users-table tbody tr:hover {
+          background: rgba(139, 92, 246, 0.04);
+        }
+
+        /* ================================
+           ROLE BADGE
+        ================================= */
+
         .admin-role-badge {
+          display: inline-flex;
+          align-items: center;
           padding: 3px 9px;
           border-radius: 20px;
           font-size: 11px;
           font-weight: 700;
-          background: rgba(139, 92, 246, .12);
+          background: rgba(139, 92, 246, 0.12);
           color: #8b5cf6;
         }
+
+        /* ================================
+           YOU BADGE
+        ================================= */
+
         .admin-you-badge {
+          display: inline-flex;
+          align-items: center;
           margin-left: 8px;
           padding: 2px 8px;
           border-radius: 20px;
@@ -188,9 +279,17 @@ function AdminUsers() {
           font-weight: 700;
           background: var(--app-card-2);
           color: var(--app-secondary-text);
+          white-space: nowrap;
         }
+
+        /* ================================
+           ROLE SELECT
+        ================================= */
+
         .admin-role-select {
-          padding: 6px 8px;
+          width: auto;
+          min-width: 105px;
+          padding: 7px 9px;
           font-size: 12px;
           font-weight: 700;
           border-radius: 7px;
@@ -198,29 +297,244 @@ function AdminUsers() {
           background: var(--app-card-2);
           color: var(--app-text);
           cursor: pointer;
+          outline: none;
         }
+
+        .admin-role-select:focus {
+          border-color: #8b5cf6;
+        }
+
         .admin-role-select:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
+
+        /* ================================
+           DELETE BUTTON
+        ================================= */
+
         .admin-delete-btn {
           border: 0;
           border-radius: 7px;
           background: #b91c1c;
           color: #fff;
-          padding: 6px 10px;
+          padding: 7px 11px;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
+          transition:
+            background 0.2s ease,
+            transform 0.1s ease;
         }
+
+        .admin-delete-btn:hover:not(:disabled) {
+          background: #dc2626;
+        }
+
+        .admin-delete-btn:active:not(:disabled) {
+          transform: scale(0.97);
+        }
+
         .admin-delete-btn:disabled {
           background: var(--app-card-2);
           color: var(--app-secondary-text);
           cursor: not-allowed;
         }
+
+        /* ================================
+           EMPTY / LOADING
+        ================================= */
+
         .admin-empty {
           color: var(--app-secondary-text);
           font-size: 13px;
+          padding: 18px 0;
+        }
+
+        /* ================================
+           MOBILE USER CARDS
+        ================================= */
+
+        .admin-mobile-users {
+          display: none;
+        }
+
+        .admin-user-card {
+          width: 100%;
+          box-sizing: border-box;
+          border: 1px solid var(--app-border);
+          border-radius: 12px;
+          background: var(--app-card);
+          padding: 15px;
+          margin-bottom: 12px;
+        }
+
+        .admin-user-card:last-child {
+          margin-bottom: 0;
+        }
+
+        .admin-user-card-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+
+        .admin-user-name {
+          min-width: 0;
+          font-size: 15px;
+          font-weight: 700;
+          color: var(--app-text);
+          word-break: break-word;
+        }
+
+        .admin-user-email {
+          margin-top: 4px;
+          font-size: 12px;
+          color: var(--app-secondary-text);
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
+
+        .admin-user-card-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 10px 0;
+          border-top: 1px solid var(--app-border);
+        }
+
+        .admin-user-card-label {
+          flex-shrink: 0;
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--app-secondary-text);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .admin-user-card-value {
+          min-width: 0;
+          text-align: right;
+          font-size: 12px;
+          color: var(--app-text);
+          word-break: break-word;
+        }
+
+        .admin-mobile-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 10px;
+        }
+
+        .admin-mobile-actions .admin-role-select,
+        .admin-mobile-actions .admin-delete-btn {
+          width: 100%;
+          min-height: 40px;
+          box-sizing: border-box;
+        }
+
+        /* ================================
+           TABLET
+        ================================= */
+
+        @media (max-width: 768px) {
+          .admin-users-page {
+            max-width: 100%;
+          }
+
+          .admin-search {
+            max-width: 100%;
+          }
+
+          .admin-table-wrapper {
+            border-radius: 10px;
+          }
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 600px) {
+          .admin-back-link {
+            font-size: 12px;
+            margin-bottom: 14px;
+          }
+
+          .admin-search-wrapper {
+            margin-bottom: 14px;
+          }
+
+          .admin-search {
+            max-width: 100%;
+            padding: 12px 13px;
+            font-size: 13px;
+          }
+
+          /* Hide desktop table */
+          .admin-table-wrapper {
+            display: none;
+          }
+
+          /* Show mobile cards */
+          .admin-mobile-users {
+            display: block;
+          }
+
+          .admin-user-card {
+            padding: 14px;
+          }
+
+          .admin-user-card-header {
+            gap: 8px;
+          }
+
+          .admin-user-name {
+            font-size: 14px;
+          }
+
+          .admin-user-card-row {
+            align-items: center;
+          }
+
+          .admin-user-card-value {
+            max-width: 65%;
+          }
+
+          .admin-mobile-actions {
+            grid-template-columns: 1fr;
+          }
+
+          .admin-mobile-actions .admin-role-select,
+          .admin-mobile-actions .admin-delete-btn {
+            min-height: 42px;
+          }
+        }
+
+        /* ================================
+           VERY SMALL PHONES
+        ================================= */
+
+        @media (max-width: 380px) {
+          .admin-user-card {
+            padding: 12px;
+          }
+
+          .admin-user-card-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+          }
+
+          .admin-user-card-value {
+            max-width: 100%;
+            width: 100%;
+            text-align: left;
+          }
         }
       `}</style>
 
@@ -229,89 +543,233 @@ function AdminUsers() {
           ← Back to Admin Dashboard
         </Link>
 
-        <input
-          className="admin-search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by name or email"
-        />
+        <div className="admin-search-wrapper">
+          <input
+            className="admin-search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by name or email"
+            aria-label="Search users by name or email"
+          />
+        </div>
 
-        {loading && <div className="admin-empty">Loading users…</div>}
-
-        {!loading && filteredUsers.length === 0 && (
-          <div className="admin-empty">No users found.</div>
+        {loading && (
+          <div className="admin-empty">
+            Loading users…
+          </div>
         )}
 
-        {!loading && filteredUsers.length > 0 && (
-          <table className="admin-users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => {
-                const isSelf =
-                  user.email?.toLowerCase() === myEmail;
+        {!loading && filteredUsers.length === 0 && (
+          <div className="admin-empty">
+            No users found.
+          </div>
+        )}
 
-                return (
-                  <tr key={user.id}>
-                    <td>
-                      {user.name}
-                      {isSelf && (
-                        <span className="admin-you-badge">You</span>
-                      )}
-                    </td>
-                    <td>{user.email}</td>
-                    <td>
-                      <select
-                        className="admin-role-select"
-                        value={user.role}
-                        disabled={isSelf || savingId === user.id}
-                        title={
-                          isSelf
-                            ? "You can't change your own role."
-                            : "Change role"
-                        }
-                        onChange={(event) =>
-                          changeRole(user, event.target.value)
-                        }
-                      >
-                        {ROLES.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
+        {/* ==========================================
+            DESKTOP / TABLET TABLE
+        =========================================== */}
+
+        {!loading && filteredUsers.length > 0 && (
+          <div className="admin-table-wrapper">
+            <table className="admin-users-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredUsers.map((user) => {
+                  const isSelf =
+                    user.email?.toLowerCase() === myEmail;
+
+                  return (
+                    <tr key={user.id}>
+                      <td>
+                        {user.name}
+
+                        {isSelf && (
+                          <span className="admin-you-badge">
+                            You
+                          </span>
+                        )}
+                      </td>
+
+                      <td>{user.email}</td>
+
+                      <td>
+                        <select
+                          className="admin-role-select"
+                          value={user.role}
+                          disabled={
+                            isSelf || savingId === user.id
+                          }
+                          title={
+                            isSelf
+                              ? "You can't change your own role."
+                              : "Change role"
+                          }
+                          onChange={(event) =>
+                            changeRole(
+                              user,
+                              event.target.value
+                            )
+                          }
+                        >
+                          {ROLES.map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
+                      <td>
+                        {user.createdAt
+                          ? new Date(
+                              user.createdAt
+                            ).toLocaleDateString()
+                          : "—"}
+                      </td>
+
+                      <td>
+                        <button
+                          className="admin-delete-btn"
+                          disabled={isSelf}
+                          title={
+                            isSelf
+                              ? "You can't delete your own account."
+                              : "Delete user"
+                          }
+                          onClick={() =>
+                            deleteUser(
+                              user.id,
+                              user.name
+                            )
+                          }
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* ==========================================
+            MOBILE USER CARDS
+        =========================================== */}
+
+        {!loading && filteredUsers.length > 0 && (
+          <div className="admin-mobile-users">
+            {filteredUsers.map((user) => {
+              const isSelf =
+                user.email?.toLowerCase() === myEmail;
+
+              return (
+                <div
+                  className="admin-user-card"
+                  key={user.id}
+                >
+                  {/* User name + email */}
+                  <div className="admin-user-card-header">
+                    <div>
+                      <div className="admin-user-name">
+                        {user.name}
+
+                        {isSelf && (
+                          <span className="admin-you-badge">
+                            You
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="admin-user-email">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Role */}
+                  <div className="admin-user-card-row">
+                    <span className="admin-user-card-label">
+                      Role
+                    </span>
+
+                    <select
+                      className="admin-role-select"
+                      value={user.role}
+                      disabled={
+                        isSelf || savingId === user.id
+                      }
+                      title={
+                        isSelf
+                          ? "You can't change your own role."
+                          : "Change role"
+                      }
+                      onChange={(event) =>
+                        changeRole(
+                          user,
+                          event.target.value
+                        )
+                      }
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Joined date */}
+                  <div className="admin-user-card-row">
+                    <span className="admin-user-card-label">
+                      Joined
+                    </span>
+
+                    <span className="admin-user-card-value">
                       {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
+                        ? new Date(
+                            user.createdAt
+                          ).toLocaleDateString()
                         : "—"}
-                    </td>
-                    <td>
-                      <button
-                        className="admin-delete-btn"
-                        disabled={isSelf}
-                        title={
-                          isSelf
-                            ? "You can't delete your own account."
-                            : "Delete user"
-                        }
-                        onClick={() => deleteUser(user.id, user.name)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="admin-mobile-actions">
+                    <button
+                      className="admin-delete-btn"
+                      disabled={isSelf}
+                      title={
+                        isSelf
+                          ? "You can't delete your own account."
+                          : "Delete user"
+                      }
+                      onClick={() =>
+                        deleteUser(
+                          user.id,
+                          user.name
+                        )
+                      }
+                    >
+                      {isSelf
+                        ? "Delete Disabled"
+                        : "Delete User"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </DashboardLayout>

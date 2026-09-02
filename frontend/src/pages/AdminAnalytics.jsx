@@ -45,10 +45,10 @@ function NumberValue({ value }) {
 
 function Section({ title, subtitle, action, children }) {
     return (
-        <section className="min-w-0 rounded-2xl border border-[var(--app-border)] bg-[var(--app-card)] p-5 shadow-sm transition duration-300 hover:border-cyan-400/30">
+        <section className="min-w-0 rounded-2xl border border-[var(--app-border)] bg-[var(--app-card)] p-5 shadow-sm transition duration-300 hover:border-violet-400/30">
             <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-cyan-400">
+                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-violet-400">
                         {subtitle}
                     </p>
 
@@ -194,9 +194,9 @@ function AdminAnalytics() {
             <main className="mx-auto max-w-[1600px] space-y-5 px-4 pb-10 sm:px-6 lg:px-8">
 
                 {/* Header */}
-                <header className="flex flex-col justify-between gap-4 rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 via-[var(--app-card)] to-amber-400/10 p-5 lg:flex-row lg:items-end">
+                <header className="flex flex-col justify-between gap-4 rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-400/10 via-[var(--app-card)] to-violet-400/10 p-5 lg:flex-row lg:items-end">
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[.2em] text-cyan-400">
+                        <p className="text-[10px] font-bold uppercase tracking-[.2em] text-violet-400">
                             DecisionHub intelligence
                         </p>
 
@@ -217,7 +217,7 @@ function AdminAnalytics() {
                                     key={item.days}
                                     onClick={() => setRange(item.days)}
                                     className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${range === item.days
-                                        ? "bg-cyan-400 text-slate-950"
+                                        ? "bg-violet-400 text-slate-950"
                                         : "text-[var(--app-secondary-text)] hover:bg-[var(--app-card-2)]"
                                         }`}
                                 >
@@ -230,7 +230,7 @@ function AdminAnalytics() {
                             onClick={() => load(range)}
                             disabled={loading}
                             title="Refresh analytics"
-                            className="rounded-xl border border-[var(--app-border)] p-2.5 text-[var(--app-secondary-text)] hover:text-cyan-400 disabled:opacity-50"
+                            className="rounded-xl border border-[var(--app-border)] p-2.5 text-[var(--app-secondary-text)] hover:text-violet-400 disabled:opacity-50"
                         >
                             <RefreshCw
                                 size={16}
@@ -262,11 +262,11 @@ function AdminAnalytics() {
                         ([label, value, Icon, detail]) => (
                             <article
                                 key={label}
-                                className="group rounded-2xl border border-[var(--app-border)] bg-[var(--app-card)] p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-cyan-400/40"
+                                className="group rounded-2xl border border-[var(--app-border)] bg-[var(--app-card)] p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-violet-400/40"
                             >
                                 <Icon
                                     size={18}
-                                    className="mb-4 text-cyan-400 transition group-hover:scale-110"
+                                    className="mb-4 text-violet-400 transition group-hover:scale-110"
                                 />
 
                                 <p className="text-xs text-[var(--app-secondary-text)]">
@@ -326,7 +326,7 @@ function AdminAnalytics() {
 
                                     <Line
                                         dataKey="activeUsers"
-                                        stroke="#22d3ee"
+                                        stroke="#8b5cf6"
                                         strokeWidth={3}
                                         dot={false}
                                         animationDuration={700}
@@ -413,7 +413,7 @@ function AdminAnalytics() {
                                         (row, index) => (
                                             <tr
                                                 key={row.id}
-                                                className="border-t border-[var(--app-border)] transition hover:bg-cyan-400/5"
+                                                className="border-t border-[var(--app-border)] transition hover:bg-violet-400/5"
                                             >
                                                 <td className="px-2 py-3 font-semibold text-[var(--app-text)]">
                                                     {index === 0
@@ -497,7 +497,7 @@ function AdminAnalytics() {
 
                                     <Bar
                                         dataKey="decisions"
-                                        fill="#f59e0b"
+                                        fill="#a855f7"
                                         radius={[0, 7, 7, 0]}
                                         animationDuration={700}
                                     />
@@ -517,10 +517,10 @@ function AdminAnalytics() {
                                 data.activeUsers.slice(0, 5).map((row, index) => (
                                     <div
                                         key={row.id ?? `${row.name}-${index}`}
-                                        className="flex items-center justify-between rounded-xl border border-transparent bg-[var(--app-card-2)] px-4 py-3.5 transition-all duration-200 hover:border-cyan-400/20 hover:bg-cyan-400/5"
+                                        className="flex items-center justify-between rounded-xl border border-transparent bg-[var(--app-card-2)] px-4 py-3.5 transition-all duration-200 hover:border-violet-400/20 hover:bg-violet-400/5"
                                     >
                                         <div className="flex min-w-0 items-center gap-2.5">
-                                            <span className="w-4 shrink-0 text-sm font-bold text-cyan-400">
+                                            <span className="w-4 shrink-0 text-sm font-bold text-violet-400">
                                                 {index + 1}
                                             </span>
 
@@ -529,7 +529,7 @@ function AdminAnalytics() {
                                             </span>
                                         </div>
 
-                                        <span className="ml-4 shrink-0 text-xs font-bold text-cyan-400">
+                                        <span className="ml-4 shrink-0 text-xs font-bold text-violet-400">
                                             {Number(row.activity || 0).toLocaleString()} activity
                                         </span>
                                     </div>
@@ -555,7 +555,7 @@ function AdminAnalytics() {
                                         key={row.id}
                                         className="flex items-center gap-3 rounded-xl bg-[var(--app-card-2)] p-3"
                                     >
-                                        <b className="text-cyan-400">
+                                        <b className="text-violet-400">
                                             {i + 1}
                                         </b>
 
@@ -563,7 +563,7 @@ function AdminAnalytics() {
                                             {row.title}
                                         </span>
 
-                                        <span className="text-xs font-bold text-amber-400">
+                                        <span className="text-xs font-bold text-violet-300">
                                             {row.votes} votes
                                         </span>
                                     </div>
@@ -579,7 +579,7 @@ function AdminAnalytics() {
                     action={
                         <Link
                             to="/admin/activity"
-                            className="shrink-0 whitespace-nowrap rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-cyan-400 transition duration-200 hover:border-cyan-400/50 hover:bg-cyan-400/10"
+                            className="shrink-0 whitespace-nowrap rounded-lg border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-violet-400 transition duration-200 hover:border-violet-400/50 hover:bg-violet-400/10"
                         >
                             View all →
                         </Link>
@@ -589,7 +589,7 @@ function AdminAnalytics() {
                         {data?.recentActivity?.length ? (
                             <div className="relative ml-2">
                                 {/* Timeline line */}
-                                <div className="absolute left-[5px] top-3 bottom-3 w-px bg-cyan-400/25" />
+                                <div className="absolute left-[5px] top-3 bottom-3 w-px bg-violet-400/25" />
 
                                 <div className="space-y-1">
                                     {data.recentActivity.slice(0, 5).map((event, index) => (
@@ -598,7 +598,7 @@ function AdminAnalytics() {
                                             className="group relative flex min-h-[62px] items-start"
                                         >
                                             {/* Timeline dot */}
-                                            <div className="relative z-10 mt-[7px] h-[11px] w-[11px] shrink-0 rounded-full border-2 border-[var(--app-card)] bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,.45)]" />
+                                            <div className="relative z-10 mt-[7px] h-[11px] w-[11px] shrink-0 rounded-full border-2 border-[var(--app-card)] bg-violet-400 shadow-[0_0_8px_rgba(139,92,246,.45)]" />
 
                                             {/* Activity content */}
                                             <div className="ml-5 min-w-0 flex-1 rounded-xl px-3 py-2 transition duration-200 group-hover:bg-[var(--app-card-2)]">
