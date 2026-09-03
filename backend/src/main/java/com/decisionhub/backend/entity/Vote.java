@@ -3,8 +3,16 @@ package com.decisionhub.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "votes", uniqueConstraints = @UniqueConstraint(name = "uk_vote_user_decision", columnNames = {"user_id", "decision_id"}))
+@Table(
+        name = "votes",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_vote_user_decision",
+                columnNames = {"user_id", "decision_id"}
+        )
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,4 +35,11 @@ public class Vote {
     @ManyToOne
     @JoinColumn(name = "option_id", nullable = false)
     private Option option;
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

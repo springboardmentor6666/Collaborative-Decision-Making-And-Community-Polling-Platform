@@ -308,7 +308,7 @@ public class AdminController {
                 "totalUsers", allUsers.size(),
                 "activeUsers", activeUserIds(allDecisions, allVotes, allComments, since).size(),
                 "totalDecisions", scopedDecisions.size(),
-                "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
+                "totalVotes", allVotes.stream().filter(v -> after(v.getCreatedAt(), since)).count(),
                 "totalComments", scopedComments.size(),
                 "totalCommunities", allCommunities.size(),
                 "communityMembers", allCommunities.stream().mapToInt(c -> c.getMembers().size()).sum(),
@@ -320,8 +320,8 @@ public class AdminController {
                 "community", scopedDecisions.stream().filter(d -> d.getCommunity() != null).count(),
                 "total", scopedDecisions.size()));
         result.put("engagement", Map.of(
-                "totalVotes", allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(),
-                "averageVotesPerDecision", average(allVotes.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).count(), scopedDecisions.size()),
+                "totalVotes", allVotes.stream().filter(v -> after(v.getCreatedAt(), since)).count(),
+                "averageVotesPerDecision", average(allVotes.stream().filter(v -> after(v.getCreatedAt(), since)).count(), scopedDecisions.size()),
                 "votedUsers", activeVoterIds(allVotes, since).size(),
                 "participationRate", percentage(activeVoterIds(allVotes, since).size(), allUsers.size()),
                 "averageCommentsPerDecision", average(scopedComments.size(), scopedDecisions.size()),
@@ -343,13 +343,13 @@ public class AdminController {
         Set<Long> ids = new HashSet<>();
         decisionList.stream().filter(d -> after(d.getCreatedAt(), since) && d.getCreatedBy() != null)
                 .forEach(d -> ids.add(d.getCreatedBy().getId()));
-        voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).forEach(v -> ids.add(v.getUser().getId()));
+        voteList.stream().filter(v -> after(v.getCreatedAt(), since)).forEach(v -> ids.add(v.getUser().getId()));
         commentList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> ids.add(c.getUser().getId()));
         return ids;
     }
 
     private Set<Long> activeVoterIds(List<com.decisionhub.backend.entity.Vote> voteList, LocalDateTime since) {
-        return voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since))
+        return voteList.stream().filter(v -> after(v.getCreatedAt(), since))
                 .map(v -> v.getUser().getId()).collect(Collectors.toSet());
     }
 
@@ -367,10 +367,10 @@ public class AdminController {
             long registrations = userList.stream().filter(u -> between(u.getCreatedAt(), start, end)).count();
             long active = activeUserIds(decisionList, voteList, commentList, start.minusNanos(1)).stream()
                     .filter(id -> decisionList.stream().anyMatch(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(id) && between(d.getCreatedAt(), start, end))
-                            || voteList.stream().anyMatch(v -> v.getUser().getId().equals(id) && between(v.getDecision().getCreatedAt(), start, end))
+                            || voteList.stream().anyMatch(v -> v.getUser().getId().equals(id) && between(v.getCreatedAt(), start, end))
                             || commentList.stream().anyMatch(c -> c.getUser().getId().equals(id) && between(c.getCreatedAt(), start, end))).count();
             long createdDecisions = decisionList.stream().filter(d -> between(d.getCreatedAt(), start, end)).count();
-            long createdVotes = voteList.stream().filter(v -> between(v.getDecision().getCreatedAt(), start, end)).count();
+            long createdVotes = voteList.stream().filter(v -> between(v.getCreatedAt(), start, end)).count();
             long createdComments = commentList.stream().filter(c -> between(c.getCreatedAt(), start, end)).count();
             series.add(Map.of("date", date.toString(), "registrations", registrations, "activeUsers", active,
                     "decisions", createdDecisions, "votes", createdVotes, "comments", createdComments));
@@ -415,7 +415,7 @@ public class AdminController {
                                                List<Community> communityList, LocalDateTime since) {
         return userList.stream().map(user -> {
             long userDecisions = decisionList.stream().filter(d -> d.getCreatedBy() != null && d.getCreatedBy().getId().equals(user.getId()) && after(d.getCreatedAt(), since)).count();
-            long userVotes = voteList.stream().filter(v -> v.getUser().getId().equals(user.getId()) && after(v.getDecision().getCreatedAt(), since)).count();
+            long userVotes = voteList.stream().filter(v -> v.getUser().getId().equals(user.getId()) && after(v.getCreatedAt(), since)).count();
             long userComments = commentList.stream().filter(c -> c.getUser().getId().equals(user.getId()) && after(c.getCreatedAt(), since)).count();
             long userCommunities = communityList.stream().filter(c -> c.getMembers().stream().anyMatch(member -> member.getId().equals(user.getId()))).count();
             return Map.<String, Object>of("id", user.getId(), "name", user.getName(), "decisions", userDecisions,
@@ -502,8 +502,8 @@ public class AdminController {
         commentList.forEach(c -> events.add(event("Comment created", "COMMENT", c.getUser().getName(), c.getDecision().getTitle(), c.getCreatedAt())));
         communityList.forEach(c -> events.add(event("Community created", "COMMUNITY",
                 c.getOwner() == null ? "Unknown" : c.getOwner().getName(), c.getCommunityName(), c.getCreatedAt())));
-        voteList.forEach(v -> events.add(event("Vote submitted", "VOTE", v.getUser().getName(), v.getDecision().getTitle(), v.getDecision().getCreatedAt())));
-        events.sort((a, b) -> String.valueOf(b.get("at")).compareTo(String.valueOf(a.get("at"))));
+        voteList.forEach(v -> events.add(event("Vote submitted", "VOTE", v.getUser().getName(), v.getDecision().getTitle(), v.getCreatedAt())));
+        events.sort(Comparator.comparing((Map<String, Object> e) -> (LocalDateTime) e.get("at"), Comparator.nullsLast(Comparator.reverseOrder())));
         return events;
     }
 
@@ -515,8 +515,11 @@ public class AdminController {
         decisionList.stream().filter(d -> after(d.getCreatedAt(), since)).forEach(d -> events.add(event("Decision created", d.getCreatedBy() == null ? "Unknown" : d.getCreatedBy().getName(), d.getTitle(), d.getCreatedAt())));
         commentList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Comment created", c.getUser().getName(), c.getDecision().getTitle(), c.getCreatedAt())));
         communityList.stream().filter(c -> after(c.getCreatedAt(), since)).forEach(c -> events.add(event("Community created", c.getOwner() == null ? "Unknown" : c.getOwner().getName(), c.getCommunityName(), c.getCreatedAt())));
-        voteList.stream().filter(v -> after(v.getDecision().getCreatedAt(), since)).forEach(v -> events.add(event("Vote submitted", v.getUser().getName(), v.getDecision().getTitle(), v.getDecision().getCreatedAt())));
-        return events.stream().sorted((a, b) -> String.valueOf(b.get("at")).compareTo(String.valueOf(a.get("at")))).limit(20).toList();
+        voteList.stream().filter(v -> after(v.getCreatedAt(), since)).forEach(v -> events.add(event("Vote submitted", v.getUser().getName(), v.getDecision().getTitle(), v.getCreatedAt())));
+        return events.stream()
+                .sorted(Comparator.comparing((Map<String, Object> e) -> (LocalDateTime) e.get("at"), Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(20)
+                .toList();
     }
 
     private Map<String, Object> event(String type, String actor, String subject, LocalDateTime at) {
