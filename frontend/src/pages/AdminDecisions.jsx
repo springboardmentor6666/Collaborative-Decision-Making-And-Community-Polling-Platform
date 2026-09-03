@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import { useTheme } from "../context/ThemeContext";
 import Toast from "../components/Toast";
 
 const API = "http://localhost:8080";
 
 function AdminDecisions() {
+  const { theme } = useTheme();
   const [decisions, setDecisions] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -1230,9 +1232,300 @@ function AdminDecisions() {
             white-space: normal;
           }
         }
+
+        /* =====================================================
+           LIGHT THEME — MATCH ADMIN USERS
+           Keeps the purple hero style in dark mode and changes
+           all inner surfaces to clean white in light mode.
+        ===================================================== */
+
+        .admin-decisions-page.theme-light {
+          color: #2b2440;
+        }
+
+        .admin-decisions-page.theme-light .admin-page-hero {
+          background:
+            radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.10), transparent 30%),
+            radial-gradient(circle at 15% 100%, rgba(99, 102, 241, 0.06), transparent 32%),
+            linear-gradient(135deg, #ffffff 0%, #f8f5ff 100%);
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow:
+            0 20px 55px rgba(31, 24, 54, 0.10),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-decisions-page.theme-light .admin-page-hero::before {
+          border-color: rgba(139, 92, 246, 0.12);
+          box-shadow:
+            0 0 0 22px rgba(139, 92, 246, 0.025),
+            0 0 0 44px rgba(139, 92, 246, 0.015);
+        }
+
+        .admin-decisions-page.theme-light .admin-eyebrow {
+          color: #7c3aed;
+        }
+
+        .admin-decisions-page.theme-light .admin-eyebrow-dot {
+          background: #8b5cf6;
+          box-shadow: 0 0 14px rgba(139, 92, 246, 0.45);
+        }
+
+        .admin-decisions-page.theme-light .admin-page-title {
+          color: #241c35;
+        }
+
+        .admin-decisions-page.theme-light .admin-page-description {
+          color: #6b6478;
+        }
+
+        .admin-decisions-page.theme-light .admin-stat-card {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.12);
+          box-shadow: 0 8px 24px rgba(31, 24, 54, 0.07);
+          backdrop-filter: none;
+        }
+
+        .admin-decisions-page.theme-light .admin-stat-label {
+          color: #756d82;
+        }
+
+        .admin-decisions-page.theme-light .admin-stat-value {
+          color: #2b2440;
+        }
+
+        .admin-decisions-page.theme-light .admin-back-link {
+          color: #7c3aed;
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.18);
+          box-shadow: 0 6px 18px rgba(31, 24, 54, 0.05);
+        }
+
+        .admin-decisions-page.theme-light .admin-back-link:hover {
+          color: #6d28d9;
+          background: #faf8ff;
+          border-color: rgba(139, 92, 246, 0.35);
+        }
+
+        .admin-decisions-page.theme-light .admin-search {
+          background: #ffffff;
+          color: #2b2440;
+          border-color: rgba(139, 92, 246, 0.16);
+          box-shadow: 0 8px 28px rgba(31, 24, 54, 0.06);
+        }
+
+        .admin-decisions-page.theme-light .admin-search::placeholder {
+          color: #8b8297;
+        }
+
+        .admin-decisions-page.theme-light .admin-search:focus {
+          background: #ffffff;
+          border-color: #8b5cf6;
+          box-shadow:
+            0 0 0 4px rgba(139, 92, 246, 0.09),
+            0 12px 30px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-decisions-page.theme-light .admin-search-icon {
+          color: #7c6b99;
+        }
+
+        .admin-decisions-page.theme-light .admin-results-count {
+          color: #756d82;
+        }
+
+        .admin-decisions-page.theme-light .admin-results-count strong {
+          color: #7c3aed;
+        }
+
+        .admin-decisions-page.theme-light .admin-table-wrapper {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.13);
+          box-shadow: 0 18px 50px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-decisions-page.theme-light .admin-decisions-table th,
+        .admin-decisions-page.theme-light .admin-decisions-table td {
+          color: #3a324c;
+          border-bottom-color: rgba(91, 72, 125, 0.10);
+        }
+
+        .admin-decisions-page.theme-light .admin-decisions-table th {
+          color: #70677d;
+          background: #faf9fc;
+        }
+
+        .admin-decisions-page.theme-light .admin-decision-row:hover {
+          background: linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.07),
+            rgba(139, 92, 246, 0.025)
+          );
+        }
+
+        .admin-decisions-page.theme-light .admin-badge {
+          background: rgba(139, 92, 246, 0.08);
+          border-color: rgba(139, 92, 246, 0.16);
+          color: #6d45b8;
+        }
+
+        .admin-decisions-page.theme-light .admin-votes {
+          background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.08),
+            rgba(99, 102, 241, 0.05)
+          );
+          border-color: rgba(139, 92, 246, 0.14);
+          color: #6d5a91;
+          box-shadow: none;
+        }
+
+        .admin-decisions-page.theme-light .admin-votes-number {
+          color: #4c3b68;
+        }
+
+        .admin-decisions-page.theme-light .admin-votes-label {
+          color: #81778d;
+        }
+
+        .admin-decisions-page.theme-light .admin-empty {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.20);
+          color: #756d82;
+          box-shadow: 0 8px 25px rgba(31, 24, 54, 0.05);
+        }
+
+        .admin-decisions-page.theme-light .admin-options-panel {
+          background:
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.045), transparent 30%),
+            #ffffff;
+        }
+
+        .admin-decisions-page.theme-light .admin-panel-section-title {
+          color: #756d82;
+        }
+
+        .admin-decisions-page.theme-light .admin-option-row {
+          background:
+            linear-gradient(
+              105deg,
+              rgba(139, 92, 246, 0.055),
+              #ffffff 48%,
+              rgba(99, 102, 241, 0.025)
+            );
+          border-color: rgba(139, 92, 246, 0.13);
+          box-shadow: 0 7px 22px rgba(31, 24, 54, 0.06);
+        }
+
+        .admin-decisions-page.theme-light .admin-option-row:hover {
+          background:
+            linear-gradient(
+              105deg,
+              rgba(139, 92, 246, 0.09),
+              #ffffff 48%,
+              rgba(99, 102, 241, 0.04)
+            );
+          box-shadow: 0 12px 28px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-decisions-page.theme-light .admin-option-text {
+          color: #3a324c;
+        }
+
+        .admin-decisions-page.theme-light .admin-option-rank {
+          background: rgba(139, 92, 246, 0.06);
+          border-color: rgba(139, 92, 246, 0.15);
+          color: #7657aa;
+        }
+
+        .admin-decisions-page.theme-light .admin-option-votes {
+          background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.07),
+            rgba(139, 92, 246, 0.07)
+          );
+          border-color: rgba(99, 102, 241, 0.13);
+          color: #66558a;
+          box-shadow: none;
+        }
+
+        .admin-decisions-page.theme-light .admin-option-votes-number {
+          color: #4c3b68;
+        }
+
+        .admin-decisions-page.theme-light .admin-option-votes-label {
+          color: #7c728c;
+        }
+
+        .admin-decisions-page.theme-light .admin-comment-row {
+          background:
+            linear-gradient(
+              110deg,
+              rgba(139, 92, 246, 0.045),
+              #ffffff 45%,
+              rgba(99, 102, 241, 0.02)
+            );
+          border-color: rgba(139, 92, 246, 0.13);
+          box-shadow: 0 8px 24px rgba(31, 24, 54, 0.06);
+        }
+
+        .admin-decisions-page.theme-light .admin-comment-row:hover {
+          box-shadow:
+            0 13px 30px rgba(31, 24, 54, 0.08),
+            0 0 0 1px rgba(139, 92, 246, 0.025);
+        }
+
+        .admin-decisions-page.theme-light .admin-comment-body {
+          color: #3a324c;
+        }
+
+        .admin-decisions-page.theme-light .admin-comment-meta {
+          background: rgba(139, 92, 246, 0.035);
+          border-color: rgba(139, 92, 246, 0.10);
+          color: #7b7187;
+        }
+
+        .admin-decisions-page.theme-light .admin-decision-card {
+          background:
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.055), transparent 35%),
+            #ffffff;
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow: 0 12px 35px rgba(31, 24, 54, 0.07);
+        }
+
+        .admin-decisions-page.theme-light .admin-decision-title {
+          color: #2f2740;
+        }
+
+        .admin-decisions-page.theme-light .admin-expand-icon {
+          background: rgba(139, 92, 246, 0.07);
+          border-color: rgba(139, 92, 246, 0.18);
+          color: #7047b8;
+        }
+
+        .admin-decisions-page.theme-light .admin-decision-card-info {
+          border-top-color: rgba(91, 72, 125, 0.10);
+        }
+
+        .admin-decisions-page.theme-light .admin-info-item {
+          background: #faf9fc;
+        }
+
+        .admin-decisions-page.theme-light .admin-info-label {
+          color: #776e80;
+        }
+
+        .admin-decisions-page.theme-light .admin-info-value {
+          color: #3a324c;
+        }
+
+        .admin-decisions-page.theme-light .admin-mobile-details {
+          background: #ffffff;
+          border-top-color: rgba(91, 72, 125, 0.10);
+        }
+
       `}</style>
 
-      <div className="admin-decisions-page">
+      <div className={`admin-decisions-page ${theme === "light" ? "theme-light" : ""}`}>
 
         <div className="admin-page-hero">
           <div className="admin-hero-content">

@@ -2,6 +2,21 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 
+// Violet sidebar icons stored in src/assets
+import homeIcon from "../assets/home-icon.png";
+import createIcon from "../assets/create-icon.png";
+import decisionsIcon from "../assets/decisions-icon.png";
+import pollsIcon from "../assets/polls-icon.png";
+import communitiesIcon from "../assets/communities-icon.png";
+import analyticsIcon from "../assets/analytics-icon.png";
+import profileIcon from "../assets/profile-icon.png";
+import adminIcon from "../assets/admin-icon.png";
+import usersIcon from "../assets/users-icon.png";
+import manageDecisionsIcon from "../assets/manage-decisions-icon.png";
+import manageCommunitiesIcon from "../assets/manage-communities-icon.png";
+import notificationIcon from "../assets/notification-icon.png";
+import logoutIcon from "../assets/logout-icon.png";
+
 function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,37 +45,37 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   const userNavItems = [
     {
       label: "Dashboard",
-      icon: "🏠",
+      icon: homeIcon,
       route: "/home",
     },
     {
       label: "Create Decision",
-      icon: "➕",
+      icon: createIcon,
       route: "/create-decision",
     },
     {
       label: "My Decisions",
-      icon: "📊",
+      icon: decisionsIcon,
       route: "/decisions",
     },
     {
       label: "Active Polls",
-      icon: "🗳",
+      icon: pollsIcon,
       route: "/polls",
     },
     {
       label: "Communities",
-      icon: "👥",
+      icon: communitiesIcon,
       route: "/communities",
     },
     {
       label: "Analytics",
-      icon: "📈",
+      icon: analyticsIcon,
       route: "/analytics",
     },
     {
       label: "Profile",
-      icon: "👤",
+      icon: profileIcon,
       route: "/profile",
     },
   ];
@@ -71,32 +86,32 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
     const adminNavItems = [
     {
       label: "Admin Dashboard",
-      icon: "🛠",
+      icon: adminIcon,
       route: "/admin",
     },
     {
       label: "Manage Users",
-      icon: "🧑‍💼",
+      icon: usersIcon,
       route: "/admin/users",
     },
     {
       label: "Manage Decisions",
-      icon: "📋",
+      icon: manageDecisionsIcon,
       route: "/admin/decisions",
     },
     {
       label: "Manage Communities",
-      icon: "👥",
+      icon: communitiesIcon,
       route: "/admin/communities",
     },
     {
       label: "Analytics",
-      icon: "📈",
+      icon: analyticsIcon,
       route: "/admin/analytics",
     },
     {
       label: "Profile",
-      icon: "👤",
+      icon: profileIcon,
       route: "/profile",
     },
   ];
@@ -490,12 +505,11 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                 >
                   <span
                     className={`
-                      flex h-8 w-8
+                      flex h-9 w-9
                       shrink-0
                       items-center
                       justify-center
                       rounded-lg
-                      text-[19px]
                       transition-transform
                       duration-200
                       hover:scale-110
@@ -507,7 +521,12 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                       }
                     `}
                   >
-                    {item.icon}
+                    <img
+                      src={item.icon}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-7 w-7 object-contain"
+                    />
                   </span>
 
                   <span
@@ -581,7 +600,12 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                 text-lg
               "
             >
-              🚪
+              <img
+                src={logoutIcon}
+                alt=""
+                aria-hidden="true"
+                className="h-7 w-7 object-contain"
+              />
             </span>
 
             <span
@@ -751,7 +775,12 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                   active:scale-95
                 "
               >
-                🔔
+                <img
+                  src={notificationIcon}
+                  alt="Notifications"
+                  aria-hidden="true"
+                  className="h-7 w-7 object-contain"
+                />
 
                 {unreadCount > 0 && (
                   <span

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import usersIcon from "../assets/users-icon.png";
+import decisionsIcon from "../assets/decisions-icon.png";
+import communitiesIcon from "../assets/communities-icon.png";
+import pollsIcon from "../assets/polls-icon.png";
+import analyticsIcon from "../assets/analytics-icon.png";
+import adminIcon from "../assets/admin-icon.png";
 
 const API = "http://localhost:8080";
 
@@ -49,28 +55,28 @@ function AdminDashboard() {
         {
           label: "Total Users",
           value: stats.totalUsers,
-          icon: "👤",
+          icon: usersIcon,
           accent: "#8b5cf6",
           description: "Registered platform users",
         },
         {
           label: "Total Decisions",
           value: stats.totalDecisions,
-          icon: "📊",
+          icon: decisionsIcon,
           accent: "#a855f7",
           description: "Community decisions created",
         },
         {
           label: "Total Communities",
           value: stats.totalCommunities,
-          icon: "👥",
+          icon: communitiesIcon,
           accent: "#c084fc",
           description: "Active community groups",
         },
         {
           label: "Total Votes",
           value: stats.totalVotes,
-          icon: "🗳️",
+          icon: pollsIcon,
           accent: "#7c3aed",
           description: "Votes submitted by users",
         },
@@ -86,7 +92,7 @@ function AdminDashboard() {
       label: "Manage Users",
       description:
         "View, search, promote or remove platform users.",
-      icon: "👤",
+      icon: usersIcon,
       accent: "#8b5cf6",
       to: "/admin/users",
     },
@@ -94,7 +100,7 @@ function AdminDashboard() {
       label: "Manage Decisions",
       description:
         "Review and moderate decisions across the platform.",
-      icon: "📊",
+      icon: decisionsIcon,
       accent: "#a855f7",
       to: "/admin/decisions",
     },
@@ -102,7 +108,7 @@ function AdminDashboard() {
       label: "Manage Communities",
       description:
         "Oversee community groups and their membership.",
-      icon: "👥",
+      icon: communitiesIcon,
       accent: "#c084fc",
       to: "/admin/communities",
     },
@@ -110,7 +116,7 @@ function AdminDashboard() {
       label: "View Analytics",
       description:
         "Explore trends, activity and platform insights.",
-      icon: "📈",
+      icon: analyticsIcon,
       accent: "#7c3aed",
       to: "/admin/analytics",
     },
@@ -964,6 +970,49 @@ function AdminDashboard() {
             gap: 11px;
           }
         }
+
+        .admin-stat-icon img,
+        .admin-action-icon img {
+          width: 26px;
+          height: 26px;
+          object-fit: contain;
+          display: block;
+        }
+
+        .admin-stat-icon img {
+          width: 27px;
+          height: 27px;
+        }
+
+        .admin-action-icon img {
+          width: 28px;
+          height: 28px;
+        }
+
+        .admin-hero-badge img {
+          width: 36px;
+          height: 36px;
+          object-fit: contain;
+          display: block;
+        }
+
+        @media (max-width: 650px) {
+          .admin-hero-badge img {
+            width: 28px;
+            height: 28px;
+          }
+
+          .admin-stat-icon img {
+            width: 23px;
+            height: 23px;
+          }
+
+          .admin-action-icon img {
+            width: 25px;
+            height: 25px;
+          }
+        }
+
       `}</style>
 
       <div className="admin-dashboard">
@@ -995,7 +1044,7 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-hero-badge">
-              ⚡
+              <img src={adminIcon} alt="Admin" />
             </div>
 
           </div>
@@ -1087,7 +1136,7 @@ function AdminDashboard() {
                   <div className="admin-stat-top">
 
                     <div className="admin-stat-icon">
-                      {card.icon}
+                      <img src={card.icon} alt="" aria-hidden="true" />
                     </div>
 
                     <span className="admin-stat-mini">
@@ -1148,7 +1197,7 @@ function AdminDashboard() {
                 >
 
                   <div className="admin-action-icon">
-                    {action.icon}
+                    <img src={action.icon} alt="" aria-hidden="true" />
                   </div>
 
                   <div className="admin-action-content">

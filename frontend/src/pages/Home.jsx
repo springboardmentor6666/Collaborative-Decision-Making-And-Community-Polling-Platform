@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import waveIcon from "../assets/wave-icon.png";
 
 const API = "http://localhost:8080";
 
@@ -195,9 +196,19 @@ function Home() {
 
   return (
     <DashboardLayout
-      pageTitle="Welcome Back 👋"
-      pageSubtitle="Create polls, compare ideas and make smarter decisions together."
-    >
+  pageTitle={
+    <>
+      Welcome Back{" "}
+      <img
+        src={waveIcon}
+        alt=""
+        aria-hidden="true"
+        className="inline-block h-8 w-8 object-contain align-middle"
+      />
+    </>
+  }
+  pageSubtitle="Create polls, compare ideas and make smarter decisions together."
+>
       <style>{`
 
         /* =====================================================

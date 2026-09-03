@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
@@ -7,6 +8,7 @@ const API = "http://localhost:8080";
 const ROLES = ["USER", "MODERATOR", "ADMIN"];
 
 function AdminUsers() {
+  const { theme } = useTheme();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -186,6 +188,42 @@ function AdminUsers() {
           box-shadow:
             0 20px 55px rgba(0, 0, 0, 0.22),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* LIGHT THEME - HERO CHANGES FROM DARK TO WHITE/LAVENDER */
+        .admin-users-page.theme-light .admin-users-hero {
+          background:
+            radial-gradient(circle at 86% 12%, rgba(168, 85, 247, 0.10), transparent 30%),
+            radial-gradient(circle at 12% 100%, rgba(99, 102, 241, 0.06), transparent 32%),
+            linear-gradient(135deg, #ffffff 0%, #f8f5ff 100%);
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow:
+            0 20px 55px rgba(31, 24, 54, 0.10),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-users-page.theme-light .admin-users-title {
+          color: #241c35;
+        }
+
+        .admin-users-page.theme-light .admin-users-description {
+          color: #6b6478;
+        }
+
+        .admin-users-page.theme-light .admin-users-eyebrow {
+          color: #7c3aed;
+        }
+
+        .admin-users-page.theme-light .admin-users-eyebrow-dot {
+          background: #8b5cf6;
+          box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
+        }
+
+        .admin-users-page.theme-light .admin-users-hero::before {
+          border-color: rgba(139, 92, 246, 0.12);
+          box-shadow:
+            0 0 0 22px rgba(139, 92, 246, 0.025),
+            0 0 0 44px rgba(139, 92, 246, 0.015);
         }
 
         .admin-users-hero::before {
@@ -652,6 +690,122 @@ function AdminUsers() {
           box-sizing: border-box;
         }
 
+        /* ==========================================
+           LIGHT THEME - WHITE INNER CONTENT BLOCKS
+        =========================================== */
+
+        .admin-users-page.theme-light .admin-user-stat {
+          background: #ffffff;
+          border-color: rgba(91, 70, 150, 0.12);
+          box-shadow: 0 8px 24px rgba(31, 24, 54, 0.06);
+        }
+
+        .admin-users-page.theme-light .admin-user-stat-label {
+          color: #746d83;
+        }
+
+        .admin-users-page.theme-light .admin-user-stat-value {
+          color: #241c35;
+        }
+
+        .admin-users-page.theme-light .admin-search {
+          background: #ffffff;
+          border-color: rgba(91, 70, 150, 0.14);
+          color: #2b2438;
+          box-shadow: 0 8px 28px rgba(31, 24, 54, 0.07);
+        }
+
+        .admin-users-page.theme-light .admin-search::placeholder {
+          color: #8b8497;
+        }
+
+        .admin-users-page.theme-light .admin-search:focus {
+          background: #ffffff;
+        }
+
+        .admin-users-page.theme-light .admin-search-icon {
+          color: #81778f;
+        }
+
+        .admin-users-page.theme-light .admin-user-results {
+          color: #746d83;
+        }
+
+        .admin-users-page.theme-light .admin-table-wrapper {
+          background: #ffffff;
+          border-color: rgba(91, 70, 150, 0.12);
+          box-shadow: 0 18px 50px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-users-page.theme-light .admin-users-table th,
+        .admin-users-page.theme-light .admin-users-table td {
+          color: #30283d;
+          border-bottom-color: rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-users-page.theme-light .admin-users-table th {
+          color: #746d83;
+          background: #faf9fd;
+        }
+
+        .admin-users-page.theme-light .admin-users-table tbody tr:hover {
+          background: linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.07),
+            rgba(139, 92, 246, 0.02)
+          );
+        }
+
+        .admin-users-page.theme-light .admin-user-name-text,
+        .admin-users-page.theme-light .admin-user-name {
+          color: #2b2438;
+        }
+
+        .admin-users-page.theme-light .admin-user-email,
+        .admin-users-page.theme-light .admin-user-email-mobile {
+          color: #777083;
+        }
+
+        .admin-users-page.theme-light .admin-role-select {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.18);
+          color: #332b40;
+        }
+
+        .admin-users-page.theme-light .admin-role-select:hover:not(:disabled) {
+          background: #faf9fd;
+        }
+
+        .admin-users-page.theme-light .admin-joined-date {
+          color: #777083;
+        }
+
+        .admin-users-page.theme-light .admin-empty {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.18);
+          color: #746d83;
+        }
+
+        .admin-users-page.theme-light .admin-user-card {
+          background:
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.06), transparent 35%),
+            #ffffff;
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow: 0 12px 35px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-users-page.theme-light .admin-user-card-row {
+          border-top-color: rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-users-page.theme-light .admin-user-card-label {
+          color: #746d83;
+        }
+
+        .admin-users-page.theme-light .admin-user-card-value {
+          color: #51495e;
+        }
+
         @media (max-width: 768px) {
           .admin-users-page {
             max-width: 100%;
@@ -779,7 +933,7 @@ function AdminUsers() {
         }
       `}</style>
 
-      <div className="admin-users-page">
+      <div className={`admin-users-page ${theme === "light" ? "theme-light" : ""}`}>
 
         <div className="admin-users-hero">
           <div className="admin-users-hero-content">

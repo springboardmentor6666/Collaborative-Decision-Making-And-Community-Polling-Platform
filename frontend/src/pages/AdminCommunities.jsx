@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import { useTheme } from "../context/ThemeContext";
 import Toast from "../components/Toast";
 
 const API = "http://localhost:8080";
 
 function AdminCommunities() {
+  const { theme } = useTheme();
   const [communities, setCommunities] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -867,9 +869,244 @@ function AdminCommunities() {
             grid-template-columns: 1fr;
           }
         }
+
+        /* =====================================================
+           LIGHT THEME — MATCH ADMIN USERS / ADMIN DECISIONS
+           All inner surfaces become clean white while keeping
+           the purple futuristic accents.
+        ===================================================== */
+
+        .admin-communities-page.theme-light {
+          color: #2b2440;
+        }
+
+        .admin-communities-page.theme-light .admin-community-hero {
+          background:
+            radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.10), transparent 30%),
+            radial-gradient(circle at 12% 100%, rgba(99, 102, 241, 0.06), transparent 32%),
+            linear-gradient(135deg, #ffffff 0%, #f8f5ff 100%);
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow:
+            0 20px 55px rgba(31, 24, 54, 0.10),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .admin-communities-page.theme-light .admin-community-hero::before {
+          border-color: rgba(139, 92, 246, 0.12);
+          box-shadow:
+            0 0 0 22px rgba(139, 92, 246, 0.025),
+            0 0 0 44px rgba(139, 92, 246, 0.015);
+        }
+
+        .admin-communities-page.theme-light .admin-community-eyebrow {
+          color: #7c3aed;
+        }
+
+        .admin-communities-page.theme-light .admin-community-eyebrow-dot {
+          background: #8b5cf6;
+          box-shadow: 0 0 14px rgba(139, 92, 246, 0.45);
+        }
+
+        .admin-communities-page.theme-light .admin-community-page-title {
+          color: #241c35;
+        }
+
+        .admin-communities-page.theme-light .admin-community-page-description {
+          color: #6b6478;
+        }
+
+        .admin-communities-page.theme-light .admin-community-stat-card {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.12);
+          box-shadow: 0 8px 24px rgba(31, 24, 54, 0.07);
+          backdrop-filter: none;
+        }
+
+        .admin-communities-page.theme-light .admin-community-stat-label {
+          color: #756d82;
+        }
+
+        .admin-communities-page.theme-light .admin-community-stat-value {
+          color: #2b2440;
+        }
+
+        .admin-communities-page.theme-light .admin-back-link {
+          color: #7c3aed;
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.18);
+          box-shadow: 0 6px 18px rgba(31, 24, 54, 0.05);
+        }
+
+        .admin-communities-page.theme-light .admin-back-link:hover {
+          color: #6d28d9;
+          background: #faf8ff;
+          border-color: rgba(139, 92, 246, 0.35);
+        }
+
+        .admin-communities-page.theme-light .admin-search {
+          background: #ffffff;
+          color: #2b2440;
+          border-color: rgba(139, 92, 246, 0.16);
+          box-shadow: 0 8px 28px rgba(31, 24, 54, 0.06);
+        }
+
+        .admin-communities-page.theme-light .admin-search::placeholder {
+          color: #8b8297;
+        }
+
+        .admin-communities-page.theme-light .admin-search:focus {
+          background: #ffffff;
+          border-color: #8b5cf6;
+          box-shadow:
+            0 0 0 4px rgba(139, 92, 246, 0.09),
+            0 12px 30px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-communities-page.theme-light .admin-search-icon {
+          color: #7c6b99;
+        }
+
+        .admin-communities-page.theme-light .admin-results-count {
+          color: #756d82;
+        }
+
+        .admin-communities-page.theme-light .admin-results-count strong {
+          color: #7c3aed;
+        }
+
+        .admin-communities-page.theme-light .admin-table-wrapper {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.13);
+          box-shadow: 0 18px 50px rgba(31, 24, 54, 0.08);
+        }
+
+        .admin-communities-page.theme-light .admin-communities-table th,
+        .admin-communities-page.theme-light .admin-communities-table td {
+          color: #3a324c;
+          border-bottom-color: rgba(91, 72, 125, 0.10);
+        }
+
+        .admin-communities-page.theme-light .admin-communities-table th {
+          color: #70677d;
+          background: #faf9fc;
+        }
+
+        .admin-communities-page.theme-light .admin-community-row:hover {
+          background: linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.07),
+            rgba(139, 92, 246, 0.025)
+          );
+        }
+
+        .admin-communities-page.theme-light .admin-community-avatar {
+          background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.10),
+            rgba(99, 102, 241, 0.06)
+          );
+          border-color: rgba(139, 92, 246, 0.16);
+          color: #6d45b8;
+          box-shadow: none;
+        }
+
+        .admin-communities-page.theme-light .admin-community-name-text {
+          color: #3a324c;
+        }
+
+        .admin-communities-page.theme-light .admin-owner-cell {
+          color: #625970;
+        }
+
+        .admin-communities-page.theme-light .admin-member-count {
+          background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.08),
+            rgba(99, 102, 241, 0.05)
+          );
+          border-color: rgba(139, 92, 246, 0.14);
+          color: #6d5595;
+        }
+
+        .admin-communities-page.theme-light .admin-empty {
+          background: #ffffff;
+          border-color: rgba(139, 92, 246, 0.20);
+          color: #756d82;
+          box-shadow: 0 8px 25px rgba(31, 24, 54, 0.05);
+        }
+
+        .admin-communities-page.theme-light .admin-members-panel {
+          background:
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.045), transparent 30%),
+            #ffffff;
+        }
+
+        .admin-communities-page.theme-light .admin-members-title {
+          color: #756d82;
+        }
+
+        .admin-communities-page.theme-light .admin-member-chip {
+          background:
+            linear-gradient(
+              135deg,
+              rgba(139, 92, 246, 0.055),
+              #ffffff
+            );
+          border-color: rgba(139, 92, 246, 0.13);
+          color: #4b405d;
+          box-shadow: 0 4px 14px rgba(31, 24, 54, 0.04);
+        }
+
+        .admin-communities-page.theme-light .admin-member-chip:hover {
+          background: rgba(139, 92, 246, 0.08);
+          border-color: rgba(139, 92, 246, 0.25);
+        }
+
+        .admin-communities-page.theme-light .admin-community-card {
+          background:
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.055), transparent 35%),
+            #ffffff;
+          border-color: rgba(139, 92, 246, 0.14);
+          box-shadow: 0 12px 35px rgba(31, 24, 54, 0.07);
+        }
+
+        .admin-communities-page.theme-light .admin-community-card-name-text {
+          color: #2f2740;
+        }
+
+        .admin-communities-page.theme-light .admin-expand-icon {
+          background: rgba(139, 92, 246, 0.07);
+          border-color: rgba(139, 92, 246, 0.18);
+          color: #7047b8;
+        }
+
+        .admin-communities-page.theme-light .admin-info-item {
+          background: #faf9fc;
+          border-color: rgba(91, 72, 125, 0.09);
+        }
+
+        .admin-communities-page.theme-light .admin-info-label {
+          color: #776e80;
+        }
+
+        .admin-communities-page.theme-light .admin-info-value {
+          color: #3a324c;
+        }
+
+        .admin-communities-page.theme-light .admin-mobile-members {
+          background: #ffffff;
+          border-top-color: rgba(91, 72, 125, 0.10);
+        }
+
+        .admin-communities-page.theme-light .admin-mobile-members-title {
+          color: #756d82;
+        }
+
+        /* Delete buttons stay intentionally red in both themes. */
+
       `}</style>
 
-      <div className="admin-communities-page">
+      <div className={`admin-communities-page ${theme === "light" ? "theme-light" : ""}`}>
 
         <div className="admin-community-hero">
           <div className="admin-community-hero-content">
