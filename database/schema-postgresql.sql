@@ -329,6 +329,63 @@ CREATE TABLE IF NOT EXISTS decision_history (
     FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- 28. community_chat_channels (Live Discussion Rooms)
+CREATE TABLE IF NOT EXISTS community_chat_channels (
+    id BIGSERIAL PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(255) NULL,
+    is_default BOOLEAN DEFAULT FALSE,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_community_channel UNIQUE (community_id, name),
+    CONSTRAINT fk_chat_channels_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_channels_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 29. community_messages (Channel Messages & Threaded Replies)
+CREATE TABLE IF NOT EXISTS community_messages (
+    id BIGSERIAL PRIMARY KEY,
+    channel_id BIGINT NOT NULL,
+    sender_id BIGINT NOT NULL,
+    parent_message_id BIGINT NULL,
+    content TEXT NOT NULL,
+    message_type VARCHAR(20) DEFAULT 'TEXT',
+    is_pinned BOOLEAN DEFAULT FALSE,
+    is_edited BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_comm_messages_channel FOREIGN KEY (channel_id) REFERENCES community_chat_channels(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_messages_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_messages_parent FOREIGN KEY (parent_message_id) REFERENCES community_messages(id) ON DELETE SET NULL,
+    CONSTRAINT chk_comm_messages_type CHECK (message_type IN ('TEXT', 'IMAGE', 'FILE', 'SYSTEM', 'POLL_SHARE'))
+);
+
+-- 30. community_message_reactions (Emoji Reactions)
+CREATE TABLE IF NOT EXISTS community_message_reactions (
+    id BIGSERIAL PRIMARY KEY,
+    message_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    emoji VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_user_message_reaction UNIQUE (message_id, user_id, emoji),
+    CONSTRAINT fk_comm_reactions_message FOREIGN KEY (message_id) REFERENCES community_messages(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_reactions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 31. community_chat_read_receipts (Unread Tracking)
+CREATE TABLE IF NOT EXISTS community_chat_read_receipts (
+    channel_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    last_read_message_id BIGINT NOT NULL,
+    last_read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (channel_id, user_id),
+    CONSTRAINT fk_comm_read_receipts_channel FOREIGN KEY (channel_id) REFERENCES community_chat_channels(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_read_receipts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comm_read_receipts_message FOREIGN KEY (last_read_message_id) REFERENCES community_messages(id) ON DELETE CASCADE
+);
+
 -- Indexes for performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_decisions_owner ON decisions(owner_id);
@@ -367,4 +424,13 @@ CREATE INDEX idx_decision_history_changed_by ON decision_history(changed_by);
 CREATE INDEX idx_decision_history_changed_at ON decision_history(changed_at);
 CREATE INDEX idx_generated_reports_generated_by ON generated_reports(generated_by);
 CREATE INDEX idx_generated_reports_created_at ON generated_reports(created_at);
+
+-- Community Chat Indexes
+CREATE INDEX idx_comm_msgs_channel_created ON community_messages(channel_id, created_at DESC);
+CREATE INDEX idx_comm_msgs_sender ON community_messages(sender_id);
+CREATE INDEX idx_comm_msgs_pinned ON community_messages(channel_id, is_pinned) WHERE is_pinned = TRUE;
+CREATE INDEX idx_comm_reactions_msg ON community_message_reactions(message_id);
+CREATE INDEX idx_comm_msgs_parent ON community_messages(parent_message_id);
+CREATE INDEX idx_comm_read_receipts_user ON community_chat_read_receipts(user_id);
+
 

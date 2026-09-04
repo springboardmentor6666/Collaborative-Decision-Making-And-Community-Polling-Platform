@@ -24,6 +24,22 @@
 | 14 | `comments` | `Comment.java` | `parent_id` → self-referencing FK for threaded replies |
 | 15 | `notifications` | `Notification.java` | `type` = NEW_COMMENT / NEW_VOTE / etc. |
 | 16 | `moderation_flags` | `ModerationFlag.java` | `target_type` = COMMENT / DECISION |
+| 17 | `decision_impressions` | `DecisionImpression.java` | Impression tracking (`VIEW`, `SHARE`, etc.) |
+| 18 | `suggestions` | `Suggestion.java` | User suggestions for options/factors |
+| 19 | `recommendations` | `Recommendation.java` | Algorithmic or expert decision recommendations |
+| 20 | `community_invites` | `CommunityInvite.java` | Community invitation tokens & statuses |
+| 21 | `saved_decisions` | `SavedDecision.java` | User bookmarked decisions |
+| 22 | `attachments` | `Attachment.java` | Decision/comment file uploads & S3/CDN URLs |
+| 23 | `audit_logs` | `AuditLog.java` | Administrative & security audit trails |
+| 24 | `reports` | `Report.java` | User content moderation reports |
+| 25 | `admin_settings` | `AdminSetting.java` | Key-value application configurations |
+| 26 | `generated_reports` | `GeneratedReport.java` | Export jobs (PDF/CSV analytics) |
+| 27 | `decision_history` | `DecisionHistory.java` | Audit changelog for decisions |
+| 28 | `community_chat_channels` | `CommunityChatChannel.java` | Live chat channels per community (`is_default` for `#general`) |
+| 29 | `community_messages` | `CommunityMessage.java` | Rich chat messages, threaded replies, pinning & soft-deletes |
+| 30 | `community_message_reactions` | `CommunityMessageReaction.java` | Emoji reactions per message per user (`UNIQUE(message_id, user_id, emoji)`) |
+| 31 | `community_chat_read_receipts` | `CommunityChatReadReceipt.java` | Composite PK `(channel_id, user_id)` cursor tracking unread messages |
+
 
 ---
 
@@ -162,6 +178,65 @@ reason          → String reason
 status          → String status        ("PENDING" / "RESOLVED")
 ```
 
+### 15. CommunityChatChannel.java ← `community_chat_channels`
+```
+id              → Long id                           @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+community_id    → Community community               @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "community_id", nullable = false)
+name            → String name                       @Column(length = 50, nullable = false)
+description     → String description                @Column(length = 255)
+is_default      → Boolean isDefault                 @Column(name = "is_default") DEFAULT FALSE
+created_by      → User createdBy                    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "created_by", nullable = false)
+created_at      → LocalDateTime createdAt           @CreationTimestamp
+messages        → List<CommunityMessage> messages   @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
+
+Constraint: @Table(name = "community_chat_channels", uniqueConstraints = @UniqueConstraint(name = "uk_community_channel", columnNames = {"community_id", "name"}))
+```
+
+### 16. CommunityMessage.java ← `community_messages`
+```
+id                → Long id                               @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+channel_id        → CommunityChatChannel channel          @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "channel_id", nullable = false)
+sender_id         → User sender                           @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "sender_id", nullable = false)
+parent_message_id → CommunityMessage parentMessage        @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "parent_message_id")
+content           → String content                        @Column(columnDefinition = "TEXT", nullable = false)
+message_type      → MessageType messageType               @Enumerated(EnumType.STRING) @Column(name = "message_type", length = 20) ("TEXT", "IMAGE", "FILE", "SYSTEM", "POLL_SHARE")
+is_pinned         → Boolean isPinned                      @Column(name = "is_pinned") DEFAULT FALSE
+is_edited         → Boolean isEdited                      @Column(name = "is_edited") DEFAULT FALSE
+is_deleted        → Boolean isDeleted                     @Column(name = "is_deleted") DEFAULT FALSE (soft delete to preserve thread hierarchy)
+created_at        → LocalDateTime createdAt               @CreationTimestamp
+updated_at        → LocalDateTime updatedAt               @UpdateTimestamp
+replies           → List<CommunityMessage> replies        @OneToMany(mappedBy = "parentMessage")
+reactions         → List<CommunityMessageReaction> reactions @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+
+Indexes: 
+- (channel_id, created_at DESC) for cursor-based chat pagination
+- (channel_id, is_pinned) for fast retrieval of pinned announcements
+- (sender_id) for user message history
+```
+
+### 17. CommunityMessageReaction.java ← `community_message_reactions`
+```
+id              → Long id                               @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+message_id      → CommunityMessage message              @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "message_id", nullable = false)
+user_id         → User user                             @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
+emoji           → String emoji                          @Column(length = 32, nullable = false) (e.g. "👍", "❤️", "🚀", "💡")
+created_at      → LocalDateTime createdAt               @CreationTimestamp
+
+Constraint: @Table(name = "community_message_reactions", uniqueConstraints = @UniqueConstraint(name = "uk_user_message_reaction", columnNames = {"message_id", "user_id", "emoji"}))
+```
+
+### 18. CommunityChatReadReceipt.java ← `community_chat_read_receipts`
+```
+channelId       → Long channelId                        @EmbeddedId / Composite Key (channel_id, user_id)
+userId          → Long userId                           
+channel         → CommunityChatChannel channel          @MapsId("channelId") @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "channel_id")
+user            → User user                             @MapsId("userId") @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id")
+lastReadMessage → CommunityMessage lastReadMessage      @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "last_read_message_id", nullable = false)
+lastReadAt      → LocalDateTime lastReadAt              @UpdateTimestamp
+
+Query Usage: Unread badge calculations via `COUNT(m.id) WHERE m.channel_id = :channelId AND m.id > :lastReadMessageId`
+```
+
 ---
 
 ## Relationship Summary for JPA
@@ -169,7 +244,8 @@ status          → String status        ("PENDING" / "RESOLVED")
 ```
 User        @OneToOne   → UserProfile
 User        @ManyToMany → Category       (via user_interests junction table)
-User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag
+User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag, CommunityMessage, CommunityMessageReaction
+User        @OneToMany  → CommunityChatChannel (as creator), CommunityChatReadReceipt
 
 Decision    @ManyToOne  → User (owner), Category
 Decision    @OneToMany  → DecisionOption, ComparisonFactor, Poll, Comment
@@ -186,7 +262,37 @@ Vote        @ManyToOne  → Poll, PollOption, User
 Comment     @ManyToOne  → Decision, User, Comment(parent) — self-referencing
 
 Community   @ManyToMany → User (via community_members)
+Community   @OneToMany  → CommunityChatChannel (e.g. #general, #announcements)
+
+CommunityChatChannel @ManyToOne → Community, User (creator)
+CommunityChatChannel @OneToMany → CommunityMessage, CommunityChatReadReceipt
+
+CommunityMessage     @ManyToOne → CommunityChatChannel, User (sender), CommunityMessage (parent for replies)
+CommunityMessage     @OneToMany → CommunityMessage (replies), CommunityMessageReaction (emoji reactions)
+
+CommunityMessageReaction @ManyToOne → CommunityMessage, User
+            UNIQUE(message_id, user_id, emoji) — prevents duplicate emoji reactions
+
+CommunityChatReadReceipt @EmbeddedId (channel_id, user_id)
+                         @ManyToOne → CommunityChatChannel, User, CommunityMessage (last_read)
 ```
+
+---
+
+## Real-Time & Chat Architectural Guidelines
+
+1. **Cursor-Based Pagination**:
+   - For channel chat timelines, use cursor pagination ordering by `id DESC` or `created_at DESC` with `LIMIT 50`.
+   - Covered by index `idx_comm_msgs_channel_created (channel_id, created_at DESC)`.
+2. **Threaded Replies & Soft Deletes**:
+   - When a parent message is deleted, mark `is_deleted = TRUE` rather than hard deletion to preserve thread hierarchy and reply readability.
+   - Self-referencing FK `parent_message_id` uses `ON DELETE SET NULL` as a safety mechanism.
+3. **Optimistic Emoji Reactions**:
+   - `UNIQUE(message_id, user_id, emoji)` allows toggling reactions (INSERT on toggle on, DELETE on toggle off) without duplicates or race conditions.
+4. **WebSocket / STOMP Real-Time Integration**:
+   - Clients subscribe to `/topic/community.{communityId}.channel.{channelId}` for incoming messages and reactions.
+   - Read receipt updates can be throttled or debounced and broadcast to `/topic/community.{communityId}.channel.{channelId}.reads`.
+
 
 ---
 
