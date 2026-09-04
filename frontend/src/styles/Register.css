@@ -1,0 +1,473 @@
+/* ================================
+   REGISTER PAGE
+================================ */
+
+.register-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 35px 20px 30px;
+
+  background: linear-gradient(
+    135deg,
+    #f5f7ff 0%,
+    #ffffff 50%,
+    #eef2ff 100%
+  );
+
+  box-sizing: border-box;
+}
+
+
+/* ================================
+   REGISTER CARD
+================================ */
+
+.register-card {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 30px 34px;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border: 1px solid #e3e6ef;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 15px 40px rgba(30, 41, 90, 0.12);
+
+  box-sizing: border-box;
+}
+
+
+/* ================================
+   LOGO
+================================ */
+
+.register-logo {
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  color: #17265d;
+
+  letter-spacing: -0.5px;
+}
+
+.register-logo span {
+  color: #4f46e5;
+}
+
+
+/* ================================
+   HEADING
+================================ */
+
+.register-card h2 {
+  margin: 5px 0 4px;
+
+  text-align: center;
+
+  font-size: 25px;
+  font-weight: 700;
+
+  color: #17265d;
+}
+
+
+/* ================================
+   SUBTITLE
+================================ */
+
+.register-subtitle {
+  margin: 0 0 20px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  color: #6b7280;
+
+  line-height: 1.5;
+}
+
+
+/* ================================
+   GOOGLE BUTTON
+================================ */
+
+.google-btn {
+  width: 100%;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  background: #ffffff;
+
+  border: 1px solid #cfd3dc;
+
+  border-radius: 9px;
+
+  color: #202124;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+
+  border-color: #9ca3af;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+
+/* Google G */
+
+.google-icon {
+  font-size: 19px;
+
+  font-weight: 700;
+
+  color: #4285f4;
+}
+
+
+/* ================================
+   DIVIDER
+================================ */
+
+.divider {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 18px 0;
+}
+
+.divider span {
+  flex: 1;
+
+  height: 1px;
+
+  background: #dfe2e8;
+}
+
+.divider p {
+  margin: 0;
+
+  font-size: 12px;
+
+  color: #8a8f9b;
+
+  font-weight: 500;
+}
+
+
+/* ================================
+   INPUT GROUP
+================================ */
+
+.input-group {
+  position: relative;
+
+  width: 100%;
+
+  margin-bottom: 11px;
+}
+
+
+/* ================================
+   INPUTS
+================================ */
+
+.input-group input {
+  width: 100%;
+
+  height: 45px;
+
+  padding: 0 13px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d4d8e1;
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  font-size: 14px;
+
+  transition: all 0.2s ease;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    outline: none;
+    background: #fff;
+    color: #222;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
+    outline: none;
+}
+.input-group input::placeholder {
+  color: #8a8f9b;
+}
+
+
+/* ================================
+   PASSWORD
+================================ */
+
+.password-group input {
+  padding-right: 45px;
+}
+
+
+/* Eye button */
+
+.eye-btn {
+  position: absolute;
+
+  right: 9px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 30px;
+  height: 30px;
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ================================
+   PASSWORD HINT
+================================ */
+
+.password-hint {
+  margin: -4px 0 10px;
+
+  font-size: 11px;
+
+  color: #8a8f9b;
+}
+
+
+/* ================================
+   TERMS
+================================ */
+
+.terms-text {
+  margin: 12px 5px 15px;
+
+  text-align: center;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+
+  color: #777;
+}
+
+.terms-text a {
+  color: #4f46e5;
+
+  text-decoration: none;
+
+  font-weight: 600;
+}
+
+.terms-text a:hover {
+  text-decoration: underline;
+}
+
+
+/* ================================
+   CREATE ACCOUNT BUTTON
+================================ */
+
+.register-btn {
+  width: 100%;
+
+  height: 45px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #4f46e5;
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.register-btn:hover {
+  background: #3730a3;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 6px 15px rgba(79, 70, 229, 0.25);
+}
+
+.register-btn:active {
+  transform: translateY(0);
+}
+
+
+/* ================================
+   LOGIN
+================================ */
+
+.login-text {
+  margin: 15px 0 0;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #777;
+}
+
+.login-text button {
+    margin-left: 5px;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent !important;
+    color: #4f46e5;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none !important;
+    appearance: none;
+}
+
+.login-text button:hover {
+    background: transparent !important;
+    color: #312e81;
+    text-decoration: underline;
+}
+
+.login-text button:focus,
+.login-text button:active,
+.login-text button:focus-visible {
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+
+/* ================================
+   TABLET
+================================ */
+
+@media (max-width: 768px) {
+
+  .register-page {
+    padding: 80px 20px 25px;
+  }
+
+  .register-card {
+    max-width: 420px;
+
+    padding: 28px 30px;
+  }
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 500px) {
+
+  .register-page {
+    padding: 75px 15px 20px;
+
+    align-items: center;
+  }
+
+  .register-card {
+    width: 100%;
+
+    padding: 25px 20px;
+
+    border-radius: 15px;
+  }
+
+  .register-logo {
+    font-size: 27px;
+  }
+
+  .register-card h2 {
+    font-size: 22px;
+  }
+
+  .register-subtitle {
+    font-size: 13px;
+
+    margin-bottom: 17px;
+  }
+
+  .google-btn {
+    height: 43px;
+  }
+
+  .input-group input {
+    height: 44px;
+  }
+
+  .register-btn {
+    height: 44px;
+  }
+}

@@ -1,0 +1,180 @@
+.features-section {
+    width: 100%;
+
+    min-height: 70vh;
+
+    padding: 90px 40px 100px;
+
+    background: linear-gradient(
+        135deg,
+        #f5f8ff,
+        #ffffff
+    );
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    box-sizing: border-box;
+}
+
+.features-container {
+    width: 100%;
+
+    max-width: 1100px;
+
+    text-align: center;
+}
+
+.features-container h1 {
+    margin: 0;
+
+    font-size: 42px;
+
+    font-weight: 700;
+
+    color: #14245c;
+}
+
+.features-subtitle {
+    margin: 15px 0 55px;
+
+    font-size: 18px;
+
+    color: #666;
+}
+
+.features-cards {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: stretch;
+
+    gap: 30px;
+
+    flex-wrap: wrap;
+}
+
+.feature-card {
+    width: 300px;
+
+    min-height: 240px;
+
+    padding: 40px 25px 30px;
+
+    background: rgba(255, 255, 255, 0.95);
+
+    border-radius: 18px;
+
+    border: 1px solid #e7ebf5;
+
+    box-shadow:
+        0 8px 25px rgba(40, 70, 150, 0.12);
+
+    box-sizing: border-box;
+
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+
+    box-shadow:
+        0 15px 35px rgba(40, 70, 150, 0.18);
+}
+
+.feature-icon {
+    font-size: 42px;
+
+    margin-bottom: 18px;
+}
+
+.feature-card h2 {
+    margin: 0 0 15px;
+
+    font-size: 22px;
+
+    color: #17265d;
+}
+
+.feature-card p {
+    margin: 0;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+
+    color: #666;
+}
+
+
+/* TABLET */
+
+@media (max-width: 900px) {
+
+    .features-section {
+        padding: 80px 25px;
+    }
+
+    .features-cards {
+        gap: 25px;
+    }
+
+    .feature-card {
+        width: 300px;
+    }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .features-section {
+        padding: 60px 20px;
+    }
+
+    .features-container h1 {
+        font-size: 32px;
+    }
+
+    .features-subtitle {
+        font-size: 16px;
+
+        margin-bottom: 40px;
+    }
+
+    .features-cards {
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 20px;
+    }
+
+    .feature-card {
+        width: 100%;
+
+        max-width: 350px;
+
+        min-height: 220px;
+
+        padding: 30px 20px;
+    }
+}
+
+
+/* SMALL MOBILE */
+
+@media (max-width: 400px) {
+
+    .features-container h1 {
+        font-size: 28px;
+    }
+
+    .feature-card {
+        max-width: 320px;
+    }
+}

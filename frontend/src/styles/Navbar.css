@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.navbar {
+    width: 100%;
+    min-height: 80px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 80px;
+
+    background: white;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 1000;
+
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4f46e5;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 35px;
+
+    list-style: none;
+
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.nav-menu li {
+    cursor: pointer;
+}
+
+.nav-menu li:hover {
+    color: #4f46e5;
+}
+
+.nav-btn {
+    padding: 12px 26px;
+
+    border: none;
+
+    background: #4f46e5;
+    color: white;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+
+    text-decoration: none;
+    display: inline-block;
+}
+
+.nav-btn:hover {
+    background: #312e81;
+}
+
+
+/* =========================
+   TABLET
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .navbar {
+        padding: 0 30px;
+    }
+
+    .logo {
+        font-size: 28px;
+    }
+
+    .nav-menu {
+        gap: 18px;
+        font-size: 16px;
+    }
+
+    .nav-btn {
+        padding: 10px 18px;
+    }
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 600px) {
+
+    .navbar {
+        padding: 15px 20px;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .logo {
+        font-size: 27px;
+    }
+
+    .nav-menu {
+        width: 100%;
+
+        justify-content: center;
+
+        flex-wrap: wrap;
+
+        gap: 10px 18px;
+
+        font-size: 15px;
+    }
+
+    .nav-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+
+/* =========================
+   SMALL MOBILE
+   ========================= */
+
+@media (max-width: 400px) {
+
+    .navbar {
+        padding: 12px 15px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .nav-menu {
+        gap: 8px 12px;
+        font-size: 14px;
+    }
+
+    .nav-btn {
+        padding: 9px 16px;
+    }
+}

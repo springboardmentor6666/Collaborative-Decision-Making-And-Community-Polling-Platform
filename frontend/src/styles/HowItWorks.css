@@ -1,0 +1,235 @@
+.how-it-works {
+    width: 100%;
+
+    min-height: 75vh;
+
+    padding: 90px 40px 100px;
+
+    background: linear-gradient(
+        135deg,
+        #f5f8ff,
+        #ffffff
+    );
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    box-sizing: border-box;
+}
+
+.how-container {
+    width: 100%;
+
+    max-width: 1100px;
+
+    text-align: center;
+}
+
+.how-container h1 {
+    margin: 0;
+
+    font-size: 42px;
+
+    color: #14245c;
+
+    font-weight: 700;
+}
+
+.how-subtitle {
+    margin: 15px 0 55px;
+
+    font-size: 18px;
+
+    color: #666;
+}
+
+
+/* CARDS */
+
+.steps-container {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: stretch;
+
+    gap: 30px;
+
+    flex-wrap: wrap;
+}
+
+
+/* CARD */
+
+.step-card {
+    position: relative;
+
+    width: 300px;
+
+    min-height: 270px;
+
+    padding: 45px 25px 30px;
+
+    background: rgba(255, 255, 255, 0.95);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 25px rgba(40, 70, 150, 0.12);
+
+    border: 1px solid #e8ecf7;
+
+    box-sizing: border-box;
+
+    transition: all 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-8px);
+
+    box-shadow:
+        0 15px 35px rgba(40, 70, 150, 0.18);
+}
+
+
+/* NUMBER */
+
+.step-number {
+    position: absolute;
+
+    top: -18px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background: #3867e8;
+
+    color: white;
+
+    border-radius: 50%;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 5px 12px rgba(56, 103, 232, 0.3);
+}
+
+
+/* ICON */
+
+.step-icon {
+    font-size: 42px;
+
+    margin-bottom: 18px;
+}
+
+
+/* HEADING */
+
+.step-card h2 {
+    margin: 0 0 15px;
+
+    font-size: 22px;
+
+    color: #17265d;
+}
+
+
+/* DESCRIPTION */
+
+.step-card p {
+    margin: 0;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+
+    color: #666;
+}
+
+
+/* TABLET */
+
+@media (max-width: 900px) {
+
+    .how-it-works {
+        padding: 80px 25px;
+    }
+
+    .steps-container {
+        gap: 25px;
+    }
+
+    .step-card {
+        width: 300px;
+    }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .how-it-works {
+        padding: 60px 20px;
+
+        min-height: auto;
+    }
+
+    .how-container h1 {
+        font-size: 32px;
+    }
+
+    .how-subtitle {
+        font-size: 16px;
+
+        margin-bottom: 40px;
+    }
+
+    .steps-container {
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 35px;
+    }
+
+    .step-card {
+        width: 100%;
+
+        max-width: 350px;
+
+        min-height: 240px;
+
+        padding: 40px 20px 25px;
+    }
+}
+
+
+/* SMALL MOBILE */
+
+@media (max-width: 400px) {
+
+    .how-container h1 {
+        font-size: 28px;
+    }
+
+    .step-card {
+        max-width: 320px;
+    }
+}

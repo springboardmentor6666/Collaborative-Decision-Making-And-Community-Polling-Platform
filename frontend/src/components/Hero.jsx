@@ -1,59 +1,49 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import "../styles/Hero.css";
+import heroImg from "../assets/hero.png";
 
 function Hero() {
+  const navigate = useNavigate();
+
+  const handleLearnMore = () => {
+    document.getElementById("features")?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <section id="home" className="container">
+    <section id="home" className="hero">
 
-      <div className="hero-text">
+      <div className="hero-left">
 
-        <span className="tag">🚀 Smart Community Platform</span>
-
-        <h1>
-          Smart Decisions,
-          <br />
-          Better Communities
-        </h1>
-        Create polls • Vote securely • Make smarter decisions
+        <h1>Make Better Decisions Together</h1>
 
         <p>
-          DecisionHub is an online polling and voting platform that helps
-          communities, colleges and teams create polls, collect votes and
-          make transparent decisions in real time.
+          Create decision boards, compare options, invite your friends
+          to vote, discuss ideas, and make smarter decisions together.
         </p>
 
         <div className="hero-buttons">
-          <Link to="/register">
-            <button className="primary-btn">
-              Get Started
-            </button>
-          </Link>
 
-          <Link to="/about">
-            <button className="secondary-btn">
-              Learn More
-            </button>
-          </Link>
-        </div>
+          <button
+            className="primary-btn"
+            onClick={() => navigate("/register")}
+          >
+            Get Started
+          </button>
 
-        <div className="hero-stats">
-
-          <div>
-            <h3>🗳️ 500+</h3>
-            <p>Votes</p>
-          </div>
-
-          <div>
-            <h3>📊 120+</h3>
-            <p>Polls</p>
-          </div>
-
-          <div>
-            <h3>⭐ 95%</h3>
-            <p>Satisfaction</p>
-          </div>
+          <button
+            className="secondary-btn"
+            onClick={handleLearnMore}
+          >
+            Learn More
+          </button>
 
         </div>
+      </div>
 
+      <div className="hero-right">
+        <img src={heroImg} alt="DecisionHub" />
       </div>
 
     </section>
