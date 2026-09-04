@@ -1,8 +1,112 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
 const API = "http://localhost:8080";
+
+// ==========================================
+// WINNER / RESULT CALCULATION
+// Finds the option(s) with max(voteCount).
+// Handles ties: if 2+ options share the top
+// vote count, all of them are marked winners
+// and isTie becomes true.
+// ==========================================
+function getWinnerInfo(options) {
+  const list = options || [];
+  const totalVotes = list.reduce(
+    (sum, o) => sum + (o.voteCount || 0),
+    0
+  );
+
+  if (list.length === 0 || totalVotes === 0) {
+    return { winnerIds: new Set(), winners: [], isTie: false, maxVotes: 0, totalVotes: 0 };
+  }
+
+  const maxVotes = Math.max(...list.map((o) => o.voteCount || 0));
+  const winners = list.filter((o) => (o.voteCount || 0) === maxVotes);
+
+  return {
+    winnerIds: new Set(winners.map((o) => o.id)),
+    winners,
+    isTie: winners.length > 1,
+    maxVotes,
+    totalVotes,
+  };
+}
+// ==========================================
+// RESULTS REPORT
+// Builds a structured summary of a decision's
+// results, used for both CSV export and the
+// printable report view.
+// ==========================================
+function buildReportData(decision) {
+  const { winners, isTie, totalVotes } = getWinnerInfo(decision.options);
+
+  return {
+    title: decision.title,
+    description: decision.description,
+    category: decision.category || "Uncategorized",
+    community: decision.communityName || "N/A",
+    status: decision.status === "COMPLETED" ? "Closed" : "Open",
+    deadline: decision.deadline || "No deadline set",
+    generatedAt: new Date().toLocaleString(),
+    totalVotes,
+    isTie,
+    options: (decision.options || []).map((o) => ({
+      text: o.optionText,
+      votes: o.voteCount || 0,
+      percent:
+        totalVotes > 0
+          ? Math.round(((o.voteCount || 0) / totalVotes) * 100)
+          : 0,
+    })),
+    winnerText:
+      totalVotes === 0
+        ? "No votes yet"
+        : isTie
+        ? `Tie between: ${winners.map((w) => w.optionText).join(" & ")}`
+        : `${winners[0].optionText} — ${winners[0].voteCount} votes (${Math.round(
+            (winners[0].voteCount / totalVotes) * 100
+          )}%)`,
+  };
+}
+
+function downloadCSV(decision) {
+  const report = buildReportData(decision);
+
+  const rows = [
+    ["Decision Results Report"],
+    ["Title", report.title],
+    ["Description", report.description],
+    ["Category", report.category],
+    ["Community", report.community],
+    ["Status", report.status],
+    ["Deadline", report.deadline],
+    ["Generated At", report.generatedAt],
+    ["Total Votes", report.totalVotes],
+    ["Result", report.winnerText],
+    [],
+    ["Option", "Votes", "Percentage"],
+    ...report.options.map((o) => [o.text, o.votes, `${o.percent}%`]),
+  ];
+
+  const csvContent = rows
+    .map((row) =>
+      row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")
+    )
+    .join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${report.title.replace(/[^a-z0-9]/gi, "_")}_report.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 function Polls() {
   const [decisions, setDecisions] = useState([]);
@@ -13,8 +117,17 @@ function Polls() {
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
-  const [voteFilter, setVoteFilter] = useState("ALL");
+    const [voteFilter, setVoteFilter] = useState("ALL");
   const [isError, setIsError] = useState(false);
+    const [reportDecision, setReportDecision] = useState(null);
+  const [revealedResults, setRevealedResults] = useState({});
+
+  const toggleReveal = (decisionId) => {
+    setRevealedResults((current) => ({
+      ...current,
+      [decisionId]: !current[decisionId],
+    }));
+  };
 
   const authHeaders = () => ({
     Authorization:
@@ -861,12 +974,96 @@ function Polls() {
         }
 
 
-        .poll-option.is-voted {
+                .poll-option.is-voted {
           border-color:
             rgba(22, 163, 74, .38);
 
           background:
             rgba(22, 163, 74, .10);
+        }
+
+                .poll-option.is-leading {
+          border-color: #22c55e;
+          background: rgba(34, 197, 94, .10);
+          box-shadow: 0 0 0 1px rgba(34, 197, 94, .25);
+        }
+
+        .leading-badge,
+        .tie-badge {
+          display: inline-block;
+          margin-left: 8px;
+          padding: 2px 7px;
+          border-radius: 20px;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: .02em;
+          vertical-align: middle;
+        }
+
+        .leading-badge {
+          color: #15803d;
+          background: rgba(34, 197, 94, .16);
+          border: 1px solid rgba(34, 197, 94, .35);
+        }
+
+        .tie-badge {
+          color: #b45309;
+          background: rgba(245, 158, 11, .16);
+          border: 1px solid rgba(245, 158, 11, .35);
+        }
+
+                .result-banner {
+          margin-bottom: 12px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
+          text-align: center;
+          line-height: 1.5;
+        }
+
+        .result-banner-empty {
+          border: 1px dashed var(--app-border);
+          background: var(--app-card-2);
+          color: var(--app-secondary-text);
+        }
+
+                .result-banner-leading {
+          border: 1px solid rgba(34, 197, 94, .4);
+          background: rgba(34, 197, 94, .12);
+          color: #15803d;
+        }
+
+        .result-banner-final {
+          border: 1px solid rgba(22, 163, 74, .4);
+          background: rgba(22, 163, 74, .12);
+          color: #15803d;
+        }
+
+        .result-banner-tie {
+          border: 1px dashed rgba(245, 158, 11, .4);
+          background: rgba(245, 158, 11, .10);
+          color: #b45309;
+        }
+
+        .option-bar-track {
+          margin-top: 6px;
+          width: 100%;
+          height: 5px;
+          border-radius: 4px;
+          background: var(--app-border);
+          overflow: hidden;
+        }
+
+        .option-bar-fill {
+          height: 100%;
+          border-radius: 4px;
+          background: linear-gradient(135deg, #4f46e5, #7c3aed);
+          transition: width .4s ease;
+        }
+
+          .option-bar-fill.is-leading {
+          background: linear-gradient(135deg, #22c55e, #16a34a);
         }
 
 
@@ -1397,10 +1594,295 @@ function Polls() {
             box-sizing: border-box;
           }
 
-          .poll-filter-reset {
+                    .poll-filter-reset {
             margin-left: 0;
           }
 
+        }
+
+        /* =========================
+           REPORT BUTTON / FOOTER LAYOUT
+        ========================= */
+
+        .poll-footer-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .report-action {
+          padding: 8px 10px;
+          border: 1px solid rgba(34, 197, 94, .3);
+          border-radius: 8px;
+          background: rgba(34, 197, 94, .08);
+          color: #15803d;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: .18s ease;
+        }
+
+                .report-action:hover {
+          background: rgba(34, 197, 94, .16);
+        }
+
+        .reveal-result-btn {
+          width: 100%;
+          margin-bottom: 4px;
+          padding: 10px;
+          border: 1px dashed rgba(139, 92, 246, .4);
+          border-radius: 10px;
+          background: rgba(139, 92, 246, .08);
+          color: #8b5cf6;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: .18s ease;
+        }
+
+        .reveal-result-btn:hover {
+          background: rgba(139, 92, 246, .16);
+        }
+
+        .hide-result-btn {
+          display: block;
+          margin: -4px 0 4px auto;
+          border: 0;
+          background: transparent;
+          color: var(--app-secondary-text);
+          font-size: 10px;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        /* =========================
+           REPORT MODAL
+        ========================= */
+
+        .report-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, .55);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+        }
+
+        .report-modal {
+          width: 100%;
+          max-width: 560px;
+          max-height: 86vh;
+          overflow-y: auto;
+          background: var(--app-card);
+          border: 1px solid var(--app-border);
+          border-radius: 16px;
+          box-shadow: 0 25px 60px rgba(0,0,0,.35);
+        }
+
+        .report-modal-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          border-bottom: 1px solid var(--app-border);
+        }
+
+        .report-modal-head h3 {
+          margin: 0;
+          font-size: 14px;
+          color: var(--app-secondary-text);
+          text-transform: uppercase;
+          letter-spacing: .06em;
+        }
+
+        .report-close {
+          border: 0;
+          background: transparent;
+          color: var(--app-secondary-text);
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .report-body {
+          padding: 20px;
+        }
+
+        .report-body h2 {
+          margin: 0 0 6px;
+          color: var(--app-text);
+          font-size: 20px;
+        }
+
+        .report-desc {
+          margin: 0 0 16px;
+          color: var(--app-secondary-text);
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .report-meta-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 16px;
+          padding: 12px;
+          border: 1px solid var(--app-border);
+          border-radius: 10px;
+          background: var(--app-card-2);
+        }
+
+        .report-meta-grid div {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .report-meta-grid span {
+          color: var(--app-secondary-text);
+          font-size: 10px;
+          text-transform: uppercase;
+        }
+
+        .report-meta-grid strong {
+          color: var(--app-text);
+          font-size: 12px;
+        }
+
+        .report-winner-line {
+          margin-bottom: 16px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .report-winner-line.win {
+          background: rgba(34, 197, 94, .12);
+          color: #15803d;
+          border: 1px solid rgba(34, 197, 94, .35);
+        }
+
+        .report-winner-line.tie {
+          background: rgba(245, 158, 11, .12);
+          color: #b45309;
+          border: 1px dashed rgba(245, 158, 11, .4);
+        }
+
+        .report-winner-line.empty {
+          background: var(--app-card-2);
+          color: var(--app-secondary-text);
+          border: 1px dashed var(--app-border);
+        }
+
+        .report-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12px;
+        }
+
+        .report-table th, .report-table td {
+          text-align: left;
+          padding: 8px 10px;
+          border-bottom: 1px solid var(--app-border);
+          color: var(--app-text);
+        }
+
+        .report-table th {
+          color: var(--app-secondary-text);
+          font-size: 10px;
+          text-transform: uppercase;
+        }
+
+        .report-actions {
+          display: flex;
+          gap: 10px;
+          padding: 16px 20px;
+          border-top: 1px solid var(--app-border);
+        }
+
+        .report-btn-primary, .report-btn-secondary {
+          flex: 1;
+          padding: 10px;
+          border-radius: 9px;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1px solid var(--app-border);
+        }
+
+        .report-btn-primary {
+          background: linear-gradient(135deg, #4f46e5, #7c3aed);
+          color: #fff;
+          border: none;
+        }
+
+        .report-btn-secondary {
+          background: var(--app-card-2);
+          color: var(--app-text);
+        }
+
+                /* The modal renders via a portal directly under <body>,
+           so we just hide every OTHER direct child of body and
+           keep our report visible — no nested-visibility guesswork. */
+                @media print {
+          body > *:not(#report-print-root) {
+            display: none !important;
+          }
+
+          #report-print-root {
+            display: block !important;
+            position: static !important;
+            background: #fff !important;
+            padding: 0 !important;
+          }
+
+          .report-modal {
+            max-width: 100% !important;
+            max-height: none !important;
+            overflow: visible !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #fff !important;
+          }
+
+          .report-modal-head, .report-actions {
+            display: none !important;
+          }
+
+          /* Force readable dark text on white paper — the theme
+             variables are made for dark mode and look washed out
+             when printed on a white page. */
+          .report-body h2 { color: #111 !important; }
+          .report-desc { color: #444 !important; }
+
+          .report-meta-grid {
+            background: #f7f7f7 !important;
+            border-color: #ddd !important;
+          }
+          .report-meta-grid span { color: #777 !important; }
+          .report-meta-grid strong { color: #111 !important; }
+
+          .report-table th { color: #666 !important; }
+          .report-table td { color: #111 !important; }
+          .report-table th, .report-table td { border-color: #ddd !important; }
+
+          .report-winner-line.win {
+            background: #eafaf0 !important;
+            color: #15803d !important;
+            border-color: #86efac !important;
+          }
+          .report-winner-line.tie {
+            background: #fff7e6 !important;
+            color: #b45309 !important;
+            border-color: #fcd34d !important;
+          }
+          .report-winner-line.empty {
+            background: #f5f5f5 !important;
+            color: #666 !important;
+            border-color: #ddd !important;
+          }
         }
 
       `}</style>
@@ -1573,7 +2055,7 @@ function Polls() {
               {filteredDecisions.map(
                 (decision) => {
 
-                  const discussionOpen =
+                                    const discussionOpen =
                     openDiscussion ===
                     decision.id;
 
@@ -1581,6 +2063,11 @@ function Polls() {
                     comments[
                       decision.id
                     ] || [];
+
+                    const { winnerIds, winners, isTie, totalVotes } =
+                    getWinnerInfo(decision.options);
+
+                  const isRevealed = !!revealedResults[decision.id];
 
 
                   return (
@@ -1650,19 +2137,94 @@ function Polls() {
                       </div>
 
 
-                      {/* OPTIONS */}
+                                            {/* OPTIONS */}
 
                       <div className="option-list">
 
+                        {!isRevealed ? (
+                          <button
+                            className="reveal-result-btn"
+                            onClick={() => toggleReveal(decision.id)}
+                          >
+                            🏁 Show Final Result
+                          </button>
+                        ) : (
+                          <>
+                            <div
+                              className={`result-banner ${
+                                totalVotes === 0
+                                  ? "result-banner-empty"
+                                  : isTie
+                                  ? "result-banner-tie"
+                                  : decision.status === "COMPLETED"
+                                  ? "result-banner-final"
+                                  : "result-banner-leading"
+                              }`}
+                            >
+                              {totalVotes === 0 && "🗳️ No votes yet — be the first to vote!"}
+
+                              {totalVotes > 0 && isTie && (
+                                <>
+                                  🤝 It's a tie between{" "}
+                                  <strong>
+                                    {winners.map((w) => w.optionText).join(" & ")}
+                                  </strong>
+                                </>
+                              )}
+
+                              {totalVotes > 0 && !isTie && (
+                                <>
+                                  {decision.status === "COMPLETED" ? "✅ Final Result: " : "🏆 Currently Leading: "}
+                                  <strong>{winners[0].optionText}</strong>
+                                  {" — "}
+                                  {winners[0].voteCount} votes (
+                                  {Math.round((winners[0].voteCount / totalVotes) * 100)}%)
+                                </>
+                              )}
+                            </div>
+
+                            <button
+                              className="hide-result-btn"
+                              onClick={() => toggleReveal(decision.id)}
+                            >
+                              Hide result
+                            </button>
+                          </>
+                        )}
+
                         {(decision.options ||
                           []).map(
-                            (option) => (
+                            (option) => {
+
+                              const isLeading =
+                                isRevealed &&
+                                !isTie &&
+                                winnerIds.has(option.id) &&
+                                totalVotes > 0;
+
+                              const isTiedLeader =
+                                isRevealed &&
+                                isTie &&
+                                winnerIds.has(option.id);
+
+                              const percent =
+                                totalVotes > 0
+                                  ? Math.round(
+                                      ((option.voteCount || 0) / totalVotes) * 100
+                                    )
+                                  : 0;
+
+                              return (
 
                               <div
                                 className={
                                   `poll-option ${
                                     option.selected
                                       ? "is-voted"
+                                      : ""
+                                  } ${
+                                    isLeading || isTiedLeader
+                                      ? "is-leading"
                                       : ""
                                   }`
                                 }
@@ -1673,6 +2235,9 @@ function Polls() {
 
                                   <strong>
                                     {option.optionText}
+                                    {isLeading && (
+                                      <span className="leading-badge">🏆 Leading</span>
+                                    )}
                                   </strong>
 
                                   <span>
@@ -1681,7 +2246,19 @@ function Polls() {
                                     1
                                       ? "vote"
                                       : "votes"}
+                                    {isRevealed && totalVotes > 0 ? ` · ${percent}%` : ""}
                                   </span>
+
+                                  {isRevealed && (
+                                    <div className="option-bar-track">
+                                      <div
+                                        className={`option-bar-fill ${
+                                          isLeading || isTiedLeader ? "is-leading" : ""
+                                        }`}
+                                        style={{ width: `${percent}%` }}
+                                      />
+                                    </div>
+                                  )}
 
                                 </div>
 
@@ -1710,15 +2287,15 @@ function Polls() {
 
                               </div>
 
-                            )
+                              );
+                            }
                           )}
 
                       </div>
 
-
                       {/* FOOTER */}
 
-                      <div className="poll-footer">
+                                            <div className="poll-footer">
 
                         <span>
                           {decision.alreadyVoted
@@ -1726,19 +2303,29 @@ function Polls() {
                             : "Choose one option to participate."}
                         </span>
 
+                        <div className="poll-footer-actions">
 
-                        <button
-                          className="discussion-action"
-                          onClick={() =>
-                            toggleDiscussion(
-                              decision.id
-                            )
-                          }
-                        >
-                          {discussionOpen
-                            ? "Close discussion"
-                            : "Open discussion"}
-                        </button>
+                          <button
+                            className="report-action"
+                            onClick={() => setReportDecision(decision)}
+                          >
+                            📊 Report
+                          </button>
+
+                          <button
+                            className="discussion-action"
+                            onClick={() =>
+                              toggleDiscussion(
+                                decision.id
+                              )
+                            }
+                          >
+                            {discussionOpen
+                              ? "Close discussion"
+                              : "Open discussion"}
+                          </button>
+
+                        </div>
 
                       </div>
 
@@ -1898,7 +2485,67 @@ function Polls() {
 
           )}
 
-      </div>
+           </div>
+
+      {/* =========================
+          RESULTS REPORT MODAL
+      ========================= */}
+
+            {reportDecision && (() => {
+        const report = buildReportData(reportDecision);
+        return createPortal(
+          <div id="report-print-root" className="report-overlay" onClick={() => setReportDecision(null)}>
+            <div className="report-modal" onClick={(e) => e.stopPropagation()}>
+
+              <div className="report-modal-head">
+                <h3>Results Report</h3>
+                <button className="report-close" onClick={() => setReportDecision(null)}>✕</button>
+              </div>
+
+              <div className="report-body">
+                <h2>{report.title}</h2>
+                <p className="report-desc">{report.description}</p>
+
+                <div className="report-meta-grid">
+                  <div><span>Category</span><strong>{report.category}</strong></div>
+                  <div><span>Community</span><strong>{report.community}</strong></div>
+                  <div><span>Status</span><strong>{report.status}</strong></div>
+                  <div><span>Deadline</span><strong>{report.deadline}</strong></div>
+                  <div><span>Total Votes</span><strong>{report.totalVotes}</strong></div>
+                  <div><span>Generated</span><strong>{report.generatedAt}</strong></div>
+                </div>
+
+                <div className={`report-winner-line ${report.totalVotes === 0 ? "empty" : report.isTie ? "tie" : "win"}`}>
+                  {report.totalVotes === 0 ? "🗳️ " : report.isTie ? "🤝 " : "🏆 "}
+                  {report.winnerText}
+                </div>
+
+                <table className="report-table">
+                  <thead>
+                    <tr><th>Option</th><th>Votes</th><th>Share</th></tr>
+                  </thead>
+                  <tbody>
+                    {report.options.map((o) => (
+                      <tr key={o.text}>
+                        <td>{o.text}</td>
+                        <td>{o.votes}</td>
+                        <td>{o.percent}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+                            <div className="report-actions">
+                <button className="report-btn-secondary" onClick={() => downloadCSV(reportDecision)}>⬇ Download CSV</button>
+                <button className="report-btn-primary" onClick={() => window.print()}>🖨 Print / Save as PDF</button>
+              </div>
+
+            </div>
+          </div>,
+          document.body
+        );
+      })()}
 
     </DashboardLayout>
   );
