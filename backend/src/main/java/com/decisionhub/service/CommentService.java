@@ -180,7 +180,6 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return mapToCommentResponse(savedComment, userEmail);
->>>>>>> feature-2-3-enhancements
     }
 
     @Transactional(readOnly = true)
