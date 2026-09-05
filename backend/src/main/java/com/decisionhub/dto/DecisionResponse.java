@@ -10,6 +10,10 @@ public class DecisionResponse {
     private String description;
     private String visibility;
     private String status;
+    private Boolean autoClose;
+    private LocalDateTime endsAt;
+    private Long winningOptionId;
+    private String winningOptionLabel;
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private UserResponse owner;
@@ -115,6 +119,38 @@ public class DecisionResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getAutoClose() {
+        return autoClose;
+    }
+
+    public void setAutoClose(Boolean autoClose) {
+        this.autoClose = autoClose;
+    }
+
+    public LocalDateTime getEndsAt() {
+        return endsAt;
+    }
+
+    public void setEndsAt(LocalDateTime endsAt) {
+        this.endsAt = endsAt;
+    }
+
+    public Long getWinningOptionId() {
+        return winningOptionId;
+    }
+
+    public void setWinningOptionId(Long winningOptionId) {
+        this.winningOptionId = winningOptionId;
+    }
+
+    public String getWinningOptionLabel() {
+        return winningOptionLabel;
+    }
+
+    public void setWinningOptionLabel(String winningOptionLabel) {
+        this.winningOptionLabel = winningOptionLabel;
     }
 
     public Boolean getIsDeleted() {

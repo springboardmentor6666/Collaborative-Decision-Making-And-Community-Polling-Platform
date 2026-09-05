@@ -28,10 +28,21 @@ public class Vote {
     @Column
     private Integer rating;
 
+    @Column(name = "rank_position")
+    private Integer rankPosition;
+
     @Column(name = "voted_at", updatable = false)
     private LocalDateTime votedAt;
 
     public Vote() {
+    }
+
+    public Integer getRankPosition() {
+        return rankPosition;
+    }
+
+    public void setRankPosition(Integer rankPosition) {
+        this.rankPosition = rankPosition;
     }
 
     @PrePersist

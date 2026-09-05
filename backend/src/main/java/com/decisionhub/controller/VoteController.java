@@ -7,6 +7,7 @@ import com.decisionhub.service.VoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,23 @@ public class VoteController {
 
     @PostMapping
     @Operation(summary = "Cast a vote", description = "Records a user's vote for a poll option")
-    public ResponseEntity<VoteResponse> castVote(@Valid @RequestBody VoteRequest request, Authentication authentication) {
-        VoteResponse response = voteService.castVote(request, authentication.getName());
+    public ResponseEntity<VoteResponse> castVote(
+            @Valid @RequestBody VoteRequest request,
+            Authentication authentication,
+            HttpServletRequest servletRequest) {
+
+        String clientIp = null;
+        if (servletRequest != null) {
+            String forwarded = servletRequest.getHeader("X-Forwarded-For");
+            if (forwarded != null && !forwarded.isBlank()) {
+                clientIp = forwarded.split(",")[0].trim();
+            } else {
+                clientIp = servletRequest.getRemoteAddr();
+            }
+        }
+
+        String email = authentication != null ? authentication.getName() : null;
+        VoteResponse response = voteService.castVote(request, email, clientIp);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

@@ -46,6 +46,9 @@ class CommunityServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private CommunityService communityService;
 

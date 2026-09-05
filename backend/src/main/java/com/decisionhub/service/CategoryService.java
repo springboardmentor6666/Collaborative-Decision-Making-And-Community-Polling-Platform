@@ -3,6 +3,8 @@ package com.decisionhub.service;
 import com.decisionhub.entity.Category;
 import com.decisionhub.repository.CategoryRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +41,18 @@ public class CategoryService {
         }
     }
 
+    @Cacheable("categories")
     @Transactional(readOnly = true)
     public List<Category> getAllCategories() {
         seedDefaultCategories();
         return categoryRepository.findAll();
+    }
+
+    @Cacheable("popularCategories")
+    @Transactional(readOnly = true)
+    public List<Category> getPopularCategories() {
+        seedDefaultCategories();
+        return categoryRepository.findAll().stream().limit(10).toList();
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +60,7 @@ public class CategoryService {
         return categoryRepository.findById(id);
     }
 
+    @CacheEvict(value = {"categories", "popularCategories"}, allEntries = true)
     @Transactional
     public Category createCategory(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -60,4 +71,3 @@ public class CategoryService {
                 .orElseGet(() -> categoryRepository.save(new Category(null, cleanName)));
     }
 }
-

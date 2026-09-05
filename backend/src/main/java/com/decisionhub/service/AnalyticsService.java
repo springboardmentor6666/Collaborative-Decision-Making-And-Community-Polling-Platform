@@ -8,6 +8,7 @@ import com.decisionhub.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,19 +21,25 @@ public class AnalyticsService {
     private final PollOptionRepository pollOptionRepository;
     private final VoteRepository voteRepository;
     private final DecisionImpressionRepository decisionImpressionRepository;
+    private final ComparisonFactorRepository comparisonFactorRepository;
+    private final OptionScoreRepository optionScoreRepository;
 
     public AnalyticsService(UserRepository userRepository,
                             DecisionRepository decisionRepository,
                             PollRepository pollRepository,
                             PollOptionRepository pollOptionRepository,
                             VoteRepository voteRepository,
-                            DecisionImpressionRepository decisionImpressionRepository) {
+                            DecisionImpressionRepository decisionImpressionRepository,
+                            ComparisonFactorRepository comparisonFactorRepository,
+                            OptionScoreRepository optionScoreRepository) {
         this.userRepository = userRepository;
         this.decisionRepository = decisionRepository;
         this.pollRepository = pollRepository;
         this.pollOptionRepository = pollOptionRepository;
         this.voteRepository = voteRepository;
         this.decisionImpressionRepository = decisionImpressionRepository;
+        this.comparisonFactorRepository = comparisonFactorRepository;
+        this.optionScoreRepository = optionScoreRepository;
     }
 
     @Transactional(readOnly = true)
@@ -220,5 +227,94 @@ public class AnalyticsService {
 
         DecisionImpression impression = new DecisionImpression(decision, user, userEmail, clientIp, sanitizedType);
         decisionImpressionRepository.save(impression);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] exportDecisionCsv(Long decisionId) {
+        Decision decision = decisionRepository.findById(decisionId)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + decisionId));
+
+        long reach = decisionImpressionRepository.countByDecisionIdAndType(decision.getId(), "REACH");
+        long views = decisionImpressionRepository.countByDecisionIdAndType(decision.getId(), "VIEW");
+
+        List<Poll> polls = pollRepository.findByDecisionId(decision.getId());
+        long totalVotes = 0;
+        List<PollOption> pollOptions = new ArrayList<>();
+        Map<Long, Long> countsByPoId = new HashMap<>();
+
+        if (!polls.isEmpty()) {
+            Poll poll = polls.get(0);
+            List<Vote> votes = voteRepository.findByPollId(poll.getId());
+            totalVotes = votes.size();
+            pollOptions = pollOptionRepository.findByPollId(poll.getId());
+            countsByPoId = votes.stream()
+                    .collect(Collectors.groupingBy(v -> v.getPollOption().getId(), Collectors.counting()));
+        }
+
+        double conversionRate = views > 0
+                ? Math.round(((double) totalVotes / views * 100.0) * 100.0) / 100.0
+                : 0.0;
+
+        StringBuilder sb = new StringBuilder();
+
+        // 1. Decision Header
+        sb.append("DECISION SUMMARY\n");
+        sb.append("ID,").append(decision.getId()).append("\n");
+        sb.append("Title,\"").append(decision.getTitle().replace("\"", "\"\"")).append("\"\n");
+        sb.append("Status,").append(decision.getStatus()).append("\n");
+        String ownerName = decision.getOwner() != null ? (decision.getOwner().getFullName() != null ? decision.getOwner().getFullName() : decision.getOwner().getEmail()) : "N/A";
+        sb.append("Owner,\"").append(ownerName.replace("\"", "\"\"")).append("\"\n");
+        sb.append("Category,").append(decision.getCategory() != null ? decision.getCategory().getName() : "None").append("\n");
+        sb.append("Created At,").append(decision.getCreatedAt()).append("\n");
+        sb.append("Total Reach,").append(reach).append("\n");
+        sb.append("Total Views,").append(views).append("\n");
+        sb.append("Total Votes,").append(totalVotes).append("\n");
+        sb.append("Conversion Rate (%) ,").append(conversionRate).append("\n");
+        String winningLabel = decision.getWinningOption() != null ? decision.getWinningOption().getLabel() : "None";
+        sb.append("Winning Option,\"").append(winningLabel.replace("\"", "\"\"")).append("\"\n\n");
+
+        // 2. Poll Vote Breakdown
+        sb.append("VOTE DISTRIBUTION BREAKDOWN\n");
+        sb.append("Option ID,Option Label,Vote Count,Percentage (%),Winning Option\n");
+        for (PollOption po : pollOptions) {
+            long c = countsByPoId.getOrDefault(po.getId(), 0L);
+            double pct = totalVotes > 0 ? Math.round(((double) c / totalVotes * 100.0) * 100.0) / 100.0 : 0.0;
+            String label = po.getOption() != null ? po.getOption().getLabel() : "Option #" + po.getId();
+            boolean isWinner = decision.getWinningOption() != null && po.getOption() != null && decision.getWinningOption().getId().equals(po.getOption().getId());
+            sb.append(po.getOption() != null ? po.getOption().getId() : po.getId()).append(",")
+              .append("\"").append(label.replace("\"", "\"\"")).append("\",")
+              .append(c).append(",")
+              .append(pct).append(",")
+              .append(isWinner ? "YES" : "NO").append("\n");
+        }
+        sb.append("\n");
+
+        // 3. Comparison Factors Score Matrix
+        List<ComparisonFactor> factors = comparisonFactorRepository.findByDecisionId(decision.getId());
+        List<DecisionOption> options = decision.getOptions();
+
+        if (!factors.isEmpty() && !options.isEmpty()) {
+            sb.append("MULTI-CRITERIA COMPARISON FACTORS SCORE MATRIX\n");
+            sb.append("Option / Factor");
+            for (ComparisonFactor f : factors) {
+                sb.append(",\"").append(f.getName().replace("\"", "\"\"")).append("\"");
+            }
+            sb.append("\n");
+
+            for (DecisionOption opt : options) {
+                sb.append("\"").append(opt.getLabel().replace("\"", "\"\"")).append("\"");
+                for (ComparisonFactor f : factors) {
+                    List<OptionScore> scores = optionScoreRepository.findByFactorId(f.getId());
+                    Optional<OptionScore> optScore = scores.stream()
+                            .filter(os -> os.getOption() != null && os.getOption().getId().equals(opt.getId()))
+                            .findFirst();
+                    Integer scoreVal = optScore.map(OptionScore::getScore).orElse(0);
+                    sb.append(",").append(scoreVal);
+                }
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

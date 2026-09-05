@@ -45,6 +45,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/api/decisions/*/impressions").permitAll()
+                .requestMatchers("/api/decisions/*/export/csv").permitAll()
+                .requestMatchers("/api/search/**").permitAll()
+                .requestMatchers("/ws-chat/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )

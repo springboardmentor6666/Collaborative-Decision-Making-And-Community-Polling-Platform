@@ -43,6 +43,16 @@ public class Decision {
     @Column(length = 20)
     private String status = "OPEN";
 
+    @Column(name = "auto_close")
+    private Boolean autoClose = false;
+
+    @Column(name = "ends_at")
+    private LocalDateTime endsAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winning_option_id")
+    private DecisionOption winningOption;
+
     @OneToMany(mappedBy = "decision", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DecisionOption> options = new ArrayList<>();
 
@@ -56,6 +66,30 @@ public class Decision {
     private List<Comment> comments = new ArrayList<>();
 
     public Decision() {
+    }
+
+    public Boolean getAutoClose() {
+        return autoClose != null ? autoClose : false;
+    }
+
+    public void setAutoClose(Boolean autoClose) {
+        this.autoClose = autoClose;
+    }
+
+    public LocalDateTime getEndsAt() {
+        return endsAt;
+    }
+
+    public void setEndsAt(LocalDateTime endsAt) {
+        this.endsAt = endsAt;
+    }
+
+    public DecisionOption getWinningOption() {
+        return winningOption;
+    }
+
+    public void setWinningOption(DecisionOption winningOption) {
+        this.winningOption = winningOption;
     }
 
     @PrePersist

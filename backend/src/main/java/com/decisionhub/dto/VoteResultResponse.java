@@ -8,10 +8,13 @@ public class VoteResultResponse {
     private Long decisionId;
     private String decisionTitle;
     private String pollType;
+    private String votingMethod;
     private Integer totalVotes;
+    private Long winningOptionId;
     private String winningOption;
     private Integer winningVoteCount;
     private List<OptionDto> options;
+    private List<RankingRoundDto> roundsBreakdown;
 
     public VoteResultResponse() {
     }
@@ -23,10 +26,28 @@ public class VoteResultResponse {
         this.decisionId = decisionId;
         this.decisionTitle = decisionTitle;
         this.pollType = pollType;
+        this.votingMethod = pollType;
         this.totalVotes = totalVotes;
         this.winningOption = winningOption;
         this.winningVoteCount = winningVoteCount;
         this.options = options;
+    }
+
+    public VoteResultResponse(Long pollId, Long decisionId, String decisionTitle, String pollType,
+                              String votingMethod, Integer totalVotes, Long winningOptionId,
+                              String winningOption, Integer winningVoteCount,
+                              List<OptionDto> options, List<RankingRoundDto> roundsBreakdown) {
+        this.pollId = pollId;
+        this.decisionId = decisionId;
+        this.decisionTitle = decisionTitle;
+        this.pollType = pollType;
+        this.votingMethod = votingMethod;
+        this.totalVotes = totalVotes;
+        this.winningOptionId = winningOptionId;
+        this.winningOption = winningOption;
+        this.winningVoteCount = winningVoteCount;
+        this.options = options;
+        this.roundsBreakdown = roundsBreakdown;
     }
 
     public Long getPollId() {
@@ -61,12 +82,28 @@ public class VoteResultResponse {
         this.pollType = pollType;
     }
 
+    public String getVotingMethod() {
+        return votingMethod;
+    }
+
+    public void setVotingMethod(String votingMethod) {
+        this.votingMethod = votingMethod;
+    }
+
     public Integer getTotalVotes() {
         return totalVotes;
     }
 
     public void setTotalVotes(Integer totalVotes) {
         this.totalVotes = totalVotes;
+    }
+
+    public Long getWinningOptionId() {
+        return winningOptionId;
+    }
+
+    public void setWinningOptionId(Long winningOptionId) {
+        this.winningOptionId = winningOptionId;
     }
 
     public String getWinningOption() {
@@ -91,5 +128,13 @@ public class VoteResultResponse {
 
     public void setOptions(List<OptionDto> options) {
         this.options = options;
+    }
+
+    public List<RankingRoundDto> getRoundsBreakdown() {
+        return roundsBreakdown;
+    }
+
+    public void setRoundsBreakdown(List<RankingRoundDto> roundsBreakdown) {
+        this.roundsBreakdown = roundsBreakdown;
     }
 }

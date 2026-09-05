@@ -5,6 +5,7 @@ import com.decisionhub.entity.*;
 import com.decisionhub.exception.CommunityNotFoundException;
 import com.decisionhub.exception.DecisionNotFoundException;
 import com.decisionhub.repository.*;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,7 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.decisionhub.event.ActivityEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +36,8 @@ public class DecisionService {
     private final ComparisonFactorRepository comparisonFactorRepository;
     private final OptionScoreRepository optionScoreRepository;
     private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final VoteService voteService;
 
     public DecisionService(DecisionRepository decisionRepository,
                            UserRepository userRepository,
@@ -44,7 +50,9 @@ public class DecisionService {
                            VoteRepository voteRepository,
                            ComparisonFactorRepository comparisonFactorRepository,
                            OptionScoreRepository optionScoreRepository,
-                           UserService userService) {
+                           UserService userService,
+                           ApplicationEventPublisher eventPublisher,
+                           @Lazy VoteService voteService) {
         this.decisionRepository = decisionRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
@@ -57,8 +65,11 @@ public class DecisionService {
         this.comparisonFactorRepository = comparisonFactorRepository;
         this.optionScoreRepository = optionScoreRepository;
         this.userService = userService;
+        this.eventPublisher = eventPublisher;
+        this.voteService = voteService;
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = {"categories", "popularCategories"}, allEntries = true)
     @Transactional
     public DecisionResponse createDecision(DecisionRequest request, String userEmail) {
         User owner = userRepository.findByEmail(userEmail)
@@ -70,6 +81,8 @@ public class DecisionService {
         decision.setOwner(owner);
         decision.setStatus(request.getStatus() != null && !request.getStatus().isBlank() 
                 ? request.getStatus().trim().toUpperCase() : "OPEN");
+        decision.setAutoClose(request.getAutoClose() != null ? request.getAutoClose() : false);
+        decision.setEndsAt(request.getEndsAt());
 
         if (request.getVisibility() != null) {
             decision.setVisibility(request.getVisibility());
@@ -108,6 +121,10 @@ public class DecisionService {
             if (request.getPollType() != null && !request.getPollType().trim().isEmpty()) {
                 Poll poll = new Poll();
                 poll.setPollType(request.getPollType());
+                poll.setVotingMethod(request.getVotingMethod() != null ? request.getVotingMethod() : request.getPollType());
+                poll.setMaxChoices(request.getMaxChoices() != null ? request.getMaxChoices() : 1);
+                poll.setAllowRevoting(request.getAllowRevoting() != null ? request.getAllowRevoting() : false);
+                poll.setEndsAt(request.getEndsAt());
                 if (request.getPollQuestion() != null && !request.getPollQuestion().trim().isEmpty()) {
                     poll.setQuestion(request.getPollQuestion().trim());
                 }
@@ -165,6 +182,22 @@ public class DecisionService {
                     optionScoreRepository.save(os);
                 }
             }
+        }
+
+        if (eventPublisher != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("decisionId", savedDecision.getId());
+            metadata.put("title", savedDecision.getTitle());
+            eventPublisher.publishEvent(new ActivityEvent(
+                    owner.getId(),
+                    "DECISION_CREATED",
+                    "DECISION",
+                    savedDecision.getId(),
+                    savedDecision.getCommunity() != null ? savedDecision.getCommunity().getId() : null,
+                    "Created decision: " + savedDecision.getTitle(),
+                    metadata,
+                    savedDecision.getVisibility()
+            ));
         }
 
         return mapToDecisionResponse(savedDecision);
@@ -242,6 +275,12 @@ public class DecisionService {
         if (request.getStatus() != null && !request.getStatus().isBlank()) {
             decision.setStatus(request.getStatus().trim().toUpperCase());
         }
+        if (request.getAutoClose() != null) {
+            decision.setAutoClose(request.getAutoClose());
+        }
+        if (request.getEndsAt() != null) {
+            decision.setEndsAt(request.getEndsAt());
+        }
 
         Decision updatedDecision = decisionRepository.save(decision);
         return mapToDecisionResponse(updatedDecision);
@@ -311,6 +350,23 @@ public class DecisionService {
             poll.getPollOptions().add(pollOption);
         }
 
+        if (eventPublisher != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("decisionId", decision.getId());
+            metadata.put("optionId", savedOption.getId());
+            metadata.put("optionLabel", savedOption.getLabel());
+            eventPublisher.publishEvent(new ActivityEvent(
+                    requestingUser.getId(),
+                    "OPTION_ADDED",
+                    "OPTION",
+                    savedOption.getId(),
+                    decision.getCommunity() != null ? decision.getCommunity().getId() : null,
+                    "Added option '" + savedOption.getLabel() + "' to " + decision.getTitle(),
+                    metadata,
+                    decision.getVisibility()
+            ));
+        }
+
         return new OptionDto(savedOption.getId(), savedOption.getLabel(), savedOption.getDescription(), 0L);
     }
 
@@ -319,18 +375,60 @@ public class DecisionService {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
 
-        User requestingUser = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+        boolean isSystem = "SYSTEM".equalsIgnoreCase(userEmail);
+        User requestingUser = null;
+        if (!isSystem) {
+            requestingUser = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
-        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
-        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+            boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+            boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
 
-        if (!isOwner && !isAdmin) {
-            throw new AccessDeniedException("You are not authorized to close this decision");
+            if (!isOwner && !isAdmin) {
+                throw new AccessDeniedException("You are not authorized to close this decision");
+            }
+        }
+
+        // Determine winning option if polls exist
+        List<Poll> polls = pollRepository.findByDecisionId(decision.getId());
+        if (!polls.isEmpty()) {
+            Poll poll = polls.get(0);
+            try {
+                VoteResultResponse result = voteService.getVoteResults(poll.getId());
+                if (result.getWinningOptionId() != null) {
+                    DecisionOption winningOpt = decisionOptionRepository.findById(result.getWinningOptionId()).orElse(null);
+                    if (winningOpt != null) {
+                        decision.setWinningOption(winningOpt);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
 
         decision.setStatus("CLOSED");
         Decision updatedDecision = decisionRepository.save(decision);
+
+        if (eventPublisher != null) {
+            Long actorId = requestingUser != null ? requestingUser.getId() : (decision.getOwner() != null ? decision.getOwner().getId() : 1L);
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("decisionId", updatedDecision.getId());
+            metadata.put("title", updatedDecision.getTitle());
+            if (updatedDecision.getWinningOption() != null) {
+                metadata.put("winningOptionId", updatedDecision.getWinningOption().getId());
+                metadata.put("winningOptionLabel", updatedDecision.getWinningOption().getLabel());
+            }
+            eventPublisher.publishEvent(new ActivityEvent(
+                    actorId,
+                    "DECISION_CLOSED",
+                    "DECISION",
+                    updatedDecision.getId(),
+                    updatedDecision.getCommunity() != null ? updatedDecision.getCommunity().getId() : null,
+                    "Closed decision: " + updatedDecision.getTitle(),
+                    metadata,
+                    updatedDecision.getVisibility()
+            ));
+        }
+
         return mapToDecisionResponse(updatedDecision);
     }
 
@@ -383,6 +481,9 @@ public class DecisionService {
                         poll.getId(),
                         decision.getId(),
                         poll.getPollType(),
+                        poll.getVotingMethod(),
+                        poll.getMaxChoices(),
+                        poll.getAllowRevoting(),
                         poll.getQuestion(),
                         poll.getIsAnonymous(),
                         poll.getEndsAt(),
@@ -435,6 +536,13 @@ public class DecisionService {
                 communityName,
                 pollResponses
         );
+
+        response.setAutoClose(decision.getAutoClose());
+        response.setEndsAt(decision.getEndsAt());
+        if (decision.getWinningOption() != null) {
+            response.setWinningOptionId(decision.getWinningOption().getId());
+            response.setWinningOptionLabel(decision.getWinningOption().getLabel());
+        }
 
         response.setOptions(allOptions);
         response.setComparisonFactors(factorDtos);

@@ -1,6 +1,8 @@
 package com.decisionhub.repository;
 
 import com.decisionhub.entity.Community;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +26,10 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
 
     @Query("SELECT c FROM Community c WHERE (c.visibility = 'PUBLIC' OR c.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email)) AND LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Community> searchCommunitiesForUser(@Param("keyword") String keyword, @Param("email") String email);
+
+    @Query("SELECT c FROM Community c WHERE (c.visibility = 'PUBLIC' OR c.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email)) " +
+           "AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Community> searchCommunitiesPaged(@Param("query") String query, @Param("email") String email, Pageable pageable);
 
     @Query("SELECT c FROM Community c WHERE c.visibility = 'PUBLIC' OR c.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email)")
     List<Community> findAllVisibleToUser(@Param("email") String email);
