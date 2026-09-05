@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Analytics & Decision Analysis", description = "Endpoints for user vote breakdown, creator analytics, and impression tracking")
+@Tag(name = "Analytics & Decision Analysis", description = "Endpoints for user vote breakdown, creator analytics, impression tracking, and decision data export")
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
@@ -94,5 +96,15 @@ public class AnalyticsController {
     public ResponseEntity<Map<String, String>> exportReport(@RequestParam(value = "format", defaultValue = "csv") String format,
                                                            Authentication authentication) {
         return ResponseEntity.ok(analyticsService.exportReport(format, authentication.getName()));
+    }
+
+    @GetMapping(value = "/decisions/{id}/export/csv", produces = "text/csv")
+    @Operation(summary = "Export decision analytics & score matrix to CSV", description = "Exports decision summary, vote percentage breakdown, and comparison factor score matrix as CSV")
+    public ResponseEntity<byte[]> exportDecisionCsv(@PathVariable("id") Long id) {
+        byte[] csvData = analyticsService.exportDecisionCsv(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"decision-" + id + "-export.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csvData);
     }
 }

@@ -62,6 +62,7 @@ public class VoteServiceMultiTest {
 
     @BeforeEach
     void setUp() {
+        voteService.resetRateLimit(null);
         voteRepository.deleteAll();
         pollOptionRepository.deleteAll();
         pollRepository.deleteAll();

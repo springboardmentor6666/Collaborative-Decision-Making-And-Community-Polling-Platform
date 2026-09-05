@@ -1,5 +1,6 @@
 package com.decisionhub.controller;
 
+import com.decisionhub.dto.CommentReactionRequest;
 import com.decisionhub.dto.CommentRequest;
 import com.decisionhub.dto.CommentResponse;
 import com.decisionhub.service.CommentService;
@@ -45,16 +46,33 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PostMapping("/{id}/react")
+    @Operation(summary = "React to a comment", description = "Toggles UPVOTE or DOWNVOTE on a comment")
+    public ResponseEntity<CommentResponse> reactToComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentReactionRequest request,
+            Authentication authentication) {
+        CommentResponse response = commentService.toggleReaction(id, request, authentication.getName());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/decision/{decisionId}")
-    @Operation(summary = "Get decision comments", description = "Retrieves all top-level comments for a decision")
-    public ResponseEntity<List<CommentResponse>> getCommentsByDecisionId(@PathVariable Long decisionId) {
-        return ResponseEntity.ok(commentService.getCommentsByDecisionId(decisionId));
+    @Operation(summary = "Get decision comments", description = "Retrieves top-level comments for a decision sorted by top, newest, or oldest")
+    public ResponseEntity<List<CommentResponse>> getCommentsByDecisionId(
+            @PathVariable Long decisionId,
+            @RequestParam(defaultValue = "top") String sortBy,
+            Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(commentService.getCommentsByDecisionId(decisionId, sortBy, email));
     }
 
     @GetMapping("/{id}/replies")
     @Operation(summary = "Get comment replies", description = "Retrieves all replies for a specific comment")
-    public ResponseEntity<List<CommentResponse>> getRepliesByCommentId(@PathVariable Long id) {
-        return ResponseEntity.ok(commentService.getRepliesByCommentId(id));
+    public ResponseEntity<List<CommentResponse>> getRepliesByCommentId(
+            @PathVariable Long id,
+            Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(commentService.getRepliesByCommentId(id, email));
     }
 
     @PutMapping("/{id}")

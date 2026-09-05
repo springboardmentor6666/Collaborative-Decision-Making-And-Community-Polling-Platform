@@ -1,6 +1,7 @@
 package com.decisionhub.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class DecisionRequest {
@@ -18,12 +19,19 @@ public class DecisionRequest {
 
     // Embedded poll creation fields (optional)
     private String pollType;
+    private String votingMethod;
+    private Integer maxChoices;
+    private Boolean allowRevoting;
     private String pollQuestion;
     private Boolean isAnonymous;
     private List<String> optionLabels;
 
     // Status field (optional, e.g., OPEN, CLOSED, EXPIRED)
     private String status;
+
+    // Auto-close & expiration fields (optional)
+    private Boolean autoClose = false;
+    private LocalDateTime endsAt;
 
     // Multi-criteria comparison factors and option scores (optional)
     private List<String> comparisonFactorNames;
@@ -91,6 +99,30 @@ public class DecisionRequest {
         this.pollType = pollType;
     }
 
+    public String getVotingMethod() {
+        return votingMethod;
+    }
+
+    public void setVotingMethod(String votingMethod) {
+        this.votingMethod = votingMethod;
+    }
+
+    public Integer getMaxChoices() {
+        return maxChoices;
+    }
+
+    public void setMaxChoices(Integer maxChoices) {
+        this.maxChoices = maxChoices;
+    }
+
+    public Boolean getAllowRevoting() {
+        return allowRevoting;
+    }
+
+    public void setAllowRevoting(Boolean allowRevoting) {
+        this.allowRevoting = allowRevoting;
+    }
+
     public String getPollQuestion() {
         return pollQuestion;
     }
@@ -129,6 +161,22 @@ public class DecisionRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getAutoClose() {
+        return autoClose;
+    }
+
+    public void setAutoClose(Boolean autoClose) {
+        this.autoClose = autoClose;
+    }
+
+    public LocalDateTime getEndsAt() {
+        return endsAt;
+    }
+
+    public void setEndsAt(LocalDateTime endsAt) {
+        this.endsAt = endsAt;
     }
 
     public List<OptionScoreDto> getOptionScores() {

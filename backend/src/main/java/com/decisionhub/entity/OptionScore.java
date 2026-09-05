@@ -24,6 +24,12 @@ public class OptionScore {
     public OptionScore() {
     }
 
+    public OptionScore(DecisionOption option, ComparisonFactor factor, Integer score) {
+        this.option = option;
+        this.factor = factor;
+        this.score = score;
+    }
+
     // --- Getters and Setters ---
 
     public Long getId() {

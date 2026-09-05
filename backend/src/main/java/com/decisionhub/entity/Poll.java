@@ -20,6 +20,15 @@ public class Poll {
     @Column(name = "poll_type", length = 20)
     private String pollType = "SINGLE";
 
+    @Column(name = "voting_method", length = 20)
+    private String votingMethod = "SINGLE_CHOICE";
+
+    @Column(name = "max_choices")
+    private Integer maxChoices = 1;
+
+    @Column(name = "allow_revoting")
+    private Boolean allowRevoting = false;
+
     @Column(name = "question")
     private String question;
 
@@ -36,6 +45,30 @@ public class Poll {
     private List<Vote> votes = new ArrayList<>();
 
     public Poll() {
+    }
+
+    public String getVotingMethod() {
+        return votingMethod != null ? votingMethod : (pollType != null ? pollType : "SINGLE_CHOICE");
+    }
+
+    public void setVotingMethod(String votingMethod) {
+        this.votingMethod = votingMethod;
+    }
+
+    public Integer getMaxChoices() {
+        return maxChoices != null ? maxChoices : 1;
+    }
+
+    public void setMaxChoices(Integer maxChoices) {
+        this.maxChoices = maxChoices;
+    }
+
+    public Boolean getAllowRevoting() {
+        return allowRevoting != null ? allowRevoting : false;
+    }
+
+    public void setAllowRevoting(Boolean allowRevoting) {
+        this.allowRevoting = allowRevoting;
     }
 
     // --- Getters and Setters ---

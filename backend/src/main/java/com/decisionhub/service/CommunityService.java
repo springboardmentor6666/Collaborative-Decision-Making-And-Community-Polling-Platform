@@ -17,7 +17,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.decisionhub.event.ActivityEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,7 @@ public class CommunityService {
     private final DecisionRepository decisionRepository;
     private final UserService userService;
     private final CommunityInviteRepository communityInviteRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public CommunityService(CommunityRepository communityRepository,
                             CommunityMemberRepository communityMemberRepository,
@@ -38,7 +43,8 @@ public class CommunityService {
                             CategoryRepository categoryRepository,
                             DecisionRepository decisionRepository,
                             UserService userService,
-                            CommunityInviteRepository communityInviteRepository) {
+                            CommunityInviteRepository communityInviteRepository,
+                            ApplicationEventPublisher eventPublisher) {
         this.communityRepository = communityRepository;
         this.communityMemberRepository = communityMemberRepository;
         this.userRepository = userRepository;
@@ -46,6 +52,7 @@ public class CommunityService {
         this.decisionRepository = decisionRepository;
         this.userService = userService;
         this.communityInviteRepository = communityInviteRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -81,6 +88,23 @@ public class CommunityService {
         ownerMember.setUser(creator);
         ownerMember.setRole("OWNER");
         communityMemberRepository.save(ownerMember);
+
+        if (eventPublisher != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("communityId", savedCommunity.getId());
+            metadata.put("name", savedCommunity.getName());
+
+            eventPublisher.publishEvent(new ActivityEvent(
+                    creator.getId(),
+                    "COMMUNITY_CREATED",
+                    "COMMUNITY",
+                    savedCommunity.getId(),
+                    savedCommunity.getId(),
+                    "Created community: " + savedCommunity.getName(),
+                    metadata,
+                    savedCommunity.getVisibility()
+            ));
+        }
 
         return mapToCommunityResponse(savedCommunity, userEmail);
     }
@@ -207,6 +231,23 @@ public class CommunityService {
         member.setUser(user);
         member.setRole("MEMBER");
         communityMemberRepository.save(member);
+
+        if (eventPublisher != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("communityId", community.getId());
+            metadata.put("name", community.getName());
+
+            eventPublisher.publishEvent(new ActivityEvent(
+                    user.getId(),
+                    "COMMUNITY_JOINED",
+                    "COMMUNITY",
+                    community.getId(),
+                    community.getId(),
+                    "Joined community: " + community.getName(),
+                    metadata,
+                    community.getVisibility()
+            ));
+        }
 
         return mapToCommunityResponse(community, userEmail);
     }

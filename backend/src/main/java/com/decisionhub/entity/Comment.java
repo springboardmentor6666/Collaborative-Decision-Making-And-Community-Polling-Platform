@@ -37,7 +37,33 @@ public class Comment {
     @Column(name = "is_flagged")
     private Boolean isFlagged = false;
 
+    @Column(name = "upvotes_count")
+    private Integer upvotesCount = 0;
+
+    @Column(name = "downvotes_count")
+    private Integer downvotesCount = 0;
+
     public Comment() {
+    }
+
+    public Integer getUpvotesCount() {
+        return upvotesCount != null ? upvotesCount : 0;
+    }
+
+    public void setUpvotesCount(Integer upvotesCount) {
+        this.upvotesCount = upvotesCount;
+    }
+
+    public Integer getDownvotesCount() {
+        return downvotesCount != null ? downvotesCount : 0;
+    }
+
+    public void setDownvotesCount(Integer downvotesCount) {
+        this.downvotesCount = downvotesCount;
+    }
+
+    public Integer getScore() {
+        return getUpvotesCount() - getDownvotesCount();
     }
 
     @PrePersist

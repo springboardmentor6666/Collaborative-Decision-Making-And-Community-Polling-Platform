@@ -6,25 +6,27 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
+@EnableAsync
 public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("categories", "userProfiles", "analyticsTrends");
-        cacheManager.setCaffeine(caffeineCacheBuilder());
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "categories", "popularCategories", "userProfiles", "analyticsTrends", "recentActivities"
+        );
+        cacheManager.setCaffeine(
+                Caffeine.newBuilder()
+                        .maximumSize(500)
+                        .expireAfterAccess(10, TimeUnit.MINUTES)
+                        .recordStats()
+        );
         return cacheManager;
     }
-
-    Caffeine<Object, Object> caffeineCacheBuilder() {
-        return Caffeine.newBuilder()
-                .initialCapacity(100)
-                .maximumSize(500)
-                .expireAfterAccess(10, TimeUnit.MINUTES)
-                .recordStats();
-    }
+}
 }

@@ -57,7 +57,11 @@ public class PollService {
 
         Poll poll = new Poll();
         poll.setPollType(request.getPollType() != null ? request.getPollType() : "SINGLE");
+        poll.setVotingMethod(request.getVotingMethod() != null ? request.getVotingMethod() : (request.getPollType() != null ? request.getPollType() : "SINGLE_CHOICE"));
+        poll.setMaxChoices(request.getMaxChoices() != null ? request.getMaxChoices() : 1);
+        poll.setAllowRevoting(request.getAllowRevoting() != null ? request.getAllowRevoting() : false);
         poll.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
+        poll.setEndsAt(request.getEndsAt());
         poll.setDecision(decision);
 
         Poll savedPoll = pollRepository.save(poll);
@@ -126,6 +130,9 @@ public class PollService {
                 poll.getId(),
                 poll.getDecision() != null ? poll.getDecision().getId() : null,
                 poll.getPollType(),
+                poll.getVotingMethod(),
+                poll.getMaxChoices(),
+                poll.getAllowRevoting(),
                 poll.getQuestion(),
                 poll.getIsAnonymous(),
                 poll.getEndsAt(),
