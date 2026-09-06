@@ -30,4 +30,16 @@ public class AuthController {
         AuthResponse response = authService.authenticateUser(loginRequest);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody com.decisionhub.backend.dto.ResetPasswordRequest req) {
+        authService.resetPassword(req);
+        return ResponseEntity.ok(new MessageResponse("Password has been reset successfully!"));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> authenticateGoogle(@Valid @RequestBody com.decisionhub.backend.dto.GoogleLoginRequest req) {
+        AuthResponse response = authService.googleLogin(req);
+        return ResponseEntity.ok(response);
+    }
 }

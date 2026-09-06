@@ -57,6 +57,16 @@ public class Option {
         this.score = 0;
     }
 
+    public Option(Decision decision, String optionTitle, String description, String pros, String cons, Integer score, Integer ranking) {
+        this.decision = decision;
+        this.optionTitle = optionTitle;
+        this.description = description;
+        this.pros = pros;
+        this.cons = cons;
+        this.score = score;
+        this.ranking = ranking;
+    }
+
     public Option(Long id, Decision decision, String optionTitle, String description, String pros, String cons, Integer score, Integer ranking) {
         this.id = id;
         this.decision = decision;

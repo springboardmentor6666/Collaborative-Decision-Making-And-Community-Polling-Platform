@@ -1,0 +1,26 @@
+# Maven
+**/target/
+*.class
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+*.env
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+Thumbs.db

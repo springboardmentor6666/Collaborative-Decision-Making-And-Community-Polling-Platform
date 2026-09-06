@@ -23,6 +23,7 @@ public class CommentService {
     @Autowired private CommentRepository commentRepository;
     @Autowired private DecisionRepository decisionRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public CommentResponse addComment(Long decisionId, CommentRequest req, String userEmail) {
@@ -39,6 +40,29 @@ public class CommentService {
 
         Comment comment = new Comment(user, decision, parent, req.getCommentText());
         Comment saved = commentRepository.save(comment);
+
+        // Send notification to decision creator if not the commenter
+        if (decision.getUser() != null && !decision.getUser().getId().equals(user.getId())) {
+            notificationService.sendNotification(
+                    decision.getUser(),
+                    decision,
+                    null,
+                    "NEW_COMMENT",
+                    user.getUsername() + " commented on your decision: '" + decision.getTitle() + "'"
+            );
+        }
+
+        // Send notification to parent comment author if replying
+        if (parent != null && parent.getUser() != null && !parent.getUser().getId().equals(user.getId())) {
+            notificationService.sendNotification(
+                    parent.getUser(),
+                    decision,
+                    null,
+                    "COMMENT_REPLY",
+                    user.getUsername() + " replied to your comment on: '" + decision.getTitle() + "'"
+            );
+        }
+
         return toResponse(saved);
     }
 
@@ -55,8 +79,12 @@ public class CommentService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
 
-        // Allow decision owner or comment owner to delete
-        if (!comment.getUser().getId().equals(user.getId()) && 
+        boolean isModOrAdmin = "ADMIN".equalsIgnoreCase(user.getRole()) || "ROLE_ADMIN".equalsIgnoreCase(user.getRole())
+                || "MODERATOR".equalsIgnoreCase(user.getRole()) || "ROLE_MODERATOR".equalsIgnoreCase(user.getRole());
+
+        // Allow decision owner, comment owner, or moderators/admins to delete
+        if (!isModOrAdmin &&
+            !comment.getUser().getId().equals(user.getId()) && 
             !comment.getDecision().getUser().getId().equals(user.getId())) {
             throw new CustomException("You are not authorized to delete this comment", HttpStatus.FORBIDDEN);
         }

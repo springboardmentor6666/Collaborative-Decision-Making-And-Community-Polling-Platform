@@ -110,6 +110,10 @@ public class User {
         this.password = password;
     }
 
+    public void setPasswordHash(String passwordHash) {
+        this.password = passwordHash;
+    }
+
     public String getFullName() {
         return fullName;
     }

@@ -24,6 +24,7 @@ public class VoteService {
     @Autowired private DecisionRepository decisionRepository;
     @Autowired private OptionRepository optionRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public void castVote(Long decisionId, VoteRequest req, String userEmail) {
@@ -55,6 +56,17 @@ public class VoteService {
 
         // Optional: Recalculate options scores if desired
         updateOptionScores(decisionId);
+
+        // Notify decision creator if someone else votes
+        if (decision.getUser() != null && !decision.getUser().getId().equals(user.getId())) {
+            notificationService.sendNotification(
+                    decision.getUser(),
+                    decision,
+                    null,
+                    "NEW_VOTE",
+                    user.getUsername() + " voted on your decision: '" + decision.getTitle() + "' (" + option.getOptionTitle() + ")"
+            );
+        }
     }
 
     @Transactional

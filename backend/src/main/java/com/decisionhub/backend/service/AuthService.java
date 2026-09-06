@@ -96,4 +96,47 @@ public class AuthService {
                 roles
         );
     }
+
+    @Transactional
+    public void resetPassword(com.decisionhub.backend.dto.ResetPasswordRequest req) {
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new CustomException("No user found with email: " + req.getEmail(), HttpStatus.NOT_FOUND));
+        user.setPasswordHash(encoder.encode(req.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public AuthResponse googleLogin(com.decisionhub.backend.dto.GoogleLoginRequest req) {
+        User user = userRepository.findByEmail(req.getEmail()).orElse(null);
+        if (user == null) {
+            String uname = req.getEmail().split("@")[0] + "_" + (int)(Math.random()*1000);
+            user = new User(
+                    uname,
+                    req.getEmail(),
+                    encoder.encode(java.util.UUID.randomUUID().toString()),
+                    req.getName() != null ? req.getName() : uname
+            );
+            user.setRole("USER");
+            user = userRepository.save(user);
+        }
+
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return new AuthResponse(
+                jwt,
+                user.getId(),
+                user.getFullName(),
+                user.getUsername(),
+                roles
+        );
+    }
 }
