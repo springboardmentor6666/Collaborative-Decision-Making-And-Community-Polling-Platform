@@ -54,6 +54,8 @@ jwt:
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  password-reset:
+    expiry-minutes: ${PASSWORD_RESET_EXPIRY_MINUTES:30}
   mail:
     from: ${APP_MAIL_FROM:noreply@decisionhub.com}
   firebase:

@@ -44,6 +44,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/change-password", "/api/auth/set-password").authenticated()
                 .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**", "/h2-console/**").permitAll()
                 .requestMatchers("/api/decisions/*/impressions").permitAll()
                 .requestMatchers("/api/decisions/*/export/csv").permitAll()
