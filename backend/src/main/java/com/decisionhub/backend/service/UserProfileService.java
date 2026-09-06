@@ -9,4 +9,12 @@ public interface UserProfileService {
     ProfileResponse update(
             ProfileUpdateRequest request
     );
+
+    void changePassword(
+            ChangePasswordRequest request
+    );
+
+    void deleteAccount(
+            DeleteAccountRequest request
+    );
 }
