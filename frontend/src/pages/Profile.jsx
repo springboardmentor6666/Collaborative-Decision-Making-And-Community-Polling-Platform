@@ -9,6 +9,7 @@ import IconSidebar from '../components/IconSidebar';
 import InterestTaxonomyEditor from '../components/InterestTaxonomyEditor';
 import DecisionCard from '../components/DecisionCard';
 import Loader from '../components/Loader';
+import RecentActivityFeed from '../components/activity/RecentActivityFeed';
 import { Link } from 'react-router-dom';
 
 const UI_MODE_COLORS = {
@@ -116,19 +117,20 @@ export default function Profile() {
             <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-black tracking-tight text-text-primary">Profile & Preferences</h1>
-                <p className="mt-1 text-muted">Manage your account information, topic interests, and saved bookmarks.</p>
+                <p className="mt-1 text-muted">Manage your account information, topic interests, and personal timeline.</p>
               </div>
 
-              <div className="flex items-center gap-1.5 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
+              <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
                 {[
                   { id: 'account', label: 'Account & Display', icon: '👤' },
                   { id: 'interests', label: 'Topic Interests', icon: '🏷️' },
                   { id: 'saved', label: 'Saved Decisions', icon: '🔖' },
+                  { id: 'activity', label: 'My Activity', icon: '⚡' },
                 ].map((t) => (
                   <button
                     key={t.id}
                     onClick={() => setActiveTab(t.id)}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                       activeTab === t.id
                         ? 'bg-primary text-white shadow-xs'
                         : 'text-text-secondary hover:text-text-primary hover:bg-surface-alt'
@@ -389,6 +391,27 @@ export default function Profile() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Tab 4: My Activity Timeline */}
+            {activeTab === 'activity' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-black text-text-primary">My Activity Timeline</h2>
+                  <p className="text-xs text-muted">
+                    Track all your poll votes, decisions created, and community contributions.
+                  </p>
+                </div>
+
+                <div className="h-[600px]">
+                  <RecentActivityFeed
+                    feedType="USER"
+                    targetId={user.id}
+                    showHeader={true}
+                    limit={25}
+                  />
+                </div>
               </div>
             )}
 

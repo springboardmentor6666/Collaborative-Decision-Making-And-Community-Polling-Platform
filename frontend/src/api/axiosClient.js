@@ -992,5 +992,182 @@ export async function flagContentApi(targetType, targetId, reason, token) {
   });
 }
 
+/**
+ * ─────────────────────────────────────────────────────────
+ * Community Real-time Chat & Channel API Endpoints
+ * ─────────────────────────────────────────────────────────
+ */
 
+export async function getCommunityChannelsApi(communityId, token = null) {
+  try {
+    const data = await request(`/api/communities/${communityId}/chat/channels`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
 
+export async function createCommunityChannelApi(communityId, channelData, token) {
+  return await request(`/api/communities/${communityId}/chat/channels`, {
+    method: 'POST',
+    body: {
+      name: channelData.name,
+      description: channelData.description || '',
+    },
+    token,
+  });
+}
+
+export async function getChannelMessagesApi(communityId, channelId, beforeCursor = null, token = null) {
+  try {
+    const query = beforeCursor ? `?before=${encodeURIComponent(beforeCursor)}` : '';
+    const data = await request(`/api/communities/${communityId}/chat/channels/${channelId}/messages${query}`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function sendChannelMessageApi(communityId, channelId, messageData, token) {
+  return await request(`/api/communities/${communityId}/chat/channels/${channelId}/messages`, {
+    method: 'POST',
+    body: {
+      content: typeof messageData === 'string' ? messageData : messageData.content,
+      messageType: messageData?.messageType || 'TEXT',
+      parentMessageId: messageData?.parentMessageId || null,
+    },
+    token,
+  });
+}
+
+export async function editChatMessageApi(communityId, messageId, messageData, token) {
+  const commId = token !== undefined ? communityId : 0;
+  const msgId = token !== undefined ? messageId : communityId;
+  const data = token !== undefined ? messageData : messageId;
+  const auth = token !== undefined ? token : messageData;
+
+  return await request(`/api/communities/${commId}/chat/messages/${msgId}`, {
+    method: 'PUT',
+    body: {
+      content: typeof data === 'string' ? data : data.content,
+    },
+    token: auth,
+  });
+}
+
+export async function deleteChatMessageApi(arg1, arg2, arg3) {
+  // Support both deleteChatMessageApi(messageId, token) and deleteChatMessageApi(communityId, messageId, token)
+  let communityId = 0;
+  let messageId = arg1;
+  let token = arg2;
+
+  if (arg3 !== undefined) {
+    communityId = arg1;
+    messageId = arg2;
+    token = arg3;
+  }
+
+  return await request(`/api/communities/${communityId}/chat/messages/${messageId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function toggleMessageReactionApi(arg1, arg2, arg3, arg4) {
+  // Support toggleMessageReactionApi(messageId, emoji, token) and toggleMessageReactionApi(communityId, messageId, emoji, token)
+  let communityId = 0;
+  let messageId = arg1;
+  let emoji = arg2;
+  let token = arg3;
+
+  if (arg4 !== undefined) {
+    communityId = arg1;
+    messageId = arg2;
+    emoji = arg3;
+    token = arg4;
+  }
+
+  return await request(`/api/communities/${communityId}/chat/messages/${messageId}/react`, {
+    method: 'POST',
+    body: { emoji },
+    token,
+  });
+}
+
+export async function pinMessageApi(arg1, arg2, arg3) {
+  // Support pinMessageApi(messageId, token) and pinMessageApi(communityId, messageId, token)
+  let communityId = 0;
+  let messageId = arg1;
+  let token = arg2;
+
+  if (arg3 !== undefined) {
+    communityId = arg1;
+    messageId = arg2;
+    token = arg3;
+  }
+
+  return await request(`/api/communities/${communityId}/chat/messages/${messageId}/pin`, {
+    method: 'PATCH',
+    token,
+  });
+}
+
+export async function getPinnedMessagesApi(communityId, channelId, token = null) {
+  try {
+    const data = await request(`/api/communities/${communityId}/chat/channels/${channelId}/pinned`, { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Recent Activity Streams API Endpoints
+ * ─────────────────────────────────────────────────────────
+ */
+
+export async function getRecentActivitiesApi(params = {}, token = null) {
+  try {
+    const query = new URLSearchParams();
+    if (params.type) query.append('type', params.type);
+    if (params.page !== undefined) query.append('page', params.page);
+    if (params.limit !== undefined) query.append('limit', params.limit);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+
+    const data = await request(`/api/activities/recent${qs}`, { token });
+    return Array.isArray(data) ? data : (data?.content || []);
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getCommunityActivitiesApi(communityId, params = {}, token = null) {
+  try {
+    const query = new URLSearchParams();
+    if (params.type) query.append('type', params.type);
+    if (params.page !== undefined) query.append('page', params.page);
+    if (params.limit !== undefined) query.append('limit', params.limit);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+
+    const data = await request(`/api/activities/communities/${communityId}${qs}`, { token });
+    return Array.isArray(data) ? data : (data?.content || []);
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getUserActivitiesApi(userId, params = {}, token = null) {
+  try {
+    const query = new URLSearchParams();
+    if (params.type) query.append('type', params.type);
+    if (params.page !== undefined) query.append('page', params.page);
+    if (params.limit !== undefined) query.append('limit', params.limit);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+
+    const data = await request(`/api/activities/users/${userId}${qs}`, { token });
+    return Array.isArray(data) ? data : (data?.content || []);
+  } catch (e) {
+    return [];
+  }
+}

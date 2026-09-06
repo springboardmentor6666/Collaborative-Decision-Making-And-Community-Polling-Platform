@@ -19,6 +19,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import CategoryBadge from '../components/CategoryBadge';
+import CommunityChatTab from '../components/chat/CommunityChatTab';
+import RecentActivityFeed from '../components/activity/RecentActivityFeed';
 
 export default function CommunityDetails() {
   const { id } = useParams();
@@ -31,7 +33,7 @@ export default function CommunityDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAccessDenied, setIsAccessDenied] = useState(false);
-  const [activeTab, setActiveTab] = useState('decisions'); // 'decisions' | 'members'
+  const [activeTab, setActiveTab] = useState('decisions'); // 'decisions' | 'chat' | 'activity' | 'members'
   const [actionLoading, setActionLoading] = useState(false);
 
   // Modals state
@@ -402,7 +404,7 @@ export default function CommunityDetails() {
             </div>
 
             {/* Tabs */}
-            <div className="mb-6 flex gap-2 border-b border-border-default pb-px">
+            <div className="mb-6 flex flex-wrap gap-2 border-b border-border-default pb-px">
               <button
                 onClick={() => setActiveTab('decisions')}
                 className={`border-b-2 px-4 py-3 text-sm font-bold transition-all ${
@@ -412,6 +414,26 @@ export default function CommunityDetails() {
                 }`}
               >
                 Group Decisions ({decisions.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`border-b-2 px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'chat'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:border-border-default hover:text-text-primary'
+                }`}
+              >
+                💬 Discussion & Chat
+              </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`border-b-2 px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'activity'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted hover:border-border-default hover:text-text-primary'
+                }`}
+              >
+                ⚡ Activity
               </button>
               <button
                 onClick={() => setActiveTab('members')}
@@ -462,6 +484,30 @@ export default function CommunityDetails() {
                     )}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Tab Content: Discussion & Chat */}
+            {activeTab === 'chat' && (
+              <div className="space-y-4">
+                <CommunityChatTab
+                  community={community}
+                  currentUser={user}
+                  token={accessToken}
+                  onJoinCommunity={handleJoin}
+                />
+              </div>
+            )}
+
+            {/* Tab Content: Recent Community Activity Feed */}
+            {activeTab === 'activity' && (
+              <div className="space-y-4">
+                <RecentActivityFeed
+                  feedType="COMMUNITY"
+                  targetId={id}
+                  showHeader={true}
+                  limit={20}
+                />
               </div>
             )}
 
