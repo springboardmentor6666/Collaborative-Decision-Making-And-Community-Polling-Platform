@@ -39,6 +39,7 @@
 | 29 | `community_messages` | `CommunityMessage.java` | Rich chat messages, threaded replies, pinning & soft-deletes |
 | 30 | `community_message_reactions` | `CommunityMessageReaction.java` | Emoji reactions per message per user (`UNIQUE(message_id, user_id, emoji)`) |
 | 31 | `community_chat_read_receipts` | `CommunityChatReadReceipt.java` | Composite PK `(channel_id, user_id)` cursor tracking unread messages |
+| 32 | `activities` | `Activity.java` | Canonical polymorphic event feed across platform, communities, and users |
 
 
 ---
@@ -237,6 +238,35 @@ lastReadAt      → LocalDateTime lastReadAt              @UpdateTimestamp
 Query Usage: Unread badge calculations via `COUNT(m.id) WHERE m.channel_id = :channelId AND m.id > :lastReadMessageId`
 ```
 
+### 19. Activity.java ← `activities`
+```
+id              → Long id                               @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+actor_id        → User actor                            @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "actor_id", nullable = false)
+activity_type   → String activityType                   @Column(name = "activity_type", length = 40, nullable = false)
+                  ('DECISION_CREATED', 'DECISION_CLOSED', 'VOTE_CAST', 'COMMENT_ADDED',
+                   'SUGGESTION_SUBMITTED', 'RECOMMENDATION_ADDED', 'COMMUNITY_CREATED',
+                   'COMMUNITY_JOINED', 'COMMUNITY_MESSAGE_SENT', 'OPTION_ADDED')
+entity_type     → String entityType                     @Column(name = "entity_type", length = 30, nullable = false)
+                  ('DECISION', 'POLL', 'COMMENT', 'COMMUNITY', 'USER')
+entity_id       → Long entityId                         @Column(name = "entity_id", nullable = false)
+community_id    → Community community                   @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "community_id")
+title           → String title                          @Column(length = 255, nullable = false)
+metadata        → String metadata                       @Column(columnDefinition = "TEXT") (JSON / JSONB payload)
+visibility      → String visibility                     @Column(length = 15) DEFAULT 'PUBLIC' ('PUBLIC', 'COMMUNITY_ONLY', 'PRIVATE')
+created_at      → LocalDateTime createdAt               @CreationTimestamp
+
+Composite Indexes & Query Workloads:
+- `idx_activities_global`: (visibility, created_at DESC) -> Platform-wide home / explore activity stream
+- `idx_activities_community`: (community_id, visibility, created_at DESC) -> Community timeline & active channels
+- `idx_activities_actor`: (actor_id, visibility, created_at DESC) -> User profile timeline & contributions
+- `idx_activities_entity`: (entity_type, entity_id) -> Quick lookup of all activities tied to a decision/poll/comment
+- `idx_activities_created_at`: (created_at) -> Chronological scanning & batch automated data retention sweeps
+
+Automated Data Lifecycle Management:
+- Retention Rule: Activity logs older than 180 days (and private activity records older than 90 days) can be automatically archived or purged.
+- Execution: Scheduled service `ActivityLifecycleScheduler` or DB routine run daily during low-traffic windows.
+```
+
 ---
 
 ## Relationship Summary for JPA
@@ -244,11 +274,12 @@ Query Usage: Unread badge calculations via `COUNT(m.id) WHERE m.channel_id = :ch
 ```
 User        @OneToOne   → UserProfile
 User        @ManyToMany → Category       (via user_interests junction table)
-User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag, CommunityMessage, CommunityMessageReaction
+User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag, CommunityMessage, CommunityMessageReaction, Activity
 User        @OneToMany  → CommunityChatChannel (as creator), CommunityChatReadReceipt
 
 Decision    @ManyToOne  → User (owner), Category
 Decision    @OneToMany  → DecisionOption, ComparisonFactor, Poll, Comment
+
 
 DecisionOption @ManyToOne → Decision
 DecisionOption @OneToMany → OptionScore, PollOption

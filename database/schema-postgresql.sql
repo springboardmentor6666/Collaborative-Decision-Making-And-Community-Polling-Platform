@@ -386,6 +386,29 @@ CREATE TABLE IF NOT EXISTS community_chat_read_receipts (
     CONSTRAINT fk_comm_read_receipts_message FOREIGN KEY (last_read_message_id) REFERENCES community_messages(id) ON DELETE CASCADE
 );
 
+-- 32. activities (Unified Public Activity Timeline)
+CREATE TABLE IF NOT EXISTS activities (
+    id BIGSERIAL PRIMARY KEY,
+    actor_id BIGINT NOT NULL,
+    activity_type VARCHAR(40) NOT NULL,
+    entity_type VARCHAR(30) NOT NULL,
+    entity_id BIGINT NOT NULL,
+    community_id BIGINT NULL,
+    title VARCHAR(255) NOT NULL,
+    metadata JSONB NULL,
+    visibility VARCHAR(15) DEFAULT 'PUBLIC',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_activity_visibility CHECK (visibility IN ('PUBLIC', 'COMMUNITY_ONLY', 'PRIVATE')),
+    CONSTRAINT chk_activity_entity_type CHECK (entity_type IN ('DECISION', 'POLL', 'COMMENT', 'COMMUNITY', 'USER')),
+    CONSTRAINT chk_activity_type CHECK (activity_type IN (
+        'DECISION_CREATED', 'DECISION_CLOSED', 'VOTE_CAST', 'COMMENT_ADDED',
+        'SUGGESTION_SUBMITTED', 'RECOMMENDATION_ADDED', 'COMMUNITY_CREATED',
+        'COMMUNITY_JOINED', 'COMMUNITY_MESSAGE_SENT', 'OPTION_ADDED'
+    )),
+    CONSTRAINT fk_activities_actor FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_activities_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE
+);
+
 -- Indexes for performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_decisions_owner ON decisions(owner_id);
@@ -432,5 +455,13 @@ CREATE INDEX idx_comm_msgs_pinned ON community_messages(channel_id, is_pinned) W
 CREATE INDEX idx_comm_reactions_msg ON community_message_reactions(message_id);
 CREATE INDEX idx_comm_msgs_parent ON community_messages(parent_message_id);
 CREATE INDEX idx_comm_read_receipts_user ON community_chat_read_receipts(user_id);
+
+-- Activity Feed Indexes
+CREATE INDEX idx_activities_global ON activities (visibility, created_at DESC);
+CREATE INDEX idx_activities_community ON activities (community_id, visibility, created_at DESC);
+CREATE INDEX idx_activities_actor ON activities (actor_id, visibility, created_at DESC);
+CREATE INDEX idx_activities_entity ON activities (entity_type, entity_id);
+CREATE INDEX idx_activities_created_at ON activities (created_at);
+
 
 
