@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import CategorySelector from '../components/CategorySelector';
+import MarkdownEditor from '../components/ui/MarkdownEditor';
 
 export default function CreateDecision() {
   const navigate = useNavigate();
@@ -214,12 +215,11 @@ export default function CreateDecision() {
 
                 <div>
                   <label className={labelClass}>Description</label>
-                  <textarea
-                    rows={4}
+                  <MarkdownEditor
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={setDescription}
                     placeholder="Explain the background, constraints, and goal of this decision..."
-                    className={inputClass}
+                    rows={4}
                   />
                 </div>
 

@@ -257,7 +257,7 @@ public class DecisionService {
 
         // Owner or ADMIN authorization check
         boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
-        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+        boolean isAdmin = requestingUser.getRole() != null && (requestingUser.getRole().toUpperCase().contains("ADMIN"));
 
         if (!isOwner && !isAdmin) {
             throw new AccessDeniedException("You are not authorized to edit this decision");
@@ -297,8 +297,8 @@ public class DecisionService {
         // Owner, ADMIN, or MODERATOR authorization check
         boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
         boolean isModeratorOrAdmin = requestingUser.getRole() != null && (
-                "ADMIN".equalsIgnoreCase(requestingUser.getRole()) ||
-                "MODERATOR".equalsIgnoreCase(requestingUser.getRole())
+                requestingUser.getRole().toUpperCase().contains("ADMIN") ||
+                requestingUser.getRole().toUpperCase().contains("MODERATOR")
         );
 
         if (!isOwner && !isModeratorOrAdmin) {
@@ -320,7 +320,7 @@ public class DecisionService {
 
         // Owner or ADMIN authorization check
         boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
-        boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+        boolean isAdmin = requestingUser.getRole() != null && requestingUser.getRole().toUpperCase().contains("ADMIN");
 
         if (!isOwner && !isAdmin) {
             throw new AccessDeniedException("You are not authorized to add options to this decision");
@@ -382,7 +382,7 @@ public class DecisionService {
                     .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
             boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
-            boolean isAdmin = requestingUser.getRole() != null && "ADMIN".equalsIgnoreCase(requestingUser.getRole());
+            boolean isAdmin = requestingUser.getRole() != null && requestingUser.getRole().toUpperCase().contains("ADMIN");
 
             if (!isOwner && !isAdmin) {
                 throw new AccessDeniedException("You are not authorized to close this decision");

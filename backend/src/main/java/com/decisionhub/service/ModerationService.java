@@ -42,7 +42,7 @@ public class ModerationService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
         String role = user.getRole() != null ? user.getRole().toUpperCase().trim() : "";
-        if (!"MODERATOR".equals(role) && !"ADMIN".equals(role)) {
+        if (!role.contains("MODERATOR") && !role.contains("ADMIN")) {
             throw new AccessDeniedException("Access denied. Only moderators or admins can access this resource.");
         }
     }

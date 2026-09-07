@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 public class CommentReactionRequest {
 
     @NotBlank(message = "Reaction type is required")
+    @com.fasterxml.jackson.annotation.JsonProperty("reactionType")
+    @com.fasterxml.jackson.annotation.JsonAlias({"type", "reaction_type"})
     private String reactionType;
 
     public CommentReactionRequest() {

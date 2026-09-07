@@ -39,7 +39,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_FLYWAY_ENABLED: "false"
-      SPRING_JPA_OPEN_IN_VIEW: "false"
+      SPRING_JPA_OPEN_IN_VIEW: "true"
     ports:
       - "8080:8080"
 

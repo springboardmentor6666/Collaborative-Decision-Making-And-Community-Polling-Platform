@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -14,6 +14,7 @@ import {
   uploadCommentFileApi,
 } from '../api/axiosClient';
 import CommentItem from './CommentItem';
+import MarkdownEditor from './ui/MarkdownEditor';
 
 function countAllComments(commentsList) {
   let count = 0;
@@ -42,8 +43,9 @@ function formatRelativeTime(dateString) {
   return date.toLocaleDateString();
 }
 
-export default function CommentSection({ decisionId, pollOptions = [] }) {
+export default function CommentSection({ decisionId, pollOptions = [], decisionOwnerEmail = null }) {
   const { user, accessToken } = useAuth();
+  const [sortBy, setSortBy] = useState('newest');
   const [activeTab, setActiveTab] = useState('COMMENTS'); // 'COMMENTS' | 'SUGGESTIONS' | 'RECOMMENDATIONS'
   
   // Comments State
@@ -275,25 +277,18 @@ export default function CommentSection({ decisionId, pollOptions = [] }) {
       {activeTab === 'COMMENTS' && (
         <div className="space-y-4">
           <form onSubmit={handlePostComment} className="space-y-3">
-            <div className="relative">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                    handlePostComment(e);
-                  }
-                }}
-                rows={3}
-                disabled={!user}
-                placeholder={
-                  user
-                    ? 'Share your perspective, rationale, or alternative considerations... (Ctrl+Enter to post)'
-                    : 'Sign in to join the discussion...'
-                }
-                className="app-input px-4 py-3 text-xs sm:text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-              />
-            </div>
+            <MarkdownEditor
+              value={newComment}
+              onChange={setNewComment}
+              placeholder={
+                user
+                  ? 'Share your perspective with markdown support... (Ctrl+Enter to post)'
+                  : 'Sign in to join the discussion...'
+              }
+              rows={3}
+              compact
+              disabled={!user}
+            />
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -354,9 +349,25 @@ export default function CommentSection({ decisionId, pollOptions = [] }) {
             </div>
           </form>
 
-          {/* Comments List */}
+          {/* Sort Dropdown + Comments List */}
           {!loading && (
-            <div className="pt-2">
+            <div className="pt-2 space-y-3">
+              {comments.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-text-secondary">
+                    {totalComments} comment{totalComments !== 1 ? 's' : ''}
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary focus:outline-none focus:border-primary"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="top">Top Voted</option>
+                  </select>
+                </div>
+              )}
               {comments.length === 0 ? (
                 <div className="py-8 text-center rounded-2xl border border-dashed border-border-default bg-surface-alt/30">
                   <div className="text-3xl mb-2">💬</div>
@@ -368,23 +379,30 @@ export default function CommentSection({ decisionId, pollOptions = [] }) {
               ) : (
                 <div className="space-y-3">
                   <AnimatePresence>
-                    {comments.map((comment) => {
-                      const isAuthorExpert =
-                        expertEmails.has(comment.author?.email?.toLowerCase()) ||
-                        Boolean(comment.isExpert);
+                    {[...comments]
+                      .sort((a, b) => {
+                        if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+                        if (sortBy === 'top') return (b.upvotes || 0) - (a.upvotes || 0);
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                      })
+                      .map((comment) => {
+                        const isAuthorExpert =
+                          expertEmails.has(comment.author?.email?.toLowerCase()) ||
+                          Boolean(comment.isExpert);
 
-                      return (
-                        <CommentItem
-                          key={comment.id}
-                          comment={{ ...comment, isExpert: isAuthorExpert }}
-                          currentUserId={user?.id}
-                          currentUserEmail={user?.email}
-                          onReply={handleReply}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      );
-                    })}
+                        return (
+                          <CommentItem
+                            key={comment.id}
+                            comment={{ ...comment, isExpert: isAuthorExpert }}
+                            currentUserId={user?.id}
+                            currentUserEmail={user?.email}
+                            decisionOwnerEmail={decisionOwnerEmail}
+                            onReply={handleReply}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                          />
+                        );
+                      })}
                   </AnimatePresence>
                 </div>
               )}

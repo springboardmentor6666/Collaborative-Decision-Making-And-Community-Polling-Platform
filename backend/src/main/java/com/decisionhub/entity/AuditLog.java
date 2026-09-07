@@ -28,6 +28,7 @@ public class AuditLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "savedDecisions", "interests", "decisions", "passwordHash"})
     private User actor;
 
     @Column(name = "metadata", columnDefinition = "TEXT")

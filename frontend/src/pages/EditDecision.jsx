@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import CategorySelector from '../components/CategorySelector';
 import Loader from '../components/Loader';
+import MarkdownEditor from '../components/ui/MarkdownEditor';
 
 export default function EditDecision() {
   const { id } = useParams();
@@ -158,12 +159,11 @@ export default function EditDecision() {
                     {/* Description */}
                     <div>
                       <label className={labelClass}>Description</label>
-                      <textarea
+                      <MarkdownEditor
                         rows={5}
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={setDescription}
                         placeholder="Explain the background, constraints, and goal of this decision..."
-                        className={inputClass}
                       />
                     </div>
 

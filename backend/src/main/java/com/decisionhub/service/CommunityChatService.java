@@ -167,7 +167,7 @@ public class CommunityChatService {
 
         User user = findUserByEmail(userEmail);
 
-        if (!message.getSender().getId().equals(user.getId()) && !"ADMIN".equalsIgnoreCase(user.getRole())) {
+        if (!message.getSender().getId().equals(user.getId()) && (user.getRole() == null || !user.getRole().toUpperCase().contains("ADMIN"))) {
             throw new AccessDeniedException("Only the message author can edit this message");
         }
 
@@ -196,7 +196,7 @@ public class CommunityChatService {
         User user = findUserByEmail(userEmail);
 
         boolean isAuthor = message.getSender().getId().equals(user.getId());
-        boolean isPlatformAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+        boolean isPlatformAdmin = user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN");
         boolean isCommunityOwnerOrAdmin = false;
 
         CommunityMember member = communityMemberRepository.findByCommunityIdAndUserId(communityId, user.getId()).orElse(null);
@@ -351,7 +351,7 @@ public class CommunityChatService {
             if (user == null) {
                 throw new AccessDeniedException("Access denied to private community chat");
             }
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            if (user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN")) {
                 return;
             }
             boolean isMember = communityMemberRepository.existsByCommunityIdAndUserId(community.getId(), user.getId());
@@ -365,7 +365,7 @@ public class CommunityChatService {
         if (user == null) {
             throw new AccessDeniedException("Authentication required");
         }
-        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+        if (user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN")) {
             return;
         }
         CommunityMember member = communityMemberRepository.findByCommunityIdAndUserId(community.getId(), user.getId())

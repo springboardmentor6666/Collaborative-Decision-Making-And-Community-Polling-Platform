@@ -80,7 +80,7 @@ public class FileService {
                 .orElseThrow(() -> new IllegalArgumentException("Attachment not found with id: " + id));
 
         boolean isUploader = attachment.getUploadedBy().getId().equals(user.getId());
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+        boolean isAdmin = user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN");
 
         if (!isUploader && !isAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("Unauthorized to delete this attachment");

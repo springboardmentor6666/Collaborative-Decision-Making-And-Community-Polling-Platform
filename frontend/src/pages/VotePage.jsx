@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   fetchDecisionById,
   castVoteApi,
@@ -12,13 +14,14 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import PollCard from '../components/PollCard';
-import Loader from '../components/Loader';
+import SkeletonCard from '../components/ui/SkeletonCard';
 
 export default function VotePage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
+  const { showToast } = useToast();
 
   const [decision, setDecision] = useState(null);
   
@@ -26,6 +29,7 @@ export default function VotePage() {
   const [selectedOptionId, setSelectedOptionId] = useState(null); // Single choice
   const [selectedOptionIds, setSelectedOptionIds] = useState([]); // Multiple choice
   const [ratings, setRatings] = useState({}); // { [optionId]: rating } for Rating polls
+  const [rankedOptions, setRankedOptions] = useState([]); // Ranked choice options order
   const [isAnonymousVote, setIsAnonymousVote] = useState(false);
   const [ratingSummary, setRatingSummary] = useState(null);
 
@@ -37,6 +41,7 @@ export default function VotePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -49,6 +54,9 @@ export default function VotePage() {
       setLoading(true);
       const dec = await fetchDecisionById(id, accessToken);
       setDecision(dec);
+      if (dec?.poll?.options) {
+        setRankedOptions(dec.poll.options);
+      }
 
       // Record a view impression
       await recordImpressionApi(id, 'VIEW', accessToken);
@@ -104,6 +112,7 @@ export default function VotePage() {
     const pollType = (decision.poll.pollType || 'SINGLE_CHOICE').toUpperCase();
     const isMulti = pollType === 'MULTIPLE' || pollType === 'MULTI';
     const isRating = pollType === 'RATING';
+    const isRanked = pollType === 'RANKED_CHOICE' || pollType === 'RANKED';
 
     try {
       if (isMulti) {
@@ -160,6 +169,30 @@ export default function VotePage() {
         } catch {
           // ignore
         }
+      } else if (isRanked) {
+        const currentRanked = rankedOptions.length > 0 ? rankedOptions : (decision.poll.options || []);
+        if (currentRanked.length === 0) {
+          setError('No options available to rank.');
+          setSubmitting(false);
+          return;
+        }
+
+        const votesPayload = currentRanked.map((opt, index) => ({
+          pollId: Number(decision.poll.id || id),
+          pollOptionId: Number(opt.id),
+          ranking: index + 1,
+          isAnonymous: isAnonymousVote,
+        }));
+
+        await castVoteApi(
+          {
+            decisionId: Number(id),
+            pollId: Number(decision.poll.id || id),
+            votes: votesPayload,
+            isAnonymous: isAnonymousVote,
+          },
+          accessToken
+        );
       } else {
         // Single Choice
         if (!selectedOptionId) {
@@ -193,6 +226,8 @@ export default function VotePage() {
 
       setSuccessMsg('Your vote has been recorded! Added to your Decision Analysis.');
       setHasVoted(true);
+      setShowSuccessModal(true);
+      showToast?.('Ballot successfully submitted!', 'success');
     } catch (err) {
       if (err.message?.includes('already voted') || err.message?.includes('409')) {
         setError('You have already voted on this decision.');
@@ -216,7 +251,7 @@ export default function VotePage() {
         <main className="flex-1 flex flex-col min-w-0">
           <div className="flex-1 max-w-3xl w-full mx-auto px-6 py-8">
             {loading ? (
-              <Loader message="Preparing voting session..." />
+              <SkeletonCard variant="poll" />
             ) : !decision ? (
               <div className="rounded-2xl border border-dashed border-default p-12 text-center">
                 <p className="mb-4 text-secondary">Decision not found.</p>
@@ -353,9 +388,11 @@ export default function VotePage() {
                   selectedOptionIds={selectedOptionIds}
                   ratings={ratings}
                   ratingSummary={ratingSummary}
+                  rankedOptions={rankedOptions}
                   onSelectOption={(optId) => setSelectedOptionId(optId)}
                   onToggleOption={handleToggleOption}
                   onRateOption={handleRateOption}
+                  onReorder={(newOrder) => setRankedOptions(newOrder)}
                   onVote={handleVote}
                   isSubmitting={submitting}
                   hasVoted={hasVoted}
@@ -363,6 +400,73 @@ export default function VotePage() {
               </div>
             )}
           </div>
+
+          {/* Animated Success Modal */}
+          <AnimatePresence>
+            {showSuccessModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md"
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-md rounded-[2.5rem] border border-border-default bg-surface p-8 text-center shadow-2xl space-y-6"
+                >
+                  <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+                    <motion.svg
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.5, delay: 0.15 }}
+                      className="h-10 w-10"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </motion.svg>
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-black text-text-primary">Vote Recorded!</h3>
+                    <p className="mt-2 text-sm text-muted">
+                      Your vote on <strong className="text-text-primary">"{decision?.title}"</strong> has been securely submitted and added to your personal decision records.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2.5 pt-2">
+                    <Link
+                      to="/analysis"
+                      className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-white shadow-app transition hover:bg-primary-hover"
+                    >
+                      📊 View Outcome in Decision Analysis
+                    </Link>
+                    <Link
+                      to={`/decisions/${id}`}
+                      className="w-full rounded-2xl border border-border-default bg-surface-alt/60 py-3 text-sm font-bold text-text-primary transition hover:bg-surface-alt"
+                    >
+                      Back to Decision Overview
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setShowSuccessModal(false)}
+                      className="text-xs font-semibold text-muted hover:text-text-primary transition pt-1"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <Footer />
         </main>
       </div>

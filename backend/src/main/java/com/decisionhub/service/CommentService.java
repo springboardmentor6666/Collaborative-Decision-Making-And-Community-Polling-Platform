@@ -257,8 +257,12 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
         boolean isAuthor = comment.getAuthor().getEmail().equals(userEmail);
-        boolean isModeratorOrAdmin = requestingUser.getRole().equalsIgnoreCase("MODERATOR") 
-                                  || requestingUser.getRole().equalsIgnoreCase("ADMIN");
+        boolean isModeratorOrAdmin = requestingUser.getRole() != null && (
+                requestingUser.getRole().equalsIgnoreCase("MODERATOR") ||
+                requestingUser.getRole().equalsIgnoreCase("ADMIN") ||
+                requestingUser.getRole().toUpperCase().contains("ADMIN") ||
+                requestingUser.getRole().toUpperCase().contains("MODERATOR")
+        );
 
         if (!isAuthor && !isModeratorOrAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("You are not authorized to delete this comment");

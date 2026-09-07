@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import {
   fetchDecisionById,
   deleteDecisionApi,
@@ -11,21 +13,25 @@ import {
   getDecisionFilesApi,
   uploadDecisionFileApi,
   deleteAttachmentFileApi,
+  saveDecisionApi,
+  unsaveDecisionApi,
 } from '../api/axiosClient';
 import { exportDecisionToPDF, exportDecisionToCSV } from '../utils/exportUtils';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
-import Loader from '../components/Loader';
+import SkeletonCard from '../components/ui/SkeletonCard';
 import CategoryBadge from '../components/CategoryBadge';
 import ComparisonMatrix from '../components/ComparisonMatrix';
 import CommentSection from '../components/CommentSection';
 import ReportModal from '../components/ReportModal';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 
 export default function DecisionDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
+  const { showToast } = useToast();
 
   const [decision, setDecision] = useState(null);
   const [userVote, setUserVote] = useState(null);
@@ -35,12 +41,24 @@ export default function DecisionDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingBookmark, setSavingBookmark] = useState(false);
 
   // Post-creation option addition & decision close states
   const [showAddOptionInput, setShowAddOptionInput] = useState(false);
   const [newOptionText, setNewOptionText] = useState('');
   const [addingOption, setAddingOption] = useState(false);
   const [closingDecision, setClosingDecision] = useState(false);
+
+  // Keyboard shortcut 'V' to navigate directly to voting screen
+  useKeyboardShortcuts({
+    v: () => {
+      const isOpen = decision?.status === 'OPEN' || decision?.status === 'Active' || decision?.status === 'ACTIVE';
+      if (isOpen) {
+        navigate(`/decisions/${id}/vote`);
+      }
+    },
+  });
 
   useEffect(() => {
     fetchData();
@@ -54,6 +72,7 @@ export default function DecisionDetails() {
         getDecisionFilesApi(id, accessToken).catch(() => []),
       ]);
       setDecision(dec);
+      setIsSaved(Boolean(dec?.isSaved));
       setAttachments(files || []);
 
       // Record a view impression
@@ -193,7 +212,10 @@ export default function DecisionDetails() {
         <main className="flex-1 flex flex-col min-w-0">
           <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-8">
             {loading ? (
-              <Loader message="Loading decision details..." />
+              <div className="space-y-6">
+                <SkeletonCard variant="decision" />
+                <SkeletonCard variant="poll" />
+              </div>
             ) : error || !decision ? (
               <div className="rounded-2xl border border-dashed border-default p-12 text-center">
                 <p className="mb-4 text-secondary">{error || 'Decision not found.'}</p>
@@ -216,6 +238,59 @@ export default function DecisionDetails() {
                   </Link>
 
                   <div className="flex flex-wrap items-center gap-2">
+                    {/* Bookmark Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={async () => {
+                        if (!accessToken || savingBookmark) return;
+                        const prev = isSaved;
+                        setIsSaved(!prev);
+                        setSavingBookmark(true);
+                        try {
+                          if (!prev) {
+                            await saveDecisionApi(id, accessToken);
+                            showToast?.('Decision saved to your bookmarks!', 'success');
+                          } else {
+                            await unsaveDecisionApi(id, accessToken);
+                            showToast?.('Decision removed from bookmarks', 'info');
+                          }
+                        } catch {
+                          setIsSaved(prev);
+                          showToast?.('Failed to update bookmark', 'error');
+                        } finally {
+                          setSavingBookmark(false);
+                        }
+                      }}
+                      disabled={savingBookmark}
+                      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold shadow-sm transition ${
+                        isSaved
+                          ? 'border-amber-500/30 bg-amber-500/10 text-amber-600'
+                          : 'border-border-default bg-surface text-text-primary hover:bg-surface-alt'
+                      }`}
+                      title="Bookmark this decision"
+                    >
+                      <svg className="h-3.5 w-3.5" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                      </svg>
+                      {isSaved ? 'Bookmarked' : 'Bookmark'}
+                    </motion.button>
+
+                    {/* Share / Copy Link Button */}
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(window.location.href);
+                        showToast?.('Link copied to clipboard!', 'success');
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-1.5 text-xs font-semibold text-text-primary transition hover:bg-surface-alt hover:border-primary/40 shadow-sm"
+                      title="Copy link to clipboard"
+                    >
+                      <svg className="h-3.5 w-3.5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Share
+                    </button>
+
                     {/* Export & Printable Report Buttons */}
                     <Link
                       to={`/decisions/${id}/report`}
@@ -623,6 +698,7 @@ export default function DecisionDetails() {
                 <CommentSection
                   decisionId={id}
                   pollOptions={decision.poll?.options || decision.options || []}
+                  decisionOwnerEmail={decision?.createdByUserEmail || decision?.createdBy?.email || decision?.ownerEmail}
                 />
               </div>
             )}

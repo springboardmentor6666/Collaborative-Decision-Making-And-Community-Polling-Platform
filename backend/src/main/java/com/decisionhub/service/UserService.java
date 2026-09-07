@@ -63,6 +63,7 @@ public class UserService {
         return new AuthResponse(token, mapToUserResponse(savedUser));
     }
 
+    @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -75,18 +76,21 @@ public class UserService {
         return new AuthResponse(token, mapToUserResponse(user));
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(this::mapToUserResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return mapToUserResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
@@ -154,18 +158,25 @@ public class UserService {
     public UserResponse mapToUserResponse(User user) {
         String bio = null;
         String avatar = null;
-        if (user.getProfile() != null) {
-            bio = user.getProfile().getBio();
-            avatar = user.getProfile().getAvatarUrl();
-        } else if (user.getProfileImage() != null) {
+        try {
+            if (user.getProfile() != null) {
+                bio = user.getProfile().getBio();
+                avatar = user.getProfile().getAvatarUrl();
+            }
+        } catch (Exception ignored) {
+        }
+        if (avatar == null && user.getProfileImage() != null) {
             avatar = user.getProfileImage();
         }
 
         java.util.Set<String> interests = new java.util.HashSet<>();
-        if (user.getInterests() != null) {
-            for (com.decisionhub.entity.Category category : user.getInterests()) {
-                interests.add(category.getName());
+        try {
+            if (user.getInterests() != null) {
+                for (com.decisionhub.entity.Category category : user.getInterests()) {
+                    interests.add(category.getName());
+                }
             }
+        } catch (Exception ignored) {
         }
 
         return new UserResponse(
@@ -192,7 +203,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + requesterEmail));
 
         // Check permission: must be self or ADMIN
-        if (!requester.getId().equals(user.getId()) && !"ADMIN".equalsIgnoreCase(requester.getRole())) {
+        if (!requester.getId().equals(user.getId()) && !isAdmin(requester)) {
             throw new org.springframework.security.access.AccessDeniedException("Access denied. You can only update your own profile.");
         }
 
@@ -228,7 +239,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + requesterEmail));
 
         // Check permission: must be self or ADMIN
-        if (!requester.getId().equals(user.getId()) && !"ADMIN".equalsIgnoreCase(requester.getRole())) {
+        if (!requester.getId().equals(user.getId()) && !isAdmin(requester)) {
             throw new org.springframework.security.access.AccessDeniedException("Access denied. You can only delete your own account.");
         }
 
@@ -318,7 +329,7 @@ public class UserService {
         User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + adminEmail));
 
-        if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
+        if (!isAdmin(admin)) {
             throw new org.springframework.security.access.AccessDeniedException("Only ADMIN users can modify roles");
         }
 
@@ -336,12 +347,24 @@ public class UserService {
         User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + adminEmail));
 
-        if (!"ADMIN".equalsIgnoreCase(admin.getRole()) && !"MODERATOR".equalsIgnoreCase(admin.getRole())) {
+        if (!isModeratorOrAdmin(admin)) {
             throw new org.springframework.security.access.AccessDeniedException("Only ADMIN or MODERATOR users can ban/deactivate users");
         }
 
         targetUser.setIsActive(isActive);
         User saved = userRepository.save(targetUser);
         return mapToUserResponse(saved);
+    }
+
+    private boolean isAdmin(User user) {
+        if (user == null || user.getRole() == null) return false;
+        String r = user.getRole().trim().toUpperCase();
+        return r.contains("ADMIN");
+    }
+
+    private boolean isModeratorOrAdmin(User user) {
+        if (user == null || user.getRole() == null) return false;
+        String r = user.getRole().trim().toUpperCase();
+        return r.contains("ADMIN") || r.contains("MODERATOR");
     }
 }

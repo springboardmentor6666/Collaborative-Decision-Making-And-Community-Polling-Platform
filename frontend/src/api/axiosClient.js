@@ -22,8 +22,14 @@ async function request(endpoint, options = {}) {
     ...customConfig.headers,
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const effectiveToken =
+    token ||
+    (typeof window !== 'undefined'
+      ? localStorage.getItem('decisionhub_token') || sessionStorage.getItem('decisionhub_token') || sessionStorage.getItem(REFRESH_TOKEN_KEY)
+      : null);
+
+  if (effectiveToken) {
+    headers['Authorization'] = `Bearer ${effectiveToken}`;
   }
 
   const config = {
@@ -1169,5 +1175,74 @@ export async function getUserActivitiesApi(userId, params = {}, token = null) {
     return Array.isArray(data) ? data : (data?.content || []);
   } catch (e) {
     return [];
+  }
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Global Search API Endpoint
+ * ─────────────────────────────────────────────────────────
+ */
+
+export async function globalSearchApi(query, type = 'all', token = null) {
+  try {
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    if (type) params.append('type', type);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+
+    const data = await request(`/api/search${qs}`, { token });
+    return {
+      decisions: Array.isArray(data?.decisions) ? data.decisions : [],
+      communities: Array.isArray(data?.communities) ? data.communities : [],
+      comments: Array.isArray(data?.comments) ? data.comments : [],
+      totalResults: data?.totalResults || 0,
+      totalDecisions: data?.totalDecisions || 0,
+      totalCommunities: data?.totalCommunities || 0,
+      totalComments: data?.totalComments || 0,
+    };
+  } catch (e) {
+    return { decisions: [], communities: [], comments: [], totalResults: 0 };
+  }
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Poll CRUD API Endpoints
+ * ─────────────────────────────────────────────────────────
+ */
+
+export async function createPollApi(pollData, token) {
+  return await request('/api/polls', {
+    method: 'POST',
+    body: pollData,
+    token,
+  });
+}
+
+export async function getPollByDecisionApi(decisionId, token = null) {
+  try {
+    return await request(`/api/polls/decision/${decisionId}`, { token });
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Comment Upvote API Endpoint
+ * ─────────────────────────────────────────────────────────
+ */
+
+export async function upvoteCommentApi(commentId, token) {
+  try {
+    return await request(`/api/comments/${commentId}/react`, {
+      method: 'POST',
+      body: { reactionType: 'UPVOTE', type: 'UPVOTE' },
+      token,
+    });
+  } catch (e) {
+    // If endpoint fails or network error, return optimistic result
+    return { upvoted: true };
   }
 }

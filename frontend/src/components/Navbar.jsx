@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';
 import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
+import CommandMenu from './CommandMenu';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 
 const UI_MODE_COLORS = {
   black: '#0f172a',
@@ -27,6 +29,13 @@ export default function Navbar() {
   } = useTheme();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K shortcut
+  useKeyboardShortcuts({
+    'ctrl+k': () => setIsCommandMenuOpen((prev) => !prev),
+    'meta+k': () => setIsCommandMenuOpen((prev) => !prev),
+  });
 
   const isActive = (path) => location.pathname === path;
 
@@ -151,8 +160,24 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Right: user + logout (desktop only mostly) */}
+          {/* Right: Search button + user + logout */}
           <div className="hidden items-center gap-3 md:flex">
+            {/* Global Search Button */}
+            <button
+              type="button"
+              onClick={() => setIsCommandMenuOpen(true)}
+              className="flex items-center gap-2 rounded-xl border border-border-default bg-surface/80 px-3 py-1.5 text-xs text-muted shadow-xs transition-all duration-200 hover:border-primary-soft hover:text-text-primary hover:bg-surface-alt"
+              title="Global Search (Ctrl+K)"
+            >
+              <svg className="h-3.5 w-3.5 shrink-0 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="hidden xl:inline font-medium">Quick search...</span>
+              <kbd className="inline-flex items-center rounded border border-border-default bg-surface-alt px-1.5 py-0.5 text-[10px] font-mono font-semibold text-muted">
+                ⌘K
+              </kbd>
+            </button>
+
             <div className="flex items-center gap-2.5">
               {user?.avatar ? (
                 <img
@@ -254,6 +279,26 @@ export default function Navbar() {
                   <p className="truncate text-xs text-muted">{user?.email}</p>
                 </div>
               </div>
+
+              {/* Mobile Quick Search */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsCommandMenuOpen(true);
+                }}
+                className="mb-4 flex w-full items-center justify-between rounded-xl border border-border-default bg-surface-alt px-4 py-2.5 text-xs text-muted transition hover:text-text-primary hover:border-primary"
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span>Quick search...</span>
+                </div>
+                <kbd className="rounded border border-border-default bg-surface px-1.5 py-0.5 text-[10px] font-mono text-muted">
+                  ⌘K
+                </kbd>
+              </button>
 
               {/* Navigation Links */}
               <nav className="mb-8 flex flex-col gap-2">
@@ -401,6 +446,12 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Global Command Menu */}
+      <CommandMenu
+        isOpen={isCommandMenuOpen}
+        onClose={() => setIsCommandMenuOpen(false)}
+      />
     </>
   );
 }

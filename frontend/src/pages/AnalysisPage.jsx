@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import PieChart from '../components/PieChart';
+import SkeletonCard from '../components/ui/SkeletonCard';
 
 const BAR_COLORS = [
   '#2563eb', // Blue
@@ -242,8 +243,8 @@ export default function AnalysisPage() {
 
             {/* Decision Cards List */}
             {loading ? (
-              <div className="flex h-48 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <div className="grid gap-4 md:grid-cols-2">
+                <SkeletonCard variant="analysis" count={4} />
               </div>
             ) : filteredList.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2">

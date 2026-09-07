@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { saveDecisionApi, unsaveDecisionApi } from '../api/axiosClient';
 import CategoryBadge from './CategoryBadge';
 
 export default function DecisionCard({ decision, isSavedInitially = false, onBookmarkToggled = null }) {
   const { accessToken, isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const [isSaved, setIsSaved] = useState(isSavedInitially || Boolean(decision.isSaved));
   const [saving, setSaving] = useState(false);
 
@@ -19,21 +22,25 @@ export default function DecisionCard({ decision, isSavedInitially = false, onBoo
     if (!isAuthenticated || !accessToken || saving) return;
 
     const previousState = isSaved;
-    setIsSaved(!previousState);
+    const newState = !previousState;
+    setIsSaved(newState);
     setSaving(true);
 
     try {
       if (!previousState) {
         await saveDecisionApi(decision.id, accessToken);
+        showToast?.('Decision bookmarked!', 'success');
       } else {
         await unsaveDecisionApi(decision.id, accessToken);
+        showToast?.('Removed from bookmarks', 'info');
       }
       if (onBookmarkToggled) {
-        onBookmarkToggled(decision.id, !previousState);
+        onBookmarkToggled(decision.id, newState);
       }
     } catch (err) {
       // Rollback on error
       setIsSaved(previousState);
+      showToast?.('Failed to update bookmark', 'error');
     } finally {
       setSaving(false);
     }
@@ -69,8 +76,11 @@ export default function DecisionCard({ decision, isSavedInitially = false, onBoo
 
           {/* Bookmark / Save Button */}
           {isAuthenticated && (
-            <button
+            <motion.button
               type="button"
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               onClick={handleToggleBookmark}
               disabled={saving}
               className={`rounded-xl p-1.5 transition ${
@@ -93,7 +103,7 @@ export default function DecisionCard({ decision, isSavedInitially = false, onBoo
                   d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
                 />
               </svg>
-            </button>
+            </motion.button>
           )}
         </div>
 

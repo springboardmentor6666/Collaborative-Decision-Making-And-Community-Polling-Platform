@@ -52,7 +52,7 @@ public class ActivityService {
                 ? userRepository.findByEmail(currentUserEmail).orElse(null)
                 : null;
 
-        boolean isPlatformAdmin = currentUser != null && "ADMIN".equalsIgnoreCase(currentUser.getRole());
+        boolean isPlatformAdmin = currentUser != null && currentUser.getRole() != null && currentUser.getRole().toUpperCase().contains("ADMIN");
 
         Page<Activity> activities;
         boolean hasTypeFilter = types != null && !types.isEmpty();
@@ -102,7 +102,7 @@ public class ActivityService {
                 ? userRepository.findByEmail(currentUserEmail).orElse(null)
                 : null;
 
-        boolean isPlatformAdmin = currentUser != null && "ADMIN".equalsIgnoreCase(currentUser.getRole());
+        boolean isPlatformAdmin = currentUser != null && currentUser.getRole() != null && currentUser.getRole().toUpperCase().contains("ADMIN");
 
         if ("PRIVATE".equalsIgnoreCase(community.getVisibility())) {
             if (currentUser == null) {
@@ -132,7 +132,7 @@ public class ActivityService {
                 ? userRepository.findByEmail(currentUserEmail).orElse(null)
                 : null;
 
-        boolean isSelfOrAdmin = currentUser != null && (currentUser.getId().equals(userId) || "ADMIN".equalsIgnoreCase(currentUser.getRole()));
+        boolean isSelfOrAdmin = currentUser != null && (currentUser.getId().equals(userId) || (currentUser.getRole() != null && currentUser.getRole().toUpperCase().contains("ADMIN")));
 
         Page<Activity> activities;
         boolean hasTypeFilter = types != null && !types.isEmpty();

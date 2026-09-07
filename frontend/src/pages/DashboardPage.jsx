@@ -7,11 +7,13 @@ import {
 } from '../api/axiosClient';
 import DecisionCard from '../components/DecisionCard';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import RecentActivityFeed from '../components/activity/RecentActivityFeed';
+import SkeletonCard from '../components/ui/SkeletonCard';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 const BAR_ACCENTS = [
@@ -24,6 +26,7 @@ const BAR_ACCENTS = [
 ];
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { user, accessToken } = useAuth();
   const [decisions, setDecisions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -32,6 +35,7 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingDecisions, setLoadingDecisions] = useState(true);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   useEffect(() => {
     Promise.all([
@@ -96,6 +100,38 @@ export default function DashboardPage() {
       return matchesSearch && matchesCat;
     });
   }, [decisions, searchQuery, selectedCategory]);
+
+  // Keyboard navigation shortcuts: J (next), K (prev), Enter/O (open)
+  useKeyboardShortcuts({
+    j: () => {
+      if (filteredDecisions.length === 0) return;
+      setFocusedIndex((prev) => {
+        const next = prev < filteredDecisions.length - 1 ? prev + 1 : 0;
+        const el = document.getElementById(`decision-card-${filteredDecisions[next]?.id}`);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return next;
+      });
+    },
+    k: () => {
+      if (filteredDecisions.length === 0) return;
+      setFocusedIndex((prev) => {
+        const next = prev > 0 ? prev - 1 : filteredDecisions.length - 1;
+        const el = document.getElementById(`decision-card-${filteredDecisions[next]?.id}`);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return next;
+      });
+    },
+    enter: () => {
+      if (focusedIndex >= 0 && filteredDecisions[focusedIndex]) {
+        navigate(`/decisions/${filteredDecisions[focusedIndex].id}`);
+      }
+    },
+    o: () => {
+      if (focusedIndex >= 0 && filteredDecisions[focusedIndex]) {
+        navigate(`/decisions/${filteredDecisions[focusedIndex].id}`);
+      }
+    },
+  });
 
   // Max trends for SVG scaling
   const maxTrendDecisions = Math.max(...decisionTrends.map((t) => Number(t.decisionsCreated) || 0), 1);
@@ -417,13 +453,23 @@ export default function DashboardPage() {
 
             {/* Decisions grid */}
             {loadingDecisions ? (
-              <div className="flex h-40 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <SkeletonCard variant="decision" count={6} />
               </div>
             ) : filteredDecisions.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredDecisions.map((decision) => (
-                  <DecisionCard key={decision.id} decision={decision} />
+                {filteredDecisions.map((decision, idx) => (
+                  <div
+                    key={decision.id}
+                    id={`decision-card-${decision.id}`}
+                    className={`rounded-2xl transition-all duration-200 ${
+                      focusedIndex === idx
+                        ? 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg scale-[1.01]'
+                        : ''
+                    }`}
+                  >
+                    <DecisionCard decision={decision} />
+                  </div>
                 ))}
               </div>
             ) : (

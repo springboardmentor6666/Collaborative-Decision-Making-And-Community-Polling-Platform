@@ -200,7 +200,7 @@ public class CommunityService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
-        boolean isPlatformAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+        boolean isPlatformAdmin = user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN");
         CommunityMember member = communityMemberRepository.findByCommunityIdAndUserId(id, user.getId()).orElse(null);
 
         if (!isPlatformAdmin && (member == null || !"OWNER".equals(member.getRole()))) {

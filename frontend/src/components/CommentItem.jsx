@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getCommentFilesApi } from '../api/axiosClient';
+import { getCommentFilesApi, upvoteCommentApi } from '../api/axiosClient';
+import { useAuth } from '../context/AuthContext';
+import { renderMarkdown } from './ui/MarkdownEditor';
 import ReportModal from './ReportModal';
 
 function formatRelativeTime(dateString) {
@@ -23,11 +25,13 @@ export default function CommentItem({
   comment,
   currentUserId,
   currentUserEmail,
+  decisionOwnerEmail,
   onReply,
   onEdit,
   onDelete,
   depth = 0,
 }) {
+  const { accessToken } = useAuth();
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -36,6 +40,8 @@ export default function CommentItem({
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const [attachments, setAttachments] = useState(comment.attachments || []);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(comment.upvotes || 0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
 
   useEffect(() => {
     if (comment.id && !comment.attachments) {
@@ -53,6 +59,24 @@ export default function CommentItem({
   const isAuthor =
     (currentUserId && author.id === currentUserId) ||
     (currentUserEmail && author.email?.toLowerCase() === currentUserEmail.toLowerCase());
+
+  const isDecisionCreator =
+    decisionOwnerEmail &&
+    author.email &&
+    author.email.toLowerCase() === decisionOwnerEmail.toLowerCase();
+
+  const handleUpvote = async () => {
+    if (hasUpvoted) return;
+    setUpvoteCount((prev) => prev + 1);
+    setHasUpvoted(true);
+    try {
+      await upvoteCommentApi(comment.id, accessToken);
+    } catch {
+      // Rollback on error
+      setUpvoteCount((prev) => prev - 1);
+      setHasUpvoted(false);
+    }
+  };
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
@@ -129,6 +153,14 @@ export default function CommentItem({
                   title="Structured Expert Recommendation"
                 >
                   🏅 Expert Advice
+                </span>
+              )}
+              {isDecisionCreator && (
+                <span
+                  className="rounded-md bg-blue-500/10 border border-blue-500/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 inline-flex items-center gap-0.5"
+                  title="Decision Creator"
+                >
+                  ✦ Creator
                 </span>
               )}
               {comment.isSuggestion && (
@@ -212,9 +244,28 @@ export default function CommentItem({
           </form>
         ) : (
           <div className="mt-2 space-y-2 pl-9 sm:pl-10">
-            <p className="text-xs sm:text-sm text-text-primary whitespace-pre-wrap break-words leading-relaxed">
-              {comment.content}
-            </p>
+            <div
+              className="text-xs sm:text-sm text-text-primary break-words leading-relaxed prose-sm"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(comment.content || '') }}
+            />
+
+            {/* Upvote Button */}
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={handleUpvote}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold transition ${
+                  hasUpvoted
+                    ? 'bg-primary-soft text-primary'
+                    : 'text-text-secondary hover:text-primary hover:bg-surface-alt'
+                }`}
+              >
+                <svg className="h-3.5 w-3.5" fill={hasUpvoted ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                </svg>
+                {upvoteCount > 0 && <span>{upvoteCount}</span>}
+              </button>
+            </div>
 
             {/* Comment Attachments */}
             {attachments.length > 0 && (
@@ -302,7 +353,6 @@ export default function CommentItem({
         </AnimatePresence>
       </div>
 
-      {/* Render Nested Child Replies */}
       {comment.replies && comment.replies.length > 0 && (
         <div className="space-y-2">
           {comment.replies.map((reply) => (
@@ -311,6 +361,7 @@ export default function CommentItem({
               comment={reply}
               currentUserId={currentUserId}
               currentUserEmail={currentUserEmail}
+              decisionOwnerEmail={decisionOwnerEmail}
               onReply={onReply}
               onEdit={onEdit}
               onDelete={onDelete}

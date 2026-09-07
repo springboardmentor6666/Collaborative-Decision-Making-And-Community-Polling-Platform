@@ -44,11 +44,8 @@ public class RecommendationService {
         User expert = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
-        // Check if user is an EXPERT or ADVISOR
-        String role = expert.getRole() != null ? expert.getRole().toUpperCase().trim() : "";
-        if (!"EXPERT".equals(role) && !"ADVISOR".equals(role)) {
-            throw new AccessDeniedException("Access denied. Only users with EXPERT or ADVISOR role can make recommendations.");
-        }
+        // Role check: all authenticated users can provide recommendations; EXPERT / ADVISOR / ADMIN status is tracked
+        String role = expert.getRole() != null ? expert.getRole().toUpperCase().trim() : "USER";
 
         Decision decision = decisionRepository.findById(request.getDecisionId())
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + request.getDecisionId()));

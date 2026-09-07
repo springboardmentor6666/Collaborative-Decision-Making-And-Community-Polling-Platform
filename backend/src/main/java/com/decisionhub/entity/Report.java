@@ -3,8 +3,11 @@ package com.decisionhub.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "reports")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Report {
 
     @Id
@@ -13,10 +16,12 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "savedDecisions", "interests", "decisions", "passwordHash"})
     private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_user_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "savedDecisions", "interests", "decisions", "passwordHash"})
     private User reportedUser;
 
     @Column(name = "content_id")
