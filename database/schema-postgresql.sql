@@ -77,6 +77,11 @@ CREATE TABLE IF NOT EXISTS decisions (
     category_id BIGINT,
     community_id BIGINT NULL,                   -- NULL for general decisions, FK to communities for group decisions
     status VARCHAR(20) DEFAULT 'OPEN',          -- OPEN / CLOSED
+    ends_at TIMESTAMP NULL DEFAULT NULL,        -- Auto-close deadline
+    auto_close BOOLEAN DEFAULT FALSE,
+    winning_option_id BIGINT NULL,
+    view_count BIGINT DEFAULT 0,
+    vote_count BIGINT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -92,6 +97,9 @@ CREATE TABLE IF NOT EXISTS decision_options (
     description TEXT,
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
 );
+
+-- Circular FK for decision winning_option_id
+ALTER TABLE decisions ADD CONSTRAINT fk_decision_winning_option FOREIGN KEY (winning_option_id) REFERENCES decision_options(id) ON DELETE SET NULL;
 
 -- 9. comparison_factors
 CREATE TABLE IF NOT EXISTS comparison_factors (
@@ -116,9 +124,13 @@ CREATE TABLE IF NOT EXISTS polls (
     id BIGSERIAL PRIMARY KEY,
     decision_id BIGINT NOT NULL,
     poll_type VARCHAR(20) DEFAULT 'SINGLE',     -- SINGLE / MULTI / RATING
+    voting_method VARCHAR(25) DEFAULT 'SINGLE_CHOICE', -- SINGLE_CHOICE / APPROVAL / RANKED_CHOICE / WEIGHTED
+    max_choices INT DEFAULT 1,
+    allow_revoting BOOLEAN DEFAULT FALSE,
     question VARCHAR(255),                      -- Optional poll question text
     is_anonymous BOOLEAN DEFAULT FALSE,
     ends_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT chk_voting_method CHECK (voting_method IN ('SINGLE_CHOICE', 'APPROVAL', 'RANKED_CHOICE', 'WEIGHTED')),
     FOREIGN KEY (decision_id) REFERENCES decisions(id) ON DELETE CASCADE
 );
 
@@ -137,9 +149,11 @@ CREATE TABLE IF NOT EXISTS votes (
     poll_id BIGINT NOT NULL,
     poll_option_id BIGINT NOT NULL,
     voter_id BIGINT NULL,                       -- nullable if anonymous
+    rank_position INT NULL,                     -- Ranked-choice / IRV preference
+    weight DECIMAL(5,2) DEFAULT 1.00,           -- Multi-choice / weighted voting
     rating INT DEFAULT NULL CHECK (rating >= 1 AND rating <= 5), -- bounded to 1-5
     voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (poll_option_id, voter_id),          -- prevents duplicate votes
+    CONSTRAINT uk_poll_option_voter UNIQUE (poll_id, poll_option_id, voter_id),
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE,
     FOREIGN KEY (poll_option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
     FOREIGN KEY (voter_id) REFERENCES users(id) ON DELETE CASCADE
@@ -152,6 +166,8 @@ CREATE TABLE IF NOT EXISTS comments (
     author_id BIGINT NOT NULL,
     parent_id BIGINT NULL,                      -- nullable, self-referencing
     content VARCHAR(2000) NOT NULL,
+    upvotes_count INT DEFAULT 0,
+    downvotes_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_flagged BOOLEAN DEFAULT FALSE,
@@ -159,6 +175,7 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );
+
 
 -- 15. notifications
 CREATE TABLE IF NOT EXISTS notifications (
@@ -409,6 +426,19 @@ CREATE TABLE IF NOT EXISTS activities (
     CONSTRAINT fk_activities_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE
 );
 
+-- 33. comment_reactions (Upvotes, Downvotes, Hearts)
+CREATE TABLE IF NOT EXISTS comment_reactions (
+    id BIGSERIAL PRIMARY KEY,
+    comment_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    reaction_type VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_comment_reaction_type CHECK (reaction_type IN ('UPVOTE', 'DOWNVOTE', 'HEART')),
+    CONSTRAINT fk_comment_reactions_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_reactions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT uk_comment_user_reaction UNIQUE (comment_id, user_id)
+);
+
 -- Indexes for performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_decisions_owner ON decisions(owner_id);
@@ -462,6 +492,20 @@ CREATE INDEX idx_activities_community ON activities (community_id, visibility, c
 CREATE INDEX idx_activities_actor ON activities (actor_id, visibility, created_at DESC);
 CREATE INDEX idx_activities_entity ON activities (entity_type, entity_id);
 CREATE INDEX idx_activities_created_at ON activities (created_at);
+
+-- Full-Text Search Indexes (PostgreSQL GIN)
+CREATE INDEX idx_decisions_fts ON decisions USING gin(to_tsvector('english', title || ' ' || COALESCE(description, '')));
+CREATE INDEX idx_communities_fts ON communities USING gin(to_tsvector('english', name || ' ' || COALESCE(description, '')));
+CREATE INDEX idx_comments_fts ON comments USING gin(to_tsvector('english', content));
+
+-- Feature Enhancement & Performance Indexes
+CREATE INDEX idx_decisions_category_status ON decisions (category_id, status, is_deleted);
+CREATE INDEX idx_decisions_created_status ON decisions (created_at DESC, status);
+CREATE INDEX idx_decisions_auto_close ON decisions (status, auto_close, ends_at);
+CREATE INDEX idx_comments_parent_created ON comments (parent_id, created_at ASC);
+CREATE INDEX idx_votes_poll_option ON votes (poll_id, poll_option_id);
+CREATE INDEX idx_comment_reactions_comment ON comment_reactions (comment_id);
+
 
 
 

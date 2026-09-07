@@ -40,7 +40,7 @@
 | 30 | `community_message_reactions` | `CommunityMessageReaction.java` | Emoji reactions per message per user (`UNIQUE(message_id, user_id, emoji)`) |
 | 31 | `community_chat_read_receipts` | `CommunityChatReadReceipt.java` | Composite PK `(channel_id, user_id)` cursor tracking unread messages |
 | 32 | `activities` | `Activity.java` | Canonical polymorphic event feed across platform, communities, and users |
-
+| 33 | `comment_reactions` | `CommentReaction.java` | Upvotes, downvotes, and hearts per comment per user |
 
 ---
 
@@ -68,14 +68,20 @@ avatar_url      → String avatarUrl
 
 ### 3. Decision.java ← `decisions`
 ```
-id              → Long id              @Id @GeneratedValue
-owner_id        → User owner           @ManyToOne @JoinColumn(name = "owner_id")
-title           → String title         @Column(nullable = false)
+id              → Long id                           @Id @GeneratedValue
+owner_id        → User owner                        @ManyToOne @JoinColumn(name = "owner_id")
+title           → String title                      @Column(nullable = false)
 description     → String description
-visibility      → String visibility    ("PUBLIC" / "PRIVATE")
-category_id     → Category category    @ManyToOne @JoinColumn(name = "category_id")
+visibility      → String visibility                 ("PUBLIC" / "PRIVATE")
+category_id     → Category category                 @ManyToOne @JoinColumn(name = "category_id")
+status          → String status                     ("OPEN" / "CLOSED")
+ends_at         → LocalDateTime endsAt              (Auto-close expiration timestamp)
+auto_close      → Boolean autoClose                 (Flag for automated scheduler closure)
+winning_option  → DecisionOption winningOption      @ManyToOne @JoinColumn(name = "winning_option_id")
+view_count      → Long viewCount                    (Denormalized asynchronous counter)
+vote_count      → Long voteCount                    (Denormalized asynchronous counter)
 created_at      → LocalDateTime createdAt
-is_deleted      → Boolean isDeleted    (soft delete flag)
+is_deleted      → Boolean isDeleted                 (soft delete flag)
 ```
 
 ### 4. DecisionOption.java ← `decision_options`
@@ -103,9 +109,12 @@ score           → Integer score        (1 to 10)
 
 ### 7. Poll.java ← `polls`
 ```
-id              → Long id              @Id @GeneratedValue
-decision_id     → Decision decision    @ManyToOne @JoinColumn(name = "decision_id")
-poll_type       → String pollType      ("SINGLE" / "MULTI" / "RATING")
+id              → Long id                           @Id @GeneratedValue
+decision_id     → Decision decision                 @ManyToOne @JoinColumn(name = "decision_id")
+poll_type       → String pollType                   ("SINGLE" / "MULTI" / "RATING")
+voting_method   → String votingMethod               ("SINGLE_CHOICE" / "APPROVAL" / "RANKED_CHOICE" / "WEIGHTED")
+max_choices     → Integer maxChoices                (Default 1, >1 for Approval/Multi)
+allow_revoting  → Boolean allowRevoting             (Flag enabling voters to recast/update ballots)
 is_anonymous    → Boolean isAnonymous
 ends_at         → LocalDateTime endsAt
 ```
@@ -119,25 +128,32 @@ option_id       → DecisionOption option @ManyToOne @JoinColumn(name = "option_
 
 ### 9. Vote.java ← `votes`
 ```
-id              → Long id              @Id @GeneratedValue
-poll_id         → Poll poll            @ManyToOne @JoinColumn(name = "poll_id")
-poll_option_id  → PollOption pollOption @ManyToOne @JoinColumn(name = "poll_option_id")
-voter_id        → User voter           @ManyToOne @JoinColumn(name = "voter_id") (nullable if anonymous)
-rating          → Integer rating       (only for RATING polls, 1-5)
+id              → Long id                           @Id @GeneratedValue
+poll_id         → Poll poll                         @ManyToOne @JoinColumn(name = "poll_id")
+poll_option_id  → PollOption pollOption             @ManyToOne @JoinColumn(name = "poll_option_id")
+voter_id        → User voter                        @ManyToOne @JoinColumn(name = "voter_id") (nullable if anonymous)
+rank_position   → Integer rankPosition              (1, 2, 3... rank preference for IRV Ranked-Choice)
+weight          → BigDecimal weight                 (Default 1.00 for weighted voting)
+rating          → Integer rating                    (only for RATING polls, 1-5)
 voted_at        → LocalDateTime votedAt
 
-Constraint: @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"poll_id", "voter_id"}))
+Constraint: @Table(uniqueConstraints = @UniqueConstraint(name = "uk_poll_option_voter", columnNames = {"poll_id", "poll_option_id", "voter_id"}))
 ```
 
 ### 10. Comment.java ← `comments`
 ```
-id              → Long id              @Id @GeneratedValue
-decision_id     → Decision decision    @ManyToOne @JoinColumn(name = "decision_id")
-author_id       → User author          @ManyToOne @JoinColumn(name = "author_id")
-parent_id       → Comment parent       @ManyToOne @JoinColumn(name = "parent_id") (self-referencing, nullable)
-content         → String content       @Column(length = 2000)
+id              → Long id                           @Id @GeneratedValue
+decision_id     → Decision decision                 @ManyToOne @JoinColumn(name = "decision_id")
+author_id       → User author                       @ManyToOne @JoinColumn(name = "author_id")
+parent_id       → Comment parent                    @ManyToOne @JoinColumn(name = "parent_id") (self-referencing, nullable)
+content         → String content                    @Column(length = 2000)
+upvotes_count   → Integer upvotesCount              (Denormalized sum of UPVOTE reactions)
+downvotes_count → Integer downvotesCount            (Denormalized sum of DOWNVOTE reactions)
 created_at      → LocalDateTime createdAt
+updated_at      → LocalDateTime updatedAt
 is_flagged      → Boolean isFlagged
+reactions       → List<CommentReaction> reactions   @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+
 ```
 
 ### 11. Community.java ← `communities`
@@ -267,6 +283,18 @@ Automated Data Lifecycle Management:
 - Execution: Scheduled service `ActivityLifecycleScheduler` or DB routine run daily during low-traffic windows.
 ```
 
+### 20. CommentReaction.java ← `comment_reactions`
+```
+id              → Long id                               @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+comment_id      → Comment comment                       @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "comment_id", nullable = false)
+user_id         → User user                             @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
+reaction_type   → String reactionType                   @Column(name = "reaction_type", length = 10, nullable = false) ("UPVOTE", "DOWNVOTE", "HEART")
+created_at      → LocalDateTime createdAt               @CreationTimestamp
+
+Constraint: @Table(name = "comment_reactions", uniqueConstraints = @UniqueConstraint(name = "uk_comment_user_reaction", columnNames = {"comment_id", "user_id"}))
+Query Optimization: Indexed on comment_id for rapid reaction tally and user active state lookups.
+```
+
 ---
 
 ## Relationship Summary for JPA
@@ -274,12 +302,11 @@ Automated Data Lifecycle Management:
 ```
 User        @OneToOne   → UserProfile
 User        @ManyToMany → Category       (via user_interests junction table)
-User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag, CommunityMessage, CommunityMessageReaction, Activity
+User        @OneToMany  → Decision, Vote, Comment, Notification, ModerationFlag, CommunityMessage, CommunityMessageReaction, Activity, CommentReaction
 User        @OneToMany  → CommunityChatChannel (as creator), CommunityChatReadReceipt
 
-Decision    @ManyToOne  → User (owner), Category
+Decision    @ManyToOne  → User (owner), Category, DecisionOption (winningOption)
 Decision    @OneToMany  → DecisionOption, ComparisonFactor, Poll, Comment
-
 
 DecisionOption @ManyToOne → Decision
 DecisionOption @OneToMany → OptionScore, PollOption
@@ -288,9 +315,10 @@ Poll        @ManyToOne  → Decision
 Poll        @OneToMany  → PollOption, Vote
 
 Vote        @ManyToOne  → Poll, PollOption, User
-            UNIQUE(poll_id, voter_id) — prevents duplicate votes
+            UNIQUE(poll_id, poll_option_id, voter_id) — supports multi-option and ranked-choice voting
 
 Comment     @ManyToOne  → Decision, User, Comment(parent) — self-referencing
+Comment     @OneToMany  → CommentReaction
 
 Community   @ManyToMany → User (via community_members)
 Community   @OneToMany  → CommunityChatChannel (e.g. #general, #announcements)
@@ -323,6 +351,26 @@ CommunityChatReadReceipt @EmbeddedId (channel_id, user_id)
 4. **WebSocket / STOMP Real-Time Integration**:
    - Clients subscribe to `/topic/community.{communityId}.channel.{channelId}` for incoming messages and reactions.
    - Read receipt updates can be throttled or debounced and broadcast to `/topic/community.{communityId}.channel.{channelId}.reads`.
+
+---
+
+## Full-Text Search & Ranked-Choice (IRV) Architecture
+
+1. **Full-Text Search Engine**:
+   - **MySQL**: Leverages native `FULLTEXT` B-Tree indexes on `decisions (title, description)`, `communities (name, description)`, and `comments (content)`.
+     - Queries: `WHERE MATCH(title, description) AGAINST(:searchTerm IN BOOLEAN MODE)`
+   - **PostgreSQL**: Implements Generalized Inverted Indexes (`GIN`) on `to_tsvector('english', ...)`.
+     - Queries: `WHERE to_tsvector('english', title || ' ' || COALESCE(description, '')) @@ plainto_tsquery('english', :searchTerm)`
+
+2. **Ranked-Choice (Instant Runoff Voting - IRV)**:
+   - Polls with `voting_method = 'RANKED_CHOICE'` allow voters to specify sequential preferences via `rank_position` (1 = 1st choice, 2 = 2nd choice, etc.).
+   - Ballot rows are linked via `UNIQUE(poll_id, poll_option_id, voter_id)`.
+   - The IRV calculation iteratively eliminates the option with the fewest #1 votes and redistributes ballots to the voter's next preferred candidate until an option achieves > 50% threshold.
+
+3. **Automated Expiration & Winner Detection**:
+   - `DecisionLifecycleScheduler` periodically checks `ends_at <= NOW() AND auto_close = TRUE AND status = 'OPEN'`.
+   - Upon closure, the winning option is calculated and recorded in `winning_option_id`, and a `DECISION_CLOSED` activity event is emitted.
+
 
 
 ---
