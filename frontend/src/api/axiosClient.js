@@ -47,7 +47,10 @@ async function request(endpoint, options = {}) {
     const response = await fetch(`${API_BASE_URL}${normalizeEndpoint(endpoint)}`, config);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
+      const error = new Error(errorData.message || `Request failed with status ${response.status}`);
+      error.status = response.status;
+      error.data = errorData;
+      throw error;
     }
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return null;
@@ -526,6 +529,53 @@ export async function saveDecisionApi(decisionId, token) {
 export async function unsaveDecisionApi(decisionId, token) {
   return await request(`/api/users/me/saved-decisions/${decisionId}`, {
     method: 'DELETE',
+    token,
+  });
+}
+
+/**
+ * Account Lifecycle Management APIs
+ */
+export async function deactivateAccountApi(data, token) {
+  return await request('/api/users/me/account/deactivate', {
+    method: 'POST',
+    body: data,
+    token,
+  });
+}
+
+export async function reactivateAccountApi(token) {
+  return await request('/api/users/me/account/reactivate', {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function scheduleAccountDeletionApi(confirmation, token) {
+  return await request('/api/users/me/account/delete', {
+    method: 'POST',
+    body: { confirmation },
+    token,
+  });
+}
+
+export async function cancelAccountDeletionApi(token) {
+  return await request('/api/users/me/account/delete/cancel', {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function permanentDeleteUserAdminApi(userId, token) {
+  return await request(`/api/admin/users/${userId}/permanent`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function cancelUserDeletionAdminApi(userId, token) {
+  return await request(`/api/admin/users/${userId}/cancel-deletion`, {
+    method: 'POST',
     token,
   });
 }

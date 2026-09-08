@@ -50,6 +50,25 @@ public class User {
     @Column(name = "is_public")
     private Boolean isPublic = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", length = 30)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
+
+    @Column(name = "deactivated_at")
+    private LocalDateTime deactivatedAt;
+
+    @Column(name = "deactivate_until")
+    private LocalDateTime deactivateUntil;
+
+    @Column(name = "deletion_requested_at")
+    private LocalDateTime deletionRequestedAt;
+
+    @Column(name = "scheduled_deletion_at")
+    private LocalDateTime scheduledDeletionAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(name = "fcm_token", length = 255)
     private String fcmToken;
 
@@ -85,6 +104,9 @@ public class User {
     protected void onCreate() {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
+        }
+        if (this.accountStatus == null) {
+            this.accountStatus = AccountStatus.ACTIVE;
         }
     }
 
@@ -216,5 +238,53 @@ public class User {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public AccountStatus getAccountStatus() {
+        return accountStatus != null ? accountStatus : AccountStatus.ACTIVE;
+    }
+
+    public void setAccountStatus(AccountStatus accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public LocalDateTime getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public void setDeactivatedAt(LocalDateTime deactivatedAt) {
+        this.deactivatedAt = deactivatedAt;
+    }
+
+    public LocalDateTime getDeactivateUntil() {
+        return deactivateUntil;
+    }
+
+    public void setDeactivateUntil(LocalDateTime deactivateUntil) {
+        this.deactivateUntil = deactivateUntil;
+    }
+
+    public LocalDateTime getDeletionRequestedAt() {
+        return deletionRequestedAt;
+    }
+
+    public void setDeletionRequestedAt(LocalDateTime deletionRequestedAt) {
+        this.deletionRequestedAt = deletionRequestedAt;
+    }
+
+    public LocalDateTime getScheduledDeletionAt() {
+        return scheduledDeletionAt;
+    }
+
+    public void setScheduledDeletionAt(LocalDateTime scheduledDeletionAt) {
+        this.scheduledDeletionAt = scheduledDeletionAt;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

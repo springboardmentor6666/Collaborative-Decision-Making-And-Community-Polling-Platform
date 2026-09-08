@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import {
   getCommentsByDecisionApi,
   createCommentApi,
@@ -45,6 +46,7 @@ function formatRelativeTime(dateString) {
 
 export default function CommentSection({ decisionId, pollOptions = [], decisionOwnerEmail = null }) {
   const { user, accessToken } = useAuth();
+  const { showError } = useAlert();
   const [sortBy, setSortBy] = useState('newest');
   const [activeTab, setActiveTab] = useState('COMMENTS'); // 'COMMENTS' | 'SUGGESTIONS' | 'RECOMMENDATIONS'
   
@@ -137,7 +139,7 @@ export default function CommentSection({ decisionId, pollOptions = [], decisionO
       setCommentFile(null);
       await fetchComments();
     } catch (err) {
-      alert(err.message || 'Failed to post comment. Please sign in.');
+      showError(err, 'Failed to post comment. Please sign in.');
     } finally {
       setSubmitting(false);
     }
@@ -159,7 +161,7 @@ export default function CommentSection({ decisionId, pollOptions = [], decisionO
       setNewSuggestion('');
       await fetchSuggestions();
     } catch (err) {
-      alert(err.message || 'Failed to post suggestion.');
+      showError(err, 'Failed to post suggestion.');
     } finally {
       setSubmittingSuggestion(false);
     }
@@ -183,7 +185,7 @@ export default function CommentSection({ decisionId, pollOptions = [], decisionO
       setJustification('');
       await fetchRecommendations();
     } catch (err) {
-      alert(err.message || 'Failed to submit expert recommendation.');
+      showError(err, 'Failed to submit expert recommendation.');
     } finally {
       setSubmittingRec(false);
     }

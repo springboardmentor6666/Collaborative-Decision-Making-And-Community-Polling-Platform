@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import {
   getAllUsersAdminApi,
   banUserAdminApi,
@@ -13,6 +14,8 @@ import {
   getAuditLogsAdminApi,
   getAdminSettingsApi,
   updateAdminSettingApi,
+  permanentDeleteUserAdminApi,
+  cancelUserDeletionAdminApi,
 } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -21,6 +24,7 @@ import Loader from '../components/Loader';
 
 export default function AdminPage() {
   const { user, accessToken } = useAuth();
+  const { showError, showConfirm, showAlert } = useAlert();
   const [activeTab, setActiveTab] = useState('users');
 
   // State
@@ -88,7 +92,8 @@ export default function AdminPage() {
       const updated = await getAllUsersAdminApi(accessToken);
       setUsers(updated);
     } catch (err) {
-      setStatusMessage({ text: err.message || 'Action failed.', type: 'error' });
+      showError(err, 'Failed to update user status.');
+      setStatusMessage({ text: 'Action failed.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -102,7 +107,48 @@ export default function AdminPage() {
       const updated = await getAllUsersAdminApi(accessToken);
       setUsers(updated);
     } catch (err) {
-      setStatusMessage({ text: err.message || 'Failed to update user role.', type: 'error' });
+      showError(err, 'Failed to update user role.');
+      setStatusMessage({ text: 'Failed to update user role.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelDeletionAdmin = async (userId) => {
+    setActionLoading(`cancel-del-${userId}`);
+    try {
+      await cancelUserDeletionAdminApi(userId, accessToken);
+      setStatusMessage({ text: 'Scheduled deletion successfully cancelled. User restored to Active.', type: 'success' });
+      const updated = await getAllUsersAdminApi(accessToken);
+      setUsers(updated);
+    } catch (err) {
+      showError(err, 'Failed to cancel deletion request.');
+      setStatusMessage({ text: 'Action failed.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handlePermanentDeleteUser = async (targetUser) => {
+    const confirmed = await showConfirm({
+      title: 'Direct Permanent Deletion',
+      message: `Are you sure you want to permanently delete user "${targetUser.name || targetUser.fullName || targetUser.email}"? All private data and tokens will be erased, and collaborative contributions will be anonymized. This action cannot be undone.`,
+      confirmText: 'Permanently Delete',
+      cancelText: 'Cancel',
+      isDangerous: true,
+    });
+
+    if (!confirmed) return;
+
+    setActionLoading(`perm-del-${targetUser.id}`);
+    try {
+      await permanentDeleteUserAdminApi(targetUser.id, accessToken);
+      setStatusMessage({ text: `User ${targetUser.name || targetUser.email} has been permanently deleted and anonymized.`, type: 'success' });
+      const updated = await getAllUsersAdminApi(accessToken);
+      setUsers(updated);
+    } catch (err) {
+      showError(err, 'Failed to permanently delete user.');
+      setStatusMessage({ text: 'Permanent deletion failed.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -116,7 +162,8 @@ export default function AdminPage() {
       setStatusMessage({ text: 'Report marked as resolved.', type: 'success' });
       setReports((prev) => prev.filter((r) => r.id !== reportId));
     } catch (err) {
-      setStatusMessage({ text: err.message || 'Failed to resolve report.', type: 'error' });
+      showError(err, 'Failed to resolve report.');
+      setStatusMessage({ text: 'Failed to resolve report.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -129,7 +176,8 @@ export default function AdminPage() {
       setStatusMessage({ text: 'Moderation flag resolved.', type: 'success' });
       setFlags((prev) => prev.filter((f) => f.id !== flagId));
     } catch (err) {
-      setStatusMessage({ text: err.message || 'Failed to resolve flag.', type: 'error' });
+      showError(err, 'Failed to resolve flag.');
+      setStatusMessage({ text: 'Failed to resolve flag.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -149,7 +197,8 @@ export default function AdminPage() {
       const updated = await getAdminSettingsApi(accessToken);
       setSettings(updated);
     } catch (err) {
-      setStatusMessage({ text: err.message || 'Failed to save setting.', type: 'error' });
+      showError(err, 'Failed to save setting.');
+      setStatusMessage({ text: 'Failed to save setting.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -309,53 +358,96 @@ export default function AdminPage() {
                                   </td>
 
                                   <td className="py-3.5 px-4">
-                                    <span
-                                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                        isActive
-                                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                                          : 'bg-red-500/10 text-red-700 dark:text-red-300'
-                                      }`}
-                                    >
-                                      <span
-                                        className={`h-1.5 w-1.5 rounded-full ${
-                                          isActive ? 'bg-emerald-500' : 'bg-red-500'
-                                        }`}
-                                      />
-                                      {isActive ? 'Active' : 'Deactivated'}
-                                    </span>
-                                  </td>
+                                     {u.accountStatus === 'PENDING_DELETION' ? (
+                                       <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30" title={`Scheduled: ${u.scheduledDeletionAt ? new Date(u.scheduledDeletionAt).toLocaleString() : '14-day hold'}`}>
+                                         <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                         Deletion Hold (14d)
+                                       </span>
+                                     ) : u.accountStatus === 'DEACTIVATED' ? (
+                                       <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30" title={`Until: ${u.deactivateUntil ? new Date(u.deactivateUntil).toLocaleDateString() : 'Manual'}`}>
+                                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                         Deactivated
+                                       </span>
+                                     ) : u.accountStatus === 'DELETED' ? (
+                                       <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/30">
+                                         <span className="h-1.5 w-1.5 rounded-full bg-gray-500" />
+                                         Deleted
+                                       </span>
+                                     ) : (
+                                       <span
+                                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                           isActive
+                                             ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                                             : 'bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/30'
+                                         }`}
+                                       >
+                                         <span
+                                           className={`h-1.5 w-1.5 rounded-full ${
+                                             isActive ? 'bg-emerald-500' : 'bg-red-500'
+                                           }`}
+                                         />
+                                         {isActive ? 'Active' : 'Deactivated'}
+                                       </span>
+                                     )}
+                                   </td>
 
-                                  <td className="py-3.5 px-4 text-xs text-muted">
-                                    {u.createdAt
-                                      ? new Date(u.createdAt).toLocaleDateString('en-US', {
-                                          year: 'numeric',
-                                          month: 'short',
-                                          day: 'numeric',
-                                        })
-                                      : '—'}
-                                  </td>
+                                   <td className="py-3.5 px-4 text-xs text-muted">
+                                     {u.createdAt
+                                       ? new Date(u.createdAt).toLocaleDateString('en-US', {
+                                           year: 'numeric',
+                                           month: 'short',
+                                           day: 'numeric',
+                                         })
+                                       : '—'}
+                                   </td>
 
-                                  <td className="py-3.5 px-4 text-right">
-                                    {!isSelf ? (
-                                      <button
-                                        onClick={() => handleToggleUserBan(u)}
-                                        disabled={actionLoading === `ban-${u.id}`}
-                                        className={`rounded-xl px-3 py-1 text-xs font-bold transition disabled:opacity-50 ${
-                                          isActive
-                                            ? 'border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:border-red-800'
-                                            : 'border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-800'
-                                        }`}
-                                      >
-                                        {actionLoading === `ban-${u.id}`
-                                          ? '...'
-                                          : isActive
-                                          ? 'Deactivate'
-                                          : 'Reactivate'}
-                                      </button>
-                                    ) : (
-                                      <span className="text-[11px] font-semibold text-muted">Current User</span>
-                                    )}
-                                  </td>
+                                   <td className="py-3.5 px-4 text-right">
+                                     {!isSelf ? (
+                                       <div className="flex items-center justify-end gap-1.5">
+                                         {u.accountStatus === 'PENDING_DELETION' && (
+                                           <button
+                                             onClick={() => handleCancelDeletionAdmin(u.id)}
+                                             disabled={actionLoading === `cancel-del-${u.id}`}
+                                             className="rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-800 transition disabled:opacity-50"
+                                             title="Cancel 14-day scheduled deletion and restore user"
+                                           >
+                                             {actionLoading === `cancel-del-${u.id}` ? '...' : '↺ Cancel Deletion'}
+                                           </button>
+                                         )}
+
+                                         {u.accountStatus !== 'DELETED' && (
+                                           <button
+                                             onClick={() => handleToggleUserBan(u)}
+                                             disabled={actionLoading === `ban-${u.id}`}
+                                             className={`rounded-xl px-2.5 py-1 text-xs font-bold transition disabled:opacity-50 ${
+                                               isActive
+                                                 ? 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:border-amber-800'
+                                                 : 'border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-800'
+                                             }`}
+                                           >
+                                             {actionLoading === `ban-${u.id}`
+                                               ? '...'
+                                               : isActive
+                                               ? 'Deactivate'
+                                               : 'Reactivate'}
+                                           </button>
+                                         )}
+
+                                         {u.accountStatus !== 'DELETED' && (
+                                           <button
+                                             onClick={() => handlePermanentDeleteUser(u)}
+                                             disabled={actionLoading === `perm-del-${u.id}`}
+                                             className="rounded-xl border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:border-red-800 transition disabled:opacity-50"
+                                             title="Permanently delete user and anonymize contributions"
+                                           >
+                                             {actionLoading === `perm-del-${u.id}` ? '...' : 'Delete'}
+                                           </button>
+                                         )}
+                                       </div>
+                                     ) : (
+                                       <span className="text-[11px] font-semibold text-muted">Current User</span>
+                                     )}
+                                   </td>
                                 </tr>
                               );
                             })

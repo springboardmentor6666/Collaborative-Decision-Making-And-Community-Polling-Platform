@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { 
   getCommunityByIdApi, 
   joinCommunityApi, 
@@ -26,6 +27,7 @@ export default function CommunityDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
+  const { showError, showConfirm } = useAlert();
   
   const [community, setCommunity] = useState(null);
   const [members, setMembers] = useState([]);
@@ -132,14 +134,20 @@ export default function CommunityDetails() {
       }));
       await fetchData();
     } catch (err) {
-      alert(err.message || 'Failed to join community.');
+      showError(err, 'Failed to join community.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleLeave = async () => {
-    if (!window.confirm('Are you sure you want to leave this community?')) return;
+    const confirmed = await showConfirm({
+      title: 'Leave Community',
+      message: 'Are you sure you want to leave this community?',
+      confirmText: 'Leave',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     setActionLoading(true);
     try {
       await leaveCommunityApi(id, accessToken);
@@ -152,7 +160,7 @@ export default function CommunityDetails() {
       }));
       await fetchData();
     } catch (err) {
-      alert(err.message || 'Failed to leave community.');
+      showError(err, 'Failed to leave community.');
     } finally {
       setActionLoading(false);
     }
@@ -176,7 +184,7 @@ export default function CommunityDetails() {
       await deleteCommunityApi(id, accessToken);
       navigate('/communities');
     } catch (err) {
-      alert(err.message || 'Failed to delete community.');
+      showError(err, 'Failed to delete community.');
       setActionLoading(false);
     }
   };
@@ -198,13 +206,19 @@ export default function CommunityDetails() {
   };
 
   const handleRemoveMember = async (targetUserId) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return;
+    const confirmed = await showConfirm({
+      title: 'Remove Member',
+      message: 'Are you sure you want to remove this member?',
+      confirmText: 'Remove',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       await removeCommunityMemberApi(id, targetUserId, accessToken);
       setMembers(members.filter(m => m.user?.id !== targetUserId));
       setCommunity(prev => prev ? { ...prev, memberCount: Math.max(0, (prev.memberCount || 1) - 1) } : prev);
     } catch (err) {
-      alert(err.message || 'Failed to remove member.');
+      showError(err, 'Failed to remove member.');
     }
   };
 
@@ -213,7 +227,7 @@ export default function CommunityDetails() {
       await updateCommunityMemberRoleApi(id, targetUserId, newRole, accessToken);
       setMembers(members.map(m => m.user?.id === targetUserId ? { ...m, role: newRole } : m));
     } catch (err) {
-      alert(err.message || 'Failed to update member role.');
+      showError(err, 'Failed to update member role.');
     }
   };
 

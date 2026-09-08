@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { getCreatorAnalyticsApi, closeDecisionApi } from '../api/axiosClient';
 import {
   exportAnalyticsReportBackendOrClient,
@@ -26,6 +27,7 @@ const BAR_COLORS = [
 
 export default function AnalyticsPage() {
   const { user, accessToken } = useAuth();
+  const { showError, showConfirm } = useAlert();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [selectedDecision, setSelectedDecision] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,9 +40,13 @@ export default function AnalyticsPage() {
   }, [user?.email]);
 
   const handleCloseDecision = async (decisionId) => {
-    if (!window.confirm('Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.')) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      title: 'Close Poll & Finalize Decision',
+      message: 'Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.',
+      confirmText: 'Close Decision',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       setClosingId(decisionId);
       const updated = await closeDecisionApi(decisionId, accessToken || localStorage.getItem('decisionhub_token'));
@@ -63,7 +69,7 @@ export default function AnalyticsPage() {
         setSelectedDecision((prev) => (prev ? { ...prev, status: newStatus } : null));
       }
     } catch (err) {
-      alert(err.message || 'Failed to close decision.');
+      showError(err, 'Failed to close decision.');
     } finally {
       setClosingId(null);
     }

@@ -16,4 +16,8 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     List<Vote> findByPollId(Long pollId);
     long countByPollId(Long pollId);
     List<Vote> findByVoterId(Long voterId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("UPDATE Vote v SET v.voter = null WHERE v.voter.id = :userId")
+    void detachUserVotes(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

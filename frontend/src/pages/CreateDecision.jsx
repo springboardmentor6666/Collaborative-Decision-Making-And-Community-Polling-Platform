@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { createDecisionApi, uploadDecisionFileApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -13,6 +14,7 @@ export default function CreateDecision() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, accessToken } = useAuth();
+  const { showError } = useAlert();
   
   const communityId = location.state?.communityId;
   const communityName = location.state?.communityName;
@@ -142,7 +144,8 @@ export default function CreateDecision() {
 
       navigate(`/decisions/${created.id}`);
     } catch (err) {
-      setError(err.message || 'Failed to create decision. Please try again.');
+      showError(err, 'Failed to create decision. Please try again.');
+      setError('Failed to create decision. Please try again.');
     } finally {
       setSubmitting(false);
     }

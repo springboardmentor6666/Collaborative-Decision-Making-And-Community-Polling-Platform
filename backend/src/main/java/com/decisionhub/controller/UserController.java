@@ -119,4 +119,34 @@ public class UserController {
         List<com.decisionhub.dto.DecisionResponse> response = userService.unsaveDecision(decisionId, authentication.getName());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/me/account/deactivate")
+    @Operation(summary = "Deactivate account", description = "Temporarily deactivates current user account for specified days or until date")
+    public ResponseEntity<UserResponse> deactivateAccount(@RequestBody com.decisionhub.dto.DeactivateAccountRequest request,
+                                                          Authentication authentication) {
+        UserResponse response = userService.deactivateAccount(authentication.getName(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/account/reactivate")
+    @Operation(summary = "Reactivate account", description = "Reactivates a currently deactivated account back to active")
+    public ResponseEntity<UserResponse> reactivateAccount(Authentication authentication) {
+        UserResponse response = userService.reactivateAccount(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/account/delete")
+    @Operation(summary = "Schedule account deletion", description = "Schedules account deletion with a 14-day hold period (requires confirmation 'DELETE')")
+    public ResponseEntity<UserResponse> scheduleAccountDeletion(@jakarta.validation.Valid @RequestBody com.decisionhub.dto.DeleteAccountRequest request,
+                                                                Authentication authentication) {
+        UserResponse response = userService.scheduleAccountDeletion(authentication.getName(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/account/delete/cancel")
+    @Operation(summary = "Cancel scheduled account deletion", description = "Cancels a pending account deletion request and restores account to active")
+    public ResponseEntity<UserResponse> cancelAccountDeletion(Authentication authentication) {
+        UserResponse response = userService.cancelAccountDeletion(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
 }

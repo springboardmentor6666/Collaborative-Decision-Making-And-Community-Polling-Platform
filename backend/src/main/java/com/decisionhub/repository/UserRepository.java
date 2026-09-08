@@ -11,4 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByProviderAndProviderId(String provider, String providerId);
     boolean existsByEmail(String email);
+
+    java.util.List<User> findByAccountStatusAndScheduledDeletionAtLessThanEqual(com.decisionhub.entity.AccountStatus status, java.time.LocalDateTime dateTime);
+    java.util.List<User> findByAccountStatusAndDeactivateUntilLessThanEqual(com.decisionhub.entity.AccountStatus status, java.time.LocalDateTime dateTime);
 }

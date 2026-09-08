@@ -24,4 +24,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
            "AND (c.decision.visibility = 'PUBLIC' OR (c.decision.owner.email = :email) OR (c.decision.community.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email))) " +
            "AND LOWER(c.content) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Comment> searchCommentsPaged(@Param("query") String query, @Param("email") String email, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("UPDATE Comment c SET c.author = null WHERE c.author.id = :userId")
+    void detachUserComments(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

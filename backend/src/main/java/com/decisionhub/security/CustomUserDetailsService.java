@@ -24,6 +24,21 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
+        if (user.getAccountStatus() == com.decisionhub.entity.AccountStatus.DELETED) {
+            throw new org.springframework.security.authentication.DisabledException("This account has been permanently deleted.");
+        }
+
+        if (user.getAccountStatus() == com.decisionhub.entity.AccountStatus.DEACTIVATED) {
+            if (user.getDeactivateUntil() != null && java.time.LocalDateTime.now().isAfter(user.getDeactivateUntil())) {
+                user.setAccountStatus(com.decisionhub.entity.AccountStatus.ACTIVE);
+                user.setDeactivatedAt(null);
+                user.setDeactivateUntil(null);
+                userRepository.save(user);
+            }
+        }
+
+        boolean isAccountNonLocked = !Boolean.FALSE.equals(user.getIsActive());
+
         String rawRole = user.getRole() != null ? user.getRole().trim().toUpperCase() : "USER";
         String cleanRole = rawRole.startsWith("ROLE_") ? rawRole.substring(5) : rawRole;
         java.util.List<SimpleGrantedAuthority> authorities = java.util.List.of(
@@ -34,6 +49,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
+                true,
+                true,
+                true,
+                isAccountNonLocked,
                 authorities
         );
     }

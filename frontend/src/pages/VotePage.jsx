@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useAlert } from '../context/AlertContext';
 import {
   fetchDecisionById,
   castVoteApi,
@@ -22,6 +23,7 @@ export default function VotePage() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
   const { showToast } = useToast();
+  const { showError } = useAlert();
 
   const [decision, setDecision] = useState(null);
   
@@ -229,11 +231,12 @@ export default function VotePage() {
       setShowSuccessModal(true);
       showToast?.('Ballot successfully submitted!', 'success');
     } catch (err) {
+      showError(err, 'Failed to submit vote. Please try again.');
       if (err.message?.includes('already voted') || err.message?.includes('409')) {
         setError('You have already voted on this decision.');
         setHasVoted(true);
       } else {
-        setError(err.message || 'Failed to submit vote. Please try again.');
+        setError('Failed to submit vote. Please try again.');
       }
     } finally {
       setSubmitting(false);

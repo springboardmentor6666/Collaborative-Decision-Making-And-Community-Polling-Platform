@@ -37,4 +37,8 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
            "AND (d.visibility = 'PUBLIC' OR (d.owner.email = :email) OR (d.community.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email))) " +
            "AND (LOWER(d.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<Decision> searchDecisions(@Param("query") String query, @Param("email") String email, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("UPDATE Decision d SET d.owner = null WHERE d.owner.id = :userId")
+    void detachUserDecisions(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

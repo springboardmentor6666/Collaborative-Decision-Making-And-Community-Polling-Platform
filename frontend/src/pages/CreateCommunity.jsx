@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { createCommunityApi } from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -10,6 +11,7 @@ import CategorySelector from '../components/CategorySelector';
 export default function CreateCommunity() {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
+  const { showError } = useAlert();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -35,7 +37,8 @@ export default function CreateCommunity() {
       // Ensure the backend returns the community id in response.id
       navigate(`/communities/${response?.id || ''}`);
     } catch (err) {
-      setError(err.message || 'Failed to create community.');
+      showError(err, 'Failed to create community.');
+      setError('Failed to create community.');
       setLoading(false);
     }
   };

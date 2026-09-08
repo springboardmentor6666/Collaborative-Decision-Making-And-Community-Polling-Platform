@@ -16,6 +16,11 @@ public class UserResponse {
     private String avatar;
     private Boolean isPublic;
     private java.util.Set<String> interests = new java.util.HashSet<>();
+    private String accountStatus;
+    private LocalDateTime deactivatedAt;
+    private LocalDateTime deactivateUntil;
+    private LocalDateTime deletionRequestedAt;
+    private LocalDateTime scheduledDeletionAt;
 
     public UserResponse() {
     }
@@ -136,5 +141,45 @@ public class UserResponse {
 
     public void setInterests(java.util.Set<String> interests) {
         this.interests = interests;
+    }
+
+    public String getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(String accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public LocalDateTime getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public void setDeactivatedAt(LocalDateTime deactivatedAt) {
+        this.deactivatedAt = deactivatedAt;
+    }
+
+    public LocalDateTime getDeactivateUntil() {
+        return deactivateUntil;
+    }
+
+    public void setDeactivateUntil(LocalDateTime deactivateUntil) {
+        this.deactivateUntil = deactivateUntil;
+    }
+
+    public LocalDateTime getDeletionRequestedAt() {
+        return deletionRequestedAt;
+    }
+
+    public void setDeletionRequestedAt(LocalDateTime deletionRequestedAt) {
+        this.deletionRequestedAt = deletionRequestedAt;
+    }
+
+    public LocalDateTime getScheduledDeletionAt() {
+        return scheduledDeletionAt;
+    }
+
+    public void setScheduledDeletionAt(LocalDateTime scheduledDeletionAt) {
+        this.scheduledDeletionAt = scheduledDeletionAt;
     }
 }

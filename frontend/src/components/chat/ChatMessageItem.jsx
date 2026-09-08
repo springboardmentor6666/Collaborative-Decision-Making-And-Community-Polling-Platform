@@ -13,6 +13,7 @@ import {
   Crown,
 } from 'lucide-react';
 import ChatReactionPicker from './ChatReactionPicker';
+import { useAlert } from '../../context/AlertContext';
 
 /**
  * Basic markdown parser for chat messages.
@@ -153,6 +154,7 @@ export default function ChatMessageItem({
   onRetry,
   onJumpToParent,
 }) {
+  const { showConfirm } = useAlert();
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -405,8 +407,14 @@ export default function ChatMessageItem({
           {canDelete && onDelete && (
             <button
               type="button"
-              onClick={() => {
-                if (window.confirm('Delete this message for everyone?')) {
+              onClick={async () => {
+                const confirmed = await showConfirm({
+                  title: 'Delete Message',
+                  message: 'Delete this message for everyone?',
+                  confirmText: 'Delete',
+                  isDangerous: true,
+                });
+                if (confirmed) {
                   onDelete(message.id);
                 }
               }}

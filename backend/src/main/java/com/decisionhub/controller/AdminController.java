@@ -62,6 +62,22 @@ public class AdminController {
         return ResponseEntity.ok(user);
     }
 
+    @DeleteMapping("/admin/users/{id}/permanent")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Permanent delete user", description = "Permanently deletes user account, detaches votes/comments/decisions, and purges personal data (Admin only)")
+    public ResponseEntity<Void> permanentDeleteUser(@PathVariable Long id, Authentication authentication) {
+        userService.adminPermanentDeleteUser(id, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/admin/users/{id}/cancel-deletion")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Cancel user deletion", description = "Cancels a user's scheduled 14-day deletion and restores account to active (Admin only)")
+    public ResponseEntity<UserResponse> adminCancelDeletion(@PathVariable Long id, Authentication authentication) {
+        UserResponse response = userService.adminCancelUserDeletion(id, authentication.getName());
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/admin/users/{id}/role")
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_ADMIN')")
     @Operation(summary = "Update user role", description = "Updates user role (Admin only)")

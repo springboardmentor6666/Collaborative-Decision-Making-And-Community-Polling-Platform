@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useAlert } from '../context/AlertContext';
 import {
   fetchDecisionById,
   deleteDecisionApi,
@@ -32,6 +33,7 @@ export default function DecisionDetails() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
   const { showToast } = useToast();
+  const { showError, showConfirm } = useAlert();
 
   const [decision, setDecision] = useState(null);
   const [userVote, setUserVote] = useState(null);
@@ -106,7 +108,7 @@ export default function DecisionDetails() {
       const files = await getDecisionFilesApi(id, accessToken);
       setAttachments(files);
     } catch (err) {
-      alert(err.message || 'Failed to upload attachment.');
+      showError(err, 'Failed to upload attachment.');
     } finally {
       setUploadingAttachment(false);
       e.target.value = '';
@@ -114,23 +116,35 @@ export default function DecisionDetails() {
   };
 
   const handleDeleteAttachment = async (fileId) => {
-    if (!window.confirm('Delete this attachment?')) return;
+    const confirmed = await showConfirm({
+      title: 'Delete Attachment',
+      message: 'Delete this attachment?',
+      confirmText: 'Delete',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       await deleteAttachmentFileApi(fileId, accessToken);
       setAttachments(prev => prev.filter(f => f.id !== fileId));
     } catch (err) {
-      alert('Failed to delete attachment.');
+      showError(err, 'Failed to delete attachment.');
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this decision?')) return;
+    const confirmed = await showConfirm({
+      title: 'Delete Decision',
+      message: 'Are you sure you want to delete this decision?',
+      confirmText: 'Delete',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       setDeleting(true);
       await deleteDecisionApi(id, accessToken);
       navigate('/dashboard');
-    } catch {
-      alert('Failed to delete decision.');
+    } catch (err) {
+      showError(err, 'Failed to delete decision.');
     } finally {
       setDeleting(false);
     }
@@ -167,16 +181,20 @@ export default function DecisionDetails() {
       setNewOptionText('');
       setShowAddOptionInput(false);
     } catch (err) {
-      alert(err.message || 'Failed to add option.');
+      showError(err, 'Failed to add option.');
     } finally {
       setAddingOption(false);
     }
   };
 
   const handleCloseDecision = async () => {
-    if (!window.confirm('Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.')) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      title: 'Close Poll & Finalize Decision',
+      message: 'Are you sure you want to close this poll and finalize the decision? No further votes will be accepted.',
+      confirmText: 'Close Decision',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       setClosingDecision(true);
       const updated = await closeDecisionApi(id, accessToken);
@@ -185,7 +203,7 @@ export default function DecisionDetails() {
         status: updated?.status || 'CLOSED',
       }));
     } catch (err) {
-      alert(err.message || 'Failed to close decision.');
+      showError(err, 'Failed to close decision.');
     } finally {
       setClosingDecision(false);
     }

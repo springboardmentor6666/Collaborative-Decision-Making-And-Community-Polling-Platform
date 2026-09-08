@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -27,6 +28,12 @@ public class UserService {
     private final com.decisionhub.repository.CategoryRepository categoryRepository;
     private final com.decisionhub.repository.DecisionRepository decisionRepository;
     private final DecisionService decisionService;
+    private final com.decisionhub.service.AuditLogService auditLogService;
+    private final com.decisionhub.repository.VoteRepository voteRepository;
+    private final com.decisionhub.repository.CommentRepository commentRepository;
+    private final com.decisionhub.repository.NotificationRepository notificationRepository;
+    private final com.decisionhub.repository.CommunityMemberRepository communityMemberRepository;
+    private final com.decisionhub.repository.PasswordResetTokenRepository passwordResetTokenRepository;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
@@ -34,7 +41,13 @@ public class UserService {
                        JwtUtil jwtUtil,
                        com.decisionhub.repository.CategoryRepository categoryRepository,
                        com.decisionhub.repository.DecisionRepository decisionRepository,
-                       @Lazy DecisionService decisionService) {
+                       @Lazy DecisionService decisionService,
+                       com.decisionhub.service.AuditLogService auditLogService,
+                       com.decisionhub.repository.VoteRepository voteRepository,
+                       com.decisionhub.repository.CommentRepository commentRepository,
+                       com.decisionhub.repository.NotificationRepository notificationRepository,
+                       com.decisionhub.repository.CommunityMemberRepository communityMemberRepository,
+                       com.decisionhub.repository.PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -42,6 +55,12 @@ public class UserService {
         this.categoryRepository = categoryRepository;
         this.decisionRepository = decisionRepository;
         this.decisionService = decisionService;
+        this.auditLogService = auditLogService;
+        this.voteRepository = voteRepository;
+        this.commentRepository = commentRepository;
+        this.notificationRepository = notificationRepository;
+        this.communityMemberRepository = communityMemberRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Transactional
@@ -156,6 +175,24 @@ public class UserService {
     }
 
     public UserResponse mapToUserResponse(User user) {
+        if (user == null) {
+            UserResponse fallback = new UserResponse(
+                    null,
+                    "Deleted User",
+                    "deleted@community.local",
+                    "USER",
+                    "LOCAL",
+                    false,
+                    null,
+                    "This account has been deleted.",
+                    null,
+                    false,
+                    java.util.Collections.emptySet()
+            );
+            fallback.setAccountStatus("DELETED");
+            return fallback;
+        }
+
         String bio = null;
         String avatar = null;
         try {
@@ -179,7 +216,7 @@ public class UserService {
         } catch (Exception ignored) {
         }
 
-        return new UserResponse(
+        UserResponse response = new UserResponse(
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
@@ -192,6 +229,12 @@ public class UserService {
                 user.getIsPublic(),
                 interests
         );
+        response.setAccountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : "ACTIVE");
+        response.setDeactivatedAt(user.getDeactivatedAt());
+        response.setDeactivateUntil(user.getDeactivateUntil());
+        response.setDeletionRequestedAt(user.getDeletionRequestedAt());
+        response.setScheduledDeletionAt(user.getScheduledDeletionAt());
+        return response;
     }
 
     @Transactional
@@ -243,7 +286,7 @@ public class UserService {
             throw new org.springframework.security.access.AccessDeniedException("Access denied. You can only delete your own account.");
         }
 
-        userRepository.delete(user);
+        executePermanentDeletion(user, "Requested by " + requesterEmail);
     }
 
     @Transactional(readOnly = true)
@@ -354,6 +397,209 @@ public class UserService {
         targetUser.setIsActive(isActive);
         User saved = userRepository.save(targetUser);
         return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public UserResponse scheduleAccountDeletion(String userEmail, DeleteAccountRequest request) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        if (request == null || request.getConfirmation() == null || !"DELETE".equalsIgnoreCase(request.getConfirmation().trim())) {
+            throw new IllegalArgumentException("To confirm deletion, you must type DELETE.");
+        }
+
+        user.setAccountStatus(com.decisionhub.entity.AccountStatus.PENDING_DELETION);
+        LocalDateTime now = LocalDateTime.now();
+        user.setDeletionRequestedAt(now);
+        user.setScheduledDeletionAt(now.plusDays(14));
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(userEmail, "SCHEDULE_DELETION", "USER", user.getId(),
+                "Scheduled account deletion with 14-day hold until " + user.getScheduledDeletionAt());
+
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public UserResponse cancelAccountDeletion(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        if (user.getAccountStatus() != com.decisionhub.entity.AccountStatus.PENDING_DELETION) {
+            throw new IllegalStateException("Account is not currently scheduled for deletion.");
+        }
+
+        user.setAccountStatus(com.decisionhub.entity.AccountStatus.ACTIVE);
+        user.setDeletionRequestedAt(null);
+        user.setScheduledDeletionAt(null);
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(userEmail, "CANCEL_DELETION", "USER", user.getId(),
+                "Cancelled scheduled account deletion; account restored to ACTIVE");
+
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public UserResponse deactivateAccount(String userEmail, DeactivateAccountRequest request) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        LocalDateTime until = null;
+        if (request != null && request.getCustomUntilDate() != null) {
+            if (request.getCustomUntilDate().isBefore(java.time.LocalDate.now())) {
+                throw new IllegalArgumentException("Deactivation end date must be in the future.");
+            }
+            until = request.getCustomUntilDate().atTime(23, 59, 59);
+        } else if (request != null && request.getDurationDays() != null && request.getDurationDays() > 0) {
+            until = LocalDateTime.now().plusDays(request.getDurationDays());
+        } else {
+            until = LocalDateTime.now().plusDays(14); // default 14 days
+        }
+
+        user.setAccountStatus(com.decisionhub.entity.AccountStatus.DEACTIVATED);
+        user.setDeactivatedAt(LocalDateTime.now());
+        user.setDeactivateUntil(until);
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(userEmail, "DEACTIVATE_ACCOUNT", "USER", user.getId(),
+                "Account deactivated until " + until);
+
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public UserResponse reactivateAccount(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        if (user.getAccountStatus() != com.decisionhub.entity.AccountStatus.DEACTIVATED) {
+            throw new IllegalStateException("Account is not currently deactivated.");
+        }
+
+        user.setAccountStatus(com.decisionhub.entity.AccountStatus.ACTIVE);
+        user.setDeactivatedAt(null);
+        user.setDeactivateUntil(null);
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(userEmail, "REACTIVATE_ACCOUNT", "USER", user.getId(),
+                "Account reactivated back to ACTIVE");
+
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public void executePermanentDeletion(User user, String reason) {
+        if (user == null || user.getId() == null) return;
+        Long userId = user.getId();
+        String originalEmail = user.getEmail();
+
+        // 1. Detach collaborative public contributions (anonymize votes, comments, decisions)
+        voteRepository.detachUserVotes(userId);
+        commentRepository.detachUserComments(userId);
+        decisionRepository.detachUserDecisions(userId);
+
+        // 2. Clear private memberships, tokens, notifications
+        notificationRepository.deleteByUserId(userId);
+        communityMemberRepository.deleteByUserId(userId);
+        passwordResetTokenRepository.deleteByUserId(userId);
+
+        // 3. Clear private collections and profile
+        if (user.getSavedDecisions() != null) {
+            user.getSavedDecisions().clear();
+        }
+        if (user.getInterests() != null) {
+            user.getInterests().clear();
+        }
+        user.setProfile(null);
+        user.setFcmToken(null);
+        user.setProfileImage(null);
+
+        // 4. Wipe credentials and scramble email to release original email
+        user.setFullName("Deleted User");
+        user.setEmail("deleted_" + userId + "_" + UUID.randomUUID().toString().substring(0, 8) + "@deleted.local");
+        user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setIsActive(false);
+        user.setAccountStatus(com.decisionhub.entity.AccountStatus.DELETED);
+        user.setDeletedAt(LocalDateTime.now());
+        user.setDeletionRequestedAt(null);
+        user.setScheduledDeletionAt(null);
+        user.setDeactivatedAt(null);
+        user.setDeactivateUntil(null);
+
+        userRepository.save(user);
+
+        auditLogService.logAction(originalEmail, "PERMANENT_DELETE_USER", "USER", userId,
+                "Account permanently deleted and anonymized. Reason: " + reason);
+    }
+
+    @Transactional
+    public void adminPermanentDeleteUser(Long userId, String adminEmail) {
+        User admin = userRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new UserNotFoundException("Admin not found with email: " + adminEmail));
+        if (!isAdmin(admin)) {
+            throw new org.springframework.security.access.AccessDeniedException("Only ADMIN users can permanently delete accounts directly.");
+        }
+
+        User target = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        executePermanentDeletion(target, "Admin direct permanent deletion by " + adminEmail);
+    }
+
+    @Transactional
+    public UserResponse adminCancelUserDeletion(Long userId, String adminEmail) {
+        User admin = userRepository.findByEmail(adminEmail)
+                .orElseThrow(() -> new UserNotFoundException("Admin not found with email: " + adminEmail));
+        if (!isAdmin(admin)) {
+            throw new org.springframework.security.access.AccessDeniedException("Only ADMIN users can cancel deletion.");
+        }
+
+        User target = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        target.setAccountStatus(com.decisionhub.entity.AccountStatus.ACTIVE);
+        target.setDeletionRequestedAt(null);
+        target.setScheduledDeletionAt(null);
+        User saved = userRepository.save(target);
+
+        auditLogService.logAction(adminEmail, "ADMIN_CANCEL_DELETION", "USER", target.getId(),
+                "Admin cancelled scheduled deletion for user ID: " + target.getId());
+
+        return mapToUserResponse(saved);
+    }
+
+    @Transactional
+    public void processScheduledDeletions() {
+        List<User> pending = userRepository.findByAccountStatusAndScheduledDeletionAtLessThanEqual(
+                com.decisionhub.entity.AccountStatus.PENDING_DELETION, LocalDateTime.now()
+        );
+        for (User u : pending) {
+            try {
+                executePermanentDeletion(u, "Scheduled 14-day hold period expired");
+            } catch (Exception e) {
+                // Ignore single failure to allow others to process
+            }
+        }
+    }
+
+    @Transactional
+    public void processScheduledReactivations() {
+        List<User> expired = userRepository.findByAccountStatusAndDeactivateUntilLessThanEqual(
+                com.decisionhub.entity.AccountStatus.DEACTIVATED, LocalDateTime.now()
+        );
+        for (User u : expired) {
+            try {
+                u.setAccountStatus(com.decisionhub.entity.AccountStatus.ACTIVE);
+                u.setDeactivatedAt(null);
+                u.setDeactivateUntil(null);
+                userRepository.save(u);
+                auditLogService.logAction(u.getEmail(), "AUTO_REACTIVATE_ACCOUNT", "USER", u.getId(),
+                        "Deactivation period expired; auto-reactivated to ACTIVE");
+            } catch (Exception e) {
+                // Ignore single failure
+            }
+        }
     }
 
     private boolean isAdmin(User user) {

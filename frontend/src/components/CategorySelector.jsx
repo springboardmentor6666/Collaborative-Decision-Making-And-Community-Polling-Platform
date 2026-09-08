@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getCategoriesApi, createCategoryApi } from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 
 export default function CategorySelector({ selectedCategoryId, onChange, label = 'Category' }) {
   const { accessToken } = useAuth();
+  const { showError } = useAlert();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -41,7 +43,7 @@ export default function CategorySelector({ selectedCategoryId, onChange, label =
         setShowCustomInput(false);
       }
     } catch (err) {
-      alert(err.message || 'Failed to create category');
+      showError(err, 'Failed to create category.');
     } finally {
       setCreatingCustom(false);
     }

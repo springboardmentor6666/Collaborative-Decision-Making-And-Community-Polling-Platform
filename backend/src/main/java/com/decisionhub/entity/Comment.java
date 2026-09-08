@@ -18,7 +18,7 @@ public class Comment {
     private Decision decision;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "author_id")
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)

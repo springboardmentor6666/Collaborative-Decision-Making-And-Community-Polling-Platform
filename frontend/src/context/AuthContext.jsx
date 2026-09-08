@@ -155,6 +155,16 @@ export function AuthProvider({ children }) {
     setError(null);
   }, []);
 
+  const updateUser = useCallback((updatedUserData) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedUserData };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('decisionhub_user', JSON.stringify(merged));
+      }
+      return merged;
+    });
+  }, []);
+
   const value = {
     user,
     accessToken,
@@ -166,6 +176,7 @@ export function AuthProvider({ children }) {
     loginWithGoogle,
     logout,
     clearError,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

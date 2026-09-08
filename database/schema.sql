@@ -20,7 +20,13 @@ CREATE TABLE IF NOT EXISTS users (
     profile_image VARCHAR(500),                 -- Avatar / profile picture URL
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
-    is_public BOOLEAN DEFAULT TRUE
+    is_public BOOLEAN DEFAULT TRUE,
+    account_status VARCHAR(30) DEFAULT 'ACTIVE', -- ACTIVE / DEACTIVATED / PENDING_DELETION / DELETED
+    deactivated_at TIMESTAMP NULL,
+    deactivate_until TIMESTAMP NULL,
+    deletion_requested_at TIMESTAMP NULL,
+    scheduled_deletion_at TIMESTAMP NULL,
+    deleted_at TIMESTAMP NULL
 );
 
 -- 3. user_profiles

@@ -7,6 +7,7 @@ import {
 } from '../api/axiosClient';
 import CommunityCard from '../components/CommunityCard';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -14,6 +15,7 @@ import IconSidebar from '../components/IconSidebar';
 
 export default function CommunitiesPage() {
   const { accessToken } = useAuth();
+  const { showError } = useAlert();
   const [communities, setCommunities] = useState([]);
   const [categories, setCategories] = useState([]);
   const [pendingInvites, setPendingInvites] = useState([]);
@@ -43,7 +45,7 @@ export default function CommunitiesPage() {
       const commData = await getCommunitiesApi(searchQuery, accessToken);
       setCommunities(Array.isArray(commData) ? commData : []);
     } catch (err) {
-      alert(err.message || `Failed to ${response.toLowerCase()} invitation`);
+      showError(err, `Failed to ${response.toLowerCase()} invitation`);
     } finally {
       setRespondingInviteId(null);
     }

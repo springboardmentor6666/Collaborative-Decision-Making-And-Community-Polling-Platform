@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { AlertProvider } from './context/AlertContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import PageTransition from './components/PageTransition';
@@ -202,9 +203,11 @@ export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <AlertProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AlertProvider>
       </ToastProvider>
     </AuthProvider>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCommentFilesApi, upvoteCommentApi } from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { renderMarkdown } from './ui/MarkdownEditor';
 import ReportModal from './ReportModal';
 
@@ -32,6 +33,7 @@ export default function CommentItem({
   depth = 0,
 }) {
   const { accessToken } = useAuth();
+  const { showError, showConfirm } = useAlert();
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -87,7 +89,7 @@ export default function CommentItem({
       setReplyText('');
       setIsReplying(false);
     } catch (err) {
-      alert(err.message || 'Failed to post reply');
+      showError(err, 'Failed to post reply.');
     } finally {
       setSubmittingReply(false);
     }
@@ -101,18 +103,24 @@ export default function CommentItem({
       await onEdit(comment.id, editText.trim());
       setIsEditing(false);
     } catch (err) {
-      alert(err.message || 'Failed to update comment');
+      showError(err, 'Failed to update comment.');
     } finally {
       setSubmittingEdit(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
+    const confirmed = await showConfirm({
+      title: 'Delete Comment',
+      message: 'Are you sure you want to delete this comment?',
+      confirmText: 'Delete',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
     try {
       await onDelete(comment.id);
     } catch (err) {
-      alert(err.message || 'Failed to delete comment');
+      showError(err, 'Failed to delete comment.');
     }
   };
 

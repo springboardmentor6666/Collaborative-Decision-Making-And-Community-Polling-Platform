@@ -2,7 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';
 import { FONT_FAMILIES, FONT_SIZES, THEMES, UI_MODES } from '../theme/themes';
-import { getSavedDecisionsApi } from '../api/axiosClient';
+import {
+  getSavedDecisionsApi,
+  getCurrentUserApi,
+  deactivateAccountApi,
+  reactivateAccountApi,
+  scheduleAccountDeletionApi,
+  cancelAccountDeletionApi,
+} from '../api/axiosClient';
+import { useAlert } from '../context/AlertContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -20,7 +28,8 @@ const UI_MODE_COLORS = {
 };
 
 export default function Profile() {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, updateUser } = useAuth();
+  const { showAlert, showError, showConfirm } = useAlert();
   const {
     theme,
     uiMode,
@@ -33,9 +42,29 @@ export default function Profile() {
     resetTypography,
   } = useTheme();
 
+  const [currentUser, setCurrentUser] = useState(user);
   const [activeTab, setActiveTab] = useState('account');
   const [savedDecisions, setSavedDecisions] = useState([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
+
+  // Account Lifecycle states
+  const [deactivateDuration, setDeactivateDuration] = useState('14');
+  const [customDeactivateDate, setCustomDeactivateDate] = useState('');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (accessToken) {
+      getCurrentUserApi(accessToken)
+        .then((userData) => {
+          if (userData) {
+            setCurrentUser(userData);
+            if (updateUser) updateUser(userData);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [accessToken, updateUser]);
 
   useEffect(() => {
     if (activeTab === 'saved') {
@@ -59,6 +88,138 @@ export default function Profile() {
   const handleBookmarkToggled = (decisionId, isSaved) => {
     if (!isSaved) {
       setSavedDecisions((prev) => prev.filter((d) => d.id !== decisionId));
+    }
+  };
+
+  const currentStatus = currentUser?.accountStatus || 'ACTIVE';
+
+  const tomorrowStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  })();
+
+  const handleDeactivate = async () => {
+    let durationDays = null;
+    let customUntilDate = null;
+    let desc = '';
+
+    if (deactivateDuration === 'custom') {
+      if (!customDeactivateDate) {
+        showError(null, 'Please select a future reactivation date.');
+        return;
+      }
+      customUntilDate = `${customDeactivateDate}T23:59:59`;
+      desc = `until ${new Date(customDeactivateDate).toLocaleDateString()}`;
+    } else {
+      durationDays = parseInt(deactivateDuration, 10) || 14;
+      desc = `for ${durationDays} days`;
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Confirm Account Deactivation',
+      message: `Are you sure you want to temporarily deactivate your account ${desc}? Your profile data and contributions will remain preserved and you can reactivate anytime.`,
+      confirmText: 'Yes, Deactivate',
+      cancelText: 'Cancel',
+      isDangerous: false,
+    });
+
+    if (!confirmed) return;
+
+    setActionLoading(true);
+    try {
+      const updated = await deactivateAccountApi({ durationDays, customUntilDate }, accessToken);
+      setCurrentUser(updated);
+      if (updateUser) updateUser(updated);
+      showAlert('Account Deactivated', `Your account is temporarily deactivated ${desc}. You can reactivate whenever you log back in.`);
+    } catch (err) {
+      showError(err, 'Failed to deactivate account.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    const confirmed = await showConfirm({
+      title: 'Reactivate Account',
+      message: 'Restore full active status to your account now?',
+      confirmText: 'Reactivate Account',
+      cancelText: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
+    setActionLoading(true);
+    try {
+      const updated = await reactivateAccountApi(accessToken);
+      setCurrentUser(updated);
+      if (updateUser) updateUser(updated);
+      showAlert('Welcome Back!', 'Your account has been successfully reactivated to Active status.');
+    } catch (err) {
+      showError(err, 'Failed to reactivate account.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleScheduleDeletion = async () => {
+    if (deleteConfirmText.trim() !== 'DELETE') {
+      showError(null, 'Please type DELETE exactly to confirm.');
+      return;
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Schedule 14-Day Account Deletion',
+      message:
+        'A 14-day hold period will begin. You can cancel this request at any time during the next 14 days. After 14 days, personal data is permanently wiped and collaborative public contributions will be anonymized. Proceed?',
+      confirmText: 'Schedule Deletion',
+      cancelText: 'Keep My Account',
+      isDangerous: true,
+    });
+
+    if (!confirmed) return;
+
+    setActionLoading(true);
+    try {
+      const updated = await scheduleAccountDeletionApi('DELETE', accessToken);
+      setCurrentUser(updated);
+      if (updateUser) updateUser(updated);
+      setDeleteConfirmText('');
+      showAlert(
+        'Deletion Scheduled',
+        `Your account deletion has been scheduled. You have until ${
+          updated.scheduledDeletionAt
+            ? new Date(updated.scheduledDeletionAt).toLocaleString()
+            : '14 days'
+        } to cancel this request.`
+      );
+    } catch (err) {
+      showError(err, 'Failed to schedule account deletion.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    const confirmed = await showConfirm({
+      title: 'Cancel Account Deletion',
+      message: 'Are you sure you want to cancel the scheduled deletion and keep your account active?',
+      confirmText: 'Keep Account',
+      cancelText: 'Go Back',
+    });
+
+    if (!confirmed) return;
+
+    setActionLoading(true);
+    try {
+      const updated = await cancelAccountDeletionApi(accessToken);
+      setCurrentUser(updated);
+      if (updateUser) updateUser(updated);
+      showAlert('Deletion Cancelled', 'Your scheduled deletion has been cancelled. Your account is active.');
+    } catch (err) {
+      showError(err, 'Failed to cancel deletion.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -161,9 +322,33 @@ export default function Profile() {
                 <div>
                   <h2 className="text-xl font-black tracking-tight text-text-primary">{user.name || user.fullName || 'User'}</h2>
                   <p className="text-sm text-muted">{user.email}</p>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-semibold text-primary">
                       {user.role || 'USER'}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        currentStatus === 'ACTIVE'
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                          : currentStatus === 'DEACTIVATED'
+                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-300'
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          currentStatus === 'ACTIVE'
+                            ? 'bg-emerald-500'
+                            : currentStatus === 'DEACTIVATED'
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500 animate-pulse'
+                        }`}
+                      />
+                      {currentStatus === 'ACTIVE'
+                        ? 'Active'
+                        : currentStatus === 'DEACTIVATED'
+                        ? 'Deactivated'
+                        : 'Scheduled for Deletion (14-Day Hold)'}
                     </span>
                     {user.role?.toUpperCase() === 'ADMIN' && (
                       <Link
@@ -329,6 +514,221 @@ export default function Profile() {
                       This text dynamically reflects your chosen font family and size scale in real-time across cards, forms, tables, and discussions.
                     </p>
                   </div>
+                </div>
+
+                {/* Account Lifecycle & Danger Zone */}
+                <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-6">
+                  <div className="border-b border-border-default pb-4">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                          <span>🛡️</span> Account Management & Lifecycle
+                        </h2>
+                        <p className="text-xs text-muted">
+                          Manage your account status, temporary deactivation periods, or scheduled 14-day deletion.
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                          currentStatus === 'ACTIVE'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            : currentStatus === 'DEACTIVATED'
+                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                            : currentStatus === 'PENDING_DELETION'
+                            ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30'
+                            : 'bg-muted/10 text-muted border border-border-default'
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            currentStatus === 'ACTIVE'
+                              ? 'bg-emerald-500'
+                              : currentStatus === 'DEACTIVATED'
+                              ? 'bg-amber-500'
+                              : currentStatus === 'PENDING_DELETION'
+                              ? 'bg-rose-500 animate-pulse'
+                              : 'bg-muted'
+                          }`}
+                        />
+                        {currentStatus === 'ACTIVE' && 'Status: Active'}
+                        {currentStatus === 'DEACTIVATED' && 'Status: Deactivated'}
+                        {currentStatus === 'PENDING_DELETION' && 'Status: Scheduled for Deletion'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pending Deletion Active Warning Banner */}
+                  {currentStatus === 'PENDING_DELETION' && (
+                    <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">⚠️</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-rose-800 dark:text-rose-200">
+                            Account Scheduled for Permanent Deletion (14-Day Hold Active)
+                          </h3>
+                          <p className="mt-1 text-xs text-rose-700 dark:text-rose-300">
+                            Your account is currently in a 14-day hold period. Permanent deletion is scheduled for{' '}
+                            <strong className="font-semibold">
+                              {currentUser?.scheduledDeletionAt
+                                ? new Date(currentUser.scheduledDeletionAt).toLocaleString()
+                                : '14 days after request'}
+                            </strong>.
+                          </p>
+                          <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">
+                            When the hold expires, your profile details, tokens, and bookmarks will be completely erased.
+                            Your collaborative public contributions (decisions, comments, votes) will remain intact and be anonymized under "Deleted User".
+                          </p>
+                        </div>
+                      </div>
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleCancelDeletion}
+                          disabled={actionLoading}
+                          className="inline-flex items-center gap-2 rounded-xl bg-surface border border-rose-500/40 px-4 py-2 text-xs font-bold text-rose-700 dark:text-rose-200 hover:bg-rose-500/20 transition disabled:opacity-50"
+                        >
+                          {actionLoading ? 'Processing...' : '↺ Cancel Scheduled Deletion & Keep Account'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Deactivated Active Notice Banner */}
+                  {currentStatus === 'DEACTIVATED' && (
+                    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">⏸️</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-amber-800 dark:text-amber-200">
+                            Account Is Currently Deactivated
+                          </h3>
+                          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                            Your account is temporarily disabled until{' '}
+                            <strong className="font-semibold">
+                              {currentUser?.deactivateUntil
+                                ? new Date(currentUser.deactivateUntil).toLocaleDateString()
+                                : 'manual reactivation'}
+                            </strong>. All your personal data is preserved and your account will automatically restore, or you can reactivate immediately below.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleReactivate}
+                          disabled={actionLoading}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 text-white px-4 py-2 text-xs font-bold hover:bg-emerald-700 transition shadow-xs disabled:opacity-50"
+                        >
+                          {actionLoading ? 'Reactivating...' : '▶ Reactivate Account Now'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Temporary Deactivation Settings (when ACTIVE) */}
+                  {currentStatus === 'ACTIVE' && (
+                    <div className="space-y-4 rounded-2xl border border-border-default bg-surface-alt/40 p-5">
+                      <div>
+                        <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                          <span>⏸️</span> Temporary Account Deactivation
+                        </h3>
+                        <p className="text-xs text-muted mt-0.5">
+                          Pause your account for a defined period. All your data is safely preserved, and the account can be re-enabled at any time.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { label: '7 Days', val: '7' },
+                          { label: '14 Days', val: '14' },
+                          { label: '30 Days', val: '30' },
+                          { label: '60 Days', val: '60' },
+                          { label: '90 Days', val: '90' },
+                          { label: 'Custom Date', val: 'custom' },
+                        ].map((item) => (
+                          <button
+                            key={item.val}
+                            type="button"
+                            onClick={() => setDeactivateDuration(item.val)}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition ${
+                              deactivateDuration === item.val
+                                ? 'border-primary bg-primary-soft text-primary font-bold shadow-xs'
+                                : 'border-border-default bg-surface text-text-secondary hover:bg-surface-alt'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {deactivateDuration === 'custom' && (
+                        <div className="pt-1">
+                          <label className="block text-xs font-semibold text-text-primary mb-1">
+                            Choose reactivation date:
+                          </label>
+                          <input
+                            type="date"
+                            min={tomorrowStr}
+                            value={customDeactivateDate}
+                            onChange={(e) => setCustomDeactivateDate(e.target.value)}
+                            className="app-input max-w-xs py-1.5 px-3 text-xs"
+                          />
+                        </div>
+                      )}
+
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={handleDeactivate}
+                          disabled={actionLoading || (deactivateDuration === 'custom' && !customDeactivateDate)}
+                          className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 transition disabled:opacity-50"
+                        >
+                          {actionLoading ? 'Processing...' : 'Deactivate Account'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 14-Day Hold Deletion Zone (when ACTIVE) */}
+                  {currentStatus === 'ACTIVE' && (
+                    <div className="space-y-4 rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5">
+                      <div>
+                        <h3 className="text-sm font-bold text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                          <span>⚠️</span> Danger Zone: Delete Account (14-Day Hold)
+                        </h3>
+                        <p className="text-xs text-muted mt-1 leading-relaxed">
+                          Requesting account deletion initiates a <strong className="text-text-primary">14-day hold period</strong>.
+                          During these 14 days, you can sign back in and cancel the deletion at any time.
+                          When the hold period expires, private profile data will be permanently wiped, and public collaborative contributions
+                          (decisions, comments, votes) will be anonymized ("Deleted User") to safeguard community polls.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 max-w-md">
+                        <label className="block text-xs font-bold text-text-primary">
+                          To confirm, type <span className="text-rose-600 font-black">DELETE</span> below:
+                        </label>
+                        <input
+                          type="text"
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder='Type "DELETE" to confirm'
+                          className="app-input py-2 px-3 text-xs border-rose-300 dark:border-rose-900 focus:border-rose-500"
+                        />
+                      </div>
+
+                      <div>
+                        <button
+                          type="button"
+                          onClick={handleScheduleDeletion}
+                          disabled={actionLoading || deleteConfirmText.trim() !== 'DELETE'}
+                          className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700 transition shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {actionLoading ? 'Scheduling...' : 'Schedule Account Deletion (14-Day Hold)'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
