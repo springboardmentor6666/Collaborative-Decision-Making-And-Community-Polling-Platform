@@ -7,6 +7,7 @@ import MyDecisions from "./pages/MyDecisions";
 import Polls from "./pages/Polls";
 import Communities from "./pages/Communities";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import Activity from "./pages/Activity";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import OAuth2Success from "./pages/OAuth2Success";
@@ -44,6 +45,7 @@ function App() {
         <Route path="/communities" element={<Communities />} />
         <Route path="/communities/:communityId" element={<CommunityDetail />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/activity" element={<Activity />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/create-decision" element={<CreateDecision />} />

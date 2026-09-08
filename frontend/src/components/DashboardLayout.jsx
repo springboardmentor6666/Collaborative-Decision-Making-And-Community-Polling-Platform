@@ -74,6 +74,11 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       route: "/analytics",
     },
     {
+      label: "Activity",
+      icon: analyticsIcon,
+      route: "/activity",
+    },
+    {
       label: "Profile",
       icon: profileIcon,
       route: "/profile",
@@ -521,13 +526,19 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
                       }
                     `}
                   >
+                    {item.label === "Activity" ? (
+                    <span className="flex h-7 w-7 items-center justify-center text-xl">
+                     🕘
+                    </span>
+                    ) : (
                     <img
                       src={item.icon}
                       alt=""
                       aria-hidden="true"
                       className="h-7 w-7 object-contain"
                     />
-                  </span>
+            )}
+            </span>
 
                   <span
   className={`

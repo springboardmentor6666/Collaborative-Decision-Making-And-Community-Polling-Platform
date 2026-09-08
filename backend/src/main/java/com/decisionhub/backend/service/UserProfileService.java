@@ -1,6 +1,8 @@
 package com.decisionhub.backend.service;
 
 import com.decisionhub.backend.dto.*;
+import java.util.List;
+import java.util.Map;
 
 public interface UserProfileService {
 
@@ -17,4 +19,6 @@ public interface UserProfileService {
     void deleteAccount(
             DeleteAccountRequest request
     );
+
+    List<Map<String, Object>> getActivity();
 }

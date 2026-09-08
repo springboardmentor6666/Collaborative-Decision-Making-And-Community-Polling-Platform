@@ -4,11 +4,13 @@ import com.decisionhub.backend.dto.CommunityRequest;
 import com.decisionhub.backend.dto.CommunityResponse;
 import com.decisionhub.backend.dto.DecisionResponse;
 import com.decisionhub.backend.entity.Community;
+import com.decisionhub.backend.entity.CommunityMemberShip;
 import com.decisionhub.backend.entity.Role;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.repository.CommunityRepository;
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.CommunityMessageRepository;
+import com.decisionhub.backend.repository.CommunityMembershipRepository;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.service.CommunityService;
 import com.decisionhub.backend.service.CurrentUserService;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class CommunityServiceImpl implements CommunityService {
 
     private final CommunityRepository repository;
+    private final CommunityMembershipRepository membershipRepository;
     private final CurrentUserService currentUser;
     private final DecisionRepository decisions;
     private final DecisionService decisionService;
@@ -35,6 +38,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     public CommunityServiceImpl(
             CommunityRepository repository,
+            CommunityMembershipRepository membershipRepository,
             CurrentUserService currentUser,
             DecisionRepository decisions,
             DecisionService decisionService,
@@ -43,6 +47,7 @@ public class CommunityServiceImpl implements CommunityService {
             UserRepository users
     ) {
         this.repository = repository;
+        this.membershipRepository = membershipRepository;
         this.currentUser = currentUser;
         this.decisions = decisions;
         this.decisionService = decisionService;
@@ -200,6 +205,13 @@ public class CommunityServiceImpl implements CommunityService {
 
         Community saved =
                 repository.save(community);
+
+        membershipRepository.save(
+                CommunityMemberShip.builder()
+                        .community(community)
+                        .user(user)
+                        .build()
+        );
 
 
         if (

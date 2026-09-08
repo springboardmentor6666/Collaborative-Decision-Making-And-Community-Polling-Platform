@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,6 +28,10 @@ public class UserController {
     public ProfileResponse profile() {
 
         return service.get();
+    }
+    @GetMapping("/activity")
+    public List<Map<String, Object>> activity() {
+        return service.getActivity();
     }
 
 

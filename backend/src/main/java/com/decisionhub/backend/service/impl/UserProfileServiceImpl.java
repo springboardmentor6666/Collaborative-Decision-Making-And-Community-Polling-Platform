@@ -10,6 +10,8 @@ import com.decisionhub.backend.service.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
@@ -17,6 +19,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final CurrentUserService current;
     private final UserRepository users;
     private final DecisionRepository decisions;
+    private final CommunityMembershipRepository memberships;
     private final VoteRepository votes;
     private final CommunityRepository communities;
     private final CommentRepository comments;
@@ -29,6 +32,7 @@ public class UserProfileServiceImpl implements UserProfileService {
             CurrentUserService current,
             UserRepository users,
             DecisionRepository decisions,
+            CommunityMembershipRepository memberships,
             VoteRepository votes,
             CommunityRepository communities,
             CommentRepository comments,
@@ -40,6 +44,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.current = current;
         this.users = users;
         this.decisions = decisions;
+        this.memberships = memberships;
         this.votes = votes;
         this.communities = communities;
         this.comments = comments;
@@ -52,6 +57,55 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public ProfileResponse get() {
         return response(current.get());
+    }
+
+    @Override
+    public List<Map<String, Object>> getActivity() {
+        User user = current.get();
+
+        List<Map<String, Object>> events = new java.util.ArrayList<>();
+        memberships.findByUser(user).forEach(membership ->
+                events.add(Map.of(
+                        "type", "Community joined",
+                        "actor", user.getName(),
+                        "subject", membership.getCommunity().getCommunityName(),
+                        "at", membership.getJoinedAt()
+                ))
+        );
+
+        decisions.findByCreatedBy(user).forEach(decision ->
+                events.add(Map.of(
+                        "type", "Decision created",
+                        "actor", user.getName(),
+                        "subject", decision.getTitle(),
+                        "at", decision.getCreatedAt()
+                ))
+        );
+
+        votes.findByUser(user).forEach(vote ->
+                events.add(Map.of(
+                        "type", "Vote submitted",
+                        "actor", user.getName(),
+                        "subject", vote.getDecision().getTitle(),
+                        "at", vote.getCreatedAt()
+                ))
+        );
+
+        comments.findByUser(user).forEach(comment ->
+                events.add(Map.of(
+                        "type", "Comment created",
+                        "actor", user.getName(),
+                        "subject", comment.getDecision().getTitle(),
+                        "at", comment.getCreatedAt()
+                ))
+        );
+
+        events.sort(java.util.Comparator.comparing(
+                event -> (java.time.LocalDateTime) event.get("at"),
+                java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())
+        ));
+
+        return events;
     }
 
     @Override
