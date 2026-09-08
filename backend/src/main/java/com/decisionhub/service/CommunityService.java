@@ -36,6 +36,7 @@ public class CommunityService {
     private final UserService userService;
     private final CommunityInviteRepository communityInviteRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public CommunityService(CommunityRepository communityRepository,
                             CommunityMemberRepository communityMemberRepository,
@@ -44,7 +45,8 @@ public class CommunityService {
                             DecisionRepository decisionRepository,
                             UserService userService,
                             CommunityInviteRepository communityInviteRepository,
-                            ApplicationEventPublisher eventPublisher) {
+                            ApplicationEventPublisher eventPublisher,
+                            jakarta.persistence.EntityManager entityManager) {
         this.communityRepository = communityRepository;
         this.communityMemberRepository = communityMemberRepository;
         this.userRepository = userRepository;
@@ -53,6 +55,7 @@ public class CommunityService {
         this.userService = userService;
         this.communityInviteRepository = communityInviteRepository;
         this.eventPublisher = eventPublisher;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -203,10 +206,47 @@ public class CommunityService {
         boolean isPlatformAdmin = user.getRole() != null && user.getRole().toUpperCase().contains("ADMIN");
         CommunityMember member = communityMemberRepository.findByCommunityIdAndUserId(id, user.getId()).orElse(null);
 
-        if (!isPlatformAdmin && (member == null || !"OWNER".equals(member.getRole()))) {
-            throw new AccessDeniedException("Only the community owner can delete the community");
+        if (!isPlatformAdmin && (member == null || !"OWNER".equalsIgnoreCase(member.getRole()))) {
+            throw new AccessDeniedException("Only the community owner or platform admin can delete the community");
         }
 
+        // 1. Detach decisions to avoid FK violation while preserving decisions
+        entityManager.createQuery("UPDATE Decision d SET d.community = null WHERE d.community.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        // 2. Delete community activities
+        entityManager.createQuery("DELETE FROM Activity a WHERE a.community.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        // 3. Delete community invites
+        entityManager.createQuery("DELETE FROM CommunityInvite ci WHERE ci.community.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        // 4. Delete chat message reactions and messages
+        try {
+            entityManager.createNativeQuery("DELETE FROM community_message_reactions WHERE message_id IN (SELECT id FROM community_messages WHERE channel_id IN (SELECT id FROM community_chat_channels WHERE community_id = :id))")
+                    .setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM community_messages WHERE channel_id IN (SELECT id FROM community_chat_channels WHERE community_id = :id)")
+                    .setParameter("id", id)
+                    .executeUpdate();
+        } catch (Exception ignored) {
+        }
+
+        // 5. Delete chat channels
+        entityManager.createQuery("DELETE FROM CommunityChatChannel ccc WHERE ccc.community.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        // 6. Delete members
+        entityManager.createQuery("DELETE FROM CommunityMember cm WHERE cm.community.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        // 7. Delete community
         communityRepository.delete(community);
     }
 

@@ -21,6 +21,13 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
     List<Decision> findByCommunityIdAndIsDeletedFalse(Long communityId);
     long countByCommunityIdAndIsDeletedFalse(Long communityId);
 
+    long countByIsDeletedFalse();
+    long countByIsDeletedTrue();
+    long countByStatusIgnoreCase(String status);
+    long countByStatusIgnoreCaseAndIsDeletedFalse(String status);
+    long countByCreatedAtGreaterThanEqualAndIsDeletedFalse(LocalDateTime date);
+    long countByCreatedAtBetweenAndIsDeletedFalse(LocalDateTime start, LocalDateTime end);
+
     @Query("SELECT d FROM Decision d WHERE UPPER(d.status) = 'OPEN' AND d.autoClose = true AND d.endsAt <= :now AND d.isDeleted = false")
     List<Decision> findExpiredAutoCloseDecisions(@Param("now") LocalDateTime now);
 

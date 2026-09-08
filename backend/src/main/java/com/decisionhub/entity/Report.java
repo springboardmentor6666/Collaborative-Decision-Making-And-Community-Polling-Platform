@@ -33,11 +33,31 @@ public class Report {
     @Column(nullable = false, length = 1000)
     private String reason;
 
-    @Column(length = 20)
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(length = 30)
     private String status = "PENDING";
+
+    @Column(name = "moderation_action", length = 50)
+    private String moderationAction;
+
+    @Column(name = "moderation_reason", length = 1000)
+    private String moderationReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewed_by_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "savedDecisions", "interests", "decisions", "passwordHash"})
+    private User reviewedBy;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public Report() {
     }
@@ -47,6 +67,14 @@ public class Report {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
         }
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -97,6 +125,14 @@ public class Report {
         this.reason = reason;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -105,11 +141,51 @@ public class Report {
         this.status = status;
     }
 
+    public String getModerationAction() {
+        return moderationAction;
+    }
+
+    public void setModerationAction(String moderationAction) {
+        this.moderationAction = moderationAction;
+    }
+
+    public String getModerationReason() {
+        return moderationReason;
+    }
+
+    public void setModerationReason(String moderationReason) {
+        this.moderationReason = moderationReason;
+    }
+
+    public User getReviewedBy() {
+        return reviewedBy;
+    }
+
+    public void setReviewedBy(User reviewedBy) {
+        this.reviewedBy = reviewedBy;
+    }
+
+    public LocalDateTime getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(LocalDateTime reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

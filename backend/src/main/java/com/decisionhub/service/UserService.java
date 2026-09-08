@@ -34,6 +34,7 @@ public class UserService {
     private final com.decisionhub.repository.NotificationRepository notificationRepository;
     private final com.decisionhub.repository.CommunityMemberRepository communityMemberRepository;
     private final com.decisionhub.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    private final com.decisionhub.security.oauth.GoogleAuthService googleAuthService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
@@ -47,7 +48,8 @@ public class UserService {
                        com.decisionhub.repository.CommentRepository commentRepository,
                        com.decisionhub.repository.NotificationRepository notificationRepository,
                        com.decisionhub.repository.CommunityMemberRepository communityMemberRepository,
-                       com.decisionhub.repository.PasswordResetTokenRepository passwordResetTokenRepository) {
+                       com.decisionhub.repository.PasswordResetTokenRepository passwordResetTokenRepository,
+                       @Lazy com.decisionhub.security.oauth.GoogleAuthService googleAuthService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -61,6 +63,7 @@ public class UserService {
         this.notificationRepository = notificationRepository;
         this.communityMemberRepository = communityMemberRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.googleAuthService = googleAuthService;
     }
 
     @Transactional
@@ -600,6 +603,48 @@ public class UserService {
                 // Ignore single failure
             }
         }
+    }
+
+    @Transactional
+    public UserResponse connectGoogleAccount(String userEmail, String idToken, String providerId, String email) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + userEmail));
+
+        String resolvedProviderId = providerId;
+        String resolvedEmail = email;
+
+        if (idToken != null && !idToken.isBlank()) {
+            com.decisionhub.dto.GoogleUserInfo info = googleAuthService.verifyToken(idToken);
+            resolvedProviderId = info.getProviderId();
+            resolvedEmail = info.getEmail();
+        }
+
+        if (resolvedProviderId == null || resolvedProviderId.isBlank()) {
+            throw new IllegalArgumentException("Google account provider ID or valid Google ID token is required.");
+        }
+
+        // 1. Check if another user is already connected to this Google ID
+        java.util.Optional<User> existingWithProviderId = userRepository.findByProviderAndProviderId("GOOGLE", resolvedProviderId);
+        if (existingWithProviderId.isPresent() && !existingWithProviderId.get().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("This Google account is already linked to another DecisionHub account.");
+        }
+
+        // 2. Check if the Google email belongs to another user
+        if (resolvedEmail != null && !resolvedEmail.isBlank() && !resolvedEmail.equalsIgnoreCase(user.getEmail())) {
+            java.util.Optional<User> existingWithEmail = userRepository.findByEmail(resolvedEmail);
+            if (existingWithEmail.isPresent() && !existingWithEmail.get().getId().equals(user.getId())) {
+                throw new IllegalArgumentException("The email address of this Google account (" + resolvedEmail + ") belongs to another DecisionHub account.");
+            }
+        }
+
+        user.setProviderId(resolvedProviderId);
+        user.setProvider("GOOGLE");
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(userEmail, "CONNECT_GOOGLE", "USER", user.getId(),
+                "Connected Google account ID: " + resolvedProviderId);
+
+        return mapToUserResponse(saved);
     }
 
     private boolean isAdmin(User user) {

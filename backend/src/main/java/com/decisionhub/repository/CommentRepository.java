@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -19,6 +20,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByAuthorId(Long authorId);
     List<Comment> findByParentId(Long parentId);
     List<Comment> findByParentId(Long parentId, Sort sort);
+
+    long countByCreatedAtGreaterThanEqual(LocalDateTime date);
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    long countByIsFlaggedTrue();
 
     @Query("SELECT c FROM Comment c WHERE c.decision.isDeleted = false " +
            "AND (c.decision.visibility = 'PUBLIC' OR (c.decision.owner.email = :email) OR (c.decision.community.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email))) " +

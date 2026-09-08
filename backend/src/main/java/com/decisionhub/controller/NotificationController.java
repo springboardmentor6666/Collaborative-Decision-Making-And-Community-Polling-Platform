@@ -1,5 +1,6 @@
 package com.decisionhub.controller;
 
+import com.decisionhub.dto.NotificationPreferenceDto;
 import com.decisionhub.dto.NotificationResponse;
 import com.decisionhub.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +44,19 @@ public class NotificationController {
     public ResponseEntity<Map<String, Long>> getUnreadCount(Authentication authentication) {
         long count = notificationService.getUnreadCount(authentication.getName());
         return ResponseEntity.ok(Map.of("unreadCount", count));
+    }
+
+    @GetMapping("/preferences")
+    @Operation(summary = "Get notification preferences", description = "Retrieves current user's category notification preferences")
+    public ResponseEntity<NotificationPreferenceDto> getPreferences(Authentication authentication) {
+        return ResponseEntity.ok(notificationService.getUserPreferences(authentication.getName()));
+    }
+
+    @PutMapping("/preferences")
+    @Operation(summary = "Update notification preferences", description = "Updates current user's category notification preferences")
+    public ResponseEntity<NotificationPreferenceDto> updatePreferences(@RequestBody NotificationPreferenceDto dto,
+                                                                      Authentication authentication) {
+        return ResponseEntity.ok(notificationService.updateUserPreferences(authentication.getName(), dto));
     }
 
     @PutMapping("/{id}/read")

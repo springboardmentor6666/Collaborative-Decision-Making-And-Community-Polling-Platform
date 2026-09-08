@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
+import { useRefresh } from '../context/RefreshContext';
 import {
   getAllUsersAdminApi,
   banUserAdminApi,
@@ -9,6 +11,7 @@ import {
   updateUserRoleAdminApi,
   getReportsAdminApi,
   resolveReportAdminApi,
+  deleteReportApi,
   getModerationFlagsApi,
   resolveModerationFlagApi,
   getAuditLogsAdminApi,
@@ -25,7 +28,13 @@ import Loader from '../components/Loader';
 export default function AdminPage() {
   const { user, accessToken } = useAuth();
   const { showError, showConfirm, showAlert } = useAlert();
-  const [activeTab, setActiveTab] = useState('users');
+  const { triggerRefresh } = useRefresh();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab');
+  const activeTab = ['users', 'moderation', 'audit', 'settings'].includes(currentTab) ? currentTab : 'users';
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   // State
   const [users, setUsers] = useState([]);
@@ -46,6 +55,12 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleRefresh = () => {
+      loadData();
+    };
+    window.addEventListener('decisionhub:refresh', handleRefresh);
+    return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
   }, [activeTab, accessToken]);
 
   const loadData = async () => {
@@ -161,9 +176,33 @@ export default function AdminPage() {
       await resolveReportAdminApi(reportId, accessToken);
       setStatusMessage({ text: 'Report marked as resolved.', type: 'success' });
       setReports((prev) => prev.filter((r) => r.id !== reportId));
+      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to resolve report.');
       setStatusMessage({ text: 'Failed to resolve report.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    const confirmed = await showConfirm({
+      title: 'Delete Content Report',
+      message: 'Are you sure you want to permanently delete this report? This will remove it from the moderation queue.',
+      confirmText: 'Delete Report',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
+
+    setActionLoading(`del-report-${reportId}`);
+    try {
+      await deleteReportApi(reportId, accessToken);
+      setStatusMessage({ text: 'Report deleted successfully.', type: 'success' });
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+      triggerRefresh();
+    } catch (err) {
+      showError(err, 'Failed to delete report.');
+      setStatusMessage({ text: 'Failed to delete report.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -175,6 +214,7 @@ export default function AdminPage() {
       await resolveModerationFlagApi(flagId, accessToken);
       setStatusMessage({ text: 'Moderation flag resolved.', type: 'success' });
       setFlags((prev) => prev.filter((f) => f.id !== flagId));
+      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to resolve flag.');
       setStatusMessage({ text: 'Failed to resolve flag.', type: 'error' });
@@ -237,26 +277,43 @@ export default function AdminPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
-                {[
-                  { id: 'users', label: 'Users', icon: '👥' },
-                  { id: 'moderation', label: 'Moderation', icon: '🚩' },
-                  { id: 'audit', label: 'Audit Logs', icon: '📋' },
-                  { id: 'settings', label: 'Settings', icon: '⚙️' },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-alt'
-                    }`}
-                  >
-                    <span>{tab.icon}</span>
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  to="/admin/statistics"
+                  className="flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-2 text-xs font-bold text-text-secondary hover:text-text-primary hover:bg-surface-alt transition shadow-xs"
+                >
+                  <span>📊</span>
+                  <span>Statistics</span>
+                </Link>
+                <Link
+                  to="/admin/reports"
+                  className="flex items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3 py-2 text-xs font-bold text-text-secondary hover:text-text-primary hover:bg-surface-alt transition shadow-xs"
+                >
+                  <span>🚩</span>
+                  <span>Reports Management</span>
+                </Link>
+
+                <div className="flex items-center gap-1 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
+                  {[
+                    { id: 'users', label: 'Users', icon: '👥' },
+                    { id: 'moderation', label: 'Quick Flags', icon: '⚡' },
+                    { id: 'audit', label: 'Audit Logs', icon: '📋' },
+                    { id: 'settings', label: 'Settings', icon: '⚙️' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
+                        activeTab === tab.id
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface-alt'
+                      }`}
+                    >
+                      <span>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -495,13 +552,23 @@ export default function AdminPage() {
                                 <p className="text-sm font-semibold text-text-primary">{report.reason}</p>
                               </div>
 
-                              <button
-                                onClick={() => handleResolveReport(report.id)}
-                                disabled={actionLoading === `report-${report.id}`}
-                                className="rounded-xl bg-primary px-3.5 py-1.5 text-xs font-bold text-white hover:bg-primary-hover disabled:opacity-60 shadow-xs"
-                              >
-                                {actionLoading === `report-${report.id}` ? 'Resolving...' : '✓ Mark Resolved'}
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleResolveReport(report.id)}
+                                  disabled={actionLoading === `report-${report.id}`}
+                                  className="rounded-xl bg-primary px-3.5 py-1.5 text-xs font-bold text-white hover:bg-primary-hover disabled:opacity-60 shadow-xs"
+                                >
+                                  {actionLoading === `report-${report.id}` ? 'Resolving...' : '✓ Mark Resolved'}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteReport(report.id)}
+                                  disabled={actionLoading === `del-report-${report.id}`}
+                                  className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:border-red-800 disabled:opacity-60 transition shadow-xs"
+                                  title="Delete report"
+                                >
+                                  {actionLoading === `del-report-${report.id}` ? '...' : '🗑️ Delete'}
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>

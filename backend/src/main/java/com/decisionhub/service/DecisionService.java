@@ -223,6 +223,9 @@ public class DecisionService {
     public DecisionResponse getDecisionById(Long id) {
         Decision decision = decisionRepository.findById(id)
                 .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + id));
+        if (Boolean.TRUE.equals(decision.getIsDeleted())) {
+            throw new DecisionNotFoundException("Decision not found or has been deleted with id: " + id);
+        }
         return mapToDecisionResponse(decision);
     }
 
@@ -368,6 +371,39 @@ public class DecisionService {
         }
 
         return new OptionDto(savedOption.getId(), savedOption.getLabel(), savedOption.getDescription(), 0L);
+    }
+
+    @Transactional
+    public void deleteOption(Long decisionId, Long optionId, String userEmail) {
+        Decision decision = decisionRepository.findById(decisionId)
+                .orElseThrow(() -> new DecisionNotFoundException("Decision not found with id: " + decisionId));
+
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        boolean isOwner = decision.getOwner() != null && decision.getOwner().getEmail().equalsIgnoreCase(userEmail);
+        boolean isAdmin = requestingUser.getRole() != null && requestingUser.getRole().toUpperCase().contains("ADMIN");
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to delete options from this decision");
+        }
+
+        DecisionOption option = decisionOptionRepository.findById(optionId)
+                .orElseThrow(() -> new IllegalArgumentException("Option not found with id: " + optionId));
+
+        if (!option.getDecision().getId().equals(decisionId)) {
+            throw new IllegalArgumentException("Option does not belong to the specified decision");
+        }
+
+        // Delete associated poll options and votes
+        List<PollOption> pollOptions = pollOptionRepository.findByOptionId(optionId);
+        for (PollOption po : pollOptions) {
+            voteRepository.deleteByPollOptionId(po.getId());
+            pollOptionRepository.delete(po);
+        }
+
+        decision.getOptions().remove(option);
+        decisionOptionRepository.delete(option);
     }
 
     @Transactional

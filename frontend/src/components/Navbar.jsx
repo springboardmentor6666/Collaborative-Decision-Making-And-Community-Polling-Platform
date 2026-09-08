@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';
-import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
 import CommandMenu from './CommandMenu';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 
@@ -108,20 +107,6 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
-              to="/analysis"
-              className={navLinkClass('/analysis')}
-              style={isActive('/analysis') ? { color: 'var(--primary)', backgroundColor: 'var(--primary-soft)' } : { color: 'var(--text-secondary)' }}
-            >
-              Analysis
-            </Link>
-            <Link
-              to="/analytics"
-              className={navLinkClass('/analytics')}
-              style={isActive('/analytics') ? { color: 'var(--primary)', backgroundColor: 'var(--primary-soft)' } : { color: 'var(--text-secondary)' }}
-            >
-              Analytics
-            </Link>
-            <Link
               to="/communities"
               className={navLinkClass('/communities')}
               style={isActive('/communities') ? { color: 'var(--primary)', backgroundColor: 'var(--primary-soft)' } : { color: 'var(--text-secondary)' }}
@@ -160,8 +145,8 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Right: Search button + user + logout */}
-          <div className="hidden items-center gap-3 md:flex">
+          {/* Right: Search button + Notification Bell + Refresh + user + logout */}
+          <div className="hidden items-center gap-2.5 md:flex">
             {/* Global Search Button */}
             <button
               type="button"
@@ -178,7 +163,8 @@ export default function Navbar() {
               </kbd>
             </button>
 
-            <div className="flex items-center gap-2.5">
+            {/* Profile */}
+            <Link to="/profile" className="flex items-center gap-2 rounded-xl p-1 hover:bg-surface-alt transition">
               {user?.avatar ? (
                 <img
                   src={user.avatar}
@@ -191,11 +177,11 @@ export default function Navbar() {
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
               )}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block text-left">
                 <p className="text-sm font-semibold leading-tight text-text-primary">{user?.name || 'User'}</p>
                 <p className="text-xs leading-tight text-muted max-w-[120px] truncate">{user?.email}</p>
               </div>
-            </div>
+            </Link>
 
             <button
               onClick={logout}
@@ -205,23 +191,23 @@ export default function Navbar() {
             </button>
           </div>
           
-          {/* Mobile Profile Icon (Visible when drawer is closed) */}
-          <div className="flex md:hidden">
-             {user?.avatar ? (
+          {/* Mobile Profile & Actions (Visible when drawer is closed) */}
+          <div className="flex items-center gap-1.5 md:hidden">
+            <Link to="/profile" className="flex">
+              {user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt={user.name || user.email}
                   className="h-8 w-8 rounded-full bg-primary-soft"
-                  onClick={() => setIsMobileMenuOpen(true)}
                 />
               ) : (
                 <div 
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
-                  onClick={() => setIsMobileMenuOpen(true)}
                 >
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
               )}
+            </Link>
           </div>
         </div>
       </motion.header>
@@ -303,11 +289,22 @@ export default function Navbar() {
               {/* Navigation Links */}
               <nav className="mb-8 flex flex-col gap-2">
                 <Link to="/dashboard" className={mobileNavLinkClass('/dashboard')}>Dashboard</Link>
-                <Link to="/analysis" className={mobileNavLinkClass('/analysis')}>Decision Analysis</Link>
-                <Link to="/analytics" className={mobileNavLinkClass('/analytics')}>Creator Analytics</Link>
                 <Link to="/communities" className={mobileNavLinkClass('/communities')}>Communities</Link>
                 <Link to="/decisions/create" className={mobileNavLinkClass('/decisions/create')}>Create Decision</Link>
                 <Link to="/profile" className={mobileNavLinkClass('/profile')}>Profile Settings</Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    triggerRefresh();
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm font-bold text-text-primary hover:bg-surface-alt transition"
+                >
+                  <svg className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-primary' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Refresh App Data</span>
+                </button>
                 {user?.role?.toUpperCase() === 'ADMIN' && (
                   <Link
                     to="/admin"

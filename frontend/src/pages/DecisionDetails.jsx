@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAlert } from '../context/AlertContext';
+import { useRefresh } from '../context/RefreshContext';
 import {
   fetchDecisionById,
   deleteDecisionApi,
   addDecisionOptionApi,
+  deleteDecisionOptionApi,
   closeDecisionApi,
   getMyVotesAnalysisApi,
   recordImpressionApi,
@@ -34,6 +36,7 @@ export default function DecisionDetails() {
   const { user, accessToken } = useAuth();
   const { showToast } = useToast();
   const { showError, showConfirm } = useAlert();
+  const { triggerRefresh } = useRefresh();
 
   const [decision, setDecision] = useState(null);
   const [userVote, setUserVote] = useState(null);
@@ -64,6 +67,12 @@ export default function DecisionDetails() {
 
   useEffect(() => {
     fetchData();
+
+    const handleRefresh = () => {
+      fetchData();
+    };
+    window.addEventListener('decisionhub:refresh', handleRefresh);
+    return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
   }, [id, accessToken]);
 
   const fetchData = async () => {
@@ -126,6 +135,7 @@ export default function DecisionDetails() {
     try {
       await deleteAttachmentFileApi(fileId, accessToken);
       setAttachments(prev => prev.filter(f => f.id !== fileId));
+      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to delete attachment.');
     }
@@ -142,7 +152,8 @@ export default function DecisionDetails() {
     try {
       setDeleting(true);
       await deleteDecisionApi(id, accessToken);
-      navigate('/dashboard');
+      triggerRefresh();
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       showError(err, 'Failed to delete decision.');
     } finally {
@@ -184,6 +195,25 @@ export default function DecisionDetails() {
       showError(err, 'Failed to add option.');
     } finally {
       setAddingOption(false);
+    }
+  };
+
+  const handleDeleteOption = async (optionId) => {
+    const confirmed = await showConfirm({
+      title: 'Delete Option',
+      message: 'Are you sure you want to delete this option? Any votes cast for this option will also be removed.',
+      confirmText: 'Delete Option',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteDecisionOptionApi(id, optionId, accessToken);
+      showToast('Option deleted successfully', 'success');
+      await fetchData();
+      triggerRefresh();
+    } catch (err) {
+      showError(err, 'Failed to delete option.');
     }
   };
 
@@ -647,18 +677,33 @@ export default function DecisionDetails() {
                                 : 'border-border-default bg-surface-alt text-text-primary'
                             }`}
                           >
-                            <span className="flex items-center gap-2.5">
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-border-default bg-surface text-[11px] font-bold text-muted">
+                            <span className="flex items-center gap-2.5 min-w-0">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border-default bg-surface text-[11px] font-bold text-muted">
                                 {idx + 1}
                               </span>
-                              {opt.optionText}
+                              <span className="truncate">{opt.optionText}</span>
                             </span>
 
-                            {isUserOption && (
-                              <span className="rounded-lg bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
-                                Your Choice
-                              </span>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {isUserOption && (
+                                <span className="rounded-lg bg-primary px-2 py-0.5 text-[10px] font-bold text-white shrink-0">
+                                  Your Choice
+                                </span>
+                              )}
+
+                              {isOpen && (isCreator || user?.role?.toUpperCase() === 'ADMIN') && (decision.poll.options?.length > 2) && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteOption(opt.id)}
+                                  className="rounded-lg p-1 text-muted hover:text-red-600 hover:bg-red-500/10 transition shrink-0"
+                                  title="Delete this option"
+                                >
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         );
                       })}

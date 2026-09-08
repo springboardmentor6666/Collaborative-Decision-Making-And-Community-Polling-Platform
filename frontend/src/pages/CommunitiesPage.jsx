@@ -77,9 +77,25 @@ export default function CommunitiesPage() {
         });
     }, 300);
 
+    const handleRefresh = () => {
+      Promise.all([
+        getCommunitiesApi(searchQuery, accessToken),
+        getCategoriesApi(accessToken).catch(() => []),
+        accessToken ? getPendingCommunityInvitesApi(accessToken).catch(() => []) : Promise.resolve([]),
+      ]).then(([commData, catData, invitesData]) => {
+        if (isSubscribed) {
+          setCommunities(Array.isArray(commData) ? commData : []);
+          setCategories(Array.isArray(catData) ? catData : []);
+          setPendingInvites(Array.isArray(invitesData) ? invitesData : []);
+        }
+      });
+    };
+    window.addEventListener('decisionhub:refresh', handleRefresh);
+
     return () => {
       isSubscribed = false;
       clearTimeout(timer);
+      window.removeEventListener('decisionhub:refresh', handleRefresh);
     };
   }, [searchQuery, accessToken]);
 

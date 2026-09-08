@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,12 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
     List<Community> findByNameContainingIgnoreCase(String keyword);
 
     List<Community> findByVisibilityAndNameContainingIgnoreCase(String visibility, String keyword);
+
+    long countByVisibilityIgnoreCase(String visibility);
+
+    long countByCreatedAtGreaterThanEqual(LocalDateTime date);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     @Query("SELECT c FROM Community c WHERE (c.visibility = 'PUBLIC' OR c.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email)) AND LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Community> searchCommunitiesForUser(@Param("keyword") String keyword, @Param("email") String email);

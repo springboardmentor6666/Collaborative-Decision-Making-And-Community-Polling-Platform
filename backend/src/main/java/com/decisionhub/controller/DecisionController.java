@@ -94,6 +94,14 @@ public class DecisionController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{id}/options/{optionId}")
+    @Operation(summary = "Delete an option from a decision", description = "Deletes an option from a decision (Owner/admin only)")
+    public ResponseEntity<Void> deleteOption(@PathVariable Long id, @PathVariable Long optionId, Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        decisionService.deleteOption(id, optionId, email);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}/close")
     @Operation(summary = "Close a decision", description = "Manually transitions decision status to CLOSED (Owner/admin only)")
     public ResponseEntity<DecisionResponse> closeDecision(@PathVariable Long id, Authentication authentication) {

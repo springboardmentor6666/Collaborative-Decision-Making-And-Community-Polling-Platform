@@ -1,5 +1,25 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loginApi, registerApi, googleLoginApi, logoutApi, refreshSessionApi } from '../api/axiosClient';
+import {
+  loginApi,
+  registerApi,
+  googleLoginApi,
+  logoutApi,
+  refreshSessionApi,
+  getCurrentUserApi,
+} from '../api/axiosClient';
+
+function isJwtExpired(token) {
+  if (!token) return true;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return false;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!payload.exp) return false;
+    return payload.exp * 1000 < Date.now();
+  } catch (e) {
+    return false;
+  }
+}
 
 const AuthContext = createContext(null);
 
@@ -10,8 +30,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   /**
-   * On initial mount / refresh: execute silent refresh call to restore session
-   * using secure short-lived in-memory access token strategy.
+   * On initial mount / refresh: execute silent refresh or restore session
    */
   useEffect(() => {
     let isMounted = true;
@@ -49,12 +68,47 @@ export function AuthProvider({ children }) {
         const storedToken = typeof window !== 'undefined' ? localStorage.getItem('decisionhub_token') : null;
         const storedUser = typeof window !== 'undefined' ? localStorage.getItem('decisionhub_user') : null;
 
-        if (storedToken && storedUser) {
+        if (storedToken && !isJwtExpired(storedToken)) {
           if (isMounted) {
             setAccessToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+              } catch (e) {
+                // Ignore parse error
+              }
+            }
+          }
+
+          // Fetch fresh user profile in background to keep permissions & data strictly synced
+          try {
+            const freshUser = await getCurrentUserApi(storedToken);
+            if (isMounted && freshUser) {
+              setUser(freshUser);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('decisionhub_user', JSON.stringify(freshUser));
+              }
+            }
+          } catch (fetchErr) {
+            // If token is rejected by backend (401), clear expired session
+            if (fetchErr.status === 401) {
+              if (isMounted) {
+                setAccessToken(null);
+                setUser(null);
+              }
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('decisionhub_token');
+                localStorage.removeItem('decisionhub_user');
+              }
+            }
           }
           return;
+        } else if (storedToken && isJwtExpired(storedToken)) {
+          // Token expired: clean up
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('decisionhub_token');
+            localStorage.removeItem('decisionhub_user');
+          }
         }
 
         const { accessToken: newToken, user: userData } = await refreshSessionApi();
@@ -76,8 +130,24 @@ export function AuthProvider({ children }) {
 
     initAuth();
 
+    // Listen for global session expiry from API responses
+    const handleSessionExpired = () => {
+      setAccessToken(null);
+      setUser(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('decisionhub_token');
+        localStorage.removeItem('decisionhub_user');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/signup' && window.location.pathname !== '/') {
+          window.location.assign('/login?expired=true');
+        }
+      }
+    };
+
+    window.addEventListener('decisionhub:session-expired', handleSessionExpired);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('decisionhub:session-expired', handleSessionExpired);
     };
   }, []);
 

@@ -19,6 +19,12 @@ export default function LoginPage() {
   const { login, loginWithGoogle, user, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, isLoading, navigate]);
+
   const handleLoginSubmit = async (event) => {
     event.preventDefault();
     setFormError('');

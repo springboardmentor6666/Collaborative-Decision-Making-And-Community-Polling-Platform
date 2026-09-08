@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
+import { useRefresh } from '../context/RefreshContext';
 import {
   getCommentsByDecisionApi,
   createCommentApi,
@@ -47,6 +48,7 @@ function formatRelativeTime(dateString) {
 export default function CommentSection({ decisionId, pollOptions = [], decisionOwnerEmail = null }) {
   const { user, accessToken } = useAuth();
   const { showError } = useAlert();
+  const { triggerRefresh } = useRefresh();
   const [sortBy, setSortBy] = useState('newest');
   const [activeTab, setActiveTab] = useState('COMMENTS'); // 'COMMENTS' | 'SUGGESTIONS' | 'RECOMMENDATIONS'
   
@@ -108,6 +110,12 @@ export default function CommentSection({ decisionId, pollOptions = [], decisionO
 
   useEffect(() => {
     loadAllData();
+
+    const handleRefreshEvent = () => {
+      loadAllData();
+    };
+    window.addEventListener('decisionhub:refresh', handleRefreshEvent);
+    return () => window.removeEventListener('decisionhub:refresh', handleRefreshEvent);
   }, [loadAllData]);
 
   // Set of expert user emails from recommendations
@@ -192,25 +200,53 @@ export default function CommentSection({ decisionId, pollOptions = [], decisionO
   };
 
   const handleReply = async (parentCommentId, content) => {
-    await replyToCommentApi(
-      parentCommentId,
-      {
-        decisionId: Number(decisionId),
-        content,
-      },
-      accessToken
-    );
-    await fetchComments();
+    try {
+      await replyToCommentApi(
+        parentCommentId,
+        {
+          decisionId: Number(decisionId),
+          content,
+        },
+        accessToken
+      );
+      await fetchComments();
+      triggerRefresh();
+    } catch (err) {
+      showError(err, 'Failed to submit reply.');
+    }
   };
 
   const handleEdit = async (commentId, content) => {
-    await updateCommentApi(commentId, { content }, accessToken);
-    await fetchComments();
+    try {
+      await updateCommentApi(commentId, { content }, accessToken);
+      await fetchComments();
+      triggerRefresh();
+    } catch (err) {
+      showError(err, 'Failed to update comment.');
+    }
   };
 
   const handleDelete = async (commentId) => {
-    await deleteCommentApi(commentId, accessToken);
-    await fetchComments();
+    try {
+      // Optimistically remove the comment from view immediately
+      const removeRecursively = (list, targetId) => {
+        if (!Array.isArray(list)) return [];
+        return list
+          .filter((c) => c.id !== targetId)
+          .map((c) => ({
+            ...c,
+            replies: c.replies ? removeRecursively(c.replies, targetId) : [],
+          }));
+      };
+      setComments((prev) => removeRecursively(prev, commentId));
+
+      await deleteCommentApi(commentId, accessToken);
+      await fetchComments();
+      triggerRefresh();
+    } catch (err) {
+      showError(err, 'Failed to delete comment.');
+      await fetchComments();
+    }
   };
 
   const totalComments = countAllComments(comments);

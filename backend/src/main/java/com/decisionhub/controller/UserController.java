@@ -149,4 +149,14 @@ public class UserController {
         UserResponse response = userService.cancelAccountDeletion(authentication.getName());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/me/connect-google")
+    @Operation(summary = "Connect Google Account", description = "Connects a Google account to current authenticated user")
+    public ResponseEntity<UserResponse> connectGoogleAccount(@RequestBody java.util.Map<String, String> body, Authentication authentication) {
+        String idToken = body.get("idToken");
+        String providerId = body.get("providerId");
+        String email = body.get("email");
+        UserResponse response = userService.connectGoogleAccount(authentication.getName(), idToken, providerId, email);
+        return ResponseEntity.ok(response);
+    }
 }

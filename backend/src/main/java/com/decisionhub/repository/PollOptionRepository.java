@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-// TODO: Add custom query methods for poll option management
 @Repository
 public interface PollOptionRepository extends JpaRepository<PollOption, Long> {
     List<PollOption> findByPollId(Long pollId);
+    List<PollOption> findByOptionId(Long optionId);
+    void deleteByOptionId(Long optionId);
 }

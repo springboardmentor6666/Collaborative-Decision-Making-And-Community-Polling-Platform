@@ -2,6 +2,7 @@ package com.decisionhub.security.oauth;
 
 import com.decisionhub.dto.AuthResponse;
 import com.decisionhub.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,21 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         }
 
         AuthResponse authResponse = userService.processOAuthLogin(provider, providerId, email, fullName, profileImage);
-        String redirectUrl = frontendUrl + "/login?token=" + URLEncoder.encode(authResponse.getToken(), StandardCharsets.UTF_8)
+
+        // Check if user initiated this from Profile to connect account
+        String returnTo = request.getParameter("returnTo");
+        if (returnTo == null && request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if ("dh_oauth_return_to".equals(c.getName())) {
+                    returnTo = c.getValue();
+                    break;
+                }
+            }
+        }
+
+        String targetPath = (returnTo != null && returnTo.contains("/profile")) ? "/profile?google_connected=true&" : "/login?";
+
+        String redirectUrl = frontendUrl + targetPath + "token=" + URLEncoder.encode(authResponse.getToken(), StandardCharsets.UTF_8)
                 + "&provider=" + provider.toLowerCase()
                 + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
                 + "&name=" + URLEncoder.encode(fullName == null ? email : fullName, StandardCharsets.UTF_8)

@@ -37,7 +37,8 @@ export default function DashboardPage() {
   const [loadingDecisions, setLoadingDecisions] = useState(true);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
-  useEffect(() => {
+  const loadDashboardData = () => {
+    setLoadingDecisions(true);
     Promise.all([
       fetchDecisions(accessToken).catch(() => []),
       getCategoriesApi(accessToken).catch(() => []),
@@ -50,6 +51,16 @@ export default function DashboardPage() {
       setDecisionTrends(trendsData || []);
       setLoadingDecisions(false);
     });
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+
+    const handleRefresh = () => {
+      loadDashboardData();
+    };
+    window.addEventListener('decisionhub:refresh', handleRefresh);
+    return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
   }, [accessToken]);
 
   // Derived popular categories if backend endpoint returns empty

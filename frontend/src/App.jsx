@@ -2,9 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { AlertProvider } from './context/AlertContext';
+import { RefreshProvider } from './context/RefreshContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import PageTransition from './components/PageTransition';
+import ErrorBoundary from './components/ErrorBoundary';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -20,6 +22,8 @@ import AnalysisPage from './pages/AnalysisPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import Profile from './pages/Profile';
 import AdminPage from './pages/AdminPage';
+import AdminStatisticsPage from './pages/AdminStatisticsPage';
+import AdminReportsPage from './pages/AdminReportsPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import CreateCommunity from './pages/CreateCommunity';
 import CommunityDetails from './pages/CommunityDetails';
@@ -124,12 +128,28 @@ function AppRoutes() {
           }
         />
 
-        {/* Admin Route */}
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
             <AdminRoute>
               <AdminPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/statistics"
+          element={
+            <AdminRoute>
+              <AdminStatisticsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <AdminRoute>
+              <AdminReportsPage />
             </AdminRoute>
           }
         />
@@ -204,9 +224,13 @@ export default function App() {
     <AuthProvider>
       <ToastProvider>
         <AlertProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <RefreshProvider>
+            <BrowserRouter>
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
+            </BrowserRouter>
+          </RefreshProvider>
         </AlertProvider>
       </ToastProvider>
     </AuthProvider>

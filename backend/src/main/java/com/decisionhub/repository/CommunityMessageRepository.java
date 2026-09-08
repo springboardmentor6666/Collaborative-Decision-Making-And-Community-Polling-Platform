@@ -18,4 +18,10 @@ public interface CommunityMessageRepository extends JpaRepository<CommunityMessa
     List<CommunityMessage> findByChannelIdAndIsPinnedTrue(Long channelId);
 
     List<CommunityMessage> findByChannelIdAndIsPinnedTrueAndIsDeletedFalse(Long channelId);
+
+    long countByIsDeletedFalse();
+
+    long countByCreatedAtGreaterThanEqual(LocalDateTime date);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }

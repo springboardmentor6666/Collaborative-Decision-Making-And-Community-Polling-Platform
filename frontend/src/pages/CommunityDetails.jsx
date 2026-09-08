@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
+import { useRefresh } from '../context/RefreshContext';
 import { 
   getCommunityByIdApi, 
   joinCommunityApi, 
@@ -28,6 +29,7 @@ export default function CommunityDetails() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
   const { showError, showConfirm } = useAlert();
+  const { triggerRefresh } = useRefresh();
   
   const [community, setCommunity] = useState(null);
   const [members, setMembers] = useState([]);
@@ -179,10 +181,19 @@ export default function CommunityDetails() {
   };
 
   const handleDeleteCommunity = async () => {
+    const confirmed = await showConfirm({
+      title: 'Delete Community',
+      message: 'Are you sure you want to delete this community? All community channels, discussions, and resources will be removed.',
+      confirmText: 'Delete Community',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
+
     setActionLoading(true);
     try {
       await deleteCommunityApi(id, accessToken);
-      navigate('/communities');
+      triggerRefresh();
+      navigate('/communities', { replace: true });
     } catch (err) {
       showError(err, 'Failed to delete community.');
       setActionLoading(false);

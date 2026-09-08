@@ -50,6 +50,13 @@ async function request(endpoint, options = {}) {
       const error = new Error(errorData.message || `Request failed with status ${response.status}`);
       error.status = response.status;
       error.data = errorData;
+
+      if (response.status === 401) {
+        if (typeof window !== 'undefined' && !endpoint.includes('/api/auth/login') && !endpoint.includes('/api/auth/refresh')) {
+          window.dispatchEvent(new CustomEvent('decisionhub:session-expired', { detail: errorData }));
+        }
+      }
+
       throw error;
     }
     if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -581,6 +588,89 @@ export async function cancelUserDeletionAdminApi(userId, token) {
 }
 
 /**
+ * Admin Statistics APIs
+ */
+export async function getAdminStatsOverviewApi(token) {
+  return await request('/api/admin/stats/overview', { token });
+}
+
+export async function getAdminStatsTimeSeriesApi(params = {}, token) {
+  const queryParams = new URLSearchParams();
+  if (params.range) queryParams.append('range', params.range);
+  if (params.startDate) queryParams.append('startDate', params.startDate);
+  if (params.endDate) queryParams.append('endDate', params.endDate);
+  const qs = queryParams.toString() ? `?${queryParams.toString()}` : '';
+  return await request(`/api/admin/stats/timeseries${qs}`, { token });
+}
+
+/**
+ * Admin Report & Moderation Management APIs
+ */
+export async function getAdminReportsPagedApi(params = {}, token) {
+  const queryParams = new URLSearchParams();
+  if (params.status) queryParams.append('status', params.status);
+  if (params.contentType) queryParams.append('contentType', params.contentType);
+  if (params.search) queryParams.append('search', params.search);
+  if (params.page !== undefined) queryParams.append('page', params.page);
+  if (params.size !== undefined) queryParams.append('size', params.size);
+  if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+  if (params.sortDir) queryParams.append('sortDir', params.sortDir);
+  const qs = queryParams.toString() ? `?${queryParams.toString()}` : '';
+  return await request(`/api/admin/reports${qs}`, { token });
+}
+
+export async function getAdminReportByIdApi(reportId, token) {
+  return await request(`/api/admin/reports/${reportId}`, { token });
+}
+
+export async function moderateReportApi(reportId, moderationData, token) {
+  return await request(`/api/admin/reports/${reportId}/moderate`, {
+    method: 'POST',
+    body: {
+      action: moderationData.action, // NO_ACTION, TEMPORARY_REMOVAL, DIRECT_REMOVE, RESTORE
+      reason: moderationData.reason || '',
+      internalNote: moderationData.internalNote || '',
+    },
+    token,
+  });
+}
+
+/**
+ * User Content Reporting & Moderation Profile APIs
+ */
+export async function submitContentReportApi(reportData, token) {
+  return await request('/api/reports', {
+    method: 'POST',
+    body: {
+      reason: reportData.reason,
+      description: reportData.description || '',
+      contentType: reportData.contentType || 'DECISION',
+      contentId: reportData.contentId ? Number(reportData.contentId) : null,
+      reportedUserId: reportData.reportedUserId ? Number(reportData.reportedUserId) : null,
+    },
+    token,
+  });
+}
+
+export async function getMySubmittedReportsApi(token) {
+  try {
+    const data = await request('/api/reports/my-submissions', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function getMyModerationNoticesApi(token) {
+  try {
+    const data = await request('/api/reports/my-notices', { token });
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
  * Admin Management APIs
  */
 export async function getAllUsersAdminApi(token) {
@@ -636,6 +726,20 @@ export async function getReportsAdminApi(token) {
 export async function resolveReportAdminApi(reportId, token) {
   return await request(`/api/reports/${reportId}/resolve`, {
     method: 'PUT',
+    token,
+  });
+}
+
+export async function deleteReportApi(reportId, token) {
+  return await request(`/api/reports/${reportId}`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export async function adminDeleteReportApi(reportId, token) {
+  return await request(`/api/admin/reports/${reportId}`, {
+    method: 'DELETE',
     token,
   });
 }
@@ -900,8 +1004,8 @@ export async function getUnreadNotificationsApi(token) {
 
 export async function getUnreadNotificationCountApi(token) {
   try {
-    const data = await request('/api/notifications/count', { token });
-    return data?.unreadCount || 0;
+    const data = await request('/api/notifications/unread-count', { token });
+    return typeof data === 'number' ? data : (data?.count !== undefined ? data.count : (data?.unreadCount || 0));
   } catch (e) {
     return 0;
   }
@@ -1295,4 +1399,42 @@ export async function upvoteCommentApi(commentId, token) {
     // If endpoint fails or network error, return optimistic result
     return { upvoted: true };
   }
+}
+
+
+export async function getNotificationPreferencesApi(token) {
+  return await request('/api/notifications/preferences', { token });
+}
+
+export async function updateNotificationPreferencesApi(preferences, token) {
+  return await request('/api/notifications/preferences', {
+    method: 'PUT',
+    body: preferences,
+    token,
+  });
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Google Account Connection for Profile
+ * ─────────────────────────────────────────────────────────
+ */
+export async function connectGoogleAccountApi(data, token) {
+  return await request('/api/users/me/connect-google', {
+    method: 'POST',
+    body: data,
+    token,
+  });
+}
+
+/**
+ * ─────────────────────────────────────────────────────────
+ * Decision Option Deletion
+ * ─────────────────────────────────────────────────────────
+ */
+export async function deleteDecisionOptionApi(decisionId, optionId, token) {
+  return await request(`/api/decisions/${decisionId}/options/${optionId}`, {
+    method: 'DELETE',
+    token,
+  });
 }

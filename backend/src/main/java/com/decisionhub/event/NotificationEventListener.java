@@ -35,6 +35,12 @@ public class NotificationEventListener {
             return;
         }
 
+        // Check if user has opted out of this category
+        if (!notificationService.isNotificationAllowed(user, event.getType())) {
+            logger.debug("Notification event suppressed by preference: type={}, user={}", event.getType(), user.getEmail());
+            return;
+        }
+
         logger.info("Handling notification event: type={}, user={}", event.getType(), user.getEmail());
 
         // 1. Create in-app notification

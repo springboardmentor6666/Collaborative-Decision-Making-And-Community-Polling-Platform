@@ -32,7 +32,7 @@ export default function CommentItem({
   onDelete,
   depth = 0,
 }) {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const { showError, showConfirm } = useAlert();
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -62,10 +62,17 @@ export default function CommentItem({
     (currentUserId && author.id === currentUserId) ||
     (currentUserEmail && author.email?.toLowerCase() === currentUserEmail.toLowerCase());
 
-  const isDecisionCreator =
+  const isDecisionOwner =
     decisionOwnerEmail &&
-    author.email &&
-    author.email.toLowerCase() === decisionOwnerEmail.toLowerCase();
+    currentUserEmail &&
+    decisionOwnerEmail.toLowerCase() === currentUserEmail.toLowerCase();
+
+  const isAdminOrMod = user?.role && (
+    user.role.toUpperCase().includes('ADMIN') ||
+    user.role.toUpperCase().includes('MODERATOR')
+  );
+
+  const canDelete = isAuthor || isDecisionOwner || isAdminOrMod;
 
   const handleUpvote = async () => {
     if (hasUpvoted) return;
@@ -85,7 +92,9 @@ export default function CommentItem({
     if (!replyText.trim() || submittingReply) return;
     try {
       setSubmittingReply(true);
-      await onReply(comment.id, replyText.trim());
+      if (typeof onReply === 'function') {
+        await onReply(comment.id, replyText.trim());
+      }
       setReplyText('');
       setIsReplying(false);
     } catch (err) {
@@ -100,7 +109,9 @@ export default function CommentItem({
     if (!editText.trim() || submittingEdit) return;
     try {
       setSubmittingEdit(true);
-      await onEdit(comment.id, editText.trim());
+      if (typeof onEdit === 'function') {
+        await onEdit(comment.id, editText.trim());
+      }
       setIsEditing(false);
     } catch (err) {
       showError(err, 'Failed to update comment.');
@@ -118,7 +129,9 @@ export default function CommentItem({
     });
     if (!confirmed) return;
     try {
-      await onDelete(comment.id);
+      if (typeof onDelete === 'function') {
+        await onDelete(comment.id);
+      }
     } catch (err) {
       showError(err, 'Failed to delete comment.');
     }
@@ -188,25 +201,25 @@ export default function CommentItem({
           {/* Actions: Edit, Delete, Report */}
           <div className="flex items-center gap-1 shrink-0 text-xs">
             {isAuthor && !isEditing && (
-              <>
-                <button
-                  onClick={() => {
-                    setEditText(comment.content || '');
-                    setIsEditing(true);
-                  }}
-                  className="px-2 py-1 rounded-lg font-semibold text-secondary hover:text-text-primary hover:bg-surface-alt transition"
-                  title="Edit comment"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-2 py-1 rounded-lg font-semibold text-red-500 hover:text-red-600 hover:bg-red-500/10 transition"
-                  title="Delete comment"
-                >
-                  Delete
-                </button>
-              </>
+              <button
+                onClick={() => {
+                  setEditText(comment.content || '');
+                  setIsEditing(true);
+                }}
+                className="px-2 py-1 rounded-lg font-semibold text-secondary hover:text-text-primary hover:bg-surface-alt transition"
+                title="Edit comment"
+              >
+                Edit
+              </button>
+            )}
+            {canDelete && !isEditing && (
+              <button
+                onClick={handleDelete}
+                className="px-2 py-1 rounded-lg font-semibold text-red-500 hover:text-red-600 hover:bg-red-500/10 transition"
+                title="Delete comment"
+              >
+                Delete
+              </button>
             )}
             <button
               onClick={() => setShowReportModal(true)}

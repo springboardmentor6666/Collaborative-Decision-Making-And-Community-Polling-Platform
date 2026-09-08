@@ -197,7 +197,7 @@ export function AlertProvider({ children }) {
   }, [showError]);
 
   return (
-    <AlertContext.Provider value={{ showAlert, showError, showConfirm, closeAlert }}>
+    <AlertContext.Provider value={{ showAlert, showError, showConfirm, confirm: showConfirm, closeAlert }}>
       {children}
       <AlertPopup
         isOpen={alertState.isOpen}

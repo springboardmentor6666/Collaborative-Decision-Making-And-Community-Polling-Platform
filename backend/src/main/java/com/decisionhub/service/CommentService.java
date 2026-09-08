@@ -256,19 +256,49 @@ public class CommentService {
         User requestingUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
-        boolean isAuthor = comment.getAuthor().getEmail().equals(userEmail);
+        // 1. Author check (case-insensitive & null-safe)
+        boolean isAuthor = comment.getAuthor() != null &&
+                comment.getAuthor().getEmail() != null &&
+                comment.getAuthor().getEmail().trim().equalsIgnoreCase(userEmail.trim());
+
+        // 2. Decision owner check (decision creators can moderate comments on their decision)
+        boolean isDecisionOwner = comment.getDecision() != null &&
+                comment.getDecision().getOwner() != null &&
+                comment.getDecision().getOwner().getEmail() != null &&
+                comment.getDecision().getOwner().getEmail().trim().equalsIgnoreCase(userEmail.trim());
+
+        // 3. Platform Admin or Moderator check
         boolean isModeratorOrAdmin = requestingUser.getRole() != null && (
                 requestingUser.getRole().equalsIgnoreCase("MODERATOR") ||
                 requestingUser.getRole().equalsIgnoreCase("ADMIN") ||
                 requestingUser.getRole().toUpperCase().contains("ADMIN") ||
-                requestingUser.getRole().toUpperCase().contains("MODERATOR")
+                requestingUser.getRole().toUpperCase().contains("MODERATOR") ||
+                requestingUser.getRole().toUpperCase().contains("SUPERADMIN")
         );
 
-        if (!isAuthor && !isModeratorOrAdmin) {
+        if (!isAuthor && !isDecisionOwner && !isModeratorOrAdmin) {
             throw new org.springframework.security.access.AccessDeniedException("You are not authorized to delete this comment");
         }
 
+        // 4. Clean up reactions on this comment and all child replies recursively
+        List<Long> commentIdsToDelete = new java.util.ArrayList<>();
+        collectAllCommentIds(comment, commentIdsToDelete);
+        if (!commentIdsToDelete.isEmpty()) {
+            commentReactionRepository.deleteByCommentIdIn(commentIdsToDelete);
+        }
+
+        // 5. Delete the comment
         commentRepository.delete(comment);
+    }
+
+    private void collectAllCommentIds(Comment c, List<Long> ids) {
+        if (c == null) return;
+        ids.add(c.getId());
+        if (c.getReplies() != null && !c.getReplies().isEmpty()) {
+            for (Comment reply : c.getReplies()) {
+                collectAllCommentIds(reply, ids);
+            }
+        }
     }
 
     public CommentResponse mapToCommentResponse(Comment comment) {

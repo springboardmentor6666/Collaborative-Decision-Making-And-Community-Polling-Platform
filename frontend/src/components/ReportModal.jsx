@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { flagContentApi } from '../api/axiosClient';
+import { flagContentApi, submitContentReportApi } from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 
 const REPORT_REASONS = [
@@ -38,7 +38,16 @@ export default function ReportModal({
       : selectedReason;
 
     try {
-      await flagContentApi(targetType, targetId, fullReason.substring(0, 255), accessToken);
+      await Promise.allSettled([
+        submitContentReportApi({
+          contentType: targetType,
+          contentId: targetId,
+          reason: selectedReason,
+          description: customNotes.trim(),
+        }, accessToken),
+        flagContentApi(targetType, targetId, fullReason.substring(0, 255), accessToken),
+      ]);
+
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
