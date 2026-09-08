@@ -15,12 +15,14 @@ import {
 import { toast } from 'sonner';
 import { MoreVertical, ShieldAlert, UserX, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useConfirm } from '@/context/ConfirmDialogContext';
 
 export function MemberManagement({ communityId }: { communityId: number }) {
   const { user: currentUser } = useAuth();
   const { data, isLoading, error } = useCommunityMembers(communityId, 0, 100);
   const updateRoleMutation = useUpdateMemberRole();
   const removeMutation = useRemoveMember();
+  const { confirm } = useConfirm();
 
   if (isLoading) return <div className="py-8 text-center text-muted-foreground">Loading members...</div>;
   if (error) return <div className="py-4 text-destructive">Failed to load members.</div>;
@@ -36,11 +38,22 @@ export function MemberManagement({ communityId }: { communityId: number }) {
     }
   };
 
-  const handleRemove = async (userId: number) => {
-    if (window.confirm('Are you sure you want to remove this member?')) {
+  const handleRemove = async (userId: number, username: string, fullName: string) => {
+    const confirmed = await confirm({
+      title: 'Remove Member',
+      message: `Are you sure you want to remove @${username} from this community? They will lose access to member discussions and polls.`,
+      confirmText: 'Remove Member',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      icon: 'user-x',
+      badgeText: 'Community Membership',
+      highlightContent: `Member: ${fullName} (@${username})`,
+    });
+
+    if (confirmed) {
       try {
         await removeMutation.mutateAsync({ communityId, userId });
-        toast.success('Member removed');
+        toast.success(`@${username} removed from community`);
       } catch {
         toast.error('Failed to remove member');
       }
@@ -97,7 +110,7 @@ export function MemberManagement({ communityId }: { communityId: number }) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-destructive focus:text-destructive"
-                      onClick={() => handleRemove(member.user.userId)}
+                      onClick={() => handleRemove(member.user.userId, member.user.username, member.user.fullName)}
                     >
                       <UserX className="mr-2 h-4 w-4" />
                       Remove from Community

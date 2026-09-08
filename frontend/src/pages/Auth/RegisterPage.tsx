@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { authService } from "@/services/authService";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -219,6 +220,24 @@ export default function RegisterPage() {
               )}
             </button>
           </form>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-slate-500 font-medium">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Sign-up */}
+          <GoogleLoginButton 
+            buttonText="signup_with" 
+            label="Sign up with Google"
+            onError={(errMsg) => setError(errMsg)}
+          />
 
           <div className="pt-4 text-center text-sm text-slate-500">
             Already have an account?{" "}

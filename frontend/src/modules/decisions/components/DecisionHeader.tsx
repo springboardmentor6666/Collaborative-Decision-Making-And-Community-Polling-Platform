@@ -10,6 +10,7 @@ import { useSavedDecisions } from "../hooks/useDecisions";
 import { useAuth } from "@/context/AuthContext";
 import { ReportDecisionModal } from "./ReportDecisionModal";
 import { BookmarkButton } from "./BookmarkButton";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 interface DecisionHeaderProps {
   decision: DecisionResponse;
@@ -19,6 +20,7 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { deleteDecision } = useDecisionMutations();
+  const { confirm } = useConfirm();
   const { data: savedData } = useSavedDecisions({ size: 100 });
   const isSaved = savedData?.content?.some((d: any) => d.decisionId === decision.decisionId) ?? false;
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -39,8 +41,19 @@ export function DecisionHeader({ decision }: DecisionHeaderProps) {
     minute: "2-digit",
   }) : "No deadline";
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this decision? This action cannot be undone.")) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Delete Decision Board',
+      message: `Are you sure you want to permanently delete "${decision.title}"? All votes, option rankings, and discussion comments will be deleted permanently.`,
+      confirmText: 'Delete Decision',
+      cancelText: 'Keep Decision',
+      variant: 'destructive',
+      icon: 'trash',
+      badgeText: 'Irreversible Action',
+      highlightContent: `Decision: "${decision.title}"`,
+    });
+
+    if (confirmed) {
       deleteDecision.mutate(decision.decisionId, {
         onSuccess: () => {
           navigate("/decisions");

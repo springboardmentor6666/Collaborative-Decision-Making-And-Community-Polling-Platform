@@ -3,6 +3,7 @@ package com.decisionhub.controller;
 import com.decisionhub.common.response.ApiResponse;
 import com.decisionhub.dto.request.AuthRequest;
 import com.decisionhub.dto.request.ForgotPasswordRequest;
+import com.decisionhub.dto.request.GoogleAuthRequest;
 import com.decisionhub.dto.request.RegisterRequest;
 import com.decisionhub.dto.request.ResetPasswordRequest;
 import com.decisionhub.dto.request.TokenRefreshRequest;
@@ -50,9 +51,24 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
     }
 
+    @PostMapping("/google")
+    @Operation(summary = "Authenticate with Google OAuth2 ID token")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(@Valid @RequestBody GoogleAuthRequest request, jakarta.servlet.http.HttpServletResponse httpServletResponse) {
+        AuthResponse response = authService.googleLogin(request);
+
+        jakarta.servlet.http.Cookie jwtCookie = new jakarta.servlet.http.Cookie("jwt_token", response.getAccessToken());
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(24 * 60 * 60); // 24 hours
+        httpServletResponse.addCookie(jwtCookie);
+
+        return ResponseEntity.ok(ApiResponse.success("Google authentication successful", response));
+    }
+
     @PostMapping("/refresh")
     @Operation(summary = "Refresh JWT access token using refresh token")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }

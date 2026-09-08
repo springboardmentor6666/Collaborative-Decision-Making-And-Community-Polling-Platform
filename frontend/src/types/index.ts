@@ -91,3 +91,54 @@ export interface DashboardStats {
   totalVotesCast: number;
   unreadNotifications: number;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword?: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface UserPreferences {
+  id?: number;
+  userId?: number;
+  emailDigest: 'INSTANT' | 'DAILY' | 'WEEKLY' | 'OFF';
+  notifyNewDecisions: boolean;
+  notifyVoteDeadlines: boolean;
+  notifyDecisionResults: boolean;
+  notifyCommentsAndMentions: boolean;
+  notifyElections: boolean;
+  inAppNotifications: boolean;
+  defaultVotingMode: 'PUBLIC' | 'ANONYMOUS';
+  activityVisibility: 'PUBLIC' | 'COMMUNITY_ONLY' | 'PRIVATE';
+  showBadges: boolean;
+  timezone: string;
+  theme: 'light' | 'dark' | 'system';
+  feedDensity: 'comfortable' | 'compact';
+}
+
+export interface UserPreferencesRequest {
+  emailDigest?: 'INSTANT' | 'DAILY' | 'WEEKLY' | 'OFF';
+  notifyNewDecisions?: boolean;
+  notifyVoteDeadlines?: boolean;
+  notifyDecisionResults?: boolean;
+  notifyCommentsAndMentions?: boolean;
+  notifyElections?: boolean;
+  inAppNotifications?: boolean;
+  defaultVotingMode?: 'PUBLIC' | 'ANONYMOUS';
+  activityVisibility?: 'PUBLIC' | 'COMMUNITY_ONLY' | 'PRIVATE';
+  showBadges?: boolean;
+  timezone?: string;
+  theme?: 'light' | 'dark' | 'system';
+  feedDensity?: 'comfortable' | 'compact';
+}
+
+export interface UserDataExportResponse {
+  profile: UserResponse;
+  preferences: UserPreferences;
+  totalCreatedDecisions: number;
+  totalSavedDecisions: number;
+  totalCommunitiesJoined: number;
+  exportGeneratedAt: string;
+  exportNotice: string;
+}
+

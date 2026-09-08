@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { CategoryFormModal } from "../components/CategoryFormModal";
 import { AdminNomineesList } from "../components/AdminNomineesList";
 import { VotingCategory } from "../types";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 export default function ElectionManagementDashboard() {
   const { id, eventId } = useParams<{ id: string; eventId: string }>();
@@ -26,6 +27,7 @@ export default function ElectionManagementDashboard() {
 
   const { data: election, isLoading: isLoadingElection } = useElection(parsedEventId);
   const { data: categories, isLoading: isLoadingCategories } = useElectionCategories(parsedEventId);
+  const { confirm } = useConfirm();
   
   const publishMutation = usePublishElection();
   const startMutation = useStartElection();
@@ -75,8 +77,19 @@ export default function ElectionManagementDashboard() {
     setIsCategoryModalOpen(true);
   };
 
-  const handleDeleteCategory = (categoryId: number) => {
-    if (confirm("Are you sure you want to delete this category?")) {
+  const handleDeleteCategory = async (categoryId: number, categoryName?: string) => {
+    const confirmed = await confirm({
+      title: 'Delete Category',
+      message: `Are you sure you want to delete "${categoryName || 'this category'}"? All candidate nominees registered under this category will also be removed.`,
+      confirmText: 'Delete Category',
+      cancelText: 'Keep Category',
+      variant: 'destructive',
+      icon: 'trash',
+      badgeText: 'Election Category',
+      highlightContent: categoryName ? `Category: "${categoryName}"` : undefined,
+    });
+
+    if (confirmed) {
       deleteCategoryMutation.mutate({ eventId: parsedEventId, categoryId }, {
         onSuccess: () => toast.success("Category deleted"),
         onError: (error: any) => toast.error(error.response?.data?.message || "Failed to delete category")
@@ -157,7 +170,7 @@ export default function ElectionManagementDashboard() {
                       <Button size="icon" variant="outline" onClick={() => handleEditCategory(category)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button size="icon" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteCategory(category.categoryId)}>
+                      <Button size="icon" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteCategory(category.categoryId, category.name)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

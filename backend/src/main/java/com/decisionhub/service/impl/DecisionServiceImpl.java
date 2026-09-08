@@ -5,8 +5,10 @@ import com.decisionhub.common.enums.DecisionVisibility;
 import com.decisionhub.common.enums.VoteType;
 import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.DecisionRequest;
+import com.decisionhub.dto.response.AttachmentResponse;
 import com.decisionhub.dto.response.DecisionResponse;
 
+import com.decisionhub.entity.Attachment;
 import com.decisionhub.entity.Community;
 import com.decisionhub.entity.Decision;
 import com.decisionhub.entity.Option;
@@ -14,8 +16,10 @@ import com.decisionhub.entity.User;
 import com.decisionhub.exception.EntityNotFoundException;
 import com.decisionhub.exception.ForbiddenException;
 import com.decisionhub.exception.ValidationException;
+import com.decisionhub.mapper.AttachmentMapper;
 import com.decisionhub.mapper.DecisionMapper;
 
+import com.decisionhub.repository.AttachmentRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.UserRepository;
@@ -30,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +42,13 @@ public class DecisionServiceImpl implements DecisionService {
 
     private final DecisionRepository decisionRepository;
     private final UserRepository userRepository;
-
     private final CommunityRepository communityRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final VoteRepository voteRepository;
     private final com.decisionhub.repository.CommentRepository commentRepository;
+    private final AttachmentRepository attachmentRepository;
     private final DecisionMapper decisionMapper;
+    private final AttachmentMapper attachmentMapper;
 
     @Override
     @Transactional
@@ -53,7 +59,6 @@ public class DecisionServiceImpl implements DecisionService {
 
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
-
 
         Community community = null;
         if (request.getCommunityId() != null) {
@@ -72,11 +77,13 @@ public class DecisionServiceImpl implements DecisionService {
         decision.setCreatedBy(author);
         decision.setCommunity(community);
         decision.setStatus(DecisionStatus.ACTIVE);
-        if (decision.getVisibility() == null) {
+        if (community != null && community.getVisibility() == com.decisionhub.common.enums.CommunityVisibility.PRIVATE) {
+            decision.setVisibility(DecisionVisibility.PRIVATE);
+        } else if (decision.getVisibility() == null) {
             decision.setVisibility(DecisionVisibility.PUBLIC);
         }
 
-        // Map options & pros/cons
+        // Map options
         if (request.getOptions() != null) {
             for (var optReq : request.getOptions()) {
                 Option option = Option.builder()
@@ -85,12 +92,21 @@ public class DecisionServiceImpl implements DecisionService {
                         .totalScore(BigDecimal.ZERO)
                         .build();
 
-
                 decision.addOption(option);
             }
         }
 
         Decision savedDecision = decisionRepository.save(decision);
+
+        // Link attachments if provided
+        if (request.getAttachmentIds() != null && !request.getAttachmentIds().isEmpty()) {
+            List<Attachment> attachments = attachmentRepository.findAllById(request.getAttachmentIds());
+            for (Attachment att : attachments) {
+                att.setDecision(savedDecision);
+            }
+            attachmentRepository.saveAll(attachments);
+        }
+
         return enrichDecisionResponse(savedDecision);
     }
 
@@ -109,6 +125,14 @@ public class DecisionServiceImpl implements DecisionService {
         if (request.getDeadline() != null) decision.setDeadline(request.getDeadline());
         if (request.getVisibility() != null) decision.setVisibility(request.getVisibility());
         if (request.getAllowAnonymousVote() != null) decision.setAllowAnonymousVote(request.getAllowAnonymousVote());
+
+        if (request.getAttachmentIds() != null && !request.getAttachmentIds().isEmpty()) {
+            List<Attachment> attachments = attachmentRepository.findAllById(request.getAttachmentIds());
+            for (Attachment att : attachments) {
+                att.setDecision(decision);
+            }
+            attachmentRepository.saveAll(attachments);
+        }
 
         return enrichDecisionResponse(decisionRepository.save(decision));
     }
@@ -138,7 +162,7 @@ public class DecisionServiceImpl implements DecisionService {
             }
         }
 
-        // Increment view count asynchronously/atomically
+        // Increment view count
         decisionRepository.incrementViewCount(decisionId);
 
         return enrichDecisionResponse(decision);
@@ -222,6 +246,16 @@ public class DecisionServiceImpl implements DecisionService {
                 optRes.setVoteCount(optVotes);
             }
         }
+
+        // Populate attachments
+        List<Attachment> attachments = attachmentRepository.findByDecisionDecisionId(decision.getDecisionId());
+        if (attachments != null && !attachments.isEmpty()) {
+            List<AttachmentResponse> attachmentResponses = attachments.stream()
+                    .map(attachmentMapper::toResponse)
+                    .toList();
+            response.setAttachments(attachmentResponses);
+        }
+
         return response;
     }
 }

@@ -17,5 +17,7 @@ public interface SavedDecisionRepository extends JpaRepository<SavedDecision, Lo
 
     boolean existsByUserUserIdAndDecisionDecisionId(Long userId, Long decisionId);
 
+    long countByUserUserId(Long userId);
+
     void deleteByUserUserIdAndDecisionDecisionId(Long userId, Long decisionId);
 }

@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Users, Globe, Lock, Settings, Calendar, Shield, ArrowRight, Trash2, Loader2 } from "lucide-react";
+import { Users, Globe, Lock, Settings, Calendar, Shield, ArrowRight, Trash2, Loader2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommunityResponse, CommunityMemberResponse } from "../types/community";
 import { JoinButton } from "./JoinButton";
 import { useAuth } from "@/context/AuthContext";
 import { useCommunityMutations } from "../hooks/useCommunityMutations";
+import { ReportCommunityModal } from "./ReportCommunityModal";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 interface CommunityHeaderProps {
   community: CommunityResponse;
@@ -17,13 +19,26 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
   const { user } = useAuth();
   const navigate = useNavigate();
   const { deleteCommunity } = useCommunityMutations();
+  const { confirm } = useConfirm();
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   
   const isOwner = user?.userId === community.owner.userId;
   const isAdmin = user?.role === "ROLE_ADMIN";
   const canEdit = isOwner || isAdmin;
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this community? This action cannot be undone.")) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: `Delete Community`,
+      message: `Are you sure you want to permanently delete "${community.name}"? This action cannot be undone and will delete all associated decisions, polls, elections, and member discussions.`,
+      confirmText: 'Delete Community',
+      cancelText: 'Keep Community',
+      variant: 'destructive',
+      icon: 'trash',
+      badgeText: 'Irreversible Community Deletion',
+      highlightContent: `Community: "${community.name}" (${community.memberCount || 0} members)`,
+    });
+
+    if (confirmed) {
       deleteCommunity.mutate(community.communityId, {
         onSuccess: () => navigate("/communities")
       });
@@ -93,15 +108,34 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
                 Delete Community
               </Button>
             ) : (
-              <JoinButton 
-                communityId={community.communityId} 
-                membership={membership} 
-                communityVisibility={community.visibility as any}
-                className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold" 
-              />
+              <>
+                <JoinButton 
+                  communityId={community.communityId} 
+                  membership={membership} 
+                  communityVisibility={community.visibility as any}
+                  className="flex-1 md:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold" 
+                />
+                {user && (
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => setIsReportModalOpen(true)}
+                  >
+                    <Flag className="w-4 h-4 mr-2" />
+                    Report
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
+
+        <ReportCommunityModal
+          communityId={community.communityId}
+          communityName={community.name}
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+        />
 
         <div>
           <div className="flex items-center gap-3 mb-2">

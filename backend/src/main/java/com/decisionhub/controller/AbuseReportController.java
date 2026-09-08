@@ -45,6 +45,28 @@ public class AbuseReportController {
         return ResponseEntity.ok(ApiResponse.success("Decision reported successfully", response));
     }
 
+    @PostMapping("/comment/{commentId}")
+    @Operation(summary = "Report a comment for abuse, harassment, or violations")
+    public ResponseEntity<ApiResponse<AbuseReportResponse>> reportComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody AbuseReportRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        
+        AbuseReportResponse response = abuseReportService.reportComment(commentId, request, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Comment reported successfully", response));
+    }
+
+    @PostMapping("/community/{communityId}/report")
+    @Operation(summary = "Report a community for scam, spam, harassment, or violations")
+    public ResponseEntity<ApiResponse<AbuseReportResponse>> reportCommunity(
+            @PathVariable Long communityId,
+            @Valid @RequestBody AbuseReportRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        
+        AbuseReportResponse response = abuseReportService.reportCommunity(communityId, request, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Community reported successfully", response));
+    }
+
     @GetMapping("/community/{communityId}")
     @Operation(summary = "Get abuse reports for a community (Owner/Moderator only)")
     public ResponseEntity<ApiResponse<Page<AbuseReportResponse>>> getCommunityReports(

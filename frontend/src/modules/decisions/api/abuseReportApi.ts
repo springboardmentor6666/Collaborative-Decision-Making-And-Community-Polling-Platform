@@ -1,7 +1,7 @@
 import axiosInstance from "@/api/axios";
 import { PagedResponse, UserResponse } from "@/types";
 
-export type AbuseReason = 'ABUSE' | 'RESTRICTED_ADULT' | 'SPAM' | 'OTHER';
+export type AbuseReason = 'ABUSE' | 'HARASSMENT' | 'IRRELEVANT' | 'RESTRICTED_ADULT' | 'SPAM' | 'SCAM' | 'MISLEADING' | 'OTHER';
 export type AbuseReportStatus = 'PENDING' | 'RESOLVED' | 'DISMISSED';
 
 export interface AbuseReportRequest {
@@ -11,10 +11,15 @@ export interface AbuseReportRequest {
 
 export interface AbuseReportResponse {
   reportId: number;
-  decisionId: number;
-  decisionTitle: string;
+  decisionId?: number;
+  decisionTitle?: string;
+  decisionDescription?: string;
+  commentId?: number;
+  commentMessage?: string;
   communityId?: number;
   communityName?: string;
+  communityDescription?: string;
+  targetAuthor?: UserResponse;
   reportedBy: UserResponse;
   reason: AbuseReason;
   description?: string;
@@ -29,6 +34,16 @@ const API_PREFIX = "/abuse-reports";
 export const abuseReportApi = {
   reportDecision: async (decisionId: number, data: AbuseReportRequest): Promise<AbuseReportResponse> => {
     const response = await axiosInstance.post(`${API_PREFIX}/decision/${decisionId}`, data);
+    return response.data.data;
+  },
+
+  reportComment: async (commentId: number, data: AbuseReportRequest): Promise<AbuseReportResponse> => {
+    const response = await axiosInstance.post(`${API_PREFIX}/comment/${commentId}`, data);
+    return response.data.data;
+  },
+
+  reportCommunity: async (communityId: number, data: AbuseReportRequest): Promise<AbuseReportResponse> => {
+    const response = await axiosInstance.post(`${API_PREFIX}/community/${communityId}/report`, data);
     return response.data.data;
   },
 
@@ -47,3 +62,4 @@ export const abuseReportApi = {
     return response.data.data;
   }
 };
+

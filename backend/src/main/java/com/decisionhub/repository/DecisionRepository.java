@@ -24,10 +24,15 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
 
     Page<Decision> findByCommunityCommunityIdAndStatus(Long communityId, DecisionStatus status, Pageable pageable);
     
+    List<Decision> findByCommunityCommunityId(Long communityId);
+
     long countByCommunityCommunityId(Long communityId);
 
     @Query("SELECT d FROM Decision d WHERE d.createdBy.userId = :userId")
     Page<Decision> findByCreatedByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT COUNT(d) FROM Decision d WHERE d.createdBy.userId = :userId")
+    long countByCreatedByUserId(@Param("userId") Long userId);
 
     @Query("SELECT COUNT(d) FROM Decision d WHERE d.createdBy.userId = :userId AND d.status = :status")
     long countByCreatedByUserIdAndStatus(@Param("userId") Long userId, @Param("status") DecisionStatus status);

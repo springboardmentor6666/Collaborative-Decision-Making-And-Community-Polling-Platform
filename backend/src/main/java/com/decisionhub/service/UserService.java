@@ -19,6 +19,8 @@ public interface UserService {
 
     void deleteUser(Long userId);
 
+    UserResponse updateUserStatus(Long userId, com.decisionhub.common.enums.AccountStatus status, String reason);
+
     PagedResponse<UserResponse> getAllUsers(Pageable pageable);
 
 
@@ -28,4 +30,12 @@ public interface UserService {
     void unsaveDecision(Long userId, Long decisionId);
 
     PagedResponse<DecisionResponse> getSavedDecisions(Long userId, Pageable pageable);
+
+    void changePassword(Long userId, com.decisionhub.dto.request.ChangePasswordRequest request);
+
+    com.decisionhub.dto.response.UserPreferencesResponse getPreferences(Long userId);
+
+    com.decisionhub.dto.response.UserPreferencesResponse updatePreferences(Long userId, com.decisionhub.dto.request.UserPreferencesRequest request);
+
+    com.decisionhub.dto.response.UserDataExportResponse exportUserData(Long userId);
 }

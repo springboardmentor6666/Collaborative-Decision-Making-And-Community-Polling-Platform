@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { authService } from "@/services/authService";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -61,7 +62,7 @@ export default function LoginPage() {
 
       {/* Right Section - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 xl:p-24 bg-white">
-        <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+        <div className="w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
           
           <div className="text-center lg:text-left space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
@@ -147,7 +148,25 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="pt-6 text-center text-sm text-slate-500">
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-slate-500 font-medium">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Sign-in */}
+          <GoogleLoginButton 
+            buttonText="signin_with" 
+            label="Sign in with Google"
+            onError={(errMsg) => setError(errMsg)}
+          />
+
+          <div className="pt-4 text-center text-sm text-slate-500">
             Don't have an account?{" "}
             <Link to="/register" className="text-blue-600 font-medium hover:text-blue-500 hover:underline transition-colors">
               Sign up

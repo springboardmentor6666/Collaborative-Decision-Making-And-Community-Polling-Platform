@@ -27,7 +27,6 @@ public class DecisionRequest {
 
     private String description;
 
-
     private Long communityId;
 
     @NotNull(message = "Vote type is required")
@@ -40,4 +39,6 @@ public class DecisionRequest {
     @NotNull(message = "At least two options are required")
     @Size(min = 2, message = "At least two options are required to create a decision board")
     private List<OptionRequest> options;
+
+    private List<Long> attachmentIds;
 }

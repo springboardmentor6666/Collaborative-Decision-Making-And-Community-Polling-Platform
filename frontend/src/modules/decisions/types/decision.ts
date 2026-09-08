@@ -16,13 +16,13 @@ export interface OptionResponse {
 
 export interface AttachmentResponse {
   attachmentId: number;
-  decisionId: number;
+  decisionId?: number;
   commentId?: number;
   fileName: string;
   fileUrl: string;
   fileType: string;
-  uploadedBy: UserResponse;
-  uploadedAt: string;
+  uploadedBy?: UserResponse;
+  uploadedAt?: string;
 }
 
 export interface DecisionResponse {
@@ -61,4 +61,5 @@ export interface DecisionRequest {
   deadline?: string;
   allowAnonymousVote: boolean;
   options: OptionRequest[];
+  attachmentIds?: number[];
 }

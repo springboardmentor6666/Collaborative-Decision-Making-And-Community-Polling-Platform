@@ -20,6 +20,19 @@ export const useDeleteUser = () => {
   });
 };
 
+export const useUpdateUserStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, status, reason }: { userId: number; status: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE'; reason?: string }) =>
+      adminApi.updateUserStatus(userId, status, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      queryClient.invalidateQueries({ queryKey: ["global-abuse-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["community-abuse-reports"] });
+    },
+  });
+};
+
 export const useAuditLogs = (page = 0, size = 10) => {
   return useQuery<PagedResponse<AuditLogResponse>, Error>({
     queryKey: ["audit-logs", page, size],

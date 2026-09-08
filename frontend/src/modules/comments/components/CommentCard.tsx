@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, Edit2, Trash2 } from 'lucide-react';
+import { MessageSquare, Edit2, Trash2, Flag } from 'lucide-react';
 import { CommentResponse } from '../types/comment';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar';
@@ -7,6 +7,8 @@ import { CommentEditor } from './CommentEditor';
 import { useDeleteComment } from '../hooks/useDeleteComment';
 import { useUpdateComment } from '../hooks/useUpdateComment';
 import { useCreateComment } from '../hooks/useCreateComment';
+import { ReportCommentModal } from './ReportCommentModal';
+import { useConfirm } from '@/context/ConfirmDialogContext';
 
 interface CommentCardProps {
   comment: CommentResponse;
@@ -15,8 +17,10 @@ interface CommentCardProps {
 
 export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId }) => {
   const { user } = useAuth();
+  const { confirm } = useConfirm();
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const deleteCommentMutation = useDeleteComment(decisionId);
   const updateCommentMutation = useUpdateComment(decisionId);
@@ -31,8 +35,8 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     }).format(new Date(dateStr));
   };
 
@@ -50,8 +54,19 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
     );
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Delete Comment',
+      message: 'Are you sure you want to delete this comment? This action cannot be undone.',
+      confirmText: 'Delete Comment',
+      cancelText: 'Keep Comment',
+      variant: 'destructive',
+      icon: 'trash',
+      badgeText: 'Comment Removal',
+      highlightContent: `"${comment.message}"`,
+    });
+
+    if (confirmed) {
       deleteCommentMutation.mutate(comment.commentId);
     }
   };
@@ -129,8 +144,24 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment, decisionId })
                 Delete
               </button>
             )}
+            {!isAuthor && user && (
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="flex items-center gap-1 text-xs text-[#64748B] hover:text-red-600 transition-colors"
+                title="Report comment"
+              >
+                <Flag className="w-3.5 h-3.5 text-red-400" />
+                Report
+              </button>
+            )}
           </div>
         )}
+
+        <ReportCommentModal
+          commentId={comment.commentId}
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+        />
 
         {isReplying && (
           <div className="mt-4 border-l-2 border-[#E2E8F0] pl-4">

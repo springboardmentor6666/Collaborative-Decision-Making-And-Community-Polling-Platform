@@ -9,6 +9,9 @@ export const authApi = {
   login: async (data: any) => {
     return await axiosInstance.post(`${AUTH_PREFIX}/login`, data);
   },
+  googleLogin: async (idToken: string) => {
+    return await axiosInstance.post(`${AUTH_PREFIX}/google`, { idToken });
+  },
   logout: async () => {
     return await axiosInstance.post(`${AUTH_PREFIX}/logout`);
   },

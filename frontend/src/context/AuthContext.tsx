@@ -8,8 +8,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   login: (usernameOrEmail: string, password: string) => Promise<any>;
+  googleLogin: (idToken: string) => Promise<any>;
   logout: () => Promise<void>;
   register: (fullName: string, username: string, email: string, password: string) => Promise<any>;
+  updateUser: (updatedUser: UserResponse) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -63,14 +65,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data;
   };
 
+  const googleLogin = async (idToken: string) => {
+    const data = await authService.googleLogin(idToken);
+    if (data.user) {
+      setUser(data.user);
+      setIsAuthenticated(true);
+    }
+    return data;
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
     setIsAuthenticated(false);
   };
 
+  const updateUser = (updatedUser: UserResponse) => {
+    setUser(updatedUser);
+    localStorage.setItem("decisionhub_user", JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, googleLogin, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

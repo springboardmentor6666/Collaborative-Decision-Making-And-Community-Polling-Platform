@@ -8,6 +8,20 @@ export const useReportDecision = () => {
   });
 };
 
+export const useReportComment = () => {
+  return useMutation({
+    mutationFn: ({ commentId, data }: { commentId: number, data: AbuseReportRequest }) => 
+      abuseReportApi.reportComment(commentId, data)
+  });
+};
+
+export const useReportCommunity = () => {
+  return useMutation({
+    mutationFn: ({ communityId, data }: { communityId: number, data: AbuseReportRequest }) => 
+      abuseReportApi.reportCommunity(communityId, data)
+  });
+};
+
 export const useCommunityReports = (communityId: number, status?: AbuseReportStatus, page = 0, size = 10) => {
   return useQuery({
     queryKey: ["community-abuse-reports", communityId, status, page, size],
@@ -31,8 +45,9 @@ export const useResolveReport = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-abuse-reports"] });
       queryClient.invalidateQueries({ queryKey: ["global-abuse-reports"] });
-      // Might want to invalidate decisions if one was deleted
       queryClient.invalidateQueries({ queryKey: ["decisions"] });
+      queryClient.invalidateQueries({ queryKey: ["communities"] });
+      queryClient.invalidateQueries({ queryKey: ["community"] });
     }
   });
 };

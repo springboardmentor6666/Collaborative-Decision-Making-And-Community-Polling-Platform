@@ -18,6 +18,8 @@ public class ReportResponse {
 
     private Long reportId;
     private Long decisionId;
+    private String decisionTitle;
+    private String communityName;
     private UserResponse generatedBy;
     private ReportType reportType;
     private String reportUrl;

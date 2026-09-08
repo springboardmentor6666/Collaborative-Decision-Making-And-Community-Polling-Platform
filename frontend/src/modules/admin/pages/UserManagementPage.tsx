@@ -7,22 +7,35 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useConfirm } from '@/context/ConfirmDialogContext';
 
 export function UserManagementPage() {
   const { data, isLoading, error } = useAllUsers(0, 100);
   const deleteMutation = useDeleteUser();
   const { user: currentUser } = useAuth();
+  const { confirm } = useConfirm();
 
   if (isLoading) return <div className="py-8 text-center text-muted-foreground">Loading users...</div>;
   if (error) return <div className="py-4 text-destructive">Failed to load users.</div>;
 
   const users = data?.content || [];
 
-  const handleDelete = async (userId: number) => {
-    if (window.confirm('Are you sure you want to permanently delete this user?')) {
+  const handleDelete = async (userId: number, username: string) => {
+    const confirmed = await confirm({
+      title: 'Delete User Account',
+      message: `Are you sure you want to permanently delete @${username}? This action will permanently remove their profile, decision boards, and community memberships.`,
+      confirmText: 'Delete User',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      icon: 'user-x',
+      badgeText: 'Admin Account Deletion',
+      highlightContent: `Account: @${username} (User ID: ${userId})`,
+    });
+
+    if (confirmed) {
       try {
         await deleteMutation.mutateAsync(userId);
-        toast.success('User deleted successfully');
+        toast.success(`User @${username} deleted successfully`);
       } catch {
         toast.error('Failed to delete user');
       }
@@ -87,7 +100,7 @@ export function UserManagementPage() {
                           variant="ghost" 
                           size="icon" 
                           className="text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(u.userId)}
+                          onClick={() => handleDelete(u.userId, u.username)}
                           disabled={deleteMutation.isPending}
                         >
                           <Trash2 className="h-4 w-4" />

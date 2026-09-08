@@ -9,9 +9,14 @@ import org.springframework.data.domain.Pageable;
 public interface AbuseReportService {
     AbuseReportResponse reportDecision(Long decisionId, AbuseReportRequest request, Long userId);
     
+    AbuseReportResponse reportComment(Long commentId, AbuseReportRequest request, Long userId);
+    
+    AbuseReportResponse reportCommunity(Long communityId, AbuseReportRequest request, Long userId);
+    
     Page<AbuseReportResponse> getReportsForCommunity(Long communityId, AbuseReportStatus status, Pageable pageable, Long userId);
     
     Page<AbuseReportResponse> getGlobalReports(AbuseReportStatus status, Pageable pageable);
     
-    AbuseReportResponse resolveReport(Long reportId, boolean deleteDecision, Long userId);
+    AbuseReportResponse resolveReport(Long reportId, boolean deleteTarget, Long userId);
 }
+

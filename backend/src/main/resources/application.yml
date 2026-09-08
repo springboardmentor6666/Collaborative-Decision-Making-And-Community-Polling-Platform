@@ -54,6 +54,9 @@ application:
       expiration-ms: 86400000 # 24 hours (1 day)
       refresh-token-expiration-ms: 604800000 # 7 days
       issuer: decisionhub-api
+    oauth2:
+      google:
+        client-id: ${GOOGLE_CLIENT_ID:702442008383-5cuppuqs826ofhvmio3m0k7q53u0m8cu.apps.googleusercontent.com}
 
 
   cors:

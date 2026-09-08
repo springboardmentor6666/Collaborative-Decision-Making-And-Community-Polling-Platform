@@ -20,6 +20,25 @@ export const authService = {
     }
   },
 
+  googleLogin: async (idToken: string): Promise<any> => {
+    try {
+      const response = await authApi.googleLogin(idToken);
+      
+      const { accessToken, user } = response.data.data;
+      
+      if (accessToken) {
+        localStorage.setItem("decisionhub_token", accessToken);
+      }
+      if (user) {
+        localStorage.setItem("decisionhub_user", JSON.stringify(user));
+      }
+      
+      return response.data.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   register: async (fullName: string, username: string, email: string, password: string): Promise<any> => {
     try {
       const response = await authApi.register({ fullName, username, email, password });

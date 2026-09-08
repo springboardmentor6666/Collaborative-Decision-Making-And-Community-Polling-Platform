@@ -37,6 +37,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_URLS = {
             "/api/auth/**",
+            "/uploads/**",
             "/v3/api-docs/**",
             "/v3/api-docs",
             "/swagger-ui/**",
@@ -59,7 +60,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/decisions/**", "/api/categories/**", "/api/communities/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**", "/api/decisions/**", "/api/categories/**", "/api/communities/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/moderator/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()

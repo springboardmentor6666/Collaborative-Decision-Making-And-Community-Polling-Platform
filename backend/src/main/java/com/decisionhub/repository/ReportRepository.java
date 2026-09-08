@@ -14,4 +14,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByDecisionDecisionId(Long decisionId);
 
     Page<Report> findByGeneratedByUserId(Long userId, Pageable pageable);
+
+    Page<Report> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

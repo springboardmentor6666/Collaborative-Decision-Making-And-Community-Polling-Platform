@@ -71,7 +71,7 @@ export default function CommunityDetails() {
               </CardTitle>
               {isMember && (
                 <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Link to="/decisions/new">Create Decision</Link>
+                  <Link to={`/decisions/new?communityId=${communityId}&visibility=${community.visibility}`}>Create Decision</Link>
                 </Button>
               )}
             </CardHeader>

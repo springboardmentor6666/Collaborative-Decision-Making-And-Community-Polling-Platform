@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,6 +39,16 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size);
         PagedResponse<UserResponse> response = userService.getAllUsers(pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/users/{userId}/status")
+    @Operation(summary = "Update user account status (e.g. SUSPENDED, INACTIVE, ACTIVE)")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
+            @PathVariable Long userId,
+            @RequestParam com.decisionhub.common.enums.AccountStatus status,
+            @RequestParam(required = false) String reason) {
+        UserResponse response = userService.updateUserStatus(userId, status, reason);
+        return ResponseEntity.ok(ApiResponse.success("User account status updated successfully", response));
     }
 
     @DeleteMapping("/users/{userId}")

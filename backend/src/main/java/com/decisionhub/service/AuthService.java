@@ -2,6 +2,7 @@ package com.decisionhub.service;
 
 import com.decisionhub.dto.request.AuthRequest;
 import com.decisionhub.dto.request.ForgotPasswordRequest;
+import com.decisionhub.dto.request.GoogleAuthRequest;
 import com.decisionhub.dto.request.RegisterRequest;
 import com.decisionhub.dto.request.ResetPasswordRequest;
 import com.decisionhub.dto.request.TokenRefreshRequest;
@@ -14,6 +15,8 @@ public interface AuthService {
 
     AuthResponse login(AuthRequest request);
 
+    AuthResponse googleLogin(GoogleAuthRequest request);
+
     AuthResponse refreshToken(TokenRefreshRequest request);
 
     void logout(String token);
@@ -22,3 +25,4 @@ public interface AuthService {
 
     void resetPassword(ResetPasswordRequest request);
 }
+

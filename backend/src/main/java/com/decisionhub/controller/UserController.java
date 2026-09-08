@@ -91,4 +91,38 @@ public class UserController {
         PagedResponse<DecisionResponse> response = userService.getSavedDecisions(currentUser.getId(), pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @PutMapping("/me/password")
+    @Operation(summary = "Change current user password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @Valid @RequestBody com.decisionhub.dto.request.ChangePasswordRequest request) {
+        userService.changePassword(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully.", null));
+    }
+
+    @GetMapping("/me/preferences")
+    @Operation(summary = "Get user notification, privacy, and appearance preferences")
+    public ResponseEntity<ApiResponse<com.decisionhub.dto.response.UserPreferencesResponse>> getPreferences(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        com.decisionhub.dto.response.UserPreferencesResponse response = userService.getPreferences(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PutMapping("/me/preferences")
+    @Operation(summary = "Update user notification, privacy, and appearance preferences")
+    public ResponseEntity<ApiResponse<com.decisionhub.dto.response.UserPreferencesResponse>> updatePreferences(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestBody com.decisionhub.dto.request.UserPreferencesRequest request) {
+        com.decisionhub.dto.response.UserPreferencesResponse response = userService.updatePreferences(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Preferences updated successfully.", response));
+    }
+
+    @GetMapping("/me/export")
+    @Operation(summary = "Export all user data and platform statistics")
+    public ResponseEntity<ApiResponse<com.decisionhub.dto.response.UserDataExportResponse>> exportUserData(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        com.decisionhub.dto.response.UserDataExportResponse response = userService.exportUserData(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("Data export generated successfully.", response));
+    }
 }

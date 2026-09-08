@@ -36,7 +36,7 @@ export function NotificationDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-slate-300 hover:text-white">
+        <Button variant="ghost" size="icon" className="relative text-foreground/80 hover:text-foreground hover:bg-muted">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
@@ -46,14 +46,14 @@ export function NotificationDropdown() {
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="end" className="w-80 sm:w-96 p-0 bg-slate-900 border-slate-800">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-          <h3 className="font-semibold text-white">Notifications</h3>
+      <DropdownMenuContent align="end" className="w-80 sm:w-96 p-0 bg-card border-border shadow-lg">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+              className="h-8 px-2 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-500/10"
               onClick={() => markAllAsRead.mutate()}
               disabled={markAllAsRead.isPending}
             >
@@ -67,11 +67,11 @@ export function NotificationDropdown() {
           {isLoading ? (
             <NotificationListSkeleton count={3} />
           ) : notifications.length === 0 ? (
-            <div className="py-8 text-center text-slate-400 text-sm">
+            <div className="py-8 text-center text-muted-foreground text-sm">
               No new notifications
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {notifications.map(notification => (
                 <NotificationCard 
                   key={notification.notificationId} 
@@ -84,13 +84,13 @@ export function NotificationDropdown() {
           )}
         </div>
         
-        <div className="p-2 border-t border-slate-800">
+        <div className="p-2 border-t border-border">
           <Button 
             variant="ghost" 
-            className="w-full text-sm text-slate-300 hover:text-white hover:bg-slate-800"
-            onClick={() => navigate('/notifications')}
+            className="w-full text-xs font-semibold text-foreground hover:bg-muted"
+            onClick={() => navigate('/activity')}
           >
-            View All Notifications
+            View Activity Timeline & History
           </Button>
         </div>
       </DropdownMenuContent>

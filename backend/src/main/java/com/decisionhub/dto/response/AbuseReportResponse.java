@@ -17,8 +17,13 @@ public class AbuseReportResponse {
     private Long reportId;
     private Long decisionId;
     private String decisionTitle;
+    private String decisionDescription;
+    private Long commentId;
+    private String commentMessage;
     private Long communityId;
     private String communityName;
+    private String communityDescription;
+    private UserResponse targetAuthor;
     private UserResponse reportedBy;
     private AbuseReason reason;
     private String description;

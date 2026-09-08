@@ -7,14 +7,27 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Calendar, Settings, Trash2 } from 'lucide-react';
 import { CreateElectionModal } from './CreateElectionModal';
 import { toast } from 'sonner';
+import { useConfirm } from '@/context/ConfirmDialogContext';
 
 export function AdminElectionsList({ communityId }: { communityId: number }) {
   const { data: elections, isLoading } = useCommunityElections(communityId);
   const deleteMutation = useDeleteElection();
+  const { confirm } = useConfirm();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handleDelete = (eventId: number) => {
-    if (confirm("Are you sure you want to delete this election? This action cannot be undone.")) {
+  const handleDelete = async (eventId: number, title?: string) => {
+    const confirmed = await confirm({
+      title: 'Delete Election Event',
+      message: `Are you sure you want to delete this election? All candidate nominations and ballot votes will be permanently erased.`,
+      confirmText: 'Delete Election',
+      cancelText: 'Keep Election',
+      variant: 'destructive',
+      icon: 'trash',
+      badgeText: 'Election Moderation',
+      highlightContent: title ? `Election: "${title}"` : undefined,
+    });
+
+    if (confirmed) {
       deleteMutation.mutate(eventId, {
         onSuccess: () => toast.success("Election deleted successfully"),
         onError: (err: any) => toast.error(err.response?.data?.message || "Failed to delete election")
@@ -68,7 +81,7 @@ export function AdminElectionsList({ communityId }: { communityId: number }) {
                       variant="outline" 
                       size="sm" 
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDelete(election.eventId)}
+                      onClick={() => handleDelete(election.eventId, election.title)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

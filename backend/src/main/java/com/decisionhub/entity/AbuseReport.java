@@ -29,6 +29,8 @@ import org.hibernate.annotations.SQLRestriction;
         name = "abuse_report",
         indexes = {
                 @Index(name = "idx_abuse_report_decision", columnList = "decision_id"),
+                @Index(name = "idx_abuse_report_comment", columnList = "comment_id"),
+                @Index(name = "idx_abuse_report_community", columnList = "community_id"),
                 @Index(name = "idx_abuse_report_status", columnList = "status")
         }
 )
@@ -47,8 +49,16 @@ public class AbuseReport extends BaseEntity {
     private Long reportId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "decision_id", nullable = false)
+    @JoinColumn(name = "decision_id")
     private Decision decision;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "community_id")
+    private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by", nullable = false)

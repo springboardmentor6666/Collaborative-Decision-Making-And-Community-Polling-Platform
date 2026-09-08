@@ -37,6 +37,7 @@ import { SavedDecisionsPage } from "./modules/profile/pages/SavedDecisionsPage";
 import { SystemAdminDashboard } from "./modules/admin/pages/SystemAdminDashboard";
 import { UserManagementPage } from "./modules/admin/pages/UserManagementPage";
 import { AuditLogsPage } from "./modules/admin/pages/AuditLogsPage";
+import ReportsPage from "./modules/reports/pages/ReportsPage";
 
 export default function App() {
   return (
@@ -70,7 +71,7 @@ export default function App() {
         <Route path="analytics/community/:id" element={<CommunityAnalyticsPage />} />
         <Route path="analytics/decision/:id" element={<DecisionAnalyticsPage />} />
         <Route path="/activity" element={<ActivityTimelinePage />} />
-        <Route path="/reports" element={<div className="p-4">Reports Page (WIP)</div>} />
+        <Route path="/reports" element={<ReportsPage />} />
         
         {/* Profile & Settings */}
         <Route path="/profile" element={<ProfilePage />} />
@@ -78,8 +79,10 @@ export default function App() {
         <Route path="/profile/settings" element={<SettingsPage />} />
         <Route path="/saved" element={<SavedDecisionsPage />} />
 
-        {/* System Admin */}
+        {/* System Admin & Report Management */}
         <Route path="/admin" element={<SystemAdminDashboard />} />
+        <Route path="/report-management" element={<SystemAdminDashboard />} />
+        <Route path="/admin/reports" element={<SystemAdminDashboard />} />
         <Route path="/admin/users" element={<UserManagementPage />} />
         <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
       </Route>

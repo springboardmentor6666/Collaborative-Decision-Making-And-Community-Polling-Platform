@@ -5,7 +5,7 @@ import { NotificationList } from '../components/NotificationList';
 import { NotificationListSkeleton } from '../components/NotificationSkeleton';
 import { NotificationType } from '../types/notification';
 import { Button } from '@/components/ui/button';
-import { Check, Filter } from 'lucide-react';
+import { Check, Filter, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function NotificationsPage() {
@@ -43,37 +43,42 @@ export default function NotificationsPage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Notifications</h1>
-          <p className="text-slate-400 mt-1">Stay updated with activities in your communities</p>
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card p-6 sm:p-7 rounded-2xl border border-border shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20 flex items-center justify-center shrink-0">
+            <Bell className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Notifications</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">Stay updated with activities across all your communities</p>
+          </div>
         </div>
         
         <Button 
           variant="outline" 
-          className="border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
+          className="border-border hover:bg-muted text-foreground text-xs font-semibold h-9"
           onClick={() => markAllAsRead.mutate()}
           disabled={markAllAsRead.isPending || allNotifications.every(n => n.read)}
         >
-          <Check className="w-4 h-4 mr-2" />
+          <Check className="w-4 h-4 mr-1.5 text-blue-600 dark:text-blue-400" />
           Mark all as read
         </Button>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 text-slate-400 border border-slate-700">
-          <Filter className="w-4 h-4" />
-          <span className="text-sm font-medium">Filter:</span>
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/70 text-muted-foreground border border-border/50 text-xs font-semibold">
+          <Filter className="w-3.5 h-3.5" />
+          <span>Filter:</span>
         </div>
         {filterOptions.map(opt => (
           <button
             key={opt.value}
             onClick={() => setFilter(opt.value as any)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
               filter === opt.value
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-900/20'
-                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800 hover:text-slate-300'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-card text-muted-foreground border border-border hover:bg-muted hover:text-foreground'
             }`}
           >
             {opt.label}
@@ -81,7 +86,7 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      <div className="bg-slate-900/50 rounded-xl border border-slate-800/50 p-4 min-h-[400px]">
+      <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-xs min-h-[400px]">
         {isLoading ? (
           <NotificationListSkeleton count={5} />
         ) : (

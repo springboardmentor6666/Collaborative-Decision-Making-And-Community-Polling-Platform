@@ -221,25 +221,25 @@ export default function ActivityTimelinePage() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'COMMENT': return <MessageSquare className="w-4 h-4 text-blue-600" />;
-      case 'MY_VOTE': return <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
-      case 'VOTE': return <Vote className="w-4 h-4 text-emerald-600" />;
-      case 'DECISION_CREATED': return <Layers className="w-4 h-4 text-amber-600" />;
-      case 'INVITE': return <UserPlus className="w-4 h-4 text-purple-600" />;
-      case 'DECISION_CLOSED': return <Lock className="w-4 h-4 text-slate-600" />;
-      default: return <Info className="w-4 h-4 text-slate-500" />;
+      case 'COMMENT': return <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
+      case 'MY_VOTE': return <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
+      case 'VOTE': return <Vote className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
+      case 'DECISION_CREATED': return <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
+      case 'INVITE': return <UserPlus className="w-4 h-4 text-purple-600 dark:text-purple-400" />;
+      case 'DECISION_CLOSED': return <Lock className="w-4 h-4 text-muted-foreground" />;
+      default: return <Info className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
   const getIconBg = (type: string) => {
     switch (type) {
-      case 'COMMENT': return 'bg-blue-50 border-blue-200 text-blue-600';
-      case 'MY_VOTE': return 'bg-emerald-50 border-emerald-300 text-emerald-600';
-      case 'VOTE': return 'bg-emerald-50 border-emerald-200 text-emerald-600';
-      case 'DECISION_CREATED': return 'bg-amber-50 border-amber-300 text-amber-600';
-      case 'INVITE': return 'bg-purple-50 border-purple-200 text-purple-600';
-      case 'DECISION_CLOSED': return 'bg-slate-100 border-slate-300 text-slate-700';
-      default: return 'bg-slate-50 border-slate-200 text-slate-600';
+      case 'COMMENT': return 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/30';
+      case 'MY_VOTE': return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30';
+      case 'VOTE': return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30';
+      case 'DECISION_CREATED': return 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30';
+      case 'INVITE': return 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/30';
+      case 'DECISION_CLOSED': return 'bg-muted border-border text-muted-foreground ring-1 ring-border';
+      default: return 'bg-muted border-border text-muted-foreground ring-1 ring-border';
     }
   };
 
@@ -305,18 +305,18 @@ export default function ActivityTimelinePage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-card p-6 sm:p-7 rounded-2xl border border-border shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 flex items-center justify-center shrink-0">
+          <div className="p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20 flex items-center justify-center shrink-0">
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
               Activity & Discussion Timeline
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="text-muted-foreground text-sm mt-0.5">
               Keep track of discussions, community votes, decisions, and milestones in one place
             </p>
           </div>
@@ -328,9 +328,9 @@ export default function ActivityTimelinePage() {
             size="sm" 
             onClick={handleMarkAllRead}
             disabled={isMarkingRead}
-            className="border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold gap-1.5 h-9 shrink-0"
+            className="border-border hover:bg-muted text-foreground text-xs font-semibold gap-1.5 h-9 shrink-0"
           >
-            <CheckCheck className="w-3.5 h-3.5 text-blue-600" />
+            <CheckCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             Mark all read
           </Button>
         )}
@@ -342,65 +342,73 @@ export default function ActivityTimelinePage() {
           onClick={() => setSelectedFilter('ALL')} 
           className={`p-4 rounded-xl border transition-all cursor-pointer ${
             selectedFilter === 'ALL' 
-              ? 'bg-blue-50/70 border-blue-300 ring-1 ring-blue-400' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              ? 'bg-blue-500/10 border-blue-500/50 ring-1 ring-blue-500/40' 
+              : 'bg-card border-border hover:border-border/80 hover:bg-muted/40 shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">All Events</span>
-            <Activity className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-semibold text-muted-foreground">All Events</span>
+            <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <Activity className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{stats.total}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-foreground mt-2">{stats.total}</p>
         </div>
 
         <div 
           onClick={() => setSelectedFilter('COMMENT')} 
           className={`p-4 rounded-xl border transition-all cursor-pointer ${
             selectedFilter === 'COMMENT' 
-              ? 'bg-blue-50/70 border-blue-300 ring-1 ring-blue-400' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              ? 'bg-blue-500/10 border-blue-500/50 ring-1 ring-blue-500/40' 
+              : 'bg-card border-border hover:border-border/80 hover:bg-muted/40 shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-blue-700">Discussions</span>
-            <MessageSquare className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Discussions</span>
+            <div className="p-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+              <MessageSquare className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">{stats.discussions}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 mt-2">{stats.discussions}</p>
         </div>
 
         <div 
           onClick={() => setSelectedFilter('MY_VOTE')} 
           className={`p-4 rounded-xl border transition-all cursor-pointer ${
             selectedFilter === 'MY_VOTE' || selectedFilter === 'VOTE'
-              ? 'bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-400' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              ? 'bg-emerald-500/10 border-emerald-500/50 ring-1 ring-emerald-500/40' 
+              : 'bg-card border-border hover:border-border/80 hover:bg-muted/40 shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-700">Votes ({stats.myVotesCount} Mine)</span>
-            <Vote className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Votes ({stats.myVotesCount} Mine)</span>
+            <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <Vote className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-emerald-700 mt-1">{stats.totalVotes}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{stats.totalVotes}</p>
         </div>
 
         <div 
           onClick={() => setSelectedFilter('DECISION')} 
           className={`p-4 rounded-xl border transition-all cursor-pointer ${
             selectedFilter === 'DECISION'
-              ? 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-400' 
-              : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/40' 
+              : 'bg-card border-border hover:border-border/80 hover:bg-muted/40 shadow-xs'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-700">Decisions</span>
-            <Layers className="w-4 h-4 text-amber-600" />
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Decisions</span>
+            <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <Layers className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-amber-700 mt-1">{stats.decisions}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-2">{stats.decisions}</p>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-card p-3 sm:p-4 rounded-xl border border-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Category Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
           {[
@@ -417,7 +425,7 @@ export default function ActivityTimelinePage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
                 selectedFilter === key
                   ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/80'
+                  : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -428,17 +436,17 @@ export default function ActivityTimelinePage() {
 
         {/* Search Bar */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search votes, discussions, decisions..."
-            className="pl-9 pr-8 h-9 text-xs bg-slate-50 border-slate-200 focus:bg-white"
+            className="pl-9 pr-8 h-9 text-xs bg-background border-border text-foreground placeholder:text-muted-foreground focus:bg-background"
           />
           {searchQuery && (
             <button 
               onClick={() => setSearchQuery('')} 
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -447,23 +455,23 @@ export default function ActivityTimelinePage() {
       </div>
 
       {/* Main Activity Timeline Container */}
-      <div className="bg-white p-5 sm:p-7 md:p-8 rounded-2xl border border-slate-200 shadow-sm min-h-[420px]">
+      <div className="bg-card p-5 sm:p-7 md:p-8 rounded-2xl border border-border shadow-xs min-h-[420px]">
         {isLoading ? (
           <NotificationListSkeleton count={5} />
         ) : filteredActivities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center max-w-sm mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3.5 border border-blue-100">
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3.5 border border-blue-500/20">
               {selectedFilter === 'COMMENT' ? (
                 <MessageSquare className="w-7 h-7" />
               ) : selectedFilter === 'MY_VOTE' || selectedFilter === 'VOTE' ? (
                 <Vote className="w-7 h-7" />
               ) : selectedFilter === 'DECISION' ? (
-                <Layers className="w-7 h-7 text-amber-600" />
+                <Layers className="w-7 h-7 text-amber-500" />
               ) : (
                 <Clock className="w-7 h-7" />
               )}
             </div>
-            <h3 className="text-base font-bold text-slate-800 mb-1">
+            <h3 className="text-base font-bold text-foreground mb-1">
               {searchQuery 
                 ? 'No matching activities found' 
                 : selectedFilter === 'MY_VOTE'
@@ -472,7 +480,7 @@ export default function ActivityTimelinePage() {
                     ? 'No discussions yet' 
                     : 'No activity recorded'}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
               {searchQuery 
                 ? `No activity matched "${searchQuery}". Try a different keyword or reset filters.` 
                 : selectedFilter === 'MY_VOTE'
@@ -484,7 +492,7 @@ export default function ActivityTimelinePage() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => setSearchQuery('')}
-                className="text-xs font-semibold"
+                className="text-xs font-semibold border-border hover:bg-muted text-foreground"
               >
                 Clear Search
               </Button>
@@ -492,7 +500,7 @@ export default function ActivityTimelinePage() {
               <Button 
                 onClick={() => navigate('/decisions')} 
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold gap-1.5"
+                className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold gap-1.5"
               >
                 <span>Browse Decisions</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -505,15 +513,15 @@ export default function ActivityTimelinePage() {
               <div key={dateLabel} className="relative">
                 {/* Date Sticky Header */}
                 <div className="sticky top-16 z-20 mb-6 flex items-center">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/80 shadow-xs backdrop-blur-md">
-                    <Clock className="w-3 h-3 text-slate-500" />
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-card/90 dark:bg-zinc-900/90 text-foreground border border-border shadow-xs backdrop-blur-md">
+                    <Clock className="w-3 h-3 text-muted-foreground" />
                     {dateLabel}
                   </span>
-                  <div className="flex-1 h-px bg-slate-100 ml-3"></div>
+                  <div className="flex-1 h-px bg-border ml-3"></div>
                 </div>
 
                 {/* Timeline Track & Items */}
-                <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-100 ml-4 sm:ml-5 space-y-6">
+                <div className="relative pl-6 sm:pl-8 border-l-2 border-border/80 ml-4 sm:ml-5 space-y-6">
                   {items.map((item) => {
                     const decisionContext = extractDecisionContext(item);
                     const isComment = item.type === 'COMMENT';
@@ -526,21 +534,21 @@ export default function ActivityTimelinePage() {
                     return (
                       <div key={item.id} className="relative group">
                         {/* Timeline Node Point */}
-                        <div className={`absolute -left-[35px] sm:-left-[43px] top-3.5 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-sm z-10 transition-transform group-hover:scale-110 ${getIconBg(item.type)}`}>
+                        <div className={`absolute -left-[35px] sm:-left-[43px] top-3.5 flex items-center justify-center w-8 h-8 rounded-full border-2 border-card shadow-sm z-10 transition-transform group-hover:scale-110 ${getIconBg(item.type)}`}>
                           {getIcon(item.type)}
                         </div>
 
                         {/* Activity Card */}
-                        <div className={`p-4 sm:p-5 rounded-xl border transition-all ${
+                        <div className={`p-4 sm:p-5 rounded-xl border transition-all duration-200 ${
                           isCreatedDecision
-                            ? 'bg-amber-50/20 border-amber-200/90 hover:border-amber-300 hover:shadow-sm'
+                            ? 'bg-card border-border hover:border-amber-500/50 hover:shadow-md'
                             : isMyVote
-                              ? 'bg-emerald-50/20 border-emerald-200 hover:border-emerald-300 hover:shadow-sm'
+                              ? 'bg-card border-border hover:border-emerald-500/50 hover:shadow-md'
                               : isClosedDecision
-                                ? 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:shadow-sm'
+                                ? 'bg-card/70 border-border/80 hover:border-border hover:shadow-sm'
                                 : !item.read 
-                                  ? 'bg-blue-50/30 border-blue-200 shadow-xs' 
-                                  : 'bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-sm'
+                                  ? 'bg-card border-blue-500/40 ring-1 ring-blue-500/20 shadow-xs' 
+                                  : 'bg-card border-border hover:border-border/80 hover:shadow-md'
                         }`}>
                           {/* Card Top Row */}
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -548,45 +556,45 @@ export default function ActivityTimelinePage() {
                               <Badge 
                                 variant="secondary" 
                                 className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                                  isCreatedDecision ? 'bg-amber-100 text-amber-800' :
-                                  isMyVote ? 'bg-emerald-100 text-emerald-800' :
-                                  isComment ? 'bg-blue-100 text-blue-800' :
-                                  isVote ? 'bg-emerald-100 text-emerald-800' :
-                                  isClosedDecision ? 'bg-slate-200 text-slate-800' :
-                                  'bg-slate-100 text-slate-700'
+                                  isCreatedDecision ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
+                                  isMyVote ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
+                                  isComment ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' :
+                                  isVote ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
+                                  isClosedDecision ? 'bg-muted text-muted-foreground border border-border' :
+                                  'bg-muted text-muted-foreground border border-border'
                                 }`}
                               >
                                 {getTypeLabel(item)}
                               </Badge>
 
                               {item.communityName && (
-                                <Badge variant="outline" className="text-[10px] font-semibold bg-slate-50 text-slate-600 border-slate-200 flex items-center gap-1">
-                                  <Users className="w-2.5 h-2.5 text-slate-500" />
+                                <Badge variant="outline" className="text-[10px] font-semibold bg-background text-muted-foreground border-border flex items-center gap-1">
+                                  <Users className="w-2.5 h-2.5 text-muted-foreground" />
                                   {item.communityName}
                                 </Badge>
                               )}
 
                               {!item.read && !isMyVote && !isCreatedDecision && (
-                                <span className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+                                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                               )}
                             </div>
 
-                            <span className="text-[11px] font-medium text-slate-400">
+                            <span className="text-[11px] font-medium text-muted-foreground">
                               {format(new Date(item.createdAt), 'h:mm a')}
                             </span>
                           </div>
 
                           {/* Activity Title */}
-                          <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                          <h4 className="text-sm sm:text-base font-bold text-foreground leading-snug">
                             {isClosedDecision && decisionContext ? `Poll Closed: "${decisionContext}"` : item.title}
                           </h4>
 
                           {/* Decision Context Link Badge */}
                           {decisionContext && !isCreatedDecision && (
-                            <div className="mt-1.5 mb-2">
+                            <div className="mt-2 mb-2">
                               <Link
                                 to={targetDecisionId ? `/decisions/${targetDecisionId}` : "/decisions"}
-                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline bg-blue-50/60 px-2.5 py-1 rounded-md border border-blue-100 transition-colors"
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20 transition-colors"
                               >
                                 <Sparkles className="w-3 h-3 text-blue-500" />
                                 <span>Decision: {decisionContext}</span>
@@ -595,67 +603,67 @@ export default function ActivityTimelinePage() {
                             </div>
                           )}
 
-                          {/* Event Details */}
+                          {/* Event Details Box */}
                           {isCreatedDecision ? (
-                            <div className="mt-2.5 p-3 rounded-lg bg-white border border-amber-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="mt-2.5 p-3 sm:p-3.5 rounded-xl bg-muted/40 dark:bg-zinc-950/60 border border-border/80 text-xs sm:text-sm text-foreground leading-relaxed font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <Layers className="w-4 h-4 text-amber-600 shrink-0" />
+                                <Layers className="w-4 h-4 text-amber-500 shrink-0" />
                                 <span>{item.message}</span>
                               </div>
                               <div className="flex items-center gap-2">
                                 {item.decisionStatus && (
-                                  <Badge variant="outline" className="text-[10px] capitalize bg-slate-50 text-slate-600 border-slate-200">
+                                  <Badge variant="outline" className="text-[10px] capitalize bg-background text-muted-foreground border-border">
                                     {item.decisionStatus.toLowerCase()}
                                   </Badge>
                                 )}
-                                <span className="text-xs font-semibold text-slate-500">
+                                <span className="text-xs font-semibold text-muted-foreground">
                                   {item.totalVotes || 0} {(item.totalVotes || 0) === 1 ? 'vote' : 'votes'}
                                 </span>
                               </div>
                             </div>
                           ) : isClosedDecision ? (
-                            <div className="mt-2.5 p-3 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="mt-2.5 p-3 sm:p-3.5 rounded-xl bg-muted/40 dark:bg-zinc-950/60 border border-border/80 text-xs sm:text-sm text-foreground leading-relaxed font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <Lock className="w-4 h-4 text-slate-600 shrink-0" />
+                                <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
                                 <span>{item.message}</span>
                               </div>
-                              <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-700 border-slate-300 font-bold self-start sm:self-auto">
+                              <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border font-bold self-start sm:self-auto">
                                 Closed
                               </Badge>
                             </div>
                           ) : isComment ? (
-                            <div className="mt-2.5 p-3 rounded-lg bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal relative">
-                              <p className="italic">
-                                {item.message}
+                            <div className="mt-2.5 p-3 sm:p-3.5 rounded-xl bg-muted/40 dark:bg-zinc-950/60 border border-border/80 text-xs sm:text-sm text-foreground leading-relaxed font-normal relative">
+                              <p className="italic text-muted-foreground">
+                                "{item.message}"
                               </p>
                             </div>
                           ) : isMyVote ? (
-                            <div className="mt-2.5 p-3 rounded-lg bg-white border border-emerald-200 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium flex items-center justify-between">
+                            <div className="mt-2.5 p-3 sm:p-3.5 rounded-xl bg-muted/40 dark:bg-zinc-950/60 border border-border/80 text-xs sm:text-sm text-foreground leading-relaxed font-medium flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                 <span>{item.message}</span>
                               </div>
                               {item.decisionStatus && (
-                                <Badge variant="outline" className="text-[10px] capitalize bg-slate-50 text-slate-600 border-slate-200">
+                                <Badge variant="outline" className="text-[10px] capitalize bg-background text-muted-foreground border-border">
                                   {item.decisionStatus.toLowerCase()}
                                 </Badge>
                               )}
                             </div>
                           ) : (
-                            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1">
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
                               {item.message}
                             </p>
                           )}
 
                           {/* Card Footer Quick Actions */}
-                          <div className="mt-3 pt-2.5 flex items-center justify-between border-t border-slate-100 text-xs">
-                            <div className="text-slate-400 text-[11px]">
+                          <div className="mt-3 pt-2.5 flex items-center justify-between border-t border-border text-xs">
+                            <div className="text-muted-foreground text-[11px]">
                               {format(new Date(item.createdAt), 'MMM d, yyyy')}
                             </div>
 
                             <Link
                               to={targetDecisionId ? `/decisions/${targetDecisionId}` : "/decisions"}
-                              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             >
                               <span>
                                 {isCreatedDecision
@@ -668,7 +676,7 @@ export default function ActivityTimelinePage() {
                                         ? 'View Discussion' 
                                         : 'View Decision'}
                               </span>
-                              <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600" />
+                              <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                             </Link>
                           </div>
                         </div>
@@ -684,7 +692,7 @@ export default function ActivityTimelinePage() {
               <div className="pt-6 flex justify-center">
                 <Button 
                   variant="outline" 
-                  className="border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold px-6 h-10 shadow-xs"
+                  className="border-border bg-card hover:bg-muted text-foreground text-xs font-bold px-6 h-10 shadow-xs"
                   onClick={handleLoadMore}
                   disabled={isFetchingNextPage}
                 >
@@ -698,7 +706,3 @@ export default function ActivityTimelinePage() {
     </div>
   );
 }
-
-
-
-

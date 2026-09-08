@@ -50,6 +50,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\DecisionRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\ElectionVoteRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\ForgotPasswordRequest.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\GoogleAuthRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\NomineeRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\OptionRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\RegisterRequest.java

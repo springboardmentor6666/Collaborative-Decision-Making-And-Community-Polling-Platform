@@ -14,6 +14,11 @@ export const adminApi = {
     await axiosInstance.delete(`${API_PREFIX}/users/${userId}`);
   },
 
+  updateUserStatus: async (userId: number, status: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE', reason?: string): Promise<UserResponse> => {
+    const response = await axiosInstance.patch(`${API_PREFIX}/users/${userId}/status`, null, { params: { status, reason } });
+    return response.data.data;
+  },
+
   getAuditLogs: async (page = 0, size = 10): Promise<PagedResponse<AuditLogResponse>> => {
     const response = await axiosInstance.get(`${API_PREFIX}/audit-logs`, { params: { page, size } });
     return response.data.data;

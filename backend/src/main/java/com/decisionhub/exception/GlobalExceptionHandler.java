@@ -125,6 +125,8 @@ public class GlobalExceptionHandler {
                 friendlyMessage = "This username is already taken. Please choose another username.";
             } else if (lower.contains("unique") || lower.contains("duplicate key")) {
                 friendlyMessage = "A record with this information already exists.";
+            } else if (lower.contains("check constraint")) {
+                friendlyMessage = "The submitted information violated validation constraints.";
             }
         }
 
