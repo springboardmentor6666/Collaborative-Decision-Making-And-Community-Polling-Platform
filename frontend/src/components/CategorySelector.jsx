@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CategorySelector.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/CategorySelector.jsx
+ *
+ * Purpose:
+ *   Interactive category taxonomy selector allowing users to choose or filter by single or multiple topic categories.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { getCategoriesApi, createCategoryApi } from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';

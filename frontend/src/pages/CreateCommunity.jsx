@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CreateCommunity.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/CreateCommunity.jsx
+ *
+ * Purpose:
+ *   Interactive community creation wizard with category taxonomy selection, privacy controls, and branding customization.
+ */
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

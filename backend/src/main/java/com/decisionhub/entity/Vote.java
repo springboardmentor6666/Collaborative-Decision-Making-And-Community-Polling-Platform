@@ -7,6 +7,16 @@ import java.time.LocalDateTime;
 @Table(name = "votes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"poll_option_id", "voter_id"})
 })
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: Vote
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'Vote' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 public class Vote {
 
     @Id

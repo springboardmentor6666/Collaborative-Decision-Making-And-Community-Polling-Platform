@@ -1,3 +1,16 @@
+-- ============================================================================
+-- DecisionHub - Collaborative Decision-Making & Community Polling Platform
+--
+-- Seed Dataset (sample_data.sql)
+--
+-- Purpose:
+--   Populates the database with initial realistic test data including:
+--   - 6 Core taxonomy categories (Career, Education, Technology, Travel, Finance, Lifestyle)
+--   - Default administrator (admin@decisionhub.com / Pass123) and moderator accounts
+--   - Multi-option decisions with pros/cons criteria and score matrices
+--   - Sample polls, ballots, comments, and community spaces
+-- ============================================================================
+
 -- Seed Data for DecisionHub (matches official schema.sql)
 
 -- 1. Categories

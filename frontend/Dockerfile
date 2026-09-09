@@ -1,3 +1,14 @@
+# ==============================================================================
+# DecisionHub - Collaborative Decision-Making & Community Polling Platform
+#
+# File: frontend/Dockerfile
+# Architecture Tier: Multi-Stage Production Web Container
+#
+# Purpose:
+#   Stage 1: Installs dependencies and builds optimized static assets using Vite 5.
+#   Stage 2: Serves SPA bundle via alpine Nginx web server with gzip and reverse proxy.
+# ==============================================================================
+
 # Build Stage
 FROM node:20-alpine AS builder
 WORKDIR /app

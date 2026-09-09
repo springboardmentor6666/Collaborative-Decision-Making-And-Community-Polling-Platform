@@ -2,6 +2,16 @@ package com.decisionhub.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ChangePasswordRequest
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Request payload DTO carrying incoming client data with validation constraints for ChangePassword operations.
+ */
 
 public class ChangePasswordRequest {
 

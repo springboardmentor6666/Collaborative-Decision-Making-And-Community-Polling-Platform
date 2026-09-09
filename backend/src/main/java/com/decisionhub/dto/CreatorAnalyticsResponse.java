@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.util.List;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CreatorAnalyticsResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing CreatorAnalytics domain data for client consumption.
+ */
 
 public class CreatorAnalyticsResponse {
 

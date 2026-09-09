@@ -3,6 +3,16 @@ package com.decisionhub.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: Attachment
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'Attachment' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 @Entity
 @Table(name = "attachments")
 public class Attachment {

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: PageTransition.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/PageTransition.jsx
+ *
+ * Purpose:
+ *   Framer Motion animated page wrapper providing smooth opacity and translate transitions between route changes.
+ */
+
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';

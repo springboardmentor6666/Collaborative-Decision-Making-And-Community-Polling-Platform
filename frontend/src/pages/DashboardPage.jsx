@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: DashboardPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/DashboardPage.jsx
+ *
+ * Purpose:
+ *   Primary authenticated landing dashboard featuring trending decisions, category filters, quick stats, keyboard navigation, and live activity streams.
+ */
+
 import { useEffect, useState, useMemo } from 'react';
 import {
   fetchDecisions,

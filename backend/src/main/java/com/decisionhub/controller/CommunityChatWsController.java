@@ -14,6 +14,16 @@ import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityChatWsController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Handles real-time WebSocket STOMP messaging for community chat: broadcasting messages, handling reactions, typing indicators, and read receipt updates.
+ */
 @Controller
 public class CommunityChatWsController {
 

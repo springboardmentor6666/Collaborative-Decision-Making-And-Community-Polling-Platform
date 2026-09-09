@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: SignupPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/SignupPage.jsx
+ *
+ * Purpose:
+ *   User registration page with input validation, password strength requirements, terms acceptance, and redirect to onboarding.
+ */
+
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';

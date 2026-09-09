@@ -1,7 +1,21 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: api.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/api.js
+ *
+ * Purpose:
+ *   Base Axios API instance configured with root base URL, timeout thresholds, and global request/response interceptors.
+ */
+
 import axios from 'axios';
 
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const baseURL = rawApiUrl ? (rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`) : '/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -17,6 +17,16 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: NotificationScheduler
+ * Architecture Tier: Scheduled Background Task (Infrastructure Tier)
+ * Package: com.decisionhub.scheduler
+ *
+ * Purpose:
+ *   Scheduled cron task cleaning up old read notifications and dispatching digest reminders for unread high-priority events.
+ */
 @Component
 @EnableScheduling
 public class NotificationScheduler {
@@ -42,6 +52,7 @@ public class NotificationScheduler {
      * Checks polls every 60 seconds for completion or expiration.
      */
     @Scheduled(fixedRate = 60000)
+    @org.springframework.transaction.annotation.Transactional
     public void checkExpiredPollsAndReminders() {
         logger.info("Running NotificationScheduler poll-completion and voting-reminder check...");
 

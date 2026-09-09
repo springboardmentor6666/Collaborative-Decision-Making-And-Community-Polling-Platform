@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: PollCard.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/PollCard.jsx
+ *
+ * Purpose:
+ *   Interactive poll ballot and result visualizer supporting Single, Multi, Approval, Ranked-Choice, and 5-Star Rating polls.
+ */
+
 import React, { useState, useRef } from 'react';
 import { motion, Reorder } from 'framer-motion';
 import VoteButton from './VoteButton';

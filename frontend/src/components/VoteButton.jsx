@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: VoteButton.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/VoteButton.jsx
+ *
+ * Purpose:
+ *   Interactive animated voting button component with active selection states, hover micro-animations, and loading spinners.
+ */
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 

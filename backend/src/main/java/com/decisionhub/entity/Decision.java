@@ -5,6 +5,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: Decision
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'Decision' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 @Entity
 @Table(name = "decisions")
 public class Decision {

@@ -9,6 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SearchController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Executes full-text cross-entity search queries across decisions, community hubs, and user comments with relevance ranking.
+ */
 @RestController
 @RequestMapping("/api/search")
 @Tag(name = "Search", description = "Endpoints for unified global full-text search across platform")

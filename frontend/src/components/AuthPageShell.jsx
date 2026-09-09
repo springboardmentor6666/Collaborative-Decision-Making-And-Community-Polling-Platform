@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AuthPageShell.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/AuthPageShell.jsx
+ *
+ * Purpose:
+ *   Shared visual layout shell for authentication pages (Login, Signup, Forgot Password) featuring branding and glassmorphism styling.
+ */
+
 import { motion } from 'framer-motion';
 import BrandMark from './BrandMark';
 

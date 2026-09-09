@@ -11,6 +11,16 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: OAuth2AuthenticationFailureHandler
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security.oauth
+ *
+ * Purpose:
+ *   Spring Security OAuth2 failure handler handling authentication errors during Google OAuth2 login and redirecting with error query params.
+ */
 @Component
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 

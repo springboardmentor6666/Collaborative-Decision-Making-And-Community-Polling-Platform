@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: LoginPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/LoginPage.jsx
+ *
+ * Purpose:
+ *   Authentication page supporting email/password login, Google OAuth2 one-click sign-in, session preservation, and navigation to signup.
+ */
+
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';

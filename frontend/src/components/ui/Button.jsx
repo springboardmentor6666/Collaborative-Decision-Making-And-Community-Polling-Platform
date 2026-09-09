@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Button.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/Button.jsx
+ *
+ * Purpose:
+ *   Design system button primitive supporting primary, secondary, danger, and ghost variants with loading states.
+ */
+
 import React from 'react';
 
 export function Button({ 

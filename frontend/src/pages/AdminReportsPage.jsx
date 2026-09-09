@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AdminReportsPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/AdminReportsPage.jsx
+ *
+ * Purpose:
+ *   Administrative moderation interface for reviewing, filtering, and resolving reported user content (decisions, comments, polls).
+ */
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';

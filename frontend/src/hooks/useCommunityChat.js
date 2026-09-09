@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: useCommunityChat.js
+ * Architecture Tier: Custom React Hook (Logic Layer)
+ * Path: frontend/src/hooks/useCommunityChat.js
+ *
+ * Purpose:
+ *   Custom React hook managing WebSocket STOMP connections, channel subscriptions, incoming messages, and typing indicators.
+ */
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   getChannelMessagesApi,

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: App.jsx
+ * Architecture Tier: Root Application Router (Root)
+ * Path: frontend/src/App.jsx
+ *
+ * Purpose:
+ *   Root application component configuring React Router routes, role-based route guards, global context providers, and layout shells.
+ */
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';

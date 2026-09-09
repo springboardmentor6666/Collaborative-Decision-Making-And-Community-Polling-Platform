@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: userService.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/userService.js
+ *
+ * Purpose:
+ *   User API service managing profile updates, interest taxonomy selections, avatar uploads, and user stats.
+ */
+
 import api from './api';
 
 export const userService = {

@@ -18,6 +18,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: UserService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Manages user account details, profile customization, avatar links, interest preferences, and saved decisions bookmarks.
+ */
 @Service
 public class UserService {
 

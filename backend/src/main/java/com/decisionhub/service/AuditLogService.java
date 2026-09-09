@@ -7,6 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AuditLogService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Records immutable security and operational audit trail records for sensitive actions (user role changes, deletions, admin logins).
+ */
 @Service
 public class AuditLogService {
 

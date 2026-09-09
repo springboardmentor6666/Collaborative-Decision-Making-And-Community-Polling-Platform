@@ -1,5 +1,16 @@
 package com.decisionhub.entity;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AuditableEntity
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'Auditable' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

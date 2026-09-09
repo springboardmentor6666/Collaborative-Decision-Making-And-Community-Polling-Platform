@@ -23,6 +23,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: PollService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Manages poll creation, option linking, voting rules (single choice, approval, ranked-choice IRV, rating), and dynamic result calculations.
+ */
 @Service
 public class PollService {
 

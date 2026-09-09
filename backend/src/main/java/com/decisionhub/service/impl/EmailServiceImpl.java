@@ -11,6 +11,16 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: EmailServiceImpl
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service.impl
+ *
+ * Purpose:
+ *   Spring Mail implementation of EmailService, dispatching HTML formatted transactional emails asynchronously.
+ */
 @Service
 public class EmailServiceImpl implements EmailService {
 

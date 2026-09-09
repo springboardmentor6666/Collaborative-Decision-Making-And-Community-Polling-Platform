@@ -17,6 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ModerationService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Processes user content reports, manages moderation flags, and coordinates content takedown or dismissal workflows.
+ */
 @Service
 public class ModerationService {
 

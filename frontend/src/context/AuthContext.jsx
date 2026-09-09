@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AuthContext.jsx
+ * Architecture Tier: State Management Context (State Layer)
+ * Path: frontend/src/context/AuthContext.jsx
+ *
+ * Purpose:
+ *   React Context provider managing global authentication state, JWT session storage, login/logout actions, and Google OAuth.
+ */
+
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   loginApi,

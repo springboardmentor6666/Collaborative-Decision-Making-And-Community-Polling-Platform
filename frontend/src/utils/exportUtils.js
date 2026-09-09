@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: exportUtils.js
+ * Architecture Tier: Utility Helper (Support Layer)
+ * Path: frontend/src/utils/exportUtils.js
+ *
+ * Purpose:
+ *   Data export utilities enabling users to download decision summaries, poll results, and analytics data in CSV and JSON formats.
+ */
+
 import jsPDF from 'jspdf';
 
 /**

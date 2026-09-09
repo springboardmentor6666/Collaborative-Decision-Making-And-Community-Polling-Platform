@@ -16,6 +16,16 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityEventListener
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Asynchronous Spring application event listener that records platform activities into the canonical activity stream upon domain events.
+ */
 @Component
 public class ActivityEventListener {
 

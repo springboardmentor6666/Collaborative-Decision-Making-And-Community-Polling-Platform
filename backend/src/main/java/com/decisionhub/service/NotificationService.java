@@ -17,6 +17,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: NotificationService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Dispatches in-app notifications to users upon comments, votes, mentions, and community invites, tracking read/unread statuses.
+ */
 @Service
 public class NotificationService {
 

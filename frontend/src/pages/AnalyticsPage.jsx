@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AnalyticsPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/AnalyticsPage.jsx
+ *
+ * Purpose:
+ *   Creator analytics dashboard presenting impressions, unique views, vote conversion rates, and engagement performance for user-authored decisions.
+ */
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

@@ -21,6 +21,16 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.decisionhub.security.LegacyPasswordEncoder;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SecurityConfig
+ * Architecture Tier: Application Configuration (Infrastructure Tier)
+ * Package: com.decisionhub.config
+ *
+ * Purpose:
+ *   Spring Security 6 configuration establishing stateless JWT filter chains, public vs protected route authorizations, and CORS filters.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

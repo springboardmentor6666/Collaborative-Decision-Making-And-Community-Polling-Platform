@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: SkeletonCard.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/SkeletonCard.jsx
+ *
+ * Purpose:
+ *   Animated placeholder skeleton component used to prevent layout shifts during asynchronous data fetching.
+ */
+
 import React from 'react';
 
 /**

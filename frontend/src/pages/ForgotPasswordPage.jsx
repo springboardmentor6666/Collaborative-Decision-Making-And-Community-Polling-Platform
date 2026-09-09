@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ForgotPasswordPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/ForgotPasswordPage.jsx
+ *
+ * Purpose:
+ *   Password recovery page allowing users to request a password reset email link with secure verification tokens.
+ */
+
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AlertContext.jsx
+ * Architecture Tier: State Management Context (State Layer)
+ * Path: frontend/src/context/AlertContext.jsx
+ *
+ * Purpose:
+ *   React Context provider managing global alert modals, confirmation prompts, and user notification dialogs.
+ */
+
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import AlertPopup from '../components/AlertPopup';
 import { getUserFriendlyError } from '../utils/errorMessages';

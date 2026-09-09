@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Manages community lifecycle: creation, details retrieval, membership joins/leaves, role elevation (moderator), and invite token management.
+ */
 @RestController
 @RequestMapping("/api/communities")
 @Tag(name = "Communities", description = "Endpoints for community group management and membership")

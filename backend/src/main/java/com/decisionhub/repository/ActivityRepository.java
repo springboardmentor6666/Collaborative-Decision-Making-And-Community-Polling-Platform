@@ -11,6 +11,16 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'Activity' entities.
+ */
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 

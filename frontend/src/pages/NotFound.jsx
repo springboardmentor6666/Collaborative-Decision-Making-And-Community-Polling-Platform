@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: NotFound.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/NotFound.jsx
+ *
+ * Purpose:
+ *   Custom 404 error page displayed when users navigate to non-existent routes, offering quick recovery navigation links.
+ */
+
 import { Link } from 'react-router-dom';
 
 export default function NotFound() {

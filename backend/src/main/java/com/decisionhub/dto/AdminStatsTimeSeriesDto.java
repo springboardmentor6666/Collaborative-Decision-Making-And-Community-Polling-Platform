@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.util.List;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AdminStatsTimeSeriesDto
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Data transfer object transferring AdminStatsTimeSeriesDto state across architectural boundaries.
+ */
 
 public class AdminStatsTimeSeriesDto {
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommunityCard.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/CommunityCard.jsx
+ *
+ * Purpose:
+ *   Card component previewing a community space: member count, category tag, description, and one-click join/leave button.
+ */
+
 import { Link } from 'react-router-dom';
 import CategoryBadge from './CategoryBadge';
 

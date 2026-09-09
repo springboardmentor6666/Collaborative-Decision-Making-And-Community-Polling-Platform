@@ -5,6 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: RegisterRequest
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Request payload DTO carrying incoming client data with validation constraints for Register operations.
+ */
 
 public class RegisterRequest {
 

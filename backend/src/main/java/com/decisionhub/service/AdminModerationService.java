@@ -14,6 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AdminModerationService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Business service for administrative moderation workflows, processing abuse reports, applying sanctions, and updating content flags.
+ */
 @Service
 public class AdminModerationService {
 

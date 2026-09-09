@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AdminPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/AdminPage.jsx
+ *
+ * Purpose:
+ *   Platform administration console providing user moderation, role assignments, system health indicators, and platform settings.
+ */
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';

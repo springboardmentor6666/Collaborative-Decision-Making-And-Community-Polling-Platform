@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: pollService.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/pollService.js
+ *
+ * Purpose:
+ *   Poll API service managing poll retrieval, ballot submission, vote calculations, and ranked-choice results.
+ */
+
 import api from './api';
 
 export const pollService = {

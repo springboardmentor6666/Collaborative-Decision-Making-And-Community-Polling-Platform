@@ -14,6 +14,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: JwtFilter
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security
+ *
+ * Purpose:
+ *   OncePerRequestFilter interceptor extracting and validating Bearer JWT tokens from HTTP Authorization headers and setting the SecurityContext.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 

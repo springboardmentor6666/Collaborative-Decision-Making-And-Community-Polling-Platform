@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: BrandMark.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/BrandMark.jsx
+ *
+ * Purpose:
+ *   DecisionHub vector branding logo component with customizable size variants and interactive hover effects.
+ */
+
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 

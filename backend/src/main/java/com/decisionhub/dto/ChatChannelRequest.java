@@ -3,6 +3,16 @@ package com.decisionhub.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ChatChannelRequest
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Request payload DTO carrying incoming client data with validation constraints for ChatChannel operations.
+ */
 
 public class ChatChannelRequest {
 

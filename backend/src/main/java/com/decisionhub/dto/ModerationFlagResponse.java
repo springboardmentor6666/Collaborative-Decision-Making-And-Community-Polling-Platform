@@ -1,4 +1,14 @@
 package com.decisionhub.dto;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ModerationFlagResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing ModerationFlag domain data for client consumption.
+ */
 
 public class ModerationFlagResponse {
 

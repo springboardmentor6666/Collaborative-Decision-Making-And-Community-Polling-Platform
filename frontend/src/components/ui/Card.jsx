@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Card.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/Card.jsx
+ *
+ * Purpose:
+ *   Design system surface container component with glassmorphism styling, border gradients, and hover elevations.
+ */
+
 import React from 'react';
 
 export function Card({ children, className = '', ...props }) {

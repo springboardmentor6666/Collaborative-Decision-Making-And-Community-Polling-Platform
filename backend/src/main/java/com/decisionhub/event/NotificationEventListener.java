@@ -10,6 +10,16 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: NotificationEventListener
+ * Architecture Tier: Application Event (Event-Driven Tier)
+ * Package: com.decisionhub.event
+ *
+ * Purpose:
+ *   Asynchronous Spring event listener that consumes NotificationEvents and persists Notification entities into the database.
+ */
 @Component
 public class NotificationEventListener {
 

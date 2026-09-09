@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Profile.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/Profile.jsx
+ *
+ * Purpose:
+ *   User profile page displaying personal details, bio, avatar, interest topics, voting activity history, and bookmarked decisions.
+ */
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Input.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/Input.jsx
+ *
+ * Purpose:
+ *   Design system text input and textarea component with validation states, helper text, and icon adornments.
+ */
+
 import React from 'react';
 
 export function Input({ className = '', ...props }) {

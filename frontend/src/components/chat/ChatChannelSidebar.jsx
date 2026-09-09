@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ChatChannelSidebar.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/ChatChannelSidebar.jsx
+ *
+ * Purpose:
+ *   Channel navigation sidebar for community chat spaces, listing text channels, active members, and unread badge counters.
+ */
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

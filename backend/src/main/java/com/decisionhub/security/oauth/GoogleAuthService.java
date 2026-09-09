@@ -18,6 +18,16 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Locale;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: GoogleAuthService
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security.oauth
+ *
+ * Purpose:
+ *   Service verifying Google OAuth2 ID tokens via Google API Client library and extracting user profile claims (email, name, picture).
+ */
 @Service
 public class GoogleAuthService {
 

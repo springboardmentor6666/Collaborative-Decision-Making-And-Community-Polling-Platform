@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: RefreshContext.jsx
+ * Architecture Tier: State Management Context (State Layer)
+ * Path: frontend/src/context/RefreshContext.jsx
+ *
+ * Purpose:
+ *   React Context provider facilitating coordinated cross-component state refetches without full page reloads.
+ */
+
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const RefreshContext = createContext({

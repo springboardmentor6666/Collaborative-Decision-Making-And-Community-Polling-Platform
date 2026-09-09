@@ -1,4 +1,14 @@
 package com.decisionhub.dto;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: OptionRatingSummaryDto
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Data transfer object transferring OptionRatingSummaryDto state across architectural boundaries.
+ */
 
 public class OptionRatingSummaryDto {
 

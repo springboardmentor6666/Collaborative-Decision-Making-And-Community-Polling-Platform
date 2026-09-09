@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ReportModal.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/ReportModal.jsx
+ *
+ * Purpose:
+ *   Reporting dialog modal allowing users to flag offensive content with predefined violation categories and details.
+ */
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { flagContentApi, submitContentReportApi } from '../api/axiosClient';

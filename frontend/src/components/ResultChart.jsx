@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ResultChart.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/ResultChart.jsx
+ *
+ * Purpose:
+ *   Animated horizontal and vertical bar chart component visualizing vote counts, percentages, and winning option highlights.
+ */
+
 import React from 'react';
 import PieChart from './PieChart';
 

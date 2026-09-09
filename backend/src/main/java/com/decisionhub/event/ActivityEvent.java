@@ -2,6 +2,16 @@ package com.decisionhub.event;
 
 import java.util.HashMap;
 import java.util.Map;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityEvent
+ * Architecture Tier: Application Event (Event-Driven Tier)
+ * Package: com.decisionhub.event
+ *
+ * Purpose:
+ *   Spring application domain event published whenever a significant user action occurs (decision created, vote cast, comment added, community joined).
+ */
 
 public class ActivityEvent {
 

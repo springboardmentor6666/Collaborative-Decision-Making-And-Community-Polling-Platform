@@ -8,6 +8,16 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: WebSocketConfig
+ * Architecture Tier: Application Configuration (Infrastructure Tier)
+ * Package: com.decisionhub.config
+ *
+ * Purpose:
+ *   Spring WebSocket configuration registering STOMP message broker endpoints (/ws), application destination prefixes (/app), and topic subscriptions (/topic).
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {

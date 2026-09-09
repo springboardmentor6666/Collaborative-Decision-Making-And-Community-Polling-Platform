@@ -11,6 +11,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: UserController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Manages user profiles, biography, interest taxonomy preferences, voting history, and bookmarked/saved decisions.
+ */
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "Users", description = "Endpoints for viewing user profiles")

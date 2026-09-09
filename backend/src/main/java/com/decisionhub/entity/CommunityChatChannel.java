@@ -3,6 +3,16 @@ package com.decisionhub.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityChatChannel
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'CommunityChatChannel' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 @Entity
 @Table(name = "community_chat_channels")
 public class CommunityChatChannel {

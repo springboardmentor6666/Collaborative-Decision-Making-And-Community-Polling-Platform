@@ -1,4 +1,14 @@
 package com.decisionhub.dto;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ApiResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing Api domain data for client consumption.
+ */
 
 public class ApiResponse {
 

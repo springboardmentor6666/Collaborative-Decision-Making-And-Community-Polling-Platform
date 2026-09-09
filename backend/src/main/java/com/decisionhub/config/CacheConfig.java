@@ -10,6 +10,16 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CacheConfig
+ * Architecture Tier: Application Configuration (Infrastructure Tier)
+ * Package: com.decisionhub.config
+ *
+ * Purpose:
+ *   Spring Cache configuration setting up in-memory caching for high-read, low-write resources such as categories and popular decisions.
+ */
 @Configuration
 @EnableCaching
 @EnableAsync

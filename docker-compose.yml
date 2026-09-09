@@ -1,3 +1,16 @@
+# ==============================================================================
+# DecisionHub - Collaborative Decision-Making & Community Polling Platform
+#
+# File: docker-compose.yml
+# Architecture Tier: Container Orchestration & Deployment
+#
+# Purpose:
+#   Coordinates multi-container deployment for DecisionHub:
+#   1. decisionhub-mysql: MySQL 8.0 relational database with persistent healthchecks
+#   2. decisionhub-backend: Spring Boot 3 Java 17 API service on port 8080
+#   3. decisionhub-frontend: Nginx production SPA web server on port 3000
+# ==============================================================================
+
 services:
   mysql:
     image: mysql:8.0
@@ -24,15 +37,16 @@ services:
       dockerfile: Dockerfile
     container_name: decisionhub-backend
     restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-decisionhub_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-decisionuser}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-decisionpass}
-      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://ep-fancy-fire-b307b9ee-pooler.c-4.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-neondb_owner}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-npg_w13CMzsdcUuI}
+      SPRING_DATASOURCE_DRIVER: ${SPRING_DATASOURCE_DRIVER:-org.postgresql.Driver}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      HIBERNATE_DIALECT: ${HIBERNATE_DIALECT:-org.hibernate.dialect.PostgreSQLDialect}
+      HIKARI_CONNECTION_TIMEOUT: ${HIKARI_CONNECTION_TIMEOUT:-30000}
+      HIKARI_INIT_FAIL_TIMEOUT: ${HIKARI_INIT_FAIL_TIMEOUT:-60000}
       JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-744578795596-gt4i13j8n9ms2cr6eojtk6jof3emtnuc.apps.googleusercontent.com}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-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}
@@ -42,6 +56,8 @@ services:
       SPRING_JPA_OPEN_IN_VIEW: "true"
     ports:
       - "8080:8080"
+    volumes:
+      - decisionhub_uploads:/app/uploads
 
   frontend:
     build:
@@ -56,3 +72,4 @@ services:
 
 volumes:
   mysql_data:
+  decisionhub_uploads:

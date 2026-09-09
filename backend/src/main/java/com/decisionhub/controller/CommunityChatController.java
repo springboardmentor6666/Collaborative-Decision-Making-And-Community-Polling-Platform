@@ -16,6 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityChatController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides REST endpoints for community chat operations: channel management, message history with cursor pagination, pinned announcements, and read receipts.
+ */
 @RestController
 @RequestMapping("/api/communities/{communityId}/chat")
 @Tag(name = "Community Chat", description = "Endpoints for community real-time channels, messages, reactions and pins")

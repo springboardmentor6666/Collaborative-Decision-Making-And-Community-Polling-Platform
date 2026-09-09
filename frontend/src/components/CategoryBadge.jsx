@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CategoryBadge.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/CategoryBadge.jsx
+ *
+ * Purpose:
+ *   Color-coded category tag component displaying category names with thematic icons and border accents.
+ */
+
 import React from 'react';
 
 const CATEGORY_STYLES = {

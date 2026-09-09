@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AlertPopup.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/AlertPopup.jsx
+ *
+ * Purpose:
+ *   Modal alert and confirmation dialog component displaying warning, error, or confirmation messages with action buttons.
+ */
+
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 

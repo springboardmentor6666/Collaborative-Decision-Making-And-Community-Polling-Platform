@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommunityDetails.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/CommunityDetails.jsx
+ *
+ * Purpose:
+ *   Community detail page displaying member roster, community decisions, discussion channels, and real-time community chat.
+ */
+
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

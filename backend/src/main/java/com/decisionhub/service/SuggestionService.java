@@ -15,6 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SuggestionService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Handles user suggestions for decision options and criteria factors, allowing decision owners to accept or decline suggestions.
+ */
 @Service
 public class SuggestionService {
 

@@ -3,6 +3,16 @@ package com.decisionhub.dto;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing Activity domain data for client consumption.
+ */
 
 public class ActivityResponse {
 

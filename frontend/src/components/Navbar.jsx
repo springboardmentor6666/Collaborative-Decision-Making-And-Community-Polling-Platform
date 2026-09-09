@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Navbar.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/Navbar.jsx
+ *
+ * Purpose:
+ *   Primary top navigation bar with brand identity, search bar, active route links, notification bell, theme toggle, and user avatar dropdown.
+ */
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';

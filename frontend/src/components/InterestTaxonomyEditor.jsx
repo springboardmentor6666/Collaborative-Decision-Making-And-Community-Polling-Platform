@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: InterestTaxonomyEditor.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/InterestTaxonomyEditor.jsx
+ *
+ * Purpose:
+ *   Interactive multi-select grid allowing users to customize their personal interest categories for tailored recommendations.
+ */
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getCategoriesApi, getUserInterestsApi, updateUserInterestsApi } from '../api/axiosClient';

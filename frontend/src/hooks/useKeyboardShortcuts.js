@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: useKeyboardShortcuts.js
+ * Architecture Tier: Custom React Hook (Logic Layer)
+ * Path: frontend/src/hooks/useKeyboardShortcuts.js
+ *
+ * Purpose:
+ *   Custom React hook binding global keyboard shortcuts (e.g., search focus, command palette, theme toggle, navigation).
+ */
+
 import { useEffect, useCallback } from 'react';
 
 /**

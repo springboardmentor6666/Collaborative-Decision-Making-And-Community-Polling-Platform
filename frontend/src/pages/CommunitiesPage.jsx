@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommunitiesPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/CommunitiesPage.jsx
+ *
+ * Purpose:
+ *   Community exploration hub allowing users to discover, search, filter, and join interest-based community spaces.
+ */
+
 import { useEffect, useState, useMemo } from 'react';
 import {
   getCommunitiesApi,

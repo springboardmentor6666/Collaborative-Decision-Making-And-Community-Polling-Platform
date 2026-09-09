@@ -19,6 +19,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: FileController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Handles multipart file uploads, attachment linking for decisions and comments, avatar updates, and secure file streaming/downloads.
+ */
 @RestController
 @RequestMapping("/api/files")
 @Tag(name = "File & Media Uploads", description = "Endpoints for uploading and retrieving attachments for decisions and comments")

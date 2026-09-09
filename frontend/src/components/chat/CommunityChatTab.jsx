@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommunityChatTab.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/CommunityChatTab.jsx
+ *
+ * Purpose:
+ *   Integrated community chat view orchestrating channel selection, message stream, real-time STOMP subscriptions, and active presence.
+ */
+
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

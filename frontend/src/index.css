@@ -1,3 +1,14 @@
+/*
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: index.css
+ * Architecture Tier: Global Design System & CSS Styling
+ *
+ * Purpose:
+ *   Core global stylesheet defining Tailwind CSS directives, CSS custom properties,
+ *   glassmorphism utilities, scrollbar styling, custom animations, and responsive rules.
+ */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import url('./theme/theme.css');
 

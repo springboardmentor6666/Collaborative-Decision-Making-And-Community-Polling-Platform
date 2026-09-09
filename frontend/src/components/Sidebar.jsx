@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Sidebar.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/Sidebar.jsx
+ *
+ * Purpose:
+ *   Left-hand collapsible navigation sidebar for desktop layouts, organizing primary application spaces and category filters.
+ */
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

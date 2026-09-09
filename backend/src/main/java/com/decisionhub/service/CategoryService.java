@@ -12,6 +12,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CategoryService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Manages the platform topic taxonomy, category retrieval, popular categories aggregation, and category validation.
+ */
 @Service
 public class CategoryService {
 

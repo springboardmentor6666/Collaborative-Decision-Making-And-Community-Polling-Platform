@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ErrorBoundary.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/ErrorBoundary.jsx
+ *
+ * Purpose:
+ *   React error boundary catching component tree rendering errors and displaying a graceful fallback UI with reload options.
+ */
+
 import React from 'react';
 
 export default class ErrorBoundary extends React.Component {

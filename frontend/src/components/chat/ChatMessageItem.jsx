@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ChatMessageItem.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/ChatMessageItem.jsx
+ *
+ * Purpose:
+ *   Individual chat message component supporting avatar display, timestamps, formatted content, reaction badges, and reply actions.
+ */
+
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

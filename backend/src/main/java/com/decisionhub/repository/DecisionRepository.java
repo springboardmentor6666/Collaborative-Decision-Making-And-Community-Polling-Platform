@@ -12,6 +12,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: DecisionRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'Decision' entities.
+ */
 @Repository
 public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSpecificationExecutor<Decision> {
     List<Decision> findByOwnerId(Long ownerId);
@@ -33,8 +43,8 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
 
     @Query("SELECT d FROM Decision d WHERE d.isDeleted = false " +
            "AND (:categoryId IS NULL OR d.category.id = :categoryId) " +
-           "AND (:status IS NULL OR UPPER(d.status) = UPPER(:status)) " +
-           "AND (:search IS NULL OR LOWER(d.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+           "AND (CAST(:status AS string) IS NULL OR UPPER(d.status) = UPPER(CAST(:status AS string))) " +
+           "AND (CAST(:search AS string) IS NULL OR LOWER(d.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))")
     Page<Decision> findWithFilters(@Param("categoryId") Long categoryId,
                                   @Param("status") String status,
                                   @Param("search") String search,
@@ -42,7 +52,7 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
 
     @Query("SELECT d FROM Decision d WHERE d.isDeleted = false " +
            "AND (d.visibility = 'PUBLIC' OR (d.owner.email = :email) OR (d.community.id IN (SELECT cm.community.id FROM CommunityMember cm WHERE cm.user.email = :email))) " +
-           "AND (LOWER(d.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "AND (LOWER(d.title) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR LOWER(d.description) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')))")
     Page<Decision> searchDecisions(@Param("query") String query, @Param("email") String email, Pageable pageable);
 
     @org.springframework.data.jpa.repository.Modifying

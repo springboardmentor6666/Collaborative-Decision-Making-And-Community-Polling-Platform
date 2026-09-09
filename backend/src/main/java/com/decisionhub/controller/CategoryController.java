@@ -11,6 +11,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CategoryController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides endpoints for category taxonomy retrieval, topic browsing, and category management across decisions and communities.
+ */
 @RestController
 @RequestMapping("/api/categories")
 @Tag(name = "Categories", description = "Endpoints for category taxonomy and user-made categories")

@@ -14,6 +14,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: WebSocketAuthChannelInterceptor
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security
+ *
+ * Purpose:
+ *   ChannelInterceptor intercepting inbound WebSocket STOMP CONNECT frames to authenticate users via JWT credentials before connection.
+ */
 @Component
 public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 

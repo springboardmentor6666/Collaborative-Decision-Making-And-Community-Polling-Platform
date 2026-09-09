@@ -7,6 +7,16 @@ import java.time.LocalDateTime;
 @Table(name = "community_message_reactions", uniqueConstraints = {
     @UniqueConstraint(name = "uq_message_user_emoji", columnNames = {"message_id", "user_id", "emoji"})
 })
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityMessageReaction
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'CommunityMessageReaction' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 public class CommunityMessageReaction {
 
     @Id

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: PieChart.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/PieChart.jsx
+ *
+ * Purpose:
+ *   Custom SVG donut and pie chart visualization component rendering interactive hovered slices and responsive legends.
+ */
+
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 

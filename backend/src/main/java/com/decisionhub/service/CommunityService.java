@@ -25,6 +25,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Manages community groups, membership rosters, member role permissions (MEMBER, MODERATOR, ADMIN), and invite verification.
+ */
 @Service
 public class CommunityService {
 

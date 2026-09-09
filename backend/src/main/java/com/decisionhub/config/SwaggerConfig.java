@@ -9,6 +9,16 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SwaggerConfig
+ * Architecture Tier: Application Configuration (Infrastructure Tier)
+ * Package: com.decisionhub.config
+ *
+ * Purpose:
+ *   OpenAPI / Swagger 3 documentation configuration exposing interactive REST API documentation at /swagger-ui.html and /v3/api-docs.
+ */
 @Configuration
 public class SwaggerConfig {
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: DecisionReportPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/DecisionReportPage.jsx
+ *
+ * Purpose:
+ *   Exportable decision summary report presenting final poll distributions, criteria factor scores, and winning option analytics.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchDecisionById, getMyVotesAnalysisApi } from '../api/axiosClient';

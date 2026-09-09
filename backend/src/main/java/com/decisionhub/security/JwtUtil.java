@@ -18,6 +18,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: JwtUtil
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security
+ *
+ * Purpose:
+ *   Cryptographic utility component for generating, signing, parsing, and validating HMAC-SHA256 JSON Web Tokens with configurable expiration.
+ */
 @Component
 public class JwtUtil {
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ChatReactionPicker.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/ChatReactionPicker.jsx
+ *
+ * Purpose:
+ *   Floating emoji reaction palette allowing users to quickly react to chat messages with popular emojis.
+ */
+
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 

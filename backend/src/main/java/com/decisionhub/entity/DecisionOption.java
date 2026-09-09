@@ -2,6 +2,16 @@ package com.decisionhub.entity;
 
 import jakarta.persistence.*;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: DecisionOption
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'DecisionOption' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 @Entity
 @Table(name = "decision_options")
 public class DecisionOption {

@@ -7,6 +7,16 @@ import java.time.LocalDateTime;
 @Table(name = "community_invites", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"community_id", "invitee_id"})
 })
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityInvite
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'CommunityInvite' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 public class CommunityInvite {
 
     @Id

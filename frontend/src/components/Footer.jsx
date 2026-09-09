@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Footer.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/Footer.jsx
+ *
+ * Purpose:
+ *   Application footer component rendering navigation links, copyright notice, status indicator, and legal disclosures.
+ */
+
 import React from 'react';
 
 /**

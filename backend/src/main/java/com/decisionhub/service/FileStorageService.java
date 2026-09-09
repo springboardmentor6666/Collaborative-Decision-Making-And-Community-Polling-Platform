@@ -19,6 +19,16 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: FileStorageService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Handles local filesystem storage and retrieval of uploaded user files, documents, and profile avatars.
+ */
 @Service
 public class FileStorageService {
 

@@ -1,4 +1,15 @@
 /**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: notificationService.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/notificationService.js
+ *
+ * Purpose:
+ *   Notification API service managing alert retrieval, read state toggles, and notification preference updates.
+ */
+
+/**
  * Notification Service — manages notifications by calling real Backend Eng 2 endpoints (/api/notifications).
  * Completely connected to Spring Boot backend API with full type support:
  * - VOTING_REMINDER / VOTE_UPDATE

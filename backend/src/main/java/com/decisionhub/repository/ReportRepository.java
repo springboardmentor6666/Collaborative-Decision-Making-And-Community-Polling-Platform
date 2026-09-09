@@ -11,6 +11,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ReportRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'Report' entities.
+ */
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
@@ -33,12 +43,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Object[]> countGroupedByStatus();
 
     @Query("SELECT r FROM Report r WHERE " +
-           "(:status IS NULL OR UPPER(r.status) = UPPER(:status)) AND " +
-           "(:contentType IS NULL OR UPPER(r.contentType) = UPPER(:contentType)) AND " +
-           "(:search IS NULL OR LOWER(r.reason) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(r.description) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(r.reporter.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " (r.reportedUser IS NOT NULL AND LOWER(r.reportedUser.email) LIKE LOWER(CONCAT('%', :search, '%'))))")
+           "(CAST(:status AS string) IS NULL OR UPPER(r.status) = UPPER(CAST(:status AS string))) AND " +
+           "(CAST(:contentType AS string) IS NULL OR UPPER(r.contentType) = UPPER(CAST(:contentType AS string))) AND " +
+           "(CAST(:search AS string) IS NULL OR LOWER(r.reason) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           " LOWER(r.description) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           " LOWER(r.reporter.email) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           " (r.reportedUser IS NOT NULL AND LOWER(r.reportedUser.email) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))))")
     Page<Report> findWithFilters(@Param("status") String status,
                                  @Param("contentType") String contentType,
                                  @Param("search") String search,

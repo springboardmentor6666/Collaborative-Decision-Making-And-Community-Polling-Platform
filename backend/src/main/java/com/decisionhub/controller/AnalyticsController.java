@@ -18,6 +18,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AnalyticsController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides analytical endpoints for creators and administrators, computing impressions, view-to-vote conversions, and decision performance metrics.
+ */
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Analytics & Decision Analysis", description = "Endpoints for user vote breakdown, creator analytics, impression tracking, and decision data export")

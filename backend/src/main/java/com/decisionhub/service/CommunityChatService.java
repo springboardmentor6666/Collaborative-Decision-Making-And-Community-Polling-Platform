@@ -20,6 +20,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityChatService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Core business logic for real-time community chat: channel CRUD, message persistence, soft-deletes for thread integrity, reaction toggles, and unread badge calculations.
+ */
 @Service
 public class CommunityChatService {
 

@@ -6,6 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AccountLifecycleScheduler
+ * Architecture Tier: Scheduled Background Task (Infrastructure Tier)
+ * Package: com.decisionhub.scheduler
+ *
+ * Purpose:
+ *   Scheduled cron task periodically checking pending account deletions, purging expired verification tokens, and anonymizing inactive users.
+ */
 @Component
 public class AccountLifecycleScheduler {
 

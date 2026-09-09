@@ -12,6 +12,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'Community' entities.
+ */
 @Repository
 public interface CommunityRepository extends JpaRepository<Community, Long> {
 

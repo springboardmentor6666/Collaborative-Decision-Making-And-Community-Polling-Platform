@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ComparisonMatrix.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/ComparisonMatrix.jsx
+ *
+ * Purpose:
+ *   Multi-Criteria Decision Analysis (MCDA) matrix rendering options against weighted criteria factors with visual score comparisons.
+ */
+
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 

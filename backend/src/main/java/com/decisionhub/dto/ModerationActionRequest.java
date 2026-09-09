@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import jakarta.validation.constraints.NotBlank;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ModerationActionRequest
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Request payload DTO carrying incoming client data with validation constraints for ModerationAction operations.
+ */
 
 public class ModerationActionRequest {
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CreateDecision.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/CreateDecision.jsx
+ *
+ * Purpose:
+ *   Comprehensive decision builder: configure titles, descriptions, categories, comparison criteria factors, and attached poll configurations.
+ */
+
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

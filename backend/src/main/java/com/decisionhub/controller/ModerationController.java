@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ModerationController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides content moderation endpoints for reporting offensive decisions, polls, or comments, and resolving moderation flags by moderators/admins.
+ */
 @RestController
 @RequestMapping("/api/moderation")
 @Tag(name = "Moderation", description = "Endpoints for content moderation and flagging")

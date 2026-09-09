@@ -11,6 +11,16 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: DecisionLifecycleScheduler
+ * Architecture Tier: Scheduled Background Task (Infrastructure Tier)
+ * Package: com.decisionhub.scheduler
+ *
+ * Purpose:
+ *   Scheduled cron task running periodically to inspect open decisions past their endsAt deadline, auto-closing them and computing winning options.
+ */
 @Component
 public class DecisionLifecycleScheduler {
 

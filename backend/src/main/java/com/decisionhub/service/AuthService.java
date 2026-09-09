@@ -25,6 +25,16 @@ import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.Locale;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AuthService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Orchestrates user authentication, password hashing with BCrypt, JWT generation/validation, password reset tokens, and Google OAuth2 user provisioning.
+ */
 @Service
 public class AuthService {
 

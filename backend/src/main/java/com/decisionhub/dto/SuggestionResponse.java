@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.time.LocalDateTime;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SuggestionResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing Suggestion domain data for client consumption.
+ */
 
 public class SuggestionResponse {
 

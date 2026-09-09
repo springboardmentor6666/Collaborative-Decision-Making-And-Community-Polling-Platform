@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AdminStatisticsPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/AdminStatisticsPage.jsx
+ *
+ * Purpose:
+ *   Analytics dashboard for administrators visualizing platform-wide metrics: user signups, decision velocity, voting volume, and activity trends.
+ */
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';

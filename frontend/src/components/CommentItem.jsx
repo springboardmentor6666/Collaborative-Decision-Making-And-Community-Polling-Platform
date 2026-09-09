@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommentItem.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/CommentItem.jsx
+ *
+ * Purpose:
+ *   Individual comment display component supporting nested replies, upvotes/downvotes/heart reactions, and report flagging.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCommentFilesApi, upvoteCommentApi } from '../api/axiosClient';

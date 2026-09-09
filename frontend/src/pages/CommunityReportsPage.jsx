@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: CommunityReportsPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/CommunityReportsPage.jsx
+ *
+ * Purpose:
+ *   Community-level moderation view allowing community moderators to review reported content within their group.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {

@@ -12,6 +12,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AnalyticsService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Calculates decision impression analytics, engagement rates, voter demographics, and option distribution summaries.
+ */
 @Service
 public class AnalyticsService {
 

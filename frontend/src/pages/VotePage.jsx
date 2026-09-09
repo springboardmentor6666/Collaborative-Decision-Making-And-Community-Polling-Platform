@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: VotePage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/VotePage.jsx
+ *
+ * Purpose:
+ *   Focused voting ballot interface supporting Single Choice, Multiple Choice, Approval Voting, Ranked-Choice (IRV), and 5-Star Rating polls.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

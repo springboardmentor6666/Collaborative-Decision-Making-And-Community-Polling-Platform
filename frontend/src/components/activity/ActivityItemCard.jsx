@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ActivityItemCard.jsx
+ * Architecture Tier: Activity Stream Component (UI Layer)
+ * Path: frontend/src/components/activity/ActivityItemCard.jsx
+ *
+ * Purpose:
+ *   Polymorphic activity item renderer formatting activity events (votes, comments, decisions, joins) with icons and action links.
+ */
+
 import { Link } from 'react-router-dom';
 import {
   CheckCircle2,

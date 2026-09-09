@@ -1,5 +1,19 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-const OAUTH_BASE_URL = (import.meta.env.VITE_OAUTH_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/api\/?$/, '');
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: axiosClient.js
+ * Architecture Tier: HTTP Client Gateway (Data Layer)
+ * Path: frontend/src/api/axiosClient.js
+ *
+ * Purpose:
+ *   Central Axios HTTP client configured with baseURL, automatic Bearer JWT header injection, 401 token refresh interceptors, and error handling.
+ */
+
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const API_BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
+const OAUTH_BASE_URL = (import.meta.env.VITE_OAUTH_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080')
+  .replace(/\/api\/?$/, '')
+  .replace(/\/+$/, '');
 
 const normalizeEndpoint = (endpoint) => {
   if (!endpoint.startsWith('/')) {

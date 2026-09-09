@@ -1,0 +1,44 @@
+# ==============================================================================
+# DecisionHub - Collaborative Decision-Making & Community Polling Platform
+#
+# Render Blueprint Specification (render.yaml)
+# Enables 1-Click deployment of the Spring Boot backend on Render Free Tier
+# ==============================================================================
+
+services:
+  - type: web
+    name: decisionhub-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    region: oregon
+    healthCheckPath: /api/decisions
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_DRIVER
+        value: org.postgresql.Driver
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: HIBERNATE_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0 -Xmx384m
+      - key: H2_CONSOLE_ENABLED
+        value: "false"
+      - key: HIKARI_KEEPALIVE_TIME
+        value: "30000"
+      - key: HIKARI_MAX_LIFETIME
+        value: "600000"

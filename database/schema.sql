@@ -1,3 +1,15 @@
+-- ============================================================================
+-- DecisionHub - Collaborative Decision-Making & Community Polling Platform
+--
+-- Database Schema: MySQL 8.0 DDL (schema.sql)
+--
+-- Purpose:
+--   Defines the complete relational database architecture comprising 35 tables:
+--   Users, Profiles, Categories, Communities, Chat Channels, Messages, Decisions,
+--   Comparison Factors, Scoring Matrices, Polls, Advanced Voting (IRV), Threaded
+--   Comments, Activity Streams, Notifications, Reports, and Audit Trails.
+-- ============================================================================
+
 -- 06. Database Design — DecisionHub
 -- Exact Official Specification Schema (Normalized to 3NF)
 -- Primary schema compatible with MySQL 8.0 & PostgreSQL

@@ -2,6 +2,16 @@ package com.decisionhub.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SearchResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing Search domain data for client consumption.
+ */
 
 public class SearchResponse {
 

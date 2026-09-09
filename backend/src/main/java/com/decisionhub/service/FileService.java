@@ -12,6 +12,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: FileService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Service managing file attachment records, validation of MIME types and file sizes, and association with decisions and comments.
+ */
 @Service
 public class FileService {
 

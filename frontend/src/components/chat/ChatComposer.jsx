@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ChatComposer.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/ChatComposer.jsx
+ *
+ * Purpose:
+ *   Rich message composer component supporting multi-line text input, file attachment selection, emoji picker, and Enter-to-send.
+ */
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

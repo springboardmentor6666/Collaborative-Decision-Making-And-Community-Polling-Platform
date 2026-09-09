@@ -24,6 +24,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AdminController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides administrative control endpoints for managing users, updating account statuses, assigning RBAC roles, and reviewing system audit logs.
+ */
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Admin, Statistics & Moderation", description = "Endpoints for platform administration, real-time statistics, report management, user control, and settings")

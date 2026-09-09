@@ -1,4 +1,15 @@
 /**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: errorMessages.js
+ * Architecture Tier: Utility Helper (Support Layer)
+ * Path: frontend/src/utils/errorMessages.js
+ *
+ * Purpose:
+ *   Error translation utility mapping API error responses, HTTP status codes, and network failures to user-friendly messages.
+ */
+
+/**
  * Utility for converting technical application & API errors into clean,
  * friendly messages without exposing raw status codes, JSON dumps, or stack traces.
  */

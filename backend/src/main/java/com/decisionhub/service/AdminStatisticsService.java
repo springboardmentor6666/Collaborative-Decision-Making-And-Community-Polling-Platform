@@ -13,6 +13,16 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AdminStatisticsService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Aggregates high-level platform statistics, user growth, decision trends, and system health metrics for the admin analytics dashboard.
+ */
 @Service
 public class AdminStatisticsService {
 

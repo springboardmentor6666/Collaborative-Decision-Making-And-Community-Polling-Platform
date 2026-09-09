@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: NotificationController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Manages user notifications: listing unread notifications, marking alerts as read, clearing notifications, and managing user notification preferences.
+ */
 @RestController
 @RequestMapping("/api/notifications")
 @Tag(name = "Notifications", description = "Endpoints for user notification management")

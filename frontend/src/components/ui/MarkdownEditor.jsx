@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: MarkdownEditor.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/MarkdownEditor.jsx
+ *
+ * Purpose:
+ *   Interactive markdown editor and preview component for formatting rich decision descriptions and community guidelines.
+ */
+
 import React, { useState, useCallback, useRef } from 'react';
 
 /**

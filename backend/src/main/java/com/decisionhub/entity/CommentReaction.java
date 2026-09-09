@@ -7,6 +7,16 @@ import java.time.LocalDateTime;
 @Table(name = "comment_reactions", uniqueConstraints = {
     @UniqueConstraint(name = "uq_comment_user_reaction", columnNames = {"comment_id", "user_id"})
 })
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommentReaction
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'CommentReaction' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 public class CommentReaction {
 
     @Id

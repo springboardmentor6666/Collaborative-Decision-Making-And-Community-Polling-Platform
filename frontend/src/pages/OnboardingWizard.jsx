@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: OnboardingWizard.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/OnboardingWizard.jsx
+ *
+ * Purpose:
+ *   Post-registration onboarding wizard guiding new users through profile setup, avatar selection, and interest category taxonomy selection.
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

@@ -24,6 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Business service orchestrating polymorphic activity feeds across global explore, community hubs, user profiles, and decision audit logs.
+ */
 @Service
 public class ActivityService {
 

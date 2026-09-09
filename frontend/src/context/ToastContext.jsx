@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ToastContext.jsx
+ * Architecture Tier: State Management Context (State Layer)
+ * Path: frontend/src/context/ToastContext.jsx
+ *
+ * Purpose:
+ *   React Context provider managing a queue of floating toast notifications across the entire application.
+ */
+
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: themes.js
+ * Architecture Tier: Theme & Styling System (Presentation Layer)
+ * Path: frontend/src/theme/themes.js
+ *
+ * Purpose:
+ *   Constants and theme token definitions defining color palettes, typography scales, and glass effect styles.
+ */
+
 export const THEMES = {
   default: 'default',
   light: 'light',

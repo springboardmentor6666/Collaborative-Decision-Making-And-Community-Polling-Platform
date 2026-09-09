@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: NotificationBell.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/NotificationBell.jsx
+ *
+ * Purpose:
+ *   Interactive notification bell icon with unread badge counter and dropdown drawer for real-time alerts.
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,8 +47,6 @@ export default function NotificationBell() {
 
   useEffect(() => {
     loadNotificationData();
-    const interval = setInterval(loadNotificationData, 30000); // 30s polling
-    return () => clearInterval(interval);
   }, [accessToken]);
 
   // Close dropdown on outside click

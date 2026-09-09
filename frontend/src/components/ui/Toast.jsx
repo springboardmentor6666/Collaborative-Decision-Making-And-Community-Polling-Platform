@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Toast.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/Toast.jsx
+ *
+ * Purpose:
+ *   Floating notification toast component rendering auto-dismissing success, info, warning, and error messages.
+ */
+
 import React from 'react';
 import { useToast, ToastProvider } from '../../context/ToastContext';
 

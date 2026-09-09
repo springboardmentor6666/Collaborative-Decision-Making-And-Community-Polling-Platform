@@ -9,6 +9,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: AuditingConfig
+ * Architecture Tier: Application Configuration (Infrastructure Tier)
+ * Package: com.decisionhub.config
+ *
+ * Purpose:
+ *   Spring Data JPA auditing configuration enabling automatic population of @CreatedDate, @LastModifiedDate, and audit timestamps.
+ */
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class AuditingConfig {

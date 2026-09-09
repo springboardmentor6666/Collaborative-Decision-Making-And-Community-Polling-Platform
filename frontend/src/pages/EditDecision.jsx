@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: EditDecision.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/EditDecision.jsx
+ *
+ * Purpose:
+ *   Decision editor allowing decision creators to modify metadata, update comparison factors, and manually change decision status.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';

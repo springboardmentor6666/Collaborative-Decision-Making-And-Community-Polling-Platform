@@ -1,6 +1,16 @@
 package com.decisionhub.exception;
 
 import java.time.LocalDateTime;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ErrorDetails
+ * Architecture Tier: Exception Handling (Cross-Cutting Tier)
+ * Package: com.decisionhub.exception
+ *
+ * Purpose:
+ *   Standardized error response payload model containing timestamp, HTTP status, error message, validation details, and request path.
+ */
 
 public class ErrorDetails {
     private LocalDateTime timestamp;

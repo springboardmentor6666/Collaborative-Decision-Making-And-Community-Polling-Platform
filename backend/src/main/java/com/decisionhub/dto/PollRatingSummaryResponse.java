@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.util.List;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: PollRatingSummaryResponse
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Response payload DTO serializing PollRatingSummary domain data for client consumption.
+ */
 
 public class PollRatingSummaryResponse {
 

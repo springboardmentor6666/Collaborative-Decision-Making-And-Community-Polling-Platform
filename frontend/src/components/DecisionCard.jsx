@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: DecisionCard.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/DecisionCard.jsx
+ *
+ * Purpose:
+ *   Feed card component previewing decisions with category tags, status badges, vote tallies, time remaining, and bookmark actions.
+ */
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';

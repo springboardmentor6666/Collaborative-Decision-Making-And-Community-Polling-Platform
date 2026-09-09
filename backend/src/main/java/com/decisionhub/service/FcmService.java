@@ -13,6 +13,16 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: FcmService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Firebase Cloud Messaging service for pushing real-time mobile and web push notifications to registered user devices.
+ */
 @Service
 public class FcmService {
 

@@ -15,6 +15,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ActivityController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Provides REST endpoints for retrieving global, community, and personal polymorphic activity streams and timelines.
+ */
 @RestController
 @RequestMapping("/api/activities")
 @Tag(name = "Activities Feed", description = "Endpoints for platform, community, and user recent activity feeds")

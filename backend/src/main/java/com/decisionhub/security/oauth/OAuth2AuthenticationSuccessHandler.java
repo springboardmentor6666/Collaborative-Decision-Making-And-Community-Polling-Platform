@@ -16,6 +16,16 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: OAuth2AuthenticationSuccessHandler
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security.oauth
+ *
+ * Purpose:
+ *   Spring Security OAuth2 success handler redirecting authenticated Google users with an issued JWT token.
+ */
 @Component
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 

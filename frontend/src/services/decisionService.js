@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: decisionService.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/decisionService.js
+ *
+ * Purpose:
+ *   Decision API service handling CRUD operations, factor scores, option creation, bookmarks, and status transitions.
+ */
+
 import api from './api';
 
 export const decisionService = {

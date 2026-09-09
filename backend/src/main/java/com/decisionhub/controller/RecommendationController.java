@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: RecommendationController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Delivers decision recommendations: provides algorithmic suggestions, category-based recommendations, and expert endorsements for open decisions.
+ */
 @RestController
 @RequestMapping("/api/recommendations")
 @Tag(name = "Recommendations", description = "Endpoints for creating and retrieving expert recommendations")

@@ -1,3 +1,14 @@
+-- ============================================================================
+-- DecisionHub - Collaborative Decision-Making & Community Polling Platform
+--
+-- Database Schema: PostgreSQL 15+ / Neon Lakebase DDL (schema-postgresql.sql)
+--
+-- Purpose:
+--   PostgreSQL-compatible relational schema featuring GIN full-text search indexes,
+--   CITEXT case-insensitive email constraints, JSONB metadata columns, and
+--   optimized composite indexes for production deployment on Neon Cloud Postgres.
+-- ============================================================================
+
 -- 06. Database Design — DecisionHub
 -- Exact Official Specification Schema (Normalized to 3NF)
 -- Primary schema compatible with PostgreSQL

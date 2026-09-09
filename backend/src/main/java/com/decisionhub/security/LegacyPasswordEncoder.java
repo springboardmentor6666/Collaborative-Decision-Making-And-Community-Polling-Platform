@@ -2,6 +2,16 @@ package com.decisionhub.security;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: LegacyPasswordEncoder
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security
+ *
+ * Purpose:
+ *   Password encoder adapter providing BCrypt hashing and backward compatibility with existing password formats.
+ */
 
 public class LegacyPasswordEncoder implements PasswordEncoder {
 

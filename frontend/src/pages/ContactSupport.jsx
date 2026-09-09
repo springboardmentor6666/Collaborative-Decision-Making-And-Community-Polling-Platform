@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ContactSupport.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/ContactSupport.jsx
+ *
+ * Purpose:
+ *   Customer support and inquiry submission page with contact channels, FAQ references, and ticket dispatch.
+ */
+
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';

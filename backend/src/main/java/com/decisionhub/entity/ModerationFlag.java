@@ -2,6 +2,16 @@ package com.decisionhub.entity;
 
 import jakarta.persistence.*;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: ModerationFlag
+ * Architecture Tier: JPA Domain Entity (Persistence Tier)
+ * Package: com.decisionhub.entity
+ *
+ * Purpose:
+ *   JPA entity representing the 'ModerationFlag' database table, defining relational mappings, lifecycle attributes, and domain state.
+ */
 @Entity
 @Table(name = "moderation_flags")
 public class ModerationFlag {

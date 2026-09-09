@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ThemeProvider.jsx
+ * Architecture Tier: Theme & Styling System (Presentation Layer)
+ * Path: frontend/src/theme/ThemeProvider.jsx
+ *
+ * Purpose:
+ *   Theme context provider managing active visual theme (Dark, Light, Slate, Emerald, Royal), CSS variables, and persistent preferences.
+ */
+
 import { createContext, useEffect, useMemo, useState } from 'react';
 import { THEMES, UI_MODES, FONT_FAMILIES, FONT_SIZES, getThemeTokens, themeOrder } from './themes';
 

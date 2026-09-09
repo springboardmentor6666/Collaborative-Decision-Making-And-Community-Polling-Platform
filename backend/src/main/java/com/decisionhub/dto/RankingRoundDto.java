@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.util.Map;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: RankingRoundDto
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Data transfer object transferring RankingRoundDto state across architectural boundaries.
+ */
 
 public class RankingRoundDto {
 

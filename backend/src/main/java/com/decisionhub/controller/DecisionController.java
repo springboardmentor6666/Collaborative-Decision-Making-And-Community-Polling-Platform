@@ -20,6 +20,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: DecisionController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Core controller for collaborative decisions: creation, paginated listing, factor comparisons, score matrices, status lifecycle (open/closed), and winner determination.
+ */
 @RestController
 @RequestMapping("/api/decisions")
 @Tag(name = "Decisions", description = "Endpoints for managing collaborative decisions")

@@ -14,6 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: VoteController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Handles secure vote submission, duplicate ballot prevention, voter anonymity enforcement, and complex Instant Runoff Voting (IRV) distribution computation.
+ */
 @RestController
 @RequestMapping("/api/votes")
 @Tag(name = "Votes", description = "Endpoints for casting votes and retrieving poll results")

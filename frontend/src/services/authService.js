@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: authService.js
+ * Architecture Tier: API Service Wrapper (Data Layer)
+ * Path: frontend/src/services/authService.js
+ *
+ * Purpose:
+ *   Authentication API service wrapping login, signup, logout, session refresh, and password management endpoints.
+ */
+
 import api from './api';
 
 export const authService = {

@@ -17,6 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: SearchService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Executes optimized database full-text search queries across decisions, communities, and comments, returning ranked matching results.
+ */
 @Service
 public class SearchService {
 

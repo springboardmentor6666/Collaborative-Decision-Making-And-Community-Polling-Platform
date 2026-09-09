@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AnalysisPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/AnalysisPage.jsx
+ *
+ * Purpose:
+ *   Personal decision analysis dashboard displaying user's voted decisions, win/loss outcomes, outcome alignment, and voting history charts.
+ */
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

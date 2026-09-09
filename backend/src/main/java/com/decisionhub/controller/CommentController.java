@@ -15,6 +15,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommentController
+ * Architecture Tier: REST API Controller (Presentation Tier)
+ * Package: com.decisionhub.controller
+ *
+ * Purpose:
+ *   Manages threaded comment discussions under decisions, including nested replies, upvote/downvote/heart reactions, and moderation status.
+ */
 @RestController
 @RequestMapping("/api/comments")
 @Tag(name = "Comments", description = "Endpoints for threaded comments on decisions")

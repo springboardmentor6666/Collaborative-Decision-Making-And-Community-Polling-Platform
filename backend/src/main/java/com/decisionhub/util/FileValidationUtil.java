@@ -9,6 +9,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Set;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: FileValidationUtil
+ * Architecture Tier: Utility Helper (Cross-Cutting Tier)
+ * Package: com.decisionhub.util
+ *
+ * Purpose:
+ *   Utility class providing file upload validation routines: MIME type inspection, file extension whitelisting, and size limit enforcement.
+ */
 
 public class FileValidationUtil {
 

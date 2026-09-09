@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: PrivacyPolicy.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/PrivacyPolicy.jsx
+ *
+ * Purpose:
+ *   Platform privacy policy page detailing data collection, cookie usage, user rights, and data protection compliance.
+ */
+
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';

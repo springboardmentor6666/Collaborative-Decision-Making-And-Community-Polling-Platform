@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: TermsConditions.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/TermsConditions.jsx
+ *
+ * Purpose:
+ *   Platform terms and conditions page defining acceptable use, community guidelines, voting integrity rules, and liability disclaimers.
+ */
+
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';

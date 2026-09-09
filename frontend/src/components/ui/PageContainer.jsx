@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: PageContainer.jsx
+ * Architecture Tier: Design System Primitive (UI Layer)
+ * Path: frontend/src/components/ui/PageContainer.jsx
+ *
+ * Purpose:
+ *   Standard layout container enforcing max-width constraints, responsive padding, and central alignment across pages.
+ */
+
 import React from 'react';
 
 export function PageContainer({ children, className = '' }) {

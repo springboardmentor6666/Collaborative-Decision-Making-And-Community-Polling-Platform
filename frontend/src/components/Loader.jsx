@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: Loader.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/Loader.jsx
+ *
+ * Purpose:
+ *   Animated loading indicator component with spinner, pulse, and skeleton loading variations.
+ */
+
 import React from 'react';
 
 /**

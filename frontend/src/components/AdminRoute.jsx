@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: AdminRoute.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/AdminRoute.jsx
+ *
+ * Purpose:
+ *   Role-based route guard component ensuring only authenticated users with ADMIN authority can access protected admin routes.
+ */
+
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Loader from './Loader';

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: RecentActivityFeed.jsx
+ * Architecture Tier: Activity Stream Component (UI Layer)
+ * Path: frontend/src/components/activity/RecentActivityFeed.jsx
+ *
+ * Purpose:
+ *   Live activity feed panel displaying real-time platform and community events with filtering and smooth list animations.
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -42,7 +53,7 @@ export default function RecentActivityFeed({
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  const isPollingPausedRef = useRef(false);
+
 
   const fetchActivities = useCallback(
     async (isManualRefresh = false) => {
@@ -83,28 +94,7 @@ export default function RecentActivityFeed({
     fetchActivities();
   }, [fetchActivities]);
 
-  // Live polling ticker every 15 seconds (auto-pauses when tab is inactive)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      isPollingPausedRef.current = document.visibilityState === 'hidden';
-      if (document.visibilityState === 'visible') {
-        fetchActivities();
-      }
-    };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    const interval = setInterval(() => {
-      if (!isPollingPausedRef.current && document.visibilityState === 'visible') {
-        fetchActivities();
-      }
-    }, 15000);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [fetchActivities]);
 
   return (
     <div className="flex flex-col h-full rounded-3xl border border-border-default bg-surface p-5 shadow-sm">
@@ -128,10 +118,6 @@ export default function RecentActivityFeed({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live (15s)
-            </span>
 
             <button
               onClick={() => fetchActivities(true)}

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: IconSidebar.jsx
+ * Architecture Tier: Reusable UI Component (UI Layer)
+ * Path: frontend/src/components/IconSidebar.jsx
+ *
+ * Purpose:
+ *   Right-edge utility navigation rail offering quick access to themes, notifications, profile, and system utilities.
+ */
+
 import { motion } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -169,8 +180,6 @@ export default function IconSidebar() {
 
   useEffect(() => {
     fetchLiveNotifications();
-    const interval = setInterval(fetchLiveNotifications, 30000);
-    return () => clearInterval(interval);
   }, [fetchLiveNotifications]);
 
 

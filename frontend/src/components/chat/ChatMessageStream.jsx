@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ChatMessageStream.jsx
+ * Architecture Tier: Real-Time Chat Component (UI Layer)
+ * Path: frontend/src/components/chat/ChatMessageStream.jsx
+ *
+ * Purpose:
+ *   Scrollable chat timeline component with message grouping by date, auto-scroll to bottom, and cursor-based infinite scroll.
+ */
+
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

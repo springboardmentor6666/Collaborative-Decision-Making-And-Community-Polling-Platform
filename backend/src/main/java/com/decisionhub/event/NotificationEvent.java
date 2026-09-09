@@ -2,6 +2,16 @@ package com.decisionhub.event;
 
 import com.decisionhub.entity.User;
 import org.springframework.context.ApplicationEvent;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: NotificationEvent
+ * Architecture Tier: Application Event (Event-Driven Tier)
+ * Package: com.decisionhub.event
+ *
+ * Purpose:
+ *   Spring application domain event representing an alert to be processed and dispatched to targeted user accounts.
+ */
 
 public class NotificationEvent extends ApplicationEvent {
 

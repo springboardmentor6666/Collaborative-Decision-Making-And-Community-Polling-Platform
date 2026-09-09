@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: ResetPasswordPage.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/ResetPasswordPage.jsx
+ *
+ * Purpose:
+ *   Password reset confirmation page validating the one-time reset token from URL query parameters and updating the user password.
+ */
+
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';

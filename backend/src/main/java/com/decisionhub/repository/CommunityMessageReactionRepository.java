@@ -7,6 +7,16 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommunityMessageReactionRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'CommunityMessageReaction' entities.
+ */
 @Repository
 public interface CommunityMessageReactionRepository extends JpaRepository<CommunityMessageReaction, Long> {
 

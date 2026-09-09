@@ -21,6 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommentService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Handles decision comment lifecycle, hierarchical reply nesting, optimistic reaction toggling (upvotes, downvotes, hearts), and comment moderation.
+ */
 @Service
 public class CommentService {
 

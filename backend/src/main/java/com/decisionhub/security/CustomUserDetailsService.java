@@ -10,6 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CustomUserDetailsService
+ * Architecture Tier: Security & Authentication (Security Tier)
+ * Package: com.decisionhub.security
+ *
+ * Purpose:
+ *   Spring Security UserDetailsService implementation loading user account details and authorities from the database by email or username.
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: DecisionDetails.jsx
+ * Architecture Tier: Page Component (View Layer)
+ * Path: frontend/src/pages/DecisionDetails.jsx
+ *
+ * Purpose:
+ *   Full decision view displaying multi-criteria comparison matrix, attached poll ballot, threaded comments, suggestions, and recommendations.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';

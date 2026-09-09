@@ -10,6 +10,16 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: GlobalExceptionHandler
+ * Architecture Tier: Exception Handling (Cross-Cutting Tier)
+ * Package: com.decisionhub.exception
+ *
+ * Purpose:
+ *   ControllerAdvice component intercepting all application exceptions, validation errors, and missing resources to return uniform JSON responses.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -80,6 +90,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDetails> handleIllegalArgumentException(RuntimeException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorDetails> handleNoResourceFoundException(org.springframework.web.servlet.resource.NoResourceFoundException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

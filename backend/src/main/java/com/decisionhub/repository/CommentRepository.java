@@ -12,6 +12,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: CommentRepository
+ * Architecture Tier: Data Access Repository (Persistence Tier)
+ * Package: com.decisionhub.repository
+ *
+ * Purpose:
+ *   Spring Data JPA repository providing query methods and database persistence operations for 'Comment' entities.
+ */
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByDecisionId(Long decisionId);

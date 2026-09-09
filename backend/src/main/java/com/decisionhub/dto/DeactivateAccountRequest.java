@@ -1,6 +1,16 @@
 package com.decisionhub.dto;
 
 import java.time.LocalDate;
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: DeactivateAccountRequest
+ * Architecture Tier: Data Transfer Object (DTO Tier)
+ * Package: com.decisionhub.dto
+ *
+ * Purpose:
+ *   Request payload DTO carrying incoming client data with validation constraints for DeactivateAccount operations.
+ */
 
 public class DeactivateAccountRequest {
 

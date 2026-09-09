@@ -19,6 +19,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * Class: VoteService
+ * Architecture Tier: Business Service (Service Tier)
+ * Package: com.decisionhub.service
+ *
+ * Purpose:
+ *   Encapsulates ballot validation, transaction-wrapped vote casting, duplicate vote prevention, revoting logic, and Instant Runoff Voting elimination algorithms.
+ */
 @Service
 public class VoteService {
 

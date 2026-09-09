@@ -1,3 +1,13 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: theme.css
+ * Architecture Tier: Theme & Styling System (Presentation Layer)
+ * Path: frontend/src/theme/theme.css
+ *
+ * Purpose:
+ *   Theme styling definitions defining color tokens, glassmorphism filters, and CSS custom properties per theme variant.
+ */
 
 @layer base {
   :root {

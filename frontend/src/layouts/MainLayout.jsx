@@ -1,3 +1,14 @@
+/**
+ * DecisionHub - Collaborative Decision-Making & Community Polling Platform
+ *
+ * File: MainLayout.jsx
+ * Architecture Tier: Layout Wrapper (Presentation Layer)
+ * Path: frontend/src/layouts/MainLayout.jsx
+ *
+ * Purpose:
+ *   Application layout coordinator wrapping authenticated and public views with consistent navigation, footer, and sidebar rails.
+ */
+
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
