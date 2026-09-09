@@ -145,7 +145,7 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Right: Search button + Notification Bell + Refresh + user + logout */}
+          {/* Right: Search button + user + logout */}
           <div className="hidden items-center gap-2.5 md:flex">
             {/* Global Search Button */}
             <button
@@ -292,19 +292,6 @@ export default function Navbar() {
                 <Link to="/communities" className={mobileNavLinkClass('/communities')}>Communities</Link>
                 <Link to="/decisions/create" className={mobileNavLinkClass('/decisions/create')}>Create Decision</Link>
                 <Link to="/profile" className={mobileNavLinkClass('/profile')}>Profile Settings</Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    triggerRefresh();
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm font-bold text-text-primary hover:bg-surface-alt transition"
-                >
-                  <svg className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-primary' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Refresh App Data</span>
-                </button>
                 {user?.role?.toUpperCase() === 'ADMIN' && (
                   <Link
                     to="/admin"

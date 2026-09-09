@@ -14,14 +14,6 @@ export default class ErrorBoundary extends React.Component {
     console.error('Unhandled UI error caught by ErrorBoundary:', error, errorInfo);
   }
 
-  handleAutoRefresh = () => {
-    this.setState({ hasError: false, error: null });
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('decisionhub:refresh'));
-      window.location.reload();
-    }
-  };
-
   handleGoHome = () => {
     this.setState({ hasError: false, error: null });
     if (typeof window !== 'undefined') {
@@ -43,7 +35,7 @@ export default class ErrorBoundary extends React.Component {
             <div className="space-y-1">
               <h2 className="text-xl font-black text-text-primary">Something went wrong</h2>
               <p className="text-xs text-muted leading-relaxed">
-                An unexpected display issue occurred. You can auto-refresh the application or return to your dashboard.
+                An unexpected display issue occurred. Return to your dashboard to continue.
               </p>
             </div>
 
@@ -55,18 +47,11 @@ export default class ErrorBoundary extends React.Component {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
-              <button
-                type="button"
-                onClick={this.handleAutoRefresh}
-                className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-90 transition active:scale-95"
-              >
-                Auto-Refresh App
-              </button>
+            <div className="flex justify-center pt-2">
               <button
                 type="button"
                 onClick={this.handleGoHome}
-                className="rounded-xl border border-border-default bg-surface px-4 py-2.5 text-xs font-bold text-muted hover:bg-surface-alt hover:text-text-primary transition active:scale-95"
+                className="w-full sm:w-auto rounded-xl bg-primary px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:opacity-90 transition active:scale-95"
               >
                 Dashboard
               </button>

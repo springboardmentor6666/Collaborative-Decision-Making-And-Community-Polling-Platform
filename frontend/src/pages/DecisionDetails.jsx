@@ -239,7 +239,14 @@ export default function DecisionDetails() {
     }
   };
 
-  const isCreator = user && decision?.createdBy && (user.id === decision.createdBy.id || user.email === decision.createdBy.email || user.role === 'ADMIN');
+  const isCreator = Boolean(
+    user && decision?.createdBy && (
+      (user.id != null && decision.createdBy.id != null && String(user.id) === String(decision.createdBy.id)) ||
+      (user.email && decision.createdBy.email && user.email.toLowerCase() === decision.createdBy.email.toLowerCase()) ||
+      (user.role && user.role.toUpperCase().includes('ADMIN'))
+    )
+  );
+  const isDecisionCreator = isCreator;
   const isOpen = decision?.status === 'OPEN' || decision?.status === 'OPEN_TO_VOTE' || decision?.status === 'Active';
 
   const getStatusStyle = (status) => {

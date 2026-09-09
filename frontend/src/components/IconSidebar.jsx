@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../theme/useTheme';
 import { useAuth } from '../context/AuthContext';
-import { useRefresh } from '../context/RefreshContext';
 import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
 import {
   getNotifications,
@@ -15,20 +14,10 @@ import {
 
 /**
  * IconSidebar — slim control rail pinned to the right edge.
- * Hosts real notification stream, theme switching, preferences, and in-app refresh.
+ * Hosts real notification stream, theme switching, preferences, and help.
  */
 
 const sidebarItems = [
-  {
-    id: 'refresh',
-    label: 'Refresh Application',
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8"
-          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-    ),
-  },
   {
     id: 'notifications',
     label: 'Notifications',
@@ -149,7 +138,6 @@ function getNotificationIcon(type) {
 export default function IconSidebar() {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
-  const { triggerRefresh, isRefreshing } = useRefresh();
   const {
     theme,
     uiMode,
@@ -185,13 +173,7 @@ export default function IconSidebar() {
     return () => clearInterval(interval);
   }, [fetchLiveNotifications]);
 
-  useEffect(() => {
-    const handleGlobalRefresh = () => {
-      fetchLiveNotifications();
-    };
-    window.addEventListener('decisionhub:refresh', handleGlobalRefresh);
-    return () => window.removeEventListener('decisionhub:refresh', handleGlobalRefresh);
-  }, [fetchLiveNotifications]);
+
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -282,27 +264,14 @@ export default function IconSidebar() {
                 whileHover={{ scale: 1.12 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
-                  if (item.id === 'refresh') {
-                    triggerRefresh();
-                    fetchLiveNotifications();
-                    return;
-                  }
                   if (item.id === 'theme') {
                     cycleTheme();
                     return;
                   }
                   openPanel(item.id);
                 }}
-                className={`icon-sidebar-btn ${
-                  item.id === 'refresh' && isRefreshing ? 'animate-spin text-primary' : ''
-                } ${hasActiveNotifs ? 'notif-pulse notif-dot' : ''}`}
-                title={
-                  item.id === 'refresh'
-                    ? (isRefreshing ? 'Refreshing application...' : 'Refresh application view')
-                    : isNotif && unreadCount > 0
-                    ? `${item.label} (${unreadCount} unread)`
-                    : item.label
-                }
+                className={`icon-sidebar-btn ${hasActiveNotifs ? 'notif-pulse notif-dot' : ''}`}
+                title={isNotif && unreadCount > 0 ? `${item.label} (${unreadCount} unread)` : item.label}
                 aria-label={item.label}
               >
                 {item.icon}

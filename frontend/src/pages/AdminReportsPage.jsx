@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
-import { useRefresh } from '../context/RefreshContext';
 import {
   getAdminReportsPagedApi,
   getAdminReportByIdApi,
@@ -18,7 +17,6 @@ import Loader from '../components/Loader';
 export default function AdminReportsPage() {
   const { accessToken } = useAuth();
   const { showConfirm, showError, showAlert } = useAlert();
-  const { triggerRefresh } = useRefresh();
 
   // State
   const [reports, setReports] = useState([]);
@@ -124,7 +122,6 @@ export default function AdminReportsPage() {
       setSelectedReport(updated);
       // Refresh list
       loadReports();
-      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to apply moderation action.');
     } finally {
@@ -147,7 +144,6 @@ export default function AdminReportsPage() {
       showAlert({ title: 'Report Deleted', message: 'The report was deleted successfully.', type: 'success' });
       setSelectedReport(null);
       await loadReports();
-      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to delete report.');
     } finally {

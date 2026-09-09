@@ -67,6 +67,12 @@ export default function CommentItem({
     currentUserEmail &&
     decisionOwnerEmail.toLowerCase() === currentUserEmail.toLowerCase();
 
+  const isDecisionCreator = Boolean(
+    decisionOwnerEmail &&
+    author.email &&
+    decisionOwnerEmail.toLowerCase() === author.email.toLowerCase()
+  );
+
   const isAdminOrMod = user?.role && (
     user.role.toUpperCase().includes('ADMIN') ||
     user.role.toUpperCase().includes('MODERATOR')

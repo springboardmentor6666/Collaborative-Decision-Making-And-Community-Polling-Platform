@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
-import { useRefresh } from '../context/RefreshContext';
 import {
   getAllUsersAdminApi,
   banUserAdminApi,
@@ -28,7 +27,6 @@ import Loader from '../components/Loader';
 export default function AdminPage() {
   const { user, accessToken } = useAuth();
   const { showError, showConfirm, showAlert } = useAlert();
-  const { triggerRefresh } = useRefresh();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab');
   const activeTab = ['users', 'moderation', 'audit', 'settings'].includes(currentTab) ? currentTab : 'users';
@@ -55,12 +53,6 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadData();
-
-    const handleRefresh = () => {
-      loadData();
-    };
-    window.addEventListener('decisionhub:refresh', handleRefresh);
-    return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
   }, [activeTab, accessToken]);
 
   const loadData = async () => {
@@ -176,7 +168,6 @@ export default function AdminPage() {
       await resolveReportAdminApi(reportId, accessToken);
       setStatusMessage({ text: 'Report marked as resolved.', type: 'success' });
       setReports((prev) => prev.filter((r) => r.id !== reportId));
-      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to resolve report.');
       setStatusMessage({ text: 'Failed to resolve report.', type: 'error' });
@@ -199,7 +190,6 @@ export default function AdminPage() {
       await deleteReportApi(reportId, accessToken);
       setStatusMessage({ text: 'Report deleted successfully.', type: 'success' });
       setReports((prev) => prev.filter((r) => r.id !== reportId));
-      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to delete report.');
       setStatusMessage({ text: 'Failed to delete report.', type: 'error' });
@@ -214,7 +204,6 @@ export default function AdminPage() {
       await resolveModerationFlagApi(flagId, accessToken);
       setStatusMessage({ text: 'Moderation flag resolved.', type: 'success' });
       setFlags((prev) => prev.filter((f) => f.id !== flagId));
-      triggerRefresh();
     } catch (err) {
       showError(err, 'Failed to resolve flag.');
       setStatusMessage({ text: 'Failed to resolve flag.', type: 'error' });
