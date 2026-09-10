@@ -22,6 +22,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import Loader from '../components/Loader';
 
 export default function CommunityReportsPage() {
   const { id } = useParams();
@@ -137,9 +138,7 @@ export default function CommunityReportsPage() {
             </div>
 
             {loading ? (
-              <div className="flex h-60 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              </div>
+              <Loader message="Generating community reports..." />
             ) : error || !community ? (
               <div className="rounded-2xl border border-dashed border-border-default bg-surface p-8 text-center">
                 <p className="text-secondary">{error || 'Community not found.'}</p>

@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
+import Loader from '../components/Loader';
 
 export default function CommunitiesPage() {
   const { accessToken } = useAuth();
@@ -262,9 +263,7 @@ export default function CommunitiesPage() {
 
             {/* Grid */}
             {loading ? (
-              <div className="flex h-40 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              </div>
+              <Loader message="Loading communities..." />
             ) : filteredCommunities.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredCommunities.map((community) => (

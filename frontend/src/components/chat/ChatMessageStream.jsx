@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import ChatMessageItem from './ChatMessageItem';
+import Loader from '../Loader';
 
 /**
  * Format date for separator pills
@@ -243,10 +244,7 @@ export default function ChatMessageStream({
 
         {/* Loading initial skeleton */}
         {isLoading && messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-48 gap-3 text-muted">
-            <div className="h-7 w-7 animate-spin rounded-full border-3 border-primary border-t-transparent" />
-            <p className="text-xs">Loading channel discussion...</p>
-          </div>
+          <Loader compact={true} message="Loading channel discussion..." />
         )}
 
         {/* Empty state */}

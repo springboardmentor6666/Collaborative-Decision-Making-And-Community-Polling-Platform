@@ -10,9 +10,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import kidsStudyingIllustration from '../assets/kids-studying-from-home.svg';
 
 const spring = {
   type: 'spring',
@@ -23,6 +24,7 @@ const spring = {
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -132,154 +134,21 @@ export default function LoginPage() {
           </div>
 
           <div className="relative z-10 flex items-end justify-center">
-            <svg viewBox="0 0 520 360" className="h-auto w-full max-w-[30rem] drop-shadow-md" aria-hidden="true">
-              <defs>
-                <linearGradient id="sceneWash" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f7fbff" />
-                  <stop offset="55%" stopColor="#eef4ff" />
-                  <stop offset="100%" stopColor="#e8f2ff" />
-                </linearGradient>
-                <linearGradient id="orbBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.08" />
-                </linearGradient>
-                <linearGradient id="laptopBody" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#475569" />
-                  <stop offset="100%" stopColor="#0f172a" />
-                </linearGradient>
-                <linearGradient id="screenInner" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#0f172a" />
-                  <stop offset="100%" stopColor="#111827" />
-                </linearGradient>
-                <linearGradient id="screenGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.7" />
-                  <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="skinWarm" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fde2c8" />
-                  <stop offset="100%" stopColor="#f2b98c" />
-                </linearGradient>
-                <linearGradient id="hairDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1f2937" />
-                  <stop offset="100%" stopColor="#0f172a" />
-                </linearGradient>
-                <linearGradient id="clothBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#1d4ed8" />
-                </linearGradient>
-                <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="12" stdDeviation="12" floodColor="#0f172a" floodOpacity="0.12" />
-                </filter>
-                <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-                  <feDropShadow dx="0" dy="0" stdDeviation="16" floodColor="#60a5fa" floodOpacity="0.32" />
-                </filter>
-              </defs>
-
-              <rect x="34" y="38" width="452" height="264" rx="46" fill="url(#sceneWash)" opacity="0.72" />
-              <motion.ellipse
-                cx="150"
-                cy="86"
-                rx="62"
-                ry="38"
-                animate={{ scale: isFocused ? [1, 1.08, 1] : 1, opacity: isFocused ? 0.6 : 0.35 }}
-                transition={isFocused ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : spring}
-                fill="url(#orbBlue)"
-                filter="url(#glow)"
-              />
-              <motion.circle
-                cx="396"
-                cy="82"
-                r="52"
-                animate={{ y: isFocused ? -6 : 0, scale: isFocused ? 1.05 : 1 }}
-                transition={spring}
-                fill="#bfdbfe"
-                opacity="0.22"
-              />
-              <motion.circle
-                cx="92"
-                cy="250"
-                r="28"
-                animate={{ y: isFocused ? -8 : 0, opacity: isFocused ? 0.65 : 0.35 }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                fill="#dbeafe"
-              />
-
-              <AnimatePresence>
-                {isFocused && (
-                  <motion.polygon
-                    initial={{ opacity: 0, scaleY: 0.5 }}
-                    animate={{ opacity: 1, scaleY: 1 }}
-                    exit={{ opacity: 0, scaleY: 0.5 }}
-                    transition={{ duration: 0.28 }}
-                    points="260,126 172,228 348,228"
-                    fill="url(#screenGlow)"
-                    style={{ originY: 1, filter: 'url(#glow)' }}
-                  />
-                )}
-              </AnimatePresence>
-
-              <motion.g
-                id="laptop"
-                animate={{ y: isFocused ? -5 : 0, scale: isFocused ? 1.02 : 1 }}
-                transition={{ type: 'spring', stiffness: 240, damping: 20 }}
-                filter="url(#softShadow)"
-              >
-                <rect x="154" y="132" width="112" height="78" rx="18" fill="url(#laptopBody)" />
-                <rect x="161" y="139" width="98" height="64" rx="12" fill="url(#screenInner)" />
-                <rect x="171" y="150" width="46" height="4" rx="2" fill="#93c5fd" opacity="0.9" />
-                <rect x="171" y="160" width="70" height="4" rx="2" fill="#86efac" opacity="0.72" />
-                <rect x="171" y="170" width="52" height="4" rx="2" fill="#fde68a" opacity="0.72" />
-                <path d="M128 212C144 206 170 203 260 203C350 203 376 206 392 212L386 224H134Z" fill="#d1d5db" />
-                <path d="M180 212H340C345 212 349 216 349 221V224H171V221C171 216 175 212 180 212Z" fill="#94a3b8" opacity="0.88" />
-              </motion.g>
-
-              <motion.g
-                id="person-left"
-                animate={{ x: isFocused ? 10 : 0, rotate: isFocused ? 2.8 : 0, y: isFocused ? -2 : 0 }}
-                transition={spring}
-                whileHover={{ scale: 1.03, y: -4 }}
-                style={{ originX: '100px', originY: '252px' }}
-                className="cursor-pointer"
-              >
-                <path d="M65 276C65 232 84 198 118 198C152 198 171 232 171 276C171 281 167 285 162 285H74C69 285 65 281 65 276Z" fill="#1e3a8a" opacity="0.98" />
-                <path d="M88 202C95 193 106 188 118 188C130 188 141 193 148 202L148 217H88Z" fill="#c7d2fe" opacity="0.9" />
-                <circle cx="118" cy="158" r="25" fill="url(#skinWarm)" />
-                <path d="M95 160C95 136 113 123 131 126C144 128 154 138 156 150C158 160 155 167 150 171C146 160 140 152 131 149C121 146 108 147 95 160Z" fill="url(#hairDark)" />
-                <path d="M101 158C109 151 117 148 126 149" stroke="#334155" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.75" />
-              </motion.g>
-
-              <motion.g
-                id="person-center"
-                animate={{ y: isFocused ? [-2, 2, -2] : 0, rotate: isFocused ? -1.1 : 0 }}
-                transition={isFocused ? { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } : spring}
-                whileHover={{ scale: 1.03, y: -4 }}
-                style={{ originX: '200px', originY: '272px' }}
-                className="cursor-pointer"
-              >
-                <path d="M173 276C173 223 194 186 260 186C326 186 347 223 347 276C347 281 343 285 338 285H182C177 285 173 281 173 276Z" fill="url(#clothBlue)" />
-                <path d="M223 189C231 177 244 171 260 171C276 171 289 177 297 189L297 209H223Z" fill="#dbeafe" opacity="0.95" />
-                <circle cx="260" cy="146" r="29" fill="url(#skinWarm)" />
-                <path d="M233 149C234 126 249 114 268 114C288 114 304 128 308 151C309 163 306 171 302 176C297 168 290 161 280 157C270 153 247 152 233 149Z" fill="url(#hairDark)" />
-                <ellipse cx="250" cy="146" rx="7" ry="4" fill="#0f172a" opacity="0.8" />
-                <ellipse cx="271" cy="146" rx="7" ry="4" fill="#0f172a" opacity="0.8" />
-                <path d="M251 155C255 158 265 158 269 155" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-              </motion.g>
-
-              <motion.g
-                id="person-right"
-                animate={{ x: isFocused ? -10 : 0, rotate: isFocused ? -2.8 : 0, y: isFocused ? -2 : 0 }}
-                transition={spring}
-                whileHover={{ scale: 1.03, y: -4 }}
-                style={{ originX: '300px', originY: '252px' }}
-                className="cursor-pointer"
-              >
-                <path d="M351 276C351 232 332 198 298 198C264 198 245 232 245 276C245 281 249 285 254 285H342C347 285 351 281 351 276Z" fill="#2563eb" opacity="0.98" />
-                <path d="M302 202C295 193 284 188 272 188C260 188 249 193 242 202L242 217H302Z" fill="#fde68a" opacity="0.92" />
-                <circle cx="286" cy="158" r="25" fill="url(#skinWarm)" />
-                <path d="M262 160C262 136 280 123 298 126C311 128 321 138 323 150C325 160 322 167 317 171C313 160 307 152 298 149C288 146 275 147 262 160Z" fill="#7c2d12" />
-                <path d="M270 158C278 151 286 148 295 149" stroke="#92400e" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85" />
-              </motion.g>
-            </svg>
+            <motion.img
+              src={kidsStudyingIllustration}
+              alt="Kids Studying from Home"
+              className="h-auto w-full max-w-[28rem] drop-shadow-md select-none object-contain"
+              animate={{
+                y: isFocused ? -6 : [0, -6, 0],
+                scale: isFocused ? 1.02 : 1,
+              }}
+              transition={{
+                y: isFocused
+                  ? { type: 'spring', stiffness: 200, damping: 15 }
+                  : { duration: 5, repeat: Infinity, ease: 'easeInOut' },
+                scale: { type: 'spring', stiffness: 200, damping: 15 },
+              }}
+            />
           </div>
         </section>
 
@@ -326,17 +195,37 @@ export default function LoginPage() {
                     Forgot password?
                   </Link>
                 </div>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  placeholder="••••••••"
-                  className="app-input px-4 py-3"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    placeholder="••••••••"
+                    className="app-input px-4 py-3 pr-11"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted hover:text-text-primary transition p-1.5 rounded-lg hover:bg-surface-alt/70"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      </svg>
+                    ) : (
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <motion.button

@@ -34,6 +34,7 @@ import IconSidebar from '../components/IconSidebar';
 import CategoryBadge from '../components/CategoryBadge';
 import CommunityChatTab from '../components/chat/CommunityChatTab';
 import RecentActivityFeed from '../components/activity/RecentActivityFeed';
+import Loader from '../components/Loader';
 
 export default function CommunityDetails() {
   const { id } = useParams();
@@ -259,7 +260,7 @@ export default function CommunityDetails() {
         <Navbar />
         <IconSidebar />
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <Loader message="Loading community workspace..." />
         </div>
       </div>
     );

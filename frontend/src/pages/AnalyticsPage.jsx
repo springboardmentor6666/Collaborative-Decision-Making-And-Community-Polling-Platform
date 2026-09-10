@@ -26,6 +26,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import PieChart from '../components/PieChart';
+import Loader from '../components/Loader';
 
 const BAR_COLORS = [
   '#2563eb', // Blue
@@ -320,9 +321,7 @@ export default function AnalyticsPage() {
 
             {/* Decision Grid */}
             {loading ? (
-              <div className="flex h-48 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              </div>
+              <Loader message="Loading decision analytics..." />
             ) : filteredDecisions.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2">
                 {filteredDecisions.map((dec) => {

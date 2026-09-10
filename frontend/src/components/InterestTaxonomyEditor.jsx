@@ -12,6 +12,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getCategoriesApi, getUserInterestsApi, updateUserInterestsApi } from '../api/axiosClient';
+import Loader from './Loader';
 
 export default function InterestTaxonomyEditor({ onSaved = null, autoSave = false, selectedIds = null, onSelectionChange = null }) {
   const { accessToken } = useAuth();
@@ -98,12 +99,7 @@ export default function InterestTaxonomyEditor({ onSaved = null, autoSave = fals
   };
 
   if (loading) {
-    return (
-      <div className="py-6 text-center text-xs text-muted">
-        <div className="h-6 w-6 mx-auto animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
-        Loading interest taxonomy...
-      </div>
-    );
+    return <Loader compact={true} message="Loading interest categories..." />;
   }
 
   return (
