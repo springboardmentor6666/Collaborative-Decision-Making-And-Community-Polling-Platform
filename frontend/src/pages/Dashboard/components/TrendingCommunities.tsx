@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CommunityResponse } from "@/types";
 import { TrendingUp, Users, ArrowRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getImageUrl } from "@/utils";
 
 interface TrendingCommunitiesProps {
   communities: CommunityResponse[];
@@ -77,7 +78,7 @@ export function TrendingCommunities({ communities }: TrendingCommunitiesProps) {
 
                 {/* Community Avatar */}
                 <Avatar className="h-8 w-8 rounded-lg border border-border shrink-0">
-                  <AvatarImage src={community.image || `https://api.dicebear.com/7.x/initials/svg?seed=${community.name || 'Community'}`} />
+                  <AvatarImage src={getImageUrl(community.profileImage || community.image) || `https://api.dicebear.com/7.x/initials/svg?seed=${community.name || 'Community'}`} />
                   <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-xs font-semibold">
                     {community.name?.substring(0, 2).toUpperCase() || "C"}
                   </AvatarFallback>

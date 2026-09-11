@@ -58,6 +58,7 @@ export interface CommunityResponse {
   owner: UserResponse;
   visibility: string;
   image?: string;
+  profileImage?: string;
   memberCount: number;
   createdAt: string;
 }

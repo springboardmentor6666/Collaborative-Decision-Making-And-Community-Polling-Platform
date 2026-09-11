@@ -69,8 +69,12 @@ export const communityApi = {
     await axiosInstance.patch(`${API_PREFIX}/${communityId}/members/${userId}/reject`);
   },
 
-  inviteUser: async (communityId: number, userId: number): Promise<CommunityMemberResponse> => {
-    const response = await axiosInstance.post(`${API_PREFIX}/${communityId}/invite`, null, { params: { userId } });
+  inviteUser: async (communityId: number, target: number | string): Promise<CommunityMemberResponse> => {
+    const targetStr = target.toString().trim();
+    const params = /^\d+$/.test(targetStr) && typeof target === 'number'
+      ? { userId: Number(targetStr), username: targetStr }
+      : { username: targetStr.replace(/^@/, '') };
+    const response = await axiosInstance.post(`${API_PREFIX}/${communityId}/invite`, null, { params });
     return response.data.data;
   },
 

@@ -25,6 +25,7 @@ import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.repository.VoteRepository;
 import com.decisionhub.repository.CommunityMemberRepository;
+import com.decisionhub.service.AuditLogService;
 import com.decisionhub.service.DecisionService;
 import com.decisionhub.specification.DecisionSpecification;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class DecisionServiceImpl implements DecisionService {
     private final AttachmentRepository attachmentRepository;
     private final DecisionMapper decisionMapper;
     private final AttachmentMapper attachmentMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -107,6 +109,8 @@ public class DecisionServiceImpl implements DecisionService {
             attachmentRepository.saveAll(attachments);
         }
 
+        auditLogService.logAction(userId, "DECISION_CREATED", "DECISION", savedDecision.getDecisionId(), "Created decision board: \"" + savedDecision.getTitle() + "\"");
+
         return enrichDecisionResponse(savedDecision);
     }
 
@@ -126,6 +130,7 @@ public class DecisionServiceImpl implements DecisionService {
         if (request.getVisibility() != null) decision.setVisibility(request.getVisibility());
         if (request.getAllowAnonymousVote() != null) decision.setAllowAnonymousVote(request.getAllowAnonymousVote());
 
+        // Handle attachment re-links
         if (request.getAttachmentIds() != null && !request.getAttachmentIds().isEmpty()) {
             List<Attachment> attachments = attachmentRepository.findAllById(request.getAttachmentIds());
             for (Attachment att : attachments) {
@@ -134,7 +139,10 @@ public class DecisionServiceImpl implements DecisionService {
             attachmentRepository.saveAll(attachments);
         }
 
-        return enrichDecisionResponse(decisionRepository.save(decision));
+        Decision saved = decisionRepository.save(decision);
+        auditLogService.logAction(userId, "DECISION_UPDATED", "DECISION", decisionId, "Updated decision board: \"" + saved.getTitle() + "\"");
+
+        return enrichDecisionResponse(saved);
     }
 
     @Override
@@ -190,7 +198,9 @@ public class DecisionServiceImpl implements DecisionService {
         if (!isAuthor && !isAdmin && !isCommunityOwnerOrMod) {
             throw new ForbiddenException("Only the decision author, community moderator/owner, or an admin can delete this board.");
         }
+        String decisionTitle = decision.getTitle();
         decisionRepository.delete(decision);
+        auditLogService.logAction(userId, "DECISION_DELETED", "DECISION", decisionId, "Deleted decision board: \"" + decisionTitle + "\"");
     }
 
     @Override

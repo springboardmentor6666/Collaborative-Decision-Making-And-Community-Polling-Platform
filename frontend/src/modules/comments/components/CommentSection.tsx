@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { useComments } from '../hooks/useComments';
 import { useCreateComment } from '../hooks/useCreateComment';
+import { useLiveComments } from '../hooks/useLiveComments';
 import { CommentCard } from './CommentCard';
 import { CommentEditor } from './CommentEditor';
 import { CommentSkeleton } from './CommentSkeleton';
@@ -12,6 +13,9 @@ interface CommentSectionProps {
 }
 
 export const CommentSection: React.FC<CommentSectionProps> = ({ decisionId }) => {
+  // Listen for live discussion messages
+  useLiveComments(decisionId);
+
   const {
     data,
     isLoading,

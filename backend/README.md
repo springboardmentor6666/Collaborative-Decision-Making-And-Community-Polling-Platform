@@ -1,12 +1,12 @@
 # 🚀 DecisionHub – Enterprise Backend API
 
-**DecisionHub** is a full-stack collaborative decision-making and community polling platform built using Java 21, Spring Boot 3.3.2, Spring Security 6, PostgreSQL, and Clean Architecture principles.
+**DecisionHub** is a full-stack collaborative decision-making and community polling platform built using Java 21, Spring Boot 3.4.3, Spring Security 6, PostgreSQL, and Clean Architecture principles.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Core Framework:** Java 21, Spring Boot 3.3.2
+- **Core Framework:** Java 21, Spring Boot 3.4.3
 - **Security & Auth:** Spring Security 6, JWT (HMAC-SHA512), OAuth2 Google Login, BCrypt
 - **Database & Persistence:** PostgreSQL, Spring Data JPA, Hibernate ORM, Flyway Migrations
 - **API Documentation:** Springdoc OpenAPI 3.0 / Swagger UI

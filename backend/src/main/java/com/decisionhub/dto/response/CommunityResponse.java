@@ -23,6 +23,8 @@ public class CommunityResponse {
 
     private CommunityVisibility visibility;
     private String image;
+    private String profileImage;
     private long memberCount;
     private LocalDateTime createdAt;
 }
+

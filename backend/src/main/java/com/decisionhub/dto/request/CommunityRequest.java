@@ -26,4 +26,6 @@ public class CommunityRequest {
 
     private CommunityVisibility visibility;
     private String image;
+    private String profileImage;
 }
+

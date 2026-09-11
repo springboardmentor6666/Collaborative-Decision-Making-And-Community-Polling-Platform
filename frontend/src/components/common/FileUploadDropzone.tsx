@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   Upload, 
   X, 
@@ -27,8 +27,8 @@ interface FileUploadDropzoneProps {
 export function FileUploadDropzone({
   onFilesUploaded,
   existingFiles = [],
-  maxFiles = 5,
-  acceptedTypes = "image/*,video/mp4,video/webm,application/pdf,text/plain",
+  maxFiles = 10,
+  acceptedTypes = "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv",
   folder = "decisions",
   className = ""
 }: FileUploadDropzoneProps) {
@@ -36,6 +36,12 @@ export function FileUploadDropzone({
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (existingFiles) {
+      setUploadedList(existingFiles);
+    }
+  }, [existingFiles]);
 
   const formatFileSize = (bytes: number) => {
     if (!bytes || bytes === 0) return "0 B";
@@ -48,45 +54,64 @@ export function FileUploadDropzone({
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    if (uploadedList.length + files.length > maxFiles) {
-      toast.error(`You can upload a maximum of ${maxFiles} attachments.`);
+    const fileArray = Array.from(files);
+
+    if (uploadedList.length + fileArray.length > maxFiles) {
+      toast.error(`You can upload a maximum of ${maxFiles} attachments (currently ${uploadedList.length}).`);
       return;
     }
 
     setIsUploading(true);
-    const newUploads: FileUploadResult[] = [];
+    const validFiles: File[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      // Validate size limit (50MB for video, 15MB for other)
-      const isVideo = file.type.startsWith("video/");
+    for (const file of fileArray) {
+      const isVideo = file.type.startsWith("video/") || file.name.match(/\.(mp4|webm|ogg|mov|mkv|avi|m4v)$/i);
       const maxSize = isVideo ? 50 * 1024 * 1024 : 15 * 1024 * 1024;
 
       if (file.size > maxSize) {
         toast.error(`"${file.name}" exceeds the ${isVideo ? "50MB" : "15MB"} size limit.`);
         continue;
       }
+      validFiles.push(file);
+    }
 
-      try {
-        const result = await fileApi.uploadFile(file, folder);
-        newUploads.push(result);
-        toast.success(`Uploaded: ${file.name}`);
-      } catch (err: any) {
-        const errMsg = err.response?.data?.message || `Failed to upload ${file.name}`;
-        toast.error(errMsg);
+    if (validFiles.length === 0) {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    try {
+      const results = await fileApi.uploadMultipleFiles(validFiles, folder);
+      if (results && results.length > 0) {
+        const updated = [...uploadedList, ...results];
+        setUploadedList(updated);
+        onFilesUploaded(updated);
+        toast.success(`Successfully uploaded ${results.length} file${results.length > 1 ? "s" : ""}.`);
       }
-    }
-
-    if (newUploads.length > 0) {
-      const updated = [...uploadedList, ...newUploads];
-      setUploadedList(updated);
-      onFilesUploaded(updated);
-    }
-
-    setIsUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    } catch (batchErr: any) {
+      console.warn("Batch upload fallback to individual uploads:", batchErr);
+      const newUploads: FileUploadResult[] = [];
+      for (const file of validFiles) {
+        try {
+          const res = await fileApi.uploadFile(file, folder);
+          newUploads.push(res);
+          toast.success(`Uploaded: ${file.name}`);
+        } catch (singleErr: any) {
+          const errMsg = singleErr.response?.data?.message || `Failed to upload ${file.name}`;
+          toast.error(errMsg);
+        }
+      }
+      if (newUploads.length > 0) {
+        const updated = [...uploadedList, ...newUploads];
+        setUploadedList(updated);
+        onFilesUploaded(updated);
+      }
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 

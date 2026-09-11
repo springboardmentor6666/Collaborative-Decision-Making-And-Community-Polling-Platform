@@ -23,6 +23,7 @@ import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.SavedDecisionRepository;
 import com.decisionhub.repository.UserPreferenceRepository;
 import com.decisionhub.repository.UserRepository;
+import com.decisionhub.service.AuditLogService;
 import com.decisionhub.service.NotificationService;
 import com.decisionhub.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final DecisionMapper decisionMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -77,7 +79,9 @@ public class UserServiceImpl implements UserService {
         if (request.getProfileImage() != null) user.setProfileImage(request.getProfileImage());
         if (request.getBio() != null) user.setBio(request.getBio());
 
-        return userMapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditLogService.logAction(userId, "PROFILE_UPDATED", "USER", userId, "Updated profile information");
+        return userMapper.toResponse(saved);
     }
 
     @Override
@@ -86,12 +90,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
         
+        String deletedUsername = user.getUsername();
+        String deletedEmail = user.getEmail();
+
         List<com.decisionhub.entity.Community> communities = communityRepository.findAllByOwnerUserId(userId);
         if (!communities.isEmpty()) {
             communityRepository.deleteAll(communities);
         }
         
         userRepository.delete(user);
+        auditLogService.logAction("USER_DELETED", "USER", userId, "Deleted user @" + deletedUsername + " (" + deletedEmail + ")");
     }
 
     @Override
@@ -100,6 +108,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
 
+        com.decisionhub.common.enums.AccountStatus oldStatus = user.getAccountStatus();
         user.setAccountStatus(status);
         User saved = userRepository.save(user);
 
@@ -116,6 +125,10 @@ public class UserServiceImpl implements UserService {
                 : "Your account status has been updated to " + status + " by administrators.";
 
         notificationService.sendNotification(userId, title, msg, com.decisionhub.common.enums.NotificationType.SYSTEM);
+
+        String auditDetails = "Changed status of @" + user.getUsername() + " from " + oldStatus + " to " + status +
+                (reason != null && !reason.trim().isEmpty() ? ". Reason: " + reason : "");
+        auditLogService.logAction("USER_STATUS_UPDATED", "USER", userId, auditDetails);
 
         return userMapper.toResponse(saved);
     }

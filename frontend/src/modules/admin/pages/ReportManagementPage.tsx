@@ -19,7 +19,8 @@ import {
   Clock, 
   Filter, 
   RotateCw,
-  FileCheck
+  FileCheck,
+  Activity
 } from 'lucide-react';
 import { ReportCard } from '../components/ReportCard';
 

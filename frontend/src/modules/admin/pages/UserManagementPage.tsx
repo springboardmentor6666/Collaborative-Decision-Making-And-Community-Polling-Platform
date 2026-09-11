@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Activity, ShieldAlert, FileCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useConfirm } from '@/context/ConfirmDialogContext';
 
@@ -44,9 +45,25 @@ export function UserManagementPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8 max-w-6xl">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">User Management</h1>
-        <p className="text-muted-foreground">View and manage all registered users on the platform.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">User Management</h1>
+          <p className="text-muted-foreground">View and manage all registered users on the platform.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin">
+              <ShieldAlert className="mr-2 h-4 w-4 text-purple-500" />
+              Report Management
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/audit-logs">
+              <FileCheck className="mr-2 h-4 w-4" />
+              Audit Logs
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card>

@@ -53,6 +53,7 @@ public class VoteServiceImpl implements VoteService {
     private final UserMapper userMapper;
     private final OptionMapper optionMapper;
     private final NotificationService notificationService;
+    private final com.decisionhub.websocket.WebSocketEventPublisher webSocketEventPublisher;
 
     @Override
     @Transactional
@@ -228,6 +229,13 @@ public class VoteServiceImpl implements VoteService {
 
         vote = voteRepository.save(vote);
 
+        try {
+            VoteResultResponse liveResults = getVoteResults(decision.getDecisionId());
+            webSocketEventPublisher.broadcastDecisionVoteResults(decision.getDecisionId(), liveResults);
+        } catch (Exception e) {
+            // Non-blocking for primary vote transaction
+        }
+
         return toEnrichedVoteResponse(vote);
     }
 
@@ -322,7 +330,7 @@ public class VoteServiceImpl implements VoteService {
         Decision decision = decisionRepository.findById(decisionId)
                 .orElseThrow(() -> new EntityNotFoundException("Decision", "id", decisionId));
 
-        List<Option> options = optionRepository.findByDecisionDecisionId(decisionId);
+        List<Option> options = optionRepository.findByDecisionDecisionIdOrderByOptionIdAsc(decisionId);
         long totalVotesCount = voteRepository.countByDecisionDecisionId(decisionId);
 
         Map<Long, Long> countsMap = new HashMap<>();

@@ -45,6 +45,7 @@ public class ElectionVotingServiceImpl implements ElectionVotingService {
     private final UserRepository userRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final VotingEventRepository votingEventRepository;
+    private final com.decisionhub.websocket.WebSocketEventPublisher webSocketEventPublisher;
 
     @Override
     @Transactional
@@ -106,6 +107,12 @@ public class ElectionVotingServiceImpl implements ElectionVotingService {
                 .build();
 
         electionVoteRepository.save(vote);
+
+        try {
+            ElectionResultsResponse liveResults = calculateElectionResults(event);
+            webSocketEventPublisher.broadcastElectionResults(event.getEventId(), liveResults);
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -126,12 +133,17 @@ public class ElectionVotingServiceImpl implements ElectionVotingService {
             }
         }
 
+        return calculateElectionResults(event);
+    }
+
+    private ElectionResultsResponse calculateElectionResults(VotingEvent event) {
+        Long eventId = event.getEventId();
         long eligibleMembers = communityMemberRepository.countByCommunityCommunityIdAndStatus(event.getCommunity().getCommunityId(), MemberStatus.ACTIVE);
         
         List<VotingCategory> categories = votingCategoryRepository.findByVotingEventEventId(eventId);
         
         List<ElectionResultsResponse.CategoryResultResponse> categoryResults = new ArrayList<>();
-        long totalUniqueVotesAcrossCategories = 0; // Simplified total votes calculation
+        long totalUniqueVotesAcrossCategories = 0;
 
         for (VotingCategory category : categories) {
             List<Object[]> aggregatedVotes = electionVoteRepository.countVotesPerNomineeByCategoryId(category.getCategoryId());
@@ -191,7 +203,6 @@ public class ElectionVotingServiceImpl implements ElectionVotingService {
                     .build());
         }
         
-        // This is a rough estimation of participation rate based on total votes / categories. A true unique user count would require a COUNT(DISTINCT user_id) query.
         int categoryCount = categories.size() > 0 ? categories.size() : 1;
         long estimatedUniqueVoters = totalUniqueVotesAcrossCategories / categoryCount;
         double participationRate = eligibleMembers > 0 ? (double) estimatedUniqueVoters / eligibleMembers * 100 : 0.0;

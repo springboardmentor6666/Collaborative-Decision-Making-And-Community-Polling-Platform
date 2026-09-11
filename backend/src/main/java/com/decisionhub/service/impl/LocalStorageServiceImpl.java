@@ -57,18 +57,21 @@ public class LocalStorageServiceImpl implements StorageService {
     private static final long MAX_DOC_SIZE = 25 * 1024 * 1024;   // 25MB
 
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
-            "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml",
+            "image/avif", "image/heic", "image/heif", "image/bmp", "image/tiff"
     );
 
     private static final Set<String> ALLOWED_VIDEO_TYPES = Set.of(
-            "video/mp4", "video/webm", "video/ogg"
+            "video/mp4", "video/webm", "video/ogg", "video/quicktime", "video/x-matroska",
+            "video/avi", "video/x-msvideo", "video/mpeg", "video/3gpp", "video/x-flv"
     );
 
     private static final Set<String> ALLOWED_DOC_TYPES = Set.of(
-            "application/pdf", "text/plain", "application/msword",
+            "application/pdf", "text/plain", "text/csv", "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.ms-excel",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/json", "application/rtf"
     );
 
     @PostConstruct
@@ -278,24 +281,29 @@ public class LocalStorageServiceImpl implements StorageService {
         }
 
         String contentType = file.getContentType();
-        if (contentType == null) {
-            throw new BusinessException("File content type could not be determined");
-        }
+        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
 
-        if (ALLOWED_IMAGE_TYPES.contains(contentType)) {
+        boolean isImage = (contentType != null && (ALLOWED_IMAGE_TYPES.contains(contentType) || contentType.startsWith("image/")))
+                || filename.matches(".*\\.(jpg|jpeg|png|webp|gif|svg|avif|heic|heif|bmp|tiff)$");
+        boolean isVideo = (contentType != null && (ALLOWED_VIDEO_TYPES.contains(contentType) || contentType.startsWith("video/")))
+                || filename.matches(".*\\.(mp4|webm|ogg|mov|mkv|avi|m4v|3gp|flv)$");
+        boolean isDoc = (contentType != null && ALLOWED_DOC_TYPES.contains(contentType))
+                || filename.matches(".*\\.(pdf|txt|csv|doc|docx|xls|xlsx|json|rtf)$");
+
+        if (isImage) {
             if (file.getSize() > MAX_IMAGE_SIZE) {
                 throw new BusinessException("Image size exceeds limit of 15MB");
             }
-        } else if (ALLOWED_VIDEO_TYPES.contains(contentType)) {
+        } else if (isVideo) {
             if (file.getSize() > MAX_VIDEO_SIZE) {
                 throw new BusinessException("Video size exceeds limit of 50MB");
             }
-        } else if (ALLOWED_DOC_TYPES.contains(contentType)) {
+        } else if (isDoc) {
             if (file.getSize() > MAX_DOC_SIZE) {
                 throw new BusinessException("Document size exceeds limit of 25MB");
             }
         } else {
-            throw new BusinessException("Unsupported file format: " + contentType + ". Allowed: Images (JPG, PNG, WebP, GIF), Videos (MP4, WebM), and Documents (PDF, DOCX, XLSX).");
+            throw new BusinessException("Unsupported file format" + (contentType != null ? ": " + contentType : "") + ". Allowed: Images (JPG, PNG, WebP, GIF), Videos (MP4, WebM, MOV), and Documents (PDF, DOCX, XLSX).");
         }
     }
 

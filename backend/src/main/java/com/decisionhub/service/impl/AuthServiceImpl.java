@@ -52,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserMapper userMapper;
     private final com.decisionhub.repository.BlacklistedTokenRepository blacklistedTokenRepository;
+    private final com.decisionhub.service.AuditLogService auditLogService;
 
     @Value("${application.security.oauth2.google.client-id:}")
     private String googleClientId;
@@ -86,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmailVerified(false);
 
         User savedUser = userRepository.save(user);
+        auditLogService.logAction(savedUser.getUserId(), "USER_REGISTERED", "USER", savedUser.getUserId(), "New user account registered: @" + savedUser.getUsername());
         log.info("Successfully registered new user with ID: {}", savedUser.getUserId());
         return userMapper.toResponse(savedUser);
     }
@@ -103,6 +105,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findById(userPrincipal.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userPrincipal.getId()));
+
+        auditLogService.logAction(user.getUserId(), "USER_LOGIN", "USER", user.getUserId(), "User signed in: @" + user.getUsername());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)

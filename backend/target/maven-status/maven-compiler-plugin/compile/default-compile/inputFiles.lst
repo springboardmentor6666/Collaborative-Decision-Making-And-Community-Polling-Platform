@@ -27,6 +27,8 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\config\PasswordEncoderConfig.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\config\SecurityConfig.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\config\WebMvcConfig.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\config\WebSocketAuthInterceptor.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\config\WebSocketConfig.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\AbuseReportController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\AdminController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\AnalyticsController.java
@@ -35,6 +37,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\CommunityController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\DecisionController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\ElectionVoteController.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\FileController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\NomineeController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\NotificationController.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\controller\ReportController.java
@@ -45,6 +48,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\DecisionHubApplication.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\AbuseReportRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\AuthRequest.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\ChangePasswordRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\CommentRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\CommunityRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\DecisionRequest.java
@@ -56,6 +60,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\RegisterRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\ResetPasswordRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\TokenRefreshRequest.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\UserPreferencesRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\UserRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\VoteRequest.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\request\VotingCategoryRequest.java
@@ -69,11 +74,14 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\CommunityResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\DecisionResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\ElectionResultsResponse.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\FileUploadResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\NomineeResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\NotificationResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\OptionResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\ReportResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\SavedDecisionResponse.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\UserDataExportResponse.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\UserPreferencesResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\UserResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\VoteResponse.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\dto\response\VoteResultResponse.java
@@ -96,6 +104,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\Role.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\SavedDecision.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\User.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\UserPreference.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\Vote.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\VoteSelection.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\entity\VotingCategory.java
@@ -138,6 +147,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\ReportRepository.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\RoleRepository.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\SavedDecisionRepository.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\UserPreferenceRepository.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\UserRepository.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\VoteRepository.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\repository\VoteSelectionRepository.java
@@ -168,6 +178,7 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\CommunityServiceImpl.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\DecisionServiceImpl.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\ElectionVotingServiceImpl.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\LocalStorageServiceImpl.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\NomineeServiceImpl.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\NotificationServiceImpl.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\impl\ReportServiceImpl.java
@@ -178,9 +189,11 @@ C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Pollin
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\NomineeService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\NotificationService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\ReportService.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\StorageService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\UserService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\VoteService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\VotingCategoryService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\service\VotingEventService.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\specification\CommunitySpecification.java
 C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\specification\DecisionSpecification.java
+C:\Users\pabhi\Desktop\collab\Collaborative-Decision-Making-And-Community-Polling-Platform\backend\src\main\java\com\decisionhub\websocket\WebSocketEventPublisher.java

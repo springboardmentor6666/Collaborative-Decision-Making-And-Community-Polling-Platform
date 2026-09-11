@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useCommunityMutations } from "../../hooks/useCommunityMutations";
 import { CommunityVisibility } from "../../types/community";
 
+import { CommunityImageUploader } from "../../components/CommunityImageUploader";
+
 export default function CreateCommunity() {
   const navigate = useNavigate();
   const { createCommunity } = useCommunityMutations();
@@ -15,6 +17,7 @@ export default function CreateCommunity() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<CommunityVisibility>("PUBLIC");
+  const [profileImage, setProfileImage] = useState("");
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
 
@@ -28,7 +31,7 @@ export default function CreateCommunity() {
     }
 
     createCommunity.mutate(
-      { name, description, visibility, image },
+      { name, description, visibility, profileImage, image },
       {
         onSuccess: (data) => {
           navigate(`/communities/${data.communityId}`);
@@ -43,32 +46,32 @@ export default function CreateCommunity() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50">
+        <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-full border-border bg-card text-foreground hover:bg-muted">
           <Link to="/communities">
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create a Community</h1>
-          <p className="text-slate-500 mt-1">Start a new space for collaboration and decision making.</p>
+          <h1 className="text-3xl font-black text-foreground tracking-tight">Create a Community</h1>
+          <p className="text-muted-foreground mt-1">Start a new space for collaboration and decision making.</p>
         </div>
       </div>
 
-      <Card className="bg-white border-slate-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-xl text-slate-900">Community Details</CardTitle>
-          <CardDescription className="text-slate-500">Fill out the information below to set up your community.</CardDescription>
+          <CardTitle className="text-xl text-foreground">Community Details</CardTitle>
+          <CardDescription className="text-muted-foreground">Fill out the information below to set up your community.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm font-medium">
+              <div className="bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm font-medium">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="name" className="text-sm font-semibold text-foreground">
                 Community Name <span className="text-red-500">*</span>
               </label>
               <Input 
@@ -76,13 +79,13 @@ export default function CreateCommunity() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Open Source Developers"
-                className="bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus-visible:ring-blue-500"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-blue-500"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="description" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="description" className="text-sm font-semibold text-foreground">
                 Description
               </label>
               <textarea 
@@ -91,40 +94,49 @@ export default function CreateCommunity() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What is this community about?"
                 rows={4}
-                className="w-full flex rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full flex rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="visibility" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="visibility" className="text-sm font-semibold text-foreground">
                 Visibility <span className="text-red-500">*</span>
               </label>
               <select 
                 id="visibility"
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as CommunityVisibility)}
-                className="w-full flex rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="w-full flex rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 <option value="PUBLIC">Public (Anyone can see and join)</option>
                 <option value="PRIVATE">Private (Invite only)</option>
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="image" className="text-sm font-semibold text-slate-700">
-                Banner Image URL (Optional)
-              </label>
-              <Input 
-                id="image"
+            {/* 1. Community Profile Logo / Avatar */}
+            <div className="pt-3 border-t border-border">
+              <CommunityImageUploader
+                value={profileImage}
+                onChange={(url) => setProfileImage(url)}
+                type="avatar"
+                label="Community Profile Logo / Avatar"
+                description="Square or circular icon representing your community badge and icon across cards and member lists."
+              />
+            </div>
+
+            {/* 2. Community Cover Banner */}
+            <div className="pt-3 border-t border-border">
+              <CommunityImageUploader
                 value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://example.com/banner.jpg"
-                className="bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus-visible:ring-blue-500"
+                onChange={(url) => setImage(url)}
+                type="cover"
+                label="Community Cover Banner"
+                description="Landscape cover image displayed at the top of your community page header."
               />
             </div>
 
             <div className="pt-4 flex justify-end gap-3">
-              <Button type="button" variant="outline" asChild className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50">
+              <Button type="button" variant="outline" asChild className="border-border bg-card text-foreground hover:bg-muted">
                 <Link to="/communities">Cancel</Link>
               </Button>
               <Button type="submit" disabled={createCommunity.isPending} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
@@ -138,3 +150,4 @@ export default function CreateCommunity() {
     </div>
   );
 }
+

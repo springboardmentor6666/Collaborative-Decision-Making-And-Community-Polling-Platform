@@ -19,6 +19,7 @@ import { DecisionResponse } from '@/modules/decisions/types/decision';
 import { useVoteMutations } from '../hooks/useVoteMutations';
 import { useHasVoted } from '../hooks/useHasVoted';
 import { useVoteResults } from '../hooks/useVoteResults';
+import { useLiveDecisionVotes } from '../hooks/useLiveDecisionVotes';
 
 interface PollCardProps {
   decision: DecisionResponse;
@@ -30,6 +31,9 @@ export function PollCard({ decision }: PollCardProps) {
   const [isEditingVote, setIsEditingVote] = useState(false);
   const [showLiveResults, setShowLiveResults] = useState(false);
   const [ratings, setRatings] = useState<Record<number, number>>({});
+
+  // Real-time live vote tally subscription
+  useLiveDecisionVotes(decision.decisionId);
 
   const { hasVoted, savedVote, setVoteData } = useHasVoted(decision.decisionId);
   const { castVote, castAnonymousVote, changeVote } = useVoteMutations();
@@ -105,6 +109,12 @@ export function PollCard({ decision }: PollCardProps) {
   // Compute total votes
   const totalVotesCount = results?.totalVotesCount ?? decision.totalVotes ?? 0;
 
+  // Stably maintain options in original creation order (by optionId)
+  const stableOptions = React.useMemo(() => {
+    if (!decision.options) return [];
+    return [...decision.options].sort((a, b) => a.optionId - b.optionId);
+  }, [decision.options]);
+
   // Safe helper to get vote count for an option
   const getOptionVotes = (optionId: number): number => {
     if (results?.optionVoteCounts) {
@@ -129,7 +139,7 @@ export function PollCard({ decision }: PollCardProps) {
   };
 
   // Determine top/winning option
-  const maxOptionVotes = Math.max(0, ...(decision.options?.map(o => getOptionVotes(o.optionId)) || [0]));
+  const maxOptionVotes = Math.max(0, ...(stableOptions.map(o => getOptionVotes(o.optionId)) || [0]));
 
   const isPending = castVote.isPending || castAnonymousVote.isPending || changeVote.isPending;
   const shouldShowResultsView = (hasVoted && !isEditingVote) || isClosed || showLiveResults;
@@ -216,7 +226,7 @@ export function PollCard({ decision }: PollCardProps) {
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
             </div>
           ) : (
-            decision.options?.map((option) => {
+            stableOptions.map((option) => {
               const votes = getOptionVotes(option.optionId);
               const percentage = getOptionPercentage(option.optionId);
               const isSelectedByUser = currentSelections.includes(option.optionId);
@@ -307,7 +317,7 @@ export function PollCard({ decision }: PollCardProps) {
         /* 2. VOTING SELECTION VIEW (when casting or editing vote) */
         <div className="space-y-4">
           <div className="space-y-3">
-            {decision.options?.map((option) => {
+            {stableOptions.map((option) => {
               const isSelected = currentSelections.includes(option.optionId);
 
               return (

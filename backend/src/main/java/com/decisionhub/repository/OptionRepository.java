@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface OptionRepository extends JpaRepository<Option, Long> {
 
+    List<Option> findByDecisionDecisionIdOrderByOptionIdAsc(Long decisionId);
     List<Option> findByDecisionDecisionId(Long decisionId);
 
     @Modifying

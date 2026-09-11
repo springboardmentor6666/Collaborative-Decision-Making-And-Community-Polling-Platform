@@ -38,7 +38,7 @@ public interface CommunityService {
 
     void rejectRequest(Long communityId, Long memberUserId, Long requestingUserId);
 
-    CommunityMemberResponse inviteUser(Long communityId, Long targetUserId, Long requestingUserId);
+    CommunityMemberResponse inviteUser(Long communityId, Long targetUserId, String usernameOrEmail, Long requestingUserId);
 
     CommunityMemberResponse getMembership(Long communityId, Long userId);
 }

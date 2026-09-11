@@ -10,6 +10,7 @@ import {
 import { useNotifications } from '../hooks/useNotifications';
 import { useUnreadCount } from '../hooks/useUnreadCount';
 import { useMarkAllAsRead } from '../hooks/useMarkAllAsRead';
+import { useLiveNotifications } from '../hooks/useLiveNotifications';
 import { NotificationCard } from './NotificationCard';
 import { NotificationListSkeleton } from './NotificationSkeleton';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,9 @@ import { NotificationResponse } from '../types/notification';
 
 export function NotificationDropdown() {
   const navigate = useNavigate();
+  // Listen for real-time incoming WebSocket notifications
+  useLiveNotifications();
+
   const { data: unreadCount = 0 } = useUnreadCount();
   const { data, isLoading } = useNotifications(5); // fetch only 5 for dropdown
   const markAllAsRead = useMarkAllAsRead();

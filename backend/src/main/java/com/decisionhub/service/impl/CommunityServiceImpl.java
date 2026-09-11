@@ -11,6 +11,7 @@ import com.decisionhub.dto.response.CommunityResponse;
 import com.decisionhub.entity.Community;
 import com.decisionhub.entity.CommunityMember;
 import com.decisionhub.entity.User;
+import com.decisionhub.exception.BusinessException;
 import com.decisionhub.exception.DuplicateException;
 import com.decisionhub.exception.EntityNotFoundException;
 import com.decisionhub.exception.ForbiddenException;
@@ -20,6 +21,7 @@ import com.decisionhub.mapper.UserMapper;
 import com.decisionhub.repository.CommunityMemberRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.UserRepository;
+import com.decisionhub.service.AuditLogService;
 import com.decisionhub.service.CommunityService;
 import com.decisionhub.service.NotificationService;
 import com.decisionhub.common.enums.NotificationType;
@@ -41,6 +43,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityMapper communityMapper;
     private final UserMapper userMapper;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -62,6 +65,8 @@ public class CommunityServiceImpl implements CommunityService {
                 .status(MemberStatus.ACTIVE)
                 .build());
 
+        auditLogService.logAction(userId, "COMMUNITY_CREATED", "COMMUNITY", savedCommunity.getCommunityId(), "Created community \"" + savedCommunity.getName() + "\"");
+
         CommunityResponse response = communityMapper.toResponse(savedCommunity);
         response.setMemberCount(1);
         return response;
@@ -80,10 +85,14 @@ public class CommunityServiceImpl implements CommunityService {
         if (request.getName() != null) community.setName(request.getName());
         if (request.getDescription() != null) community.setDescription(request.getDescription());
         if (request.getImage() != null) community.setImage(request.getImage());
+        if (request.getProfileImage() != null) community.setProfileImage(request.getProfileImage());
         if (request.getVisibility() != null) community.setVisibility(request.getVisibility());
 
-        return communityMapper.toResponse(communityRepository.save(community));
+        Community saved = communityRepository.save(community);
+        auditLogService.logAction(userId, "COMMUNITY_UPDATED", "COMMUNITY", communityId, "Updated community \"" + saved.getName() + "\"");
+        return communityMapper.toResponse(saved);
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -138,7 +147,9 @@ public class CommunityServiceImpl implements CommunityService {
         if (!community.getOwner().getUserId().equals(userId) && !isAdmin) {
             throw new ForbiddenException("Only the owner or an admin can delete this community.");
         }
+        String communityName = community.getName();
         communityRepository.delete(community);
+        auditLogService.logAction(userId, "COMMUNITY_DELETED", "COMMUNITY", communityId, "Deleted community \"" + communityName + "\"");
     }
 
     @Override
@@ -200,6 +211,7 @@ public class CommunityServiceImpl implements CommunityService {
                 .orElseThrow(() -> new EntityNotFoundException("Member not found in community."));
         member.setMemberRole(role);
         communityMemberRepository.save(member);
+        auditLogService.logAction(requestingUserId, "MEMBER_ROLE_UPDATED", "COMMUNITY", communityId, "Changed role of user #" + memberUserId + " to " + role + " in \"" + community.getName() + "\"");
     }
 
     @Override
@@ -219,6 +231,7 @@ public class CommunityServiceImpl implements CommunityService {
         CommunityMember memberRecord = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, memberUserId)
                 .orElseThrow(() -> new EntityNotFoundException("Member record not found"));
         communityMemberRepository.delete(memberRecord);
+        auditLogService.logAction(requestingUserId, "MEMBER_REMOVED", "COMMUNITY", communityId, "Removed user #" + memberUserId + " from \"" + community.getName() + "\"");
     }
 
     @Override
@@ -318,7 +331,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     @Transactional
-    public CommunityMemberResponse inviteUser(Long communityId, Long targetUserId, Long requestingUserId) {
+    public CommunityMemberResponse inviteUser(Long communityId, Long targetUserId, String usernameOrEmail, Long requestingUserId) {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new EntityNotFoundException("Community", "id", communityId));
         
@@ -330,30 +343,40 @@ public class CommunityServiceImpl implements CommunityService {
             throw new ForbiddenException("Only owners and moderators can invite users.");
         }
 
-        if (communityMemberRepository.existsByCommunityCommunityIdAndUserUserId(communityId, targetUserId)) {
-            throw new DuplicateException("User is already invited or a member.");
+        User targetUser;
+        if (usernameOrEmail != null && !usernameOrEmail.trim().isEmpty()) {
+            String trimmed = usernameOrEmail.trim().replace("@", "");
+            targetUser = userRepository.findByUsernameOrEmail(trimmed)
+                    .or(() -> userRepository.findByUsernameOrEmail(usernameOrEmail.trim()))
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with username: @" + trimmed));
+        } else if (targetUserId != null) {
+            targetUser = userRepository.findById(targetUserId)
+                    .orElseThrow(() -> new EntityNotFoundException("User", "id", targetUserId));
+        } else {
+            throw new BusinessException("Please provide a username or user ID to invite.");
+        }
+
+        Long actualTargetUserId = targetUser.getUserId();
+
+        if (communityMemberRepository.existsByCommunityCommunityIdAndUserUserId(communityId, actualTargetUserId)) {
+            throw new DuplicateException("User @" + targetUser.getUsername() + " is already a member or has already been invited.");
         }
         
-        User targetUser = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User", "id", targetUserId));
-
-        // Let's assume an invite immediately makes them a PENDING member (or ACTIVE if they accept, but since we don't have PENDING_INVITE, we'll make them ACTIVE as a direct add, or we can make them PENDING and they have to accept. For simplicity based on the prompt, "Owner -> Invite User -> Invitation -> Accept -> ACTIVE". However, we don't have an Accept endpoint. I will just add them as ACTIVE for now, but notify them).
-        
         CommunityMember member;
-        if (communityMemberRepository.countAllByCommunityIdAndUserId(communityId, targetUserId) > 0) {
-            communityMemberRepository.resurrectMember(communityId, targetUserId, MemberStatus.ACTIVE, MemberRole.MEMBER);
-            member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, targetUserId)
+        if (communityMemberRepository.countAllByCommunityIdAndUserId(communityId, actualTargetUserId) > 0) {
+            communityMemberRepository.resurrectMember(communityId, actualTargetUserId, MemberStatus.ACTIVE, MemberRole.MEMBER);
+            member = communityMemberRepository.findByCommunityCommunityIdAndUserUserId(communityId, actualTargetUserId)
                     .orElseThrow(() -> new IllegalStateException("Failed to resurrect member"));
         } else {
             member = communityMemberRepository.save(CommunityMember.builder()
                     .community(community)
                     .user(targetUser)
                     .memberRole(MemberRole.MEMBER)
-                    .status(MemberStatus.ACTIVE) // Auto-add for now to simplify
+                    .status(MemberStatus.ACTIVE)
                     .build());
         }
                 
-        notificationService.sendNotification(targetUserId, "Community Invitation", "You have been invited and added to " + community.getName() + ".", NotificationType.INVITE);
+        notificationService.sendNotification(actualTargetUserId, "Community Invitation", "You have been invited and added to " + community.getName() + ".", NotificationType.INVITE);
 
         return CommunityMemberResponse.builder()
                 .memberId(member.getMemberId())

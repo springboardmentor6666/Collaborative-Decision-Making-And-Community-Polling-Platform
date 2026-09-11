@@ -32,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
     private final NotificationService notificationService;
+    private final com.decisionhub.websocket.WebSocketEventPublisher webSocketEventPublisher;
 
     @Override
     @Transactional
@@ -81,7 +82,12 @@ public class CommentServiceImpl implements CommentService {
             );
         }
 
-        return commentMapper.toResponse(savedComment);
+        CommentResponse response = commentMapper.toResponse(savedComment);
+        try {
+            webSocketEventPublisher.broadcastComment(decision.getDecisionId(), response);
+        } catch (Exception ignored) {
+        }
+        return response;
     }
 
     @Override
@@ -96,7 +102,15 @@ public class CommentServiceImpl implements CommentService {
 
         comment.setMessage(newMessage);
         comment.setEdited(true);
-        return commentMapper.toResponse(commentRepository.save(comment));
+        Comment saved = commentRepository.save(comment);
+        CommentResponse response = commentMapper.toResponse(saved);
+        try {
+            if (comment.getDecision() != null) {
+                webSocketEventPublisher.broadcastComment(comment.getDecision().getDecisionId(), response);
+            }
+        } catch (Exception ignored) {
+        }
+        return response;
     }
 
     @Override

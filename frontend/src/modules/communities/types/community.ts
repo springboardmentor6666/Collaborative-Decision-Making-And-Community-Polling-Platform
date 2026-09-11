@@ -10,7 +10,8 @@ export interface CommunityResponse {
   description: string;
   owner: UserResponse;
   visibility: CommunityVisibility;
-  image: string;
+  image: string; // Cover Banner Image
+  profileImage?: string; // Profile Avatar / Icon Image
   memberCount: number;
   createdAt: string;
 }
@@ -19,8 +20,10 @@ export interface CommunityRequest {
   name: string;
   description?: string;
   visibility: CommunityVisibility;
-  image?: string;
+  image?: string; // Cover Banner Image
+  profileImage?: string; // Profile Avatar / Icon Image
 }
+
 
 export interface CommunityMemberResponse {
   memberId: number;

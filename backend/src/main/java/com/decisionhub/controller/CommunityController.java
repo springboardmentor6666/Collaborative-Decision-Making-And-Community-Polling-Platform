@@ -185,13 +185,16 @@ public class CommunityController {
     }
 
     @PostMapping("/{id}/invite")
-    @Operation(summary = "Invite a user to the community")
+    @Operation(summary = "Invite a user to the community by username or ID")
     public ResponseEntity<ApiResponse<CommunityMemberResponse>> inviteUser(
             @PathVariable Long id,
-            @RequestParam Long userId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String identifier,
             @AuthenticationPrincipal UserPrincipal currentUser) {
-        CommunityMemberResponse response = communityService.inviteUser(id, userId, currentUser.getId());
-        return ResponseEntity.ok(ApiResponse.success("User invited successfully.", response));
+        String targetUsername = (username != null && !username.trim().isEmpty()) ? username : identifier;
+        CommunityMemberResponse response = communityService.inviteUser(id, userId, targetUsername, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("User @" + response.getUser().getUsername() + " invited successfully.", response));
     }
 
     @GetMapping("/{id}/membership")

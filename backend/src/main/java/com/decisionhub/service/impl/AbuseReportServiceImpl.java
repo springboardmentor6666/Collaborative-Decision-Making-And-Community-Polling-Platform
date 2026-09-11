@@ -20,6 +20,7 @@ import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.service.AbuseReportService;
+import com.decisionhub.service.AuditLogService;
 import com.decisionhub.service.CommentService;
 import com.decisionhub.service.CommunityService;
 import com.decisionhub.service.DecisionService;
@@ -45,6 +46,7 @@ public class AbuseReportServiceImpl implements AbuseReportService {
     private final CommentService commentService;
     private final CommunityService communityService;
     private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -64,6 +66,7 @@ public class AbuseReportServiceImpl implements AbuseReportService {
                 .build();
 
         AbuseReport savedReport = abuseReportRepository.save(report);
+        auditLogService.logAction(userId, "REPORT_SUBMITTED", "DECISION", decisionId, "Reported decision \"" + decision.getTitle() + "\" for: " + request.getReason());
         return mapToResponse(savedReport);
     }
 
@@ -86,6 +89,7 @@ public class AbuseReportServiceImpl implements AbuseReportService {
                 .build();
 
         AbuseReport savedReport = abuseReportRepository.save(report);
+        auditLogService.logAction(userId, "REPORT_SUBMITTED", "COMMENT", commentId, "Reported comment for: " + request.getReason());
         return mapToResponse(savedReport);
     }
 
@@ -107,6 +111,7 @@ public class AbuseReportServiceImpl implements AbuseReportService {
                 .build();
 
         AbuseReport savedReport = abuseReportRepository.save(report);
+        auditLogService.logAction(userId, "REPORT_SUBMITTED", "COMMUNITY", communityId, "Reported community \"" + community.getName() + "\" for: " + request.getReason());
         return mapToResponse(savedReport);
     }
 
@@ -222,6 +227,16 @@ public class AbuseReportServiceImpl implements AbuseReportService {
         report.setResolvedBy(user);
         
         AbuseReport savedReport = abuseReportRepository.save(report);
+
+        String actionType = deleteTarget ? "REPORT_RESOLVED" : "REPORT_DISMISSED";
+        String targetType = report.getComment() != null ? "COMMENT" : (report.getDecision() != null ? "DECISION" : "COMMUNITY");
+        Long targetId = report.getComment() != null ? report.getComment().getCommentId() : (report.getDecision() != null ? report.getDecision().getDecisionId() : (report.getCommunity() != null ? report.getCommunity().getCommunityId() : null));
+        String resolutionDetails = deleteTarget
+                ? "Resolved report #" + reportId + " (" + report.getReason() + ") and deleted " + targetType.toLowerCase() + " #" + targetId
+                : "Dismissed report #" + reportId + " (" + report.getReason() + ") as compliant";
+
+        auditLogService.logAction(userId, actionType, "ABUSE_REPORT", reportId, resolutionDetails);
+
         return mapToResponse(savedReport);
     }
 

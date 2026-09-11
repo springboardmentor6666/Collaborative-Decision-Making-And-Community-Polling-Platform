@@ -88,10 +88,11 @@ export const useCommunityMutations = () => {
   });
 
   const inviteUser = useMutation({
-    mutationFn: ({ communityId, userId }: { communityId: number; userId: number }) => 
-      communityApi.inviteUser(communityId, userId),
+    mutationFn: ({ communityId, username, userId }: { communityId: number; username?: string; userId?: number | string }) => 
+      communityApi.inviteUser(communityId, username || (userId !== undefined ? userId : "")),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["communities", "members", variables.communityId] });
+      queryClient.invalidateQueries({ queryKey: ["community-members", variables.communityId] });
     },
   });
 

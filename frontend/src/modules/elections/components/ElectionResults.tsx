@@ -1,10 +1,14 @@
 import React from "react";
 import { Loader2, Trophy, Users, BarChart3, Lock } from "lucide-react";
 import { useElectionResults } from "../hooks/useElections";
+import { useLiveElectionResults } from "../hooks/useLiveElectionResults";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export function ElectionResults({ eventId }: { eventId: number }) {
+  // Listen for live election vote updates
+  useLiveElectionResults(eventId);
+
   const { data: results, isLoading, error } = useElectionResults(eventId);
 
   if (isLoading) {

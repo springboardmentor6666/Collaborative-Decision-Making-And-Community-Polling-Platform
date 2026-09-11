@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCommunityMutations } from "../hooks/useCommunityMutations";
 import { ReportCommunityModal } from "./ReportCommunityModal";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { getImageUrl } from "@/utils";
 
 interface CommunityHeaderProps {
   community: CommunityResponse;
@@ -25,6 +26,8 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
   const isOwner = user?.userId === community.owner.userId;
   const isAdmin = user?.role === "ROLE_ADMIN";
   const canEdit = isOwner || isAdmin;
+  const bannerUrl = getImageUrl(community.image);
+  const profileAvatarUrl = getImageUrl(community.profileImage || community.image);
 
   const handleDelete = async () => {
     const confirmed = await confirm({
@@ -52,26 +55,27 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
   });
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border border-[#E2E8F0] shadow-sm mb-6">
-      {/* Banner */}
+    <div className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm mb-6">
+      {/* Cover Banner */}
       <div 
-        className="h-48 md:h-64 bg-slate-100 relative w-full"
+        className="h-48 md:h-64 bg-muted/40 relative w-full overflow-hidden"
         style={{
-          backgroundImage: community.image ? `url(${community.image})` : 'linear-gradient(to right, #f1f5f9, #e2e8f0)',
+          backgroundImage: bannerUrl ? `url(${bannerUrl})` : 'linear-gradient(to right, #1e293b, #0f172a)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
       </div>
       
       {/* Content */}
       <div className="px-6 md:px-10 pb-8 pt-6 relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 -mt-16 md:-mt-20 mb-4 z-10 relative">
-          <div className="bg-white p-2 rounded-2xl inline-block border border-[#E2E8F0] shadow-sm">
-            <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-100 rounded-xl flex items-center justify-center text-4xl font-bold text-[#2563EB] overflow-hidden">
-              {community.image ? (
-                <img src={community.image} alt={community.name} className="w-full h-full object-cover" />
+          {/* Profile Logo Avatar */}
+          <div className="bg-card p-2 rounded-2xl inline-block border border-border shadow-md">
+            <div className="w-24 h-24 md:w-32 md:h-32 bg-muted rounded-xl flex items-center justify-center text-4xl font-bold text-blue-600 dark:text-blue-400 overflow-hidden shadow-inner">
+              {profileAvatarUrl ? (
+                <img src={profileAvatarUrl} alt={community.name} className="w-full h-full object-cover" />
               ) : (
                 community.name.substring(0, 2).toUpperCase()
               )}
@@ -80,7 +84,7 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
           
           <div className="flex gap-3 w-full md:w-auto">
             {(isOwner || isAdmin || membership?.memberRole === "MODERATOR") && (
-              <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
+              <Button asChild variant="outline" className="border-border bg-card hover:bg-muted text-foreground">
                 <Link to={`/communities/${community.communityId}/admin`}>
                   <Shield className="w-4 h-4 mr-2" />
                   Admin
@@ -89,7 +93,7 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
             )}
             
             {canEdit && (
-              <Button asChild variant="outline" className="border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#0F172A]">
+              <Button asChild variant="outline" className="border-border bg-card hover:bg-muted text-foreground">
                 <Link to={`/communities/${community.communityId}/edit`}>
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
@@ -118,7 +122,7 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
                 {user && (
                   <Button
                     variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10"
                     onClick={() => setIsReportModalOpen(true)}
                   >
                     <Flag className="w-4 h-4 mr-2" />
@@ -139,41 +143,41 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tight">{community.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">{community.name}</h1>
             <Badge 
               variant="outline" 
               className={community.visibility === "PUBLIC" 
-                ? "bg-[#EFF6FF] text-[#1D4ED8] border-none" 
-                : "bg-[#F1F5F9] text-[#334155] border-none"}
+                ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-none" 
+                : "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-none"}
             >
               {community.visibility === "PUBLIC" ? <Globe className="w-3 h-3 mr-1" /> : <Lock className="w-3 h-3 mr-1" />}
               {community.visibility}
             </Badge>
           </div>
           
-          <p className="text-[#64748B] text-lg max-w-3xl mb-6">
+          <p className="text-muted-foreground text-lg max-w-3xl mb-6">
             {community.description || "Welcome to our community!"}
           </p>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-4 md:gap-8 text-sm text-[#64748B] font-medium">
-              <div className="flex items-center hover:text-[#0F172A] transition-colors cursor-pointer" onClick={() => window.location.href = `/communities/${community.communityId}/members`}>
-                <Users className="w-4 h-4 mr-2 text-[#2563EB]" />
+            <div className="flex flex-wrap gap-4 md:gap-8 text-sm text-muted-foreground font-medium">
+              <div className="flex items-center hover:text-foreground transition-colors cursor-pointer" onClick={() => navigate(`/communities/${community.communityId}/members`)}>
+                <Users className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                 <span>{community.memberCount.toLocaleString()} {community.memberCount === 1 ? 'Member' : 'Members'}</span>
               </div>
               
               <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-[#2563EB]" />
-                <span>Managed by <span className="text-[#0F172A] font-semibold">{community.owner.username}</span></span>
+                <Shield className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                <span>Managed by <span className="text-foreground font-semibold">{community.owner.username}</span></span>
               </div>
               
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2 text-[#2563EB]" />
+                <Calendar className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                 <span>Created on {createdDate}</span>
               </div>
             </div>
             
-            <Button asChild variant="outline" className="border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 shrink-0">
+            <Button asChild variant="outline" className="border-border bg-card text-foreground hover:bg-muted shrink-0">
               <Link to={`/communities/${community.communityId}/members`}>
                 View All Members
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -185,3 +189,4 @@ export function CommunityHeader({ community, membership }: CommunityHeaderProps)
     </div>
   );
 }
+

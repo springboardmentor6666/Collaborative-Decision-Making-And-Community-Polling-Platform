@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * Central Security Configuration for Spring Boot 3.3.2 & Spring Security 6.
+ * Central Security Configuration for Spring Boot 3.4 & Spring Security 6.
  * Implements JWT authentication filter chain, OAuth2 Google login, RBAC endpoints, and exception handling.
  */
 @Configuration
@@ -43,7 +43,9 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/actuator/health",
-            "/actuator/info"
+            "/actuator/info",
+            "/ws/**",
+            "/ws"
     };
 
     @Bean

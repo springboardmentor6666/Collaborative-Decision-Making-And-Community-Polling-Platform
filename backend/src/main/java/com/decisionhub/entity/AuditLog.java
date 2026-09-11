@@ -60,6 +60,9 @@ public class AuditLog extends BaseEntity {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
+    @Column(name = "details", length = 1000)
+    private String details;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -65,6 +65,9 @@ public class Community extends BaseEntity {
     @Column(name = "image", length = 255)
     private String image;
 
+    @Column(name = "profile_image", length = 255)
+    private String profileImage;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

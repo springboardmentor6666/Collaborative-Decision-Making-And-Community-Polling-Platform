@@ -106,6 +106,7 @@ public class Decision extends BaseEntity {
     private int shareCount = 0;
 
     @OneToMany(mappedBy = "decision", cascade = CascadeType.ALL, orphanRemoval = true)
+    @jakarta.persistence.OrderBy("optionId ASC")
     @Builder.Default
     private List<Option> options = new ArrayList<>();
 

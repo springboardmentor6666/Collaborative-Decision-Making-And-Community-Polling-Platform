@@ -26,6 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper;
+    private final com.decisionhub.websocket.WebSocketEventPublisher webSocketEventPublisher;
 
     @Override
     @Transactional
@@ -41,8 +42,14 @@ public class NotificationServiceImpl implements NotificationService {
                 .read(false)
                 .build();
 
-        notificationRepository.save(notification);
+        Notification saved = notificationRepository.save(notification);
         log.info("Dispatched notification to user ID {}: [{}] {}", userId, type, title);
+
+        try {
+            NotificationResponse response = notificationMapper.toResponse(saved);
+            webSocketEventPublisher.sendLiveNotification(recipient.getUsername(), response);
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

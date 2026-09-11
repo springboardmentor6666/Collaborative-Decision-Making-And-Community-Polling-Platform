@@ -21,5 +21,6 @@ public class AuditLogResponse {
     private String entityType;
     private Long entityId;
     private String ipAddress;
+    private String details;
     private LocalDateTime createdAt;
 }

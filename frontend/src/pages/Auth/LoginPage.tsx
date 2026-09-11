@@ -135,7 +135,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition-all text-sm active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 disabled:cursor-not-allowed mt-4"
+              className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md shadow-blue-500/25 transition-all text-sm active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 disabled:cursor-not-allowed mt-4"
             >
               {isSubmitting ? (
                 <>

@@ -75,6 +75,27 @@ export function DecisionCard({ decision, isSaved = false, onUnsaved }: DecisionC
               {decision.description}
             </p>
           )}
+
+          {/* Media Preview (if any) */}
+          {decision.attachments && decision.attachments.length > 0 && (() => {
+            const firstImg = decision.attachments.find(a => a.fileType?.startsWith("image/"));
+            const totalVisual = decision.attachments.filter(a => a.fileType?.startsWith("image/") || a.fileType?.startsWith("video/")).length;
+            if (!firstImg) return null;
+            return (
+              <div className="relative mt-3.5 rounded-xl overflow-hidden border border-slate-200 bg-slate-950 aspect-[16/9] max-h-[240px]">
+                <img
+                  src={firstImg.fileUrl}
+                  alt={decision.title}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+                {totalVisual > 1 && (
+                  <span className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-white/15 shadow-sm">
+                    +{totalVisual - 1} more
+                  </span>
+                )}
+              </div>
+            );
+          })()}
         </CardHeader>
 
         <CardContent className="px-6 pb-6 pt-0 mt-3">

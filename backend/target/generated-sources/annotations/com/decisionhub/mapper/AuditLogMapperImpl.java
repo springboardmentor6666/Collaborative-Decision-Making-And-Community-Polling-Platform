@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-09-08T18:19:01+0530",
+    date = "2026-09-11T15:45:46+0530",
     comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.100.v20260826-1225, environment: Java 21.0.12.1 (Eclipse Adoptium)"
 )
 @Component
@@ -27,6 +27,7 @@ public class AuditLogMapperImpl implements AuditLogMapper {
 
         auditLogResponse.action( auditLog.getAction() );
         auditLogResponse.createdAt( auditLog.getCreatedAt() );
+        auditLogResponse.details( auditLog.getDetails() );
         auditLogResponse.entityId( auditLog.getEntityId() );
         auditLogResponse.entityType( auditLog.getEntityType() );
         auditLogResponse.ipAddress( auditLog.getIpAddress() );

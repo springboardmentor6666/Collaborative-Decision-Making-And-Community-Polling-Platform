@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Loader2, Camera, Upload, Trash2 } from 'lucide-react';
 import { fileApi } from '@/api/fileApi';
 import { useAuth } from '@/context/AuthContext';
+import { ImageCropperModal } from '@/components/common/ImageCropperModal';
 
 export function EditProfilePage() {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ export function EditProfilePage() {
   });
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -44,7 +47,7 @@ export function EditProfilePage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDeviceImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDeviceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -59,25 +62,39 @@ export function EditProfilePage() {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setIsCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
     setIsUploadingAvatar(true);
     try {
+      const file = new File([croppedBlob], `avatar_${Date.now()}.jpg`, { type: 'image/jpeg' });
       const result = await fileApi.uploadProfileImage(file);
       setFormData(prev => ({ ...prev, profileImage: result.fileUrl }));
       if (user) {
         updateUser({ ...user, profileImage: result.fileUrl });
       }
       refetch();
-      toast.success('Avatar uploaded successfully!');
+      toast.success('Profile avatar cropped and updated successfully!');
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || 'Failed to upload avatar';
+      const errMsg = err.response?.data?.message || 'Failed to upload cropped avatar';
       toast.error(errMsg);
     } finally {
       setIsUploadingAvatar(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setIsCropModalOpen(false);
+      setCropImageSrc(null);
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,6 +245,22 @@ export function EditProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Profile Image Cropping Modal */}
+      <ImageCropperModal
+        isOpen={isCropModalOpen}
+        imageSrc={cropImageSrc}
+        onClose={() => {
+          setIsCropModalOpen(false);
+          setCropImageSrc(null);
+        }}
+        onCropComplete={handleCropComplete}
+        shape="circle"
+        allowShapeSwitch={true}
+        title="Crop Profile Avatar"
+        description="Position and scale your picture to perfectly fit the circular profile avatar."
+      />
     </div>
   );
 }
+
