@@ -278,6 +278,17 @@ public class CommunityServiceImpl implements CommunityService {
         Community saved =
                 repository.save(community);
 
+        membershipRepository.findByUser(user)
+                .stream()
+                .filter(membership ->
+                        membership.getCommunity().getId().equals(community.getId())
+                )
+                .findFirst()
+                .ifPresent(membership -> {
+                    membership.setLeftAt(java.time.LocalDateTime.now());
+                    membershipRepository.save(membership);
+                });
+
         return response(
                 saved,
                 user

@@ -83,9 +83,11 @@ function Activity() {
                         <p className="break-words text-xs leading-5 text-[var(--app-text)]">
                            <span className="font-bold">
     {event.type === "Decision created" && "📝 You created a decision"}
+    {event.type === "Decision deleted" && "🗑️ You deleted a decision"}
     {event.type === "Vote submitted" && "🗳️ You voted on a decision"}
     {event.type === "Comment created" && "💬 You commented on a decision"}
     {event.type === "Community joined" && "👥 You joined a community"}
+    {event.type === "Community left" && "👋 You left a community"}
 </span>
                         </p>
 

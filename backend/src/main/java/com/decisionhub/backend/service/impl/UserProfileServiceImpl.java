@@ -1,6 +1,7 @@
 package com.decisionhub.backend.service.impl;
 
 import com.decisionhub.backend.dto.*;
+import com.decisionhub.backend.entity.Activity;
 import com.decisionhub.backend.entity.Community;
 import com.decisionhub.backend.entity.Decision;
 import com.decisionhub.backend.entity.Role;
@@ -19,6 +20,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final CurrentUserService current;
     private final UserRepository users;
     private final DecisionRepository decisions;
+    private final ActivityRepository activities;
     private final CommunityMembershipRepository memberships;
     private final VoteRepository votes;
     private final CommunityRepository communities;
@@ -32,6 +34,7 @@ public class UserProfileServiceImpl implements UserProfileService {
             CurrentUserService current,
             UserRepository users,
             DecisionRepository decisions,
+            ActivityRepository activities,
             CommunityMembershipRepository memberships,
             VoteRepository votes,
             CommunityRepository communities,
@@ -44,6 +47,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.current = current;
         this.users = users;
         this.decisions = decisions;
+        this.activities = activities;
         this.memberships = memberships;
         this.votes = votes;
         this.communities = communities;
@@ -64,14 +68,32 @@ public class UserProfileServiceImpl implements UserProfileService {
         User user = current.get();
 
         List<Map<String, Object>> events = new java.util.ArrayList<>();
-        memberships.findByUser(user).forEach(membership ->
+        activities.findByUserOrderByAtDesc(user).forEach(activity ->
                 events.add(Map.of(
-                        "type", "Community joined",
+                        "type", activity.getType(),
                         "actor", user.getName(),
-                        "subject", membership.getCommunity().getCommunityName(),
-                        "at", membership.getJoinedAt()
+                        "subject", activity.getSubject(),
+                        "at", activity.getAt()
                 ))
         );
+        memberships.findByUser(user).forEach(membership -> {
+
+            events.add(Map.of(
+                    "type", "Community joined",
+                    "actor", user.getName(),
+                    "subject", membership.getCommunity().getCommunityName(),
+                    "at", membership.getJoinedAt()
+            ));
+
+            if (membership.getLeftAt() != null) {
+                events.add(Map.of(
+                        "type", "Community left",
+                        "actor", user.getName(),
+                        "subject", membership.getCommunity().getCommunityName(),
+                        "at", membership.getLeftAt()
+                ));
+            }
+        });
 
         decisions.findByCreatedBy(user).forEach(decision ->
                 events.add(Map.of(
@@ -204,6 +226,14 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .filter(comment -> comment.getDecision() != null
                         && comment.getDecision().getId().equals(decision.getId()))
                 .toList());
+        activities.save(
+                Activity.builder()
+                        .user(decision.getCreatedBy())
+                        .type("Decision deleted")
+                        .subject(decision.getTitle())
+                        .at(java.time.LocalDateTime.now())
+                        .build()
+        );
         decisions.delete(decision);
     }
 

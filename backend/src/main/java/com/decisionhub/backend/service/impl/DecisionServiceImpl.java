@@ -10,12 +10,14 @@ import com.decisionhub.backend.entity.Community;
 import com.decisionhub.backend.entity.Option;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.entity.Vote;
+import com.decisionhub.backend.entity.Activity;
 
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.OptionRepository;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.repository.VoteRepository;
 import com.decisionhub.backend.repository.CommunityRepository;
+import com.decisionhub.backend.repository.ActivityRepository;
 
 import com.decisionhub.backend.service.DecisionService;
 import com.decisionhub.backend.service.CurrentUserService;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 public class DecisionServiceImpl implements DecisionService {
 
     private final DecisionRepository decisionRepository;
+    private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
     private final OptionRepository optionRepository;
     private final VoteRepository voteRepository;
@@ -46,6 +49,7 @@ public class DecisionServiceImpl implements DecisionService {
 
     public DecisionServiceImpl(
             DecisionRepository decisionRepository,
+            ActivityRepository activityRepository,
             UserRepository userRepository,
             OptionRepository optionRepository,
             VoteRepository voteRepository, CommunityRepository communityRepository, CurrentUserService currentUser,
@@ -54,6 +58,7 @@ public class DecisionServiceImpl implements DecisionService {
             com.decisionhub.backend.repository.ReportRepository reportRepository) {
 
         this.decisionRepository = decisionRepository;
+        this.activityRepository = activityRepository;
         this.userRepository = userRepository;
         this.optionRepository = optionRepository;
         this.voteRepository = voteRepository;
@@ -241,6 +246,15 @@ public class DecisionServiceImpl implements DecisionService {
         voteRepository.deleteByDecisionId(id);
         commentRepository.deleteByDecisionId(id);
         reportRepository.deleteByDecisionId(id);
+
+        activityRepository.save(
+                Activity.builder()
+                        .user(decision.getCreatedBy())
+                        .type("Decision deleted")
+                        .subject(decision.getTitle())
+                        .at(LocalDateTime.now())
+                        .build()
+        );
 
         decisionRepository.delete(decision);
     }

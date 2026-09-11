@@ -34,6 +34,7 @@ public class CommunityMemberShip{
 
     @Column(nullable = false)
     private LocalDateTime joinedAt;
+    private LocalDateTime leftAt;
 
     @PrePersist
     protected void onCreate() {

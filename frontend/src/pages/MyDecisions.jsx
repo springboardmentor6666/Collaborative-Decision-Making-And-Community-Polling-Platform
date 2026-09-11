@@ -462,24 +462,25 @@ function MyDecisions() {
                    DECISION GRID
                 ========================= */
 
-                .decisions-grid {
+               .decisions-grid {
+    width: 100%;
 
-                    width:
-                        100%;
+    display: grid;
 
-                    display:
-                        grid;
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
 
-                    grid-template-columns:
-                        repeat(
-                            3,
-                            minmax(0, 1fr)
-                        );
+    gap: 20px;
 
-                    gap:
-                        20px;
-
-                }
+    align-items: start;
+    grid-auto-rows: max-content;
+}
+    .decisions-grid .decision-card {
+    align-self: start;
+}
 
 
                 /* =========================
@@ -488,36 +489,37 @@ function MyDecisions() {
 
                 .decision-card {
 
-                    position:
-                        relative;
+    position: relative;
 
-                    min-width:
-                        0;
+    min-width: 0;
+    min-height: 0;
 
-                    background:
-                        var(--app-card);
+    background:
+    linear-gradient(
+        145deg,
+        #1d1745,
+        #10112b
+    );
 
-                    border:
-                        1px solid
-                        var(--app-border);
+    border: 1px solid #5b35c9;
 
-                    border-radius:
-                        14px;
+    border-radius: 14px;
 
-                    padding:
-                        22px;
+    padding: 16px;
 
-                    overflow:
-                        hidden;
+    overflow: hidden;
 
-                    transition:
-                        transform 0.2s ease,
-                        border-color 0.2s ease,
-                        box-shadow 0.2s ease,
-                        background 0.25s ease;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(109, 69, 216, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-                }
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 
+}
 
                 .decision-card::before {
 
@@ -537,7 +539,7 @@ function MyDecisions() {
                         100%;
 
                     height:
-                        3px;
+                        2px;
 
                     background:
                         linear-gradient(
@@ -549,19 +551,13 @@ function MyDecisions() {
                 }
 
 
-                .decision-card:hover {
-
-                    transform:
-                        translateY(-4px);
-
-                    border-color:
-                        #8b5cf6;
-
-                    box-shadow:
-                        0 12px 30px
-                        rgba(0, 0, 0, 0.10);
-
-                }
+.decision-card:hover {
+    transform: translateY(-3px);
+    border-color: #7c5ce5;
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.35),
+        0 0 20px rgba(124, 92, 229, 0.22);
+}
 
 
                 /* =========================
@@ -569,46 +565,101 @@ function MyDecisions() {
                 ========================= */
 
                 .decision-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 18px;
+}
+    .decision-menu-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
 
-                    display:
-                        flex;
+    width: 28px;
+    height: 28px;
 
-                    align-items:
-                        flex-start;
+    border: none;
+    background: transparent;
+    color: #ffffff;
 
-                    justify-content:
-                        space-between;
+    font-size: 24px;
+    line-height: 1;
 
-                    gap:
-                        12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-                    margin-bottom:
-                        18px;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
 
-                }
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.decision-menu-btn:hover {
+    background: rgba(139, 92, 246, 0.18);
+    color: #c4b5fd;
+}
+         .decision-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 6px;
+}
 
 
-                .decision-card h2 {
+   .decision-card h2 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+    padding-right: 32px;
+    word-break: break-word;
+}
 
-                    color:
-                        var(--app-text);
+                /* =========================
+                  STATUS BADGES
+                 ========================= */
 
-                    font-size:
-                        18px;
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height : 1;
+}
 
-                    font-weight:
-                        600;
+.status-dot {
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
 
-                    line-height:
-                        1.35;
+.status-active {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+}
 
-                    margin:
-                        0;
+.status-completed {
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.14);
+    border: 1px solid rgba(139, 92, 246, 0.28);
+}
 
-                    word-break:
-                        break-word;
-
-                }
 
 
                 /* =========================
@@ -738,146 +789,82 @@ function MyDecisions() {
                    DETAILS
                 ========================= */
 
-                .decision-details {
-
-                    display:
-                        flex;
-
-                    flex-direction:
-                        column;
-
-                    gap:
-                        10px;
-
-                    margin-bottom:
-                        20px;
-
-                }
-
+   .decision-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
 
                 .detail-row {
-
-                    display:
-                        flex;
-
-                    align-items:
-                        flex-start;
-
-                    gap:
-                        8px;
-
-                    font-size:
-                        13px;
-
-                    line-height:
-                        1.5;
-
-                }
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #aaa4c5;
+    font-size: 12px;
+    line-height: 1.4;
+}
 
 
-                .detail-label {
-
-                    color:
-                        var(--app-secondary-text);
-
-                    min-width:
-                        80px;
-
-                    flex-shrink:
-                        0;
-
-                }
-
+.detail-label {
+    color: #aaa4c5;
+    min-width: 80px;
+    font-size: 12px;
+    font-weight: 600;
+}
+}
 
                 .detail-value {
-
-                    color:
-                        var(--app-text);
-
-                    word-break:
-                        break-word;
-
-                }
+    color: #eeeaff;
+    word-break: break-word;
+    font-weight: 500;
+}
 
 
                 .detail-description {
-
-                    display:
-                        -webkit-box;
-
-                    -webkit-line-clamp:
-                        2;
-
-                    -webkit-box-orient:
-                        vertical;
-
-                    overflow:
-                        hidden;
-
-                    color:
-                        var(--app-secondary-text);
-
-                }
+    color: #a9a3c7;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
 
                 /* =========================
                    CARD FOOTER
                 ========================= */
 
-                .card-footer {
-
-                    padding-top:
-                        16px;
-
-                    border-top:
-                        1px solid
-                        var(--app-border);
-
-                }
+            .card-footer {
+    border-top: 1px solid rgba(139, 92, 246, 0.25);
+    padding-top: 14px;
+    margin-top: auto;
+}
 
 
                 .card-buttons {
 
                     display:
                         flex;
-
-                    gap:
-                        10px;
-
-                }
-
-
-                .card-buttons button {
-
-                    flex:
-                        1;
-
-                    border:
-                        1px solid
-                        transparent;
-
-                    padding:
-                        10px;
-
-                    border-radius:
-                        8px;
-
-                    cursor:
-                        pointer;
-
-                    font-weight:
-                        600;
-
-                    font-size:
-                        12px;
-
-                    transition:
-                        background 0.2s ease,
-                        border-color 0.2s ease,
-                        color 0.2s ease,
-                        transform 0.2s ease;
+                    gap:8px;
+                        width : 100%;
 
                 }
+
+
+   .card-buttons button {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
 
 
                 /* =========================
@@ -925,48 +912,25 @@ function MyDecisions() {
                    DELETE BUTTON
                 ========================= */
 
-                .btn-delete {
+       .btn-delete {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid rgba(239, 68, 68, 0.50);
+    border-radius: 9px;
+    background: rgba(239, 68, 68, 0.16);
+    color: #f87171;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
 
-                    background:
-                        rgba(
-                            239,
-                            68,
-                            68,
-                            0.08
-                        );
-
-                    color:
-                        #dc2626;
-
-                    border:
-                        1px solid
-                        rgba(
-                            239,
-                            68,
-                            68,
-                            0.22
-                        ) !important;
-
-                }
-
-
-                .btn-delete:hover {
-
-                    background:
-                        rgba(
-                            239,
-                            68,
-                            68,
-                            0.14
-                        );
-
-                    border-color:
-                        #ef4444 !important;
-
-                    transform:
-                        translateY(-1px);
-
-                }
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.18);
+    transform: translateY(-1px);
+}
 
 
                 /* =========================
@@ -1175,12 +1139,11 @@ function MyDecisions() {
                     }
 
 
-                    .decisions-grid {
-
-                        grid-template-columns:
-                            1fr;
-
-                    }
+                    .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
 
                 }
 
@@ -1190,17 +1153,18 @@ function MyDecisions() {
                     .decision-card {
 
                         padding:
-                            18px;
+                            16px;
 
                     }
 
 
-                    .decision-card-header {
-
-                        flex-direction:
-                            column;
-
-                    }
+                   .decision-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 12px;
+}
 
 
                     .visibility-badge {
@@ -1212,14 +1176,33 @@ function MyDecisions() {
 
 
                     .detail-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+}
+    .detail-row::before {
+    width: 18px;
+    min-width: 18px;
+    color: #8b5cf6;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+    .detail-row:nth-child(1)::before {
+    content: "◈";
+}
 
-                        flex-direction:
-                            column;
+.detail-row:nth-child(2)::before {
+    content: "♟";
+}
 
-                        gap:
-                            2px;
+.detail-row:nth-child(3)::before {
+    content: "✓";
+}
 
-                    }
+.detail-row:nth-child(4)::before {
+    content: "◷";
+}
 
 
                     .detail-label {
@@ -1243,27 +1226,29 @@ function MyDecisions() {
                    RESULTS SECTION
                 ========================= */
 
-                .decision-results {
-                    margin: 10px 20px 0;
-                    padding-top: 14px;
-                    border-top: 1px solid var(--app-border);
-                }
+.decision-results {
+    margin: 12px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid rgba(139, 92, 246, 0.22);
+}
 
                 .reveal-result-btn {
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px dashed rgba(139, 92, 246, .4);
-                    border-radius: 10px;
-                    background: rgba(139, 92, 246, .08);
-                    color: #8b5cf6;
-                    font-size: 12px;
-                    font-weight: 700;
-                    cursor: pointer;
-                }
+                width: 100%;
+                padding: 13px 16px;
+                border: 1px solid #7c5ce5;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #713de8, #915cf7);
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
 
                 .reveal-result-btn:hover {
-                    background: rgba(139, 92, 246, .16);
-                }
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(109, 69, 216, 0.28);
+}
 
                 .hide-result-btn {
                     display: block;
@@ -1365,20 +1350,22 @@ function MyDecisions() {
                 ========================= */
 
                 .report-action {
-                    padding: 9px 12px;
-                    border: 1px solid rgba(34, 197, 94, .3);
-                    border-radius: 7px;
-                    background: rgba(34, 197, 94, .08);
-                    color: #15803d;
-                    font-size: 12px;
-                    font-weight: 700;
-                    cursor: pointer;
-                }
+                flex: 1;
+                padding: 10px 14px;
+                border: 1px solid rgba(34, 197, 94, 0.50);
+                border-radius: 9px;
+                background: rgba(34, 197, 94, 0.16);
+                color: #4ade80;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                 transition: background 0.2s ease, transform 0.2s ease;
+        }
 
                 .report-action:hover {
-                    background: rgba(34, 197, 94, .16);
-                }
-
+    background: rgba(34, 197, 94, 0.18);
+    transform: translateY(-1px);
+}
                 /* =========================
                    REPORT MODAL
                 ========================= */
@@ -1401,7 +1388,7 @@ function MyDecisions() {
                     overflow-y: auto;
                     background: var(--app-card);
                     border: 1px solid var(--app-border);
-                    border-radius: 16px;
+                    border-radius: 14px;
                     box-shadow: 0 25px 60px rgba(0,0,0,.35);
                 }
 
@@ -1547,6 +1534,103 @@ function MyDecisions() {
                     background: var(--app-card-2);
                     color: var(--app-text);
                 }
+                    /* =========================
+   LIGHT THEME - MY DECISIONS
+   ========================= */
+
+[data-theme="light"] .decision-card {
+    background: linear-gradient(145deg, #ffffff, #f8f7ff);
+    border: 1px solid #d8caff;
+    box-shadow:
+        0 8px 24px rgba(91, 53, 201, 0.10),
+        0 0 16px rgba(139, 92, 246, 0.06);
+}
+
+[data-theme="light"] .decision-card:hover {
+    border-color: #a78bfa;
+    box-shadow:
+        0 10px 28px rgba(91, 53, 201, 0.14),
+        0 0 18px rgba(139, 92, 246, 0.10);
+}
+
+/* Title */
+[data-theme="light"] .decision-card h2 {
+    color: #17122b;
+}
+
+/* Description */
+[data-theme="light"] .card-description {
+    color: #6b6680;
+}
+
+/* Detail labels */
+[data-theme="light"] .detail-label {
+    color: #6b6680;
+}
+
+/* Detail values */
+[data-theme="light"] .detail-value {
+    color: #29233f;
+}
+
+/* Detail rows */
+[data-theme="light"] .detail-row {
+    color: #6b6680;
+}
+
+/* Icons */
+[data-theme="light"] .detail-row::before {
+    color: #7c3aed;
+}
+
+/* Footer separator */
+[data-theme="light"] .card-footer {
+    border-top-color: #e5def7;
+}
+
+/* Results area */
+[data-theme="light"] .decision-results {
+    background: #f7f4ff;
+    border-color: #d8caff;
+}
+
+[data-theme="light"] .decision-results strong {
+    color: #6d28d9;
+}
+
+[data-theme="light"] .decision-results p {
+    color: #29233f;
+}
+
+[data-theme="light"] .decision-results span {
+    color: #6b6680;
+}
+
+/* Three-dot button */
+[data-theme="light"] .decision-menu-btn {
+    color: #4c4563;
+}
+
+[data-theme="light"] .decision-menu-btn:hover {
+    background: rgba(139, 92, 246, 0.10);
+    color: #6d28d9;
+}
+
+/* Three-dot dropdown */
+[data-theme="light"] .decision-menu-dropdown {
+    background: #ffffff;
+    border-color: #d8caff;
+    box-shadow: 0 10px 25px rgba(40, 30, 80, 0.15);
+}
+
+[data-theme="light"] .decision-menu-dropdown button {
+    color: #29233f;
+}
+
+[data-theme="light"] .decision-menu-dropdown button:hover {
+    background: #f3efff;
+    color: #6d28d9;
+}
 
                 @media print {
                     body > *:not(#report-print-root) { display: none !important; }
@@ -1664,33 +1748,31 @@ function MyDecisions() {
                                         className="decision-card"
                                         key={decision.id}
                                     >
-
-
                                         {/* CARD HEADER */}
 
                                         <div className="decision-card-header">
+                                            <div className="decision-card-top">
+                                            <span className={`status-badge ${
+                                             decision.status === "COMPLETED"
+                                               ? "status-completed"
+                                              : "status-active"
+                                        }`}>
+                                                 <span className="status-dot"></span>
+                                                  {decision.status === "COMPLETED" ? "Completed" : "Active"}
+                                                </span>
+                                               
+                <button
+    type="button"
+    className="decision-menu-btn"
+    aria-label="Decision menu"
+>
+    ⋮
+</button>
+                                                </div>
 
                                             <h2>
                                                 {decision.title}
                                             </h2>
-
-
-                                            <span
-                                                className={
-                                                    "visibility-badge " +
-                                                    (
-                                                        decision.visibility ===
-                                                        "PRIVATE"
-                                                            ? "visibility-private"
-                                                            : "visibility-public"
-                                                    )
-                                                }
-                                            >
-
-                                                {decision.visibility ||
-                                                    "PUBLIC"}
-
-                                            </span>
 
                                         </div>
 
@@ -1892,20 +1974,6 @@ function MyDecisions() {
                                         <div className="card-footer">
 
                                             <div className="card-buttons">
-
-
-                                                                                                <button
-                                                    className="btn-view"
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/polls`
-                                                        )
-                                                    }
-                                                >
-
-                                                    View Details
-
-                                                </button>
 
 
                                                 <button
