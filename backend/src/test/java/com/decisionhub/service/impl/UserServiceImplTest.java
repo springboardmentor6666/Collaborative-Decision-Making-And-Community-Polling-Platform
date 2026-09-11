@@ -3,7 +3,6 @@ package com.decisionhub.service.impl;
 import com.decisionhub.common.enums.AuthProvider;
 import com.decisionhub.dto.request.ChangePasswordRequest;
 import com.decisionhub.dto.request.UserPreferencesRequest;
-import com.decisionhub.dto.request.UserRequest;
 import com.decisionhub.dto.response.UserDataExportResponse;
 import com.decisionhub.dto.response.UserPreferencesResponse;
 import com.decisionhub.dto.response.UserResponse;
@@ -29,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

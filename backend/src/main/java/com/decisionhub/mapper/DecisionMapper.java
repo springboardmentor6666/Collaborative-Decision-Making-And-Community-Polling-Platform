@@ -18,6 +18,8 @@ public interface DecisionMapper {
     @Mapping(target = "community", expression = "java(safeCommunity(decision.getCommunity()))")
     @Mapping(target = "options", source = "options")
     @Mapping(target = "totalVotes", ignore = true)
+    @Mapping(target = "commentCount", ignore = true)
+    @Mapping(target = "isHiked", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     DecisionResponse toResponse(Decision decision);
 

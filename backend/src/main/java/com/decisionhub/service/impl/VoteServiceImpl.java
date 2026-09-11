@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -327,8 +326,9 @@ public class VoteServiceImpl implements VoteService {
     @Override
     @Transactional(readOnly = true)
     public VoteResultResponse getVoteResults(Long decisionId) {
-        Decision decision = decisionRepository.findById(decisionId)
-                .orElseThrow(() -> new EntityNotFoundException("Decision", "id", decisionId));
+        if (!decisionRepository.existsById(decisionId)) {
+            throw new EntityNotFoundException("Decision", "id", decisionId);
+        }
 
         List<Option> options = optionRepository.findByDecisionDecisionIdOrderByOptionIdAsc(decisionId);
         long totalVotesCount = voteRepository.countByDecisionDecisionId(decisionId);

@@ -4,7 +4,6 @@ import com.decisionhub.common.enums.VoteType;
 import com.decisionhub.entity.Decision;
 import com.decisionhub.entity.Option;
 import com.decisionhub.entity.Report;
-import com.decisionhub.entity.User;
 import com.decisionhub.mapper.ReportMapper;
 import com.decisionhub.repository.DecisionRepository;
 import com.decisionhub.repository.OptionRepository;

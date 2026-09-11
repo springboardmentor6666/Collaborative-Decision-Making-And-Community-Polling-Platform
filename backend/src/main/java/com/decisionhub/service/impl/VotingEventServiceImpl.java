@@ -16,7 +16,6 @@ import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.repository.VotingEventRepository;
 import com.decisionhub.repository.VotingCategoryRepository;
-import com.decisionhub.repository.NomineeRepository;
 import com.decisionhub.service.VotingEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class VotingEventServiceImpl implements VotingEventService {
     private final UserRepository userRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final VotingCategoryRepository votingCategoryRepository;
-    private final NomineeRepository nomineeRepository;
 
     private void verifyModeratorOrOwner(Long communityId, Long userId) {
         Community community = communityRepository.findById(communityId)

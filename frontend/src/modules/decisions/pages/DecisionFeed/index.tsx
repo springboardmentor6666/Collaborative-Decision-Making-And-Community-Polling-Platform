@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { 
   useDecisions, 
@@ -15,9 +15,12 @@ import { DecisionFeedSkeleton } from "../../components/DecisionSkeleton";
 import { DecisionSearch } from "../../components/DecisionSearch";
 import { DecisionFilters } from "../../components/DecisionFilters";
 import { DecisionStatus, DecisionVisibility, VoteType } from "../../types/decision";
+import { useUserPreferences } from "@/modules/profile/hooks/useSettings";
 
 export default function DecisionFeed() {
   const { user } = useAuth();
+  const { data: preferences } = useUserPreferences();
+  const density = preferences?.feedDensity || 'comfortable';
   const [activeTab, setActiveTab] = useState("all");
   
   // Filters
@@ -72,11 +75,12 @@ export default function DecisionFeed() {
     }
 
     return (
-      <div className="flex flex-col space-y-6">
+      <div className={density === 'compact' ? "flex flex-col space-y-2.5" : "flex flex-col space-y-6"}>
         {data.content.map((decision: any) => (
           <DecisionCard 
             key={decision.decisionId} 
             decision={decision} 
+            density={density}
           />
         ))}
       </div>
@@ -158,6 +162,3 @@ export default function DecisionFeed() {
     </div>
   );
 }
-
-// Add Search icon import that was missing in renderContent
-import { Search } from "lucide-react";

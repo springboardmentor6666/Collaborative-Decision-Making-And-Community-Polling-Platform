@@ -171,7 +171,6 @@ public class ReportServiceImpl implements ReportService {
     public byte[] generateCommunityExcelReport(Long communityId, Long requestingUserId) {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new EntityNotFoundException("Community", "id", communityId));
-        User requester = userIdOrNull(requestingUserId);
 
         List<Decision> decisions = decisionRepository.findByCommunityCommunityId(communityId);
         Page<CommunityMember> members = communityMemberRepository.findByCommunityCommunityIdAndStatus(communityId, MemberStatus.ACTIVE, PageRequest.of(0, 500));

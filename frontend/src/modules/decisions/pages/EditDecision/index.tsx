@@ -13,6 +13,7 @@ import { useCommunities } from "@/modules/communities/hooks/useCommunities";
 import { OptionRequest, VoteType, DecisionVisibility } from "../../types/decision";
 import { FileUploadDropzone } from "@/components/common/FileUploadDropzone";
 import { FileUploadResult } from "@/api/fileApi";
+import { toast } from "sonner";
 
 export default function EditDecision() {
   const { id } = useParams<{ id: string }>();
@@ -93,14 +94,18 @@ export default function EditDecision() {
     e.preventDefault();
     setError("");
 
-    if (!title.trim() || title.length < 3) {
-      setError("Title must be at least 3 characters long.");
+    if (!title.trim() || title.trim().length < 3) {
+      const msg = "Please enter a decision title (at least 3 characters).";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     const validOptions = options.filter(opt => opt.title.trim().length > 0);
     if (validOptions.length < 2) {
-      setError("Please provide at least two valid options.");
+      const msg = "Please provide at least two valid poll options.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -116,8 +121,8 @@ export default function EditDecision() {
     updateDecision.mutate({
       id: decisionId,
       data: {
-        title,
-        description: description || undefined,
+        title: title.trim(),
+        description: description.trim() || undefined,
         communityId: communityId !== "none" ? parseInt(communityId, 10) : undefined,
         voteType,
         visibility,
@@ -128,10 +133,13 @@ export default function EditDecision() {
       }
     }, {
       onSuccess: () => {
+        toast.success("Decision updated successfully!");
         navigate(`/decisions/${decisionId}`);
       },
       onError: (err: any) => {
-        setError(err.response?.data?.message || "Failed to update decision.");
+        const msg = err.response?.data?.message || "Failed to update decision.";
+        setError(msg);
+        toast.error(msg);
       }
     });
   };
@@ -153,11 +161,24 @@ export default function EditDecision() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Button asChild variant="ghost" className="mb-6 -ml-4 text-muted-foreground hover:text-foreground">
-        <Link to={`/decisions/${decisionId}`}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Decision
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
+      <Button 
+        asChild
+        type="button" 
+        variant="ghost" 
+        className="mb-6 -ml-4 text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-2 font-medium"
+      >
+        <Link 
+          to={`/decisions/${decisionId}`} 
+          onClick={(e) => {
+            if (window.history.state && window.history.state.idx > 0) {
+              e.preventDefault();
+              navigate(-1);
+            }
+          }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Decision</span>
         </Link>
       </Button>
 
@@ -168,12 +189,12 @@ export default function EditDecision() {
         </h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-foreground font-semibold">Decision Title <span className="text-red-500">*</span></Label>
             <Input
@@ -320,8 +341,23 @@ export default function EditDecision() {
               {updateDecision.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Save Changes
             </Button>
-            <Button type="button" variant="outline" asChild className="flex-1 border-border hover:bg-muted text-foreground">
-              <Link to={`/decisions/${decisionId}`}>Cancel</Link>
+            <Button 
+              asChild
+              type="button" 
+              variant="outline" 
+              className="flex-1 border-border hover:bg-muted text-foreground cursor-pointer"
+            >
+              <Link 
+                to={`/decisions/${decisionId}`} 
+                onClick={(e) => {
+                  if (window.history.state && window.history.state.idx > 0) {
+                    e.preventDefault();
+                    navigate(-1);
+                  }
+                }}
+              >
+                Cancel
+              </Link>
             </Button>
           </div>
         </form>

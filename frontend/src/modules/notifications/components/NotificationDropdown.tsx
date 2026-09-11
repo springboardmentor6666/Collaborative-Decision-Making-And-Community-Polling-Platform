@@ -30,7 +30,7 @@ export function NotificationDropdown() {
   const handleNotificationClick = (n: NotificationResponse) => {
     // In the future, this would do deep linking.
     // For now, just navigate to the related area based on type as fallback
-    if (n.type === 'COMMENT' || n.type === 'VOTE' || n.type === 'DECISION_CLOSED') {
+    if (n.type === 'COMMENT' || n.type === 'VOTE' || n.type === 'DECISION_CLOSED' || n.type === 'COMMUNITY_DECISION' || n.type === 'HIKE') {
       navigate('/decisions');
     } else if (n.type === 'INVITE') {
       navigate('/communities');

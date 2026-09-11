@@ -1,0 +1,114 @@
+# ==============================================================================
+# DecisionHub Root .gitignore
+# Covers Java/Spring backend, Vite/React frontend, Docker, logs, and environments
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment & Secrets (NEVER commit secrets or real credentials)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.env
+*.env.local
+*.env.production.local
+*.env.development.local
+
+# ------------------------------------------------------------------------------
+# 2. Backend / Java / Maven
+# ------------------------------------------------------------------------------
+**/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Maven local repository / wrapper / status
+.mvn/wrapper/maven-wrapper.jar
+**/maven-status/
+**/surefire-reports/
+
+# ------------------------------------------------------------------------------
+# 3. Frontend / Node / Vite
+# ------------------------------------------------------------------------------
+**/node_modules/
+node_modules/
+frontend/node_modules/
+
+# Vite / React build outputs
+**/dist/
+dist/
+frontend/dist/
+build/
+frontend/build/
+
+# Package manager debug logs & caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+.pnp
+.pnp.js
+
+# ------------------------------------------------------------------------------
+# 4. Runtime Logs & System Dumps
+# ------------------------------------------------------------------------------
+logs/
+**/logs/
+*.log
+*.log.*
+*.log.gz
+server.log
+server-error.log
+run.log
+
+# ------------------------------------------------------------------------------
+# 5. User Uploaded Files / Media / Storage
+# (Uploaded files belong in volume mounts or object storage, not git)
+# ------------------------------------------------------------------------------
+uploads/
+**/uploads/
+backend/uploads/
+uploads/avatars/
+uploads/communities/
+uploads/decisions/
+uploads/temp/
+
+# ------------------------------------------------------------------------------
+# 6. IDEs & Editors
+# ------------------------------------------------------------------------------
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ------------------------------------------------------------------------------
+# 7. OS Generated Files
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini

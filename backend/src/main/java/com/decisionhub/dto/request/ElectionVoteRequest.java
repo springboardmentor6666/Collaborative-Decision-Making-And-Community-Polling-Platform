@@ -1,6 +1,5 @@
 package com.decisionhub.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;

@@ -10,12 +10,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
 public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSpecificationExecutor<Decision> {
 
     Page<Decision> findByVisibilityAndStatus(DecisionVisibility visibility, DecisionStatus status, Pageable pageable);
@@ -58,6 +56,13 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
            "ORDER BY d.createdAt DESC")
     Page<Decision> findLatestDecisions(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("SELECT d FROM Decision d LEFT JOIN d.community c WHERE d.status = com.decisionhub.common.enums.DecisionStatus.ACTIVE AND " +
+           "( ((d.visibility = com.decisionhub.common.enums.DecisionVisibility.PUBLIC OR d.visibility IS NULL) AND (c IS NULL OR c.visibility = com.decisionhub.common.enums.CommunityVisibility.PUBLIC OR c.visibility IS NULL)) " +
+           "  OR (:userId IS NOT NULL AND d.createdBy.userId = :userId) " +
+           "  OR (:userId IS NOT NULL AND c IS NOT NULL AND EXISTS (SELECT 1 FROM CommunityMember cm WHERE cm.community = c AND cm.user.userId = :userId AND cm.status = com.decisionhub.common.enums.MemberStatus.ACTIVE)) ) " +
+           "ORDER BY d.likeCount DESC, d.createdAt DESC")
+    Page<Decision> findMostHikedDecisions(@Param("userId") Long userId, Pageable pageable);
+
     @Modifying
     @Query("UPDATE Decision d SET d.viewCount = d.viewCount + 1 WHERE d.decisionId = :decisionId")
     void incrementViewCount(@Param("decisionId") Long decisionId);
@@ -65,6 +70,10 @@ public interface DecisionRepository extends JpaRepository<Decision, Long>, JpaSp
     @Modifying
     @Query("UPDATE Decision d SET d.likeCount = d.likeCount + 1 WHERE d.decisionId = :decisionId")
     void incrementLikeCount(@Param("decisionId") Long decisionId);
+
+    @Modifying
+    @Query("UPDATE Decision d SET d.likeCount = CASE WHEN d.likeCount > 0 THEN d.likeCount - 1 ELSE 0 END WHERE d.decisionId = :decisionId")
+    void decrementLikeCount(@Param("decisionId") Long decisionId);
 
     @Modifying
     @Query("UPDATE Decision d SET d.shareCount = d.shareCount + 1 WHERE d.decisionId = :decisionId")

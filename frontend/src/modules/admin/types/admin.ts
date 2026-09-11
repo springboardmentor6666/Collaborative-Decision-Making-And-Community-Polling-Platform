@@ -14,3 +14,16 @@ export interface AuditLogResponse {
   details?: string;
   createdAt: string;
 }
+
+export interface CreateAdminUserRequest {
+  username: string;
+  email: string;
+  fullName: string;
+  password: string;
+  role: 'ROLE_ADMIN' | 'ROLE_MODERATOR' | 'ROLE_USER';
+}
+
+export interface UpdateUserRoleRequest {
+  role: 'ROLE_ADMIN' | 'ROLE_MODERATOR' | 'ROLE_USER';
+}
+

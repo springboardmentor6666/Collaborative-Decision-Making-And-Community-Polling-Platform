@@ -54,6 +54,8 @@ class AuthServiceImplTest {
     private UserMapper userMapper;
     @Mock
     private BlacklistedTokenRepository blacklistedTokenRepository;
+    @Mock
+    private com.decisionhub.service.AuditLogService auditLogService;
 
     @InjectMocks
     private AuthServiceImpl authService;

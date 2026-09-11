@@ -26,7 +26,7 @@ export default function NotificationsPage() {
 
   const handleNotificationClick = (n: any) => {
     // Deep linking fallback
-    if (n.type === 'COMMENT' || n.type === 'VOTE' || n.type === 'DECISION_CLOSED') {
+    if (n.type === 'COMMENT' || n.type === 'VOTE' || n.type === 'DECISION_CLOSED' || n.type === 'COMMUNITY_DECISION' || n.type === 'HIKE') {
       navigate('/decisions');
     } else if (n.type === 'INVITE') {
       navigate('/communities');
@@ -36,6 +36,8 @@ export default function NotificationsPage() {
   const filterOptions = [
     { value: 'ALL', label: 'All' },
     { value: 'UNREAD', label: 'Unread' },
+    { value: 'COMMUNITY_DECISION', label: 'Decisions' },
+    { value: 'HIKE', label: 'Hikes' },
     { value: 'COMMENT', label: 'Comments' },
     { value: 'VOTE', label: 'Votes' },
     { value: 'INVITE', label: 'Invites' },

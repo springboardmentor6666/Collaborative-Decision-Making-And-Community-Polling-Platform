@@ -23,6 +23,11 @@ export function DashboardPage() {
     queryFn: () => decisionApi.getLatestDecisions(0, 5).then(res => res.data)
   });
 
+  const { data: mostHikedDecisionsData, isLoading: mostHikedLoading } = useQuery({
+    queryKey: ['mostHikedDecisions'],
+    queryFn: () => decisionApi.getMostHikedDecisions(0, 5).then(res => res.data)
+  });
+
   const { data: trendingCommunitiesData, isLoading: trendingLoading } = useQuery({
     queryKey: ['trendingCommunities'],
     queryFn: () => communityApi.searchCommunities({ page: 0, size: 5 })
@@ -52,11 +57,12 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          {recentLoading ? (
-            <Skeleton className="h-[400px] w-full rounded-xl" />
-          ) : (
-            <RecentDecisions decisions={recentDecisionsData?.data?.content || (recentDecisionsData as any)?.content || []} />
-          )}
+          <RecentDecisions 
+            recentDecisions={recentDecisionsData?.data?.content || (recentDecisionsData as any)?.content || []}
+            mostHikedDecisions={mostHikedDecisionsData?.data?.content || (mostHikedDecisionsData as any)?.content || []}
+            isLoadingRecent={recentLoading}
+            isLoadingMostHiked={mostHikedLoading}
+          />
         </div>
         <div className="lg:col-span-1">
           {trendingLoading ? (

@@ -11,7 +11,6 @@ import com.decisionhub.entity.Option;
 import com.decisionhub.entity.Role;
 import com.decisionhub.entity.User;
 import com.decisionhub.entity.Vote;
-import com.decisionhub.exception.BusinessException;
 import com.decisionhub.exception.DuplicateException;
 import com.decisionhub.mapper.OptionMapper;
 import com.decisionhub.mapper.UserMapper;
@@ -30,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,8 +142,8 @@ class VoteServiceImplTest {
     @Test
     @DisplayName("getVoteResults - Computes vote counts and percentages")
     void getVoteResults_Success() {
-        when(decisionRepository.findById(50L)).thenReturn(Optional.of(decision));
-        when(optionRepository.findByDecisionDecisionId(50L)).thenReturn(List.of(option1, option2));
+        when(decisionRepository.existsById(50L)).thenReturn(true);
+        when(optionRepository.findByDecisionDecisionIdOrderByOptionIdAsc(50L)).thenReturn(List.of(option1, option2));
         when(voteRepository.countByDecisionDecisionId(50L)).thenReturn(10L);
         when(voteSelectionRepository.countByOptionOptionId(101L)).thenReturn(7L);
         when(voteSelectionRepository.countByOptionOptionId(102L)).thenReturn(3L);

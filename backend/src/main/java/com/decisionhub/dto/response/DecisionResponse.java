@@ -33,6 +33,25 @@ public class DecisionResponse {
     private int viewCount;
     private int likeCount;
     private int shareCount;
+    @com.fasterxml.jackson.annotation.JsonProperty("isHiked")
+    private boolean isHiked;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("hikeCount")
+    public int getHikeCount() {
+        return likeCount;
+    }
+
+    public void setHikeCount(int hikeCount) {
+        this.likeCount = hikeCount;
+    }
+
+    public boolean isHiked() {
+        return isHiked;
+    }
+
+    public void setHiked(boolean isHiked) {
+        this.isHiked = isHiked;
+    }
     private long totalVotes;
     private long commentCount;
     private List<OptionResponse> options;

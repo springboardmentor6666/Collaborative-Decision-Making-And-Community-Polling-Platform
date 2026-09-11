@@ -1,4 +1,4 @@
-export type NotificationType = 'VOTE' | 'COMMENT' | 'SYSTEM' | 'INVITE' | 'DECISION_CLOSED';
+export type NotificationType = 'VOTE' | 'COMMENT' | 'SYSTEM' | 'INVITE' | 'DECISION_CLOSED' | 'COMMUNITY_DECISION' | 'HIKE';
 
 export interface NotificationResponse {
   notificationId: number;

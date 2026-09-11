@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -69,7 +70,7 @@ public class DecisionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Long userId = currentUser != null ? currentUser.getId() : null;
         PagedResponse<DecisionResponse> response = decisionService.searchDecisions(
                 query, communityId, visibility, status, voteType, createdById, userId, pageable
@@ -110,6 +111,17 @@ public class DecisionController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/most-hiked")
+    @Operation(summary = "Get most hiked active decisions")
+    public ResponseEntity<ApiResponse<PagedResponse<DecisionResponse>>> getMostHiked(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Long userId = currentUser != null ? currentUser.getId() : null;
+        PagedResponse<DecisionResponse> response = decisionService.getMostHikedDecisions(userId, PageRequest.of(page, size));
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get decision board details by ID")
     public ResponseEntity<ApiResponse<DecisionResponse>> getDecisionById(
@@ -127,5 +139,15 @@ public class DecisionController {
             @AuthenticationPrincipal UserPrincipal currentUser) {
         decisionService.deleteDecision(id, currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success("Decision board deleted successfully", null));
+    }
+
+    @PostMapping("/{id}/hike")
+    @Operation(summary = "Toggle hike (like) on a decision")
+    public ResponseEntity<ApiResponse<com.decisionhub.dto.response.HikeResponse>> toggleHike(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        com.decisionhub.dto.response.HikeResponse response = decisionService.toggleHike(id, currentUser.getId());
+        String msg = response.isHiked() ? "Decision hiked successfully" : "Decision unhiked successfully";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 }

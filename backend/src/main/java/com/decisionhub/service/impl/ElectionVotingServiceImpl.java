@@ -1,6 +1,5 @@
 package com.decisionhub.service.impl;
 
-import com.decisionhub.common.enums.ElectionVisibility;
 import com.decisionhub.common.enums.MemberRole;
 import com.decisionhub.common.enums.MemberStatus;
 import com.decisionhub.common.enums.NominationStatus;

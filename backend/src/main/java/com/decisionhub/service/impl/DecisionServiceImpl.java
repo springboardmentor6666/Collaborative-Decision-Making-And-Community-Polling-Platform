@@ -7,10 +7,13 @@ import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.DecisionRequest;
 import com.decisionhub.dto.response.AttachmentResponse;
 import com.decisionhub.dto.response.DecisionResponse;
+import com.decisionhub.dto.response.HikeResponse;
 
 import com.decisionhub.entity.Attachment;
 import com.decisionhub.entity.Community;
 import com.decisionhub.entity.Decision;
+import com.decisionhub.entity.DecisionHike;
+import com.decisionhub.entity.DecisionView;
 import com.decisionhub.entity.Option;
 import com.decisionhub.entity.User;
 import com.decisionhub.exception.EntityNotFoundException;
@@ -19,16 +22,25 @@ import com.decisionhub.exception.ValidationException;
 import com.decisionhub.mapper.AttachmentMapper;
 import com.decisionhub.mapper.DecisionMapper;
 
+import com.decisionhub.common.enums.MemberStatus;
+import com.decisionhub.common.enums.NotificationType;
+import com.decisionhub.entity.CommunityMember;
+import com.decisionhub.entity.UserPreference;
 import com.decisionhub.repository.AttachmentRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.DecisionRepository;
+import com.decisionhub.repository.DecisionHikeRepository;
+import com.decisionhub.repository.DecisionViewRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.repository.VoteRepository;
 import com.decisionhub.repository.CommunityMemberRepository;
+import com.decisionhub.repository.UserPreferenceRepository;
 import com.decisionhub.service.AuditLogService;
 import com.decisionhub.service.DecisionService;
+import com.decisionhub.service.NotificationService;
 import com.decisionhub.specification.DecisionSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +50,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class DecisionServiceImpl implements DecisionService {
 
@@ -48,9 +61,13 @@ public class DecisionServiceImpl implements DecisionService {
     private final VoteRepository voteRepository;
     private final com.decisionhub.repository.CommentRepository commentRepository;
     private final AttachmentRepository attachmentRepository;
+    private final DecisionHikeRepository decisionHikeRepository;
+    private final DecisionViewRepository decisionViewRepository;
     private final DecisionMapper decisionMapper;
     private final AttachmentMapper attachmentMapper;
     private final AuditLogService auditLogService;
+    private final NotificationService notificationService;
+    private final UserPreferenceRepository userPreferenceRepository;
 
     @Override
     @Transactional
@@ -111,6 +128,39 @@ public class DecisionServiceImpl implements DecisionService {
 
         auditLogService.logAction(userId, "DECISION_CREATED", "DECISION", savedDecision.getDecisionId(), "Created decision board: \"" + savedDecision.getTitle() + "\"");
 
+        // Notify joined community members
+        if (community != null) {
+            try {
+                List<CommunityMember> members = communityMemberRepository.findByCommunityCommunityIdAndStatus(
+                        community.getCommunityId(), MemberStatus.ACTIVE);
+                String notifTitle = "New Decision in " + community.getName();
+                String notifMsg = author.getFullName() + " posted a new decision: \"" + savedDecision.getTitle() + "\"";
+
+                for (CommunityMember member : members) {
+                    if (member.getUser() != null && !member.getUser().getUserId().equals(userId)) {
+                        Long memberUserId = member.getUser().getUserId();
+                        boolean shouldNotify = userPreferenceRepository.findByUserUserId(memberUserId)
+                                .map(UserPreference::isNotifyNewDecisions)
+                                .orElse(true);
+                        if (shouldNotify) {
+                            try {
+                                notificationService.sendNotification(
+                                        memberUserId,
+                                        notifTitle,
+                                        notifMsg,
+                                        NotificationType.COMMUNITY_DECISION
+                                );
+                            } catch (Exception e) {
+                                log.error("Failed to send decision notification to user ID {}: {}", memberUserId, e.getMessage());
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to process community decision notifications for community ID {}: {}", community.getCommunityId(), e.getMessage());
+            }
+        }
+
         return enrichDecisionResponse(savedDecision);
     }
 
@@ -170,10 +220,29 @@ public class DecisionServiceImpl implements DecisionService {
             }
         }
 
-        // Increment view count
-        decisionRepository.incrementViewCount(decisionId);
+        // Only increment view count if user hasn't viewed before (unique view per user)
+        int updatedViewCount = decision.getViewCount();
+        if (requestingUserId != null) {
+            boolean alreadyViewed = decisionViewRepository.existsByUserUserIdAndDecisionDecisionId(requestingUserId, decisionId);
+            if (!alreadyViewed) {
+                try {
+                    User userRef = userRepository.getReferenceById(requestingUserId);
+                    DecisionView view = DecisionView.builder()
+                            .decision(decision)
+                            .user(userRef)
+                            .build();
+                    decisionViewRepository.save(view);
+                    decisionRepository.incrementViewCount(decisionId);
+                } catch (Exception e) {
+                    log.debug("View already recorded concurrently for user {} on decision {}", requestingUserId, decisionId);
+                }
+                updatedViewCount = decision.getViewCount() + 1;
+            }
+        }
 
-        return enrichDecisionResponse(decision);
+        DecisionResponse response = enrichDecisionResponse(decision, requestingUserId);
+        response.setViewCount(updatedViewCount);
+        return response;
     }
 
     @Override
@@ -213,7 +282,7 @@ public class DecisionServiceImpl implements DecisionService {
         Page<DecisionResponse> page = decisionRepository.findAll(
                 DecisionSpecification.filterDecisions(searchQuery, communityId, visibility, status, voteType, createdById, requestingUserId),
                 pageable
-        ).map(this::enrichDecisionResponse);
+        ).map(d -> enrichDecisionResponse(d, requestingUserId));
 
         return PagedResponse.fromPage(page);
     }
@@ -222,7 +291,7 @@ public class DecisionServiceImpl implements DecisionService {
     @Transactional(readOnly = true)
     public PagedResponse<DecisionResponse> getTrendingDecisions(Long requestingUserId, Pageable pageable) {
         Page<DecisionResponse> page = decisionRepository.findTrendingDecisions(requestingUserId, pageable)
-                .map(this::enrichDecisionResponse);
+                .map(d -> enrichDecisionResponse(d, requestingUserId));
         return PagedResponse.fromPage(page);
     }
 
@@ -230,7 +299,7 @@ public class DecisionServiceImpl implements DecisionService {
     @Transactional(readOnly = true)
     public PagedResponse<DecisionResponse> getPopularDecisions(Long requestingUserId, Pageable pageable) {
         Page<DecisionResponse> page = decisionRepository.findPopularDecisions(requestingUserId, pageable)
-                .map(this::enrichDecisionResponse);
+                .map(d -> enrichDecisionResponse(d, requestingUserId));
         return PagedResponse.fromPage(page);
     }
 
@@ -238,17 +307,103 @@ public class DecisionServiceImpl implements DecisionService {
     @Transactional(readOnly = true)
     public PagedResponse<DecisionResponse> getLatestDecisions(Long requestingUserId, Pageable pageable) {
         Page<DecisionResponse> page = decisionRepository.findLatestDecisions(requestingUserId, pageable)
-                .map(this::enrichDecisionResponse);
+                .map(d -> enrichDecisionResponse(d, requestingUserId));
         return PagedResponse.fromPage(page);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<DecisionResponse> getMostHikedDecisions(Long requestingUserId, Pageable pageable) {
+        Page<DecisionResponse> page = decisionRepository.findMostHikedDecisions(requestingUserId, pageable)
+                .map(d -> enrichDecisionResponse(d, requestingUserId));
+        return PagedResponse.fromPage(page);
+    }
+
+    @Override
+    @Transactional
+    public HikeResponse toggleHike(Long decisionId, Long userId) {
+        Decision decision = decisionRepository.findById(decisionId)
+                .orElseThrow(() -> new EntityNotFoundException("Decision", "id", decisionId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
+
+        boolean alreadyHiked = decisionHikeRepository.existsByUserUserIdAndDecisionDecisionId(userId, decisionId);
+
+        if (alreadyHiked) {
+            decisionHikeRepository.deleteByUserUserIdAndDecisionDecisionId(userId, decisionId);
+            decisionHikeRepository.flush();
+            decisionRepository.decrementLikeCount(decisionId);
+            auditLogService.logAction(userId, "DECISION_UNHIKED", "DECISION", decisionId, "Unhiked decision: \"" + decision.getTitle() + "\"");
+
+            int actualCount = (int) decisionHikeRepository.countByDecisionDecisionId(decisionId);
+            return HikeResponse.builder()
+                    .decisionId(decisionId)
+                    .isHiked(false)
+                    .hikeCount(actualCount)
+                    .build();
+        } else {
+            // Delete any stale record first to prevent duplicate key constraint failure
+            decisionHikeRepository.deleteByUserUserIdAndDecisionDecisionId(userId, decisionId);
+            decisionHikeRepository.flush();
+
+            DecisionHike hike = DecisionHike.builder()
+                    .decision(decision)
+                    .user(user)
+                    .build();
+            decisionHikeRepository.saveAndFlush(hike);
+            decisionRepository.incrementLikeCount(decisionId);
+            auditLogService.logAction(userId, "DECISION_HIKED", "DECISION", decisionId, "Hiked decision: \"" + decision.getTitle() + "\"");
+
+            // Dispatch notification to decision author if hiked by another user and author wants hike notifications
+            if (decision.getCreatedBy() != null && !decision.getCreatedBy().getUserId().equals(userId)) {
+                Long authorId = decision.getCreatedBy().getUserId();
+                boolean wantsHikeNotifications = userPreferenceRepository.findByUserUserId(authorId)
+                        .map(UserPreference::isNotifyHikes)
+                        .orElse(true);
+
+                if (wantsHikeNotifications) {
+                    try {
+                        String hikerName = (user.getFullName() != null && !user.getFullName().isBlank())
+                                ? user.getFullName()
+                                : user.getUsername();
+                        String decisionTitle = decision.getTitle();
+                        String title = "New Hike on " + decisionTitle;
+                        if (title.length() > 140) {
+                            title = title.substring(0, 137) + "...";
+                        }
+                        String message = hikerName + " hiked your decision.";
+                        notificationService.sendNotification(authorId, title, message, NotificationType.HIKE);
+                    } catch (Exception e) {
+                        log.error("Failed to send hike notification to user {}: {}", authorId, e.getMessage());
+                    }
+                }
+            }
+
+            int actualCount = (int) decisionHikeRepository.countByDecisionDecisionId(decisionId);
+            return HikeResponse.builder()
+                    .decisionId(decisionId)
+                    .isHiked(true)
+                    .hikeCount(actualCount)
+                    .build();
+        }
+    }
+
     private DecisionResponse enrichDecisionResponse(Decision decision) {
+        return enrichDecisionResponse(decision, null);
+    }
+
+    private DecisionResponse enrichDecisionResponse(Decision decision, Long requestingUserId) {
         DecisionResponse response = decisionMapper.toResponse(decision);
         long totalVotes = voteRepository.countByDecisionDecisionId(decision.getDecisionId());
         response.setTotalVotes(totalVotes);
 
         long commentCount = commentRepository.countByDecisionDecisionId(decision.getDecisionId());
         response.setCommentCount(commentCount);
+
+        long actualHikes = decisionHikeRepository.countByDecisionDecisionId(decision.getDecisionId());
+        response.setLikeCount((int) actualHikes);
+        response.setHikeCount((int) actualHikes);
 
         if (response.getOptions() != null) {
             for (var optRes : response.getOptions()) {
@@ -264,6 +419,13 @@ public class DecisionServiceImpl implements DecisionService {
                     .map(attachmentMapper::toResponse)
                     .toList();
             response.setAttachments(attachmentResponses);
+        }
+
+        if (requestingUserId != null) {
+            boolean isHiked = decisionHikeRepository.existsByUserUserIdAndDecisionDecisionId(requestingUserId, decision.getDecisionId());
+            response.setHiked(isHiked);
+        } else {
+            response.setHiked(false);
         }
 
         return response;

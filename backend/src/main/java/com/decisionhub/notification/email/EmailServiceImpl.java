@@ -22,6 +22,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${application.mail.from-email:no-reply@decisionhub.com}")
     private String fromEmail;
 
+    @Value("${application.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
     @Override
     @Async
     public void sendHtmlEmail(String to, String subject, String body) {
@@ -43,7 +46,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
-        String resetUrl = "http://localhost:3000/reset-password?token=" + resetToken;
+        String resetUrl = (frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl)
+                + "/reset-password?token=" + resetToken;
         String htmlContent = "<h2>Password Reset Request</h2>" +
                 "<p>Click the link below to reset your DecisionHub password:</p>" +
                 "<a href=\"" + resetUrl + "\">Reset Password</a>";

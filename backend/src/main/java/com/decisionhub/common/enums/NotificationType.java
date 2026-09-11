@@ -5,5 +5,7 @@ public enum NotificationType {
     COMMENT,
     SYSTEM,
     INVITE,
-    DECISION_CLOSED
+    DECISION_CLOSED,
+    COMMUNITY_DECISION,
+    HIKE
 }

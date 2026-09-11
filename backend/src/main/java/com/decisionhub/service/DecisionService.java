@@ -6,6 +6,7 @@ import com.decisionhub.common.enums.VoteType;
 import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.DecisionRequest;
 import com.decisionhub.dto.response.DecisionResponse;
+import com.decisionhub.dto.response.HikeResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface DecisionService {
@@ -35,4 +36,8 @@ public interface DecisionService {
     PagedResponse<DecisionResponse> getPopularDecisions(Long requestingUserId, Pageable pageable);
 
     PagedResponse<DecisionResponse> getLatestDecisions(Long requestingUserId, Pageable pageable);
+
+    PagedResponse<DecisionResponse> getMostHikedDecisions(Long requestingUserId, Pageable pageable);
+
+    HikeResponse toggleHike(Long decisionId, Long userId);
 }

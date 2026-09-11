@@ -69,7 +69,7 @@ public class AbuseReportController {
 
     @GetMapping("/community/{communityId}")
     @Operation(summary = "Get abuse reports for a community (Owner/Moderator only)")
-    public ResponseEntity<ApiResponse<Page<AbuseReportResponse>>> getCommunityReports(
+    public ResponseEntity<ApiResponse<com.decisionhub.common.response.PagedResponse<AbuseReportResponse>>> getCommunityReports(
             @PathVariable Long communityId,
             @RequestParam(required = false) AbuseReportStatus status,
             @RequestParam(defaultValue = "0") int page,
@@ -79,13 +79,13 @@ public class AbuseReportController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<AbuseReportResponse> reports = abuseReportService.getReportsForCommunity(communityId, status, pageable, currentUser.getId());
         
-        return ResponseEntity.ok(ApiResponse.success("Community reports retrieved successfully", reports));
+        return ResponseEntity.ok(ApiResponse.success("Community reports retrieved successfully", com.decisionhub.common.response.PagedResponse.fromPage(reports)));
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get all abuse reports (System Admin only)")
-    public ResponseEntity<ApiResponse<Page<AbuseReportResponse>>> getGlobalReports(
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
+    @Operation(summary = "Get all abuse reports (System Admin/Moderator)")
+    public ResponseEntity<ApiResponse<com.decisionhub.common.response.PagedResponse<AbuseReportResponse>>> getGlobalReports(
             @RequestParam(required = false) AbuseReportStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -93,7 +93,7 @@ public class AbuseReportController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<AbuseReportResponse> reports = abuseReportService.getGlobalReports(status, pageable);
         
-        return ResponseEntity.ok(ApiResponse.success("Global reports retrieved successfully", reports));
+        return ResponseEntity.ok(ApiResponse.success("Global reports retrieved successfully", com.decisionhub.common.response.PagedResponse.fromPage(reports)));
     }
 
     @PatchMapping("/{reportId}/resolve")

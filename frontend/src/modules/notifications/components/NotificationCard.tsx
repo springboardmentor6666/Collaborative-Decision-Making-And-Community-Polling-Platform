@@ -1,6 +1,7 @@
 import React from 'react';
 import { NotificationResponse } from '../types/notification';
-import { MessageSquare, ThumbsUp, Info, UserPlus, Lock } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Info, UserPlus, Lock, Vote } from 'lucide-react';
+import { HikeIcon } from '@/components/icons/HikeIcon';
 import { formatDistanceToNow } from 'date-fns';
 import { useMarkAsRead } from '../hooks/useMarkAsRead';
 
@@ -15,6 +16,10 @@ export function NotificationCard({ notification, onClick, compact = false }: Not
 
   const getIcon = () => {
     switch (notification.type) {
+      case 'COMMUNITY_DECISION':
+        return <Vote className="w-5 h-5 text-indigo-500" />;
+      case 'HIKE':
+        return <HikeIcon hiked={true} className="w-5 h-5" />;
       case 'COMMENT':
         return <MessageSquare className="w-5 h-5 text-blue-500" />;
       case 'VOTE':
@@ -31,6 +36,8 @@ export function NotificationCard({ notification, onClick, compact = false }: Not
 
   const getIconBg = () => {
     switch (notification.type) {
+      case 'COMMUNITY_DECISION': return 'bg-indigo-500/10';
+      case 'HIKE': return 'bg-emerald-500/10';
       case 'COMMENT': return 'bg-blue-500/10';
       case 'VOTE': return 'bg-emerald-500/10';
       case 'INVITE': return 'bg-purple-500/10';

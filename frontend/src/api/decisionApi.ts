@@ -12,6 +12,11 @@ export const decisionApi = {
       params: { page, size }
     });
   },
+  getMostHikedDecisions: async (page = 0, size = 10) => {
+    return await axiosInstance.get<ApiResponse<PagedResponse<DecisionResponse>>>(`/decisions/most-hiked`, {
+      params: { page, size }
+    });
+  },
   getDecisionById: async (id: number) => {
     return await axiosInstance.get<ApiResponse<DecisionResponse>>(`/decisions/${id}`);
   }

@@ -23,7 +23,9 @@ import com.decisionhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Component
+@Profile("!prod")
+@Order(10)
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
@@ -47,13 +51,14 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Initializing database with default roles, users, communities and decisions...");
 
-        Role adminRole = createRoleIfNotFound(RoleType.ROLE_ADMIN, "System Administrator");
         Role moderatorRole = createRoleIfNotFound(RoleType.ROLE_MODERATOR, "Content Moderator");
         Role userRole = createRoleIfNotFound(RoleType.ROLE_USER, "Standard User");
 
-        User adminUser = createUserIfNotFound("admin", "admin@decisionhub.com", "Admin123!", adminRole);
-        User modUser = createUserIfNotFound("moderator", "moderator@decisionhub.com", "Mod123!", moderatorRole);
+        createUserIfNotFound("moderator", "moderator@decisionhub.com", "Mod123!", moderatorRole);
         User stdUser = createUserIfNotFound("user", "user@decisionhub.com", "User123!", userRole);
+
+        // Resolve admin user created by InitialAdminSeeder
+        User adminUser = userRepository.findByUsername("admin").orElse(stdUser);
 
         seedCommunitiesAndDecisionsIfEmpty(adminUser, stdUser);
         

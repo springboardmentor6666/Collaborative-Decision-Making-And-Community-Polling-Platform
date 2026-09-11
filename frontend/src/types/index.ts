@@ -107,6 +107,7 @@ export interface UserPreferences {
   notifyVoteDeadlines: boolean;
   notifyDecisionResults: boolean;
   notifyCommentsAndMentions: boolean;
+  notifyHikes: boolean;
   notifyElections: boolean;
   inAppNotifications: boolean;
   defaultVotingMode: 'PUBLIC' | 'ANONYMOUS';
@@ -123,6 +124,7 @@ export interface UserPreferencesRequest {
   notifyVoteDeadlines?: boolean;
   notifyDecisionResults?: boolean;
   notifyCommentsAndMentions?: boolean;
+  notifyHikes?: boolean;
   notifyElections?: boolean;
   inAppNotifications?: boolean;
   defaultVotingMode?: 'PUBLIC' | 'ANONYMOUS';

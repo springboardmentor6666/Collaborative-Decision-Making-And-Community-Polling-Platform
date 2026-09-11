@@ -21,7 +21,6 @@ import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.UserRepository;
 import com.decisionhub.service.AbuseReportService;
 import com.decisionhub.service.AuditLogService;
-import com.decisionhub.service.CommentService;
 import com.decisionhub.service.CommunityService;
 import com.decisionhub.service.DecisionService;
 import com.decisionhub.service.NotificationService;
@@ -43,7 +42,6 @@ public class AbuseReportServiceImpl implements AbuseReportService {
     private final UserRepository userRepository;
     private final CommunityMemberRepository communityMemberRepository;
     private final DecisionService decisionService;
-    private final CommentService commentService;
     private final CommunityService communityService;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
@@ -183,40 +181,69 @@ public class AbuseReportServiceImpl implements AbuseReportService {
             throw new AccessDeniedException("You do not have permission to resolve this report");
         }
 
+        // Capture snapshot details before potential deletion so references are preserved for response and audit
+        Long snapshotDecisionId = report.getDecision() != null ? report.getDecision().getDecisionId() : null;
+        String snapshotDecisionTitle = report.getDecision() != null ? report.getDecision().getTitle() : null;
+        String snapshotDecisionDesc = report.getDecision() != null ? report.getDecision().getDescription() : null;
+        User snapshotDecisionAuthor = report.getDecision() != null ? report.getDecision().getCreatedBy() : null;
+
+        Long snapshotCommentId = report.getComment() != null ? report.getComment().getCommentId() : null;
+        String snapshotCommentMsg = report.getComment() != null ? report.getComment().getMessage() : null;
+        User snapshotCommentAuthor = report.getComment() != null ? report.getComment().getUser() : null;
+
+        Long snapshotCommunityId = null;
+        String snapshotCommunityName = null;
+        String snapshotCommunityDesc = null;
+        User snapshotCommunityOwner = null;
+        if (report.getCommunity() != null) {
+            snapshotCommunityId = report.getCommunity().getCommunityId();
+            snapshotCommunityName = report.getCommunity().getName();
+            snapshotCommunityDesc = report.getCommunity().getDescription();
+            snapshotCommunityOwner = report.getCommunity().getOwner();
+        } else if (report.getDecision() != null && report.getDecision().getCommunity() != null) {
+            snapshotCommunityId = report.getDecision().getCommunity().getCommunityId();
+            snapshotCommunityName = report.getDecision().getCommunity().getName();
+            snapshotCommunityDesc = report.getDecision().getCommunity().getDescription();
+        }
+
+        User targetAuthorUser = snapshotCommentAuthor != null ? snapshotCommentAuthor : (snapshotDecisionAuthor != null ? snapshotDecisionAuthor : snapshotCommunityOwner);
+        UserResponse targetAuthor = targetAuthorUser != null ? mapUserToResponse(targetAuthorUser) : null;
+
         if (deleteTarget) {
             if (report.getComment() != null) {
-                User author = report.getComment().getUser();
-                String decisionTitle = report.getComment().getDecision() != null ? report.getComment().getDecision().getTitle() : "a discussion";
-                commentRepository.delete(report.getComment());
-                if (author != null) {
+                Comment commentToDelete = report.getComment();
+                report.setComment(null);
+                commentRepository.delete(commentToDelete);
+                if (snapshotCommentAuthor != null) {
+                    String title = snapshotDecisionTitle != null ? snapshotDecisionTitle : "a discussion";
                     notificationService.sendNotification(
-                            author.getUserId(),
+                            snapshotCommentAuthor.getUserId(),
                             "Comment Removed",
-                            "Your comment in \"" + decisionTitle + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
+                            "Your comment in \"" + title + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
                             com.decisionhub.common.enums.NotificationType.SYSTEM
                     );
                 }
             } else if (report.getDecision() != null) {
-                User author = report.getDecision().getCreatedBy();
-                String decisionTitle = report.getDecision().getTitle();
-                decisionService.deleteDecision(report.getDecision().getDecisionId(), userId);
-                if (author != null) {
+                Long decisionIdToDelete = report.getDecision().getDecisionId();
+                report.setDecision(null);
+                decisionService.deleteDecision(decisionIdToDelete, userId);
+                if (snapshotDecisionAuthor != null) {
                     notificationService.sendNotification(
-                            author.getUserId(),
+                            snapshotDecisionAuthor.getUserId(),
                             "Decision Removed",
-                            "Your decision board \"" + decisionTitle + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
+                            "Your decision board \"" + snapshotDecisionTitle + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
                             com.decisionhub.common.enums.NotificationType.SYSTEM
                     );
                 }
             } else if (report.getCommunity() != null) {
-                User owner = report.getCommunity().getOwner();
-                String communityName = report.getCommunity().getName();
-                communityService.deleteCommunity(report.getCommunity().getCommunityId(), userId);
-                if (owner != null) {
+                Long communityIdToDelete = report.getCommunity().getCommunityId();
+                report.setCommunity(null);
+                communityService.deleteCommunity(communityIdToDelete, userId);
+                if (snapshotCommunityOwner != null) {
                     notificationService.sendNotification(
-                            owner.getUserId(),
+                            snapshotCommunityOwner.getUserId(),
                             "Community Removed",
-                            "Your community \"" + communityName + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
+                            "Your community \"" + snapshotCommunityName + "\" was removed by administrators due to a reported violation (" + report.getReason() + ").",
                             com.decisionhub.common.enums.NotificationType.SYSTEM
                     );
                 }
@@ -229,49 +256,84 @@ public class AbuseReportServiceImpl implements AbuseReportService {
         AbuseReport savedReport = abuseReportRepository.save(report);
 
         String actionType = deleteTarget ? "REPORT_RESOLVED" : "REPORT_DISMISSED";
-        String targetType = report.getComment() != null ? "COMMENT" : (report.getDecision() != null ? "DECISION" : "COMMUNITY");
-        Long targetId = report.getComment() != null ? report.getComment().getCommentId() : (report.getDecision() != null ? report.getDecision().getDecisionId() : (report.getCommunity() != null ? report.getCommunity().getCommunityId() : null));
+        String targetType = snapshotCommentId != null ? "COMMENT" : (snapshotDecisionId != null ? "DECISION" : "COMMUNITY");
+        Long targetId = snapshotCommentId != null ? snapshotCommentId : (snapshotDecisionId != null ? snapshotDecisionId : snapshotCommunityId);
         String resolutionDetails = deleteTarget
                 ? "Resolved report #" + reportId + " (" + report.getReason() + ") and deleted " + targetType.toLowerCase() + " #" + targetId
                 : "Dismissed report #" + reportId + " (" + report.getReason() + ") as compliant";
 
         auditLogService.logAction(userId, actionType, "ABUSE_REPORT", reportId, resolutionDetails);
 
-        return mapToResponse(savedReport);
+        return AbuseReportResponse.builder()
+                .reportId(savedReport.getReportId())
+                .decisionId(snapshotDecisionId)
+                .decisionTitle(snapshotDecisionTitle)
+                .decisionDescription(snapshotDecisionDesc)
+                .commentId(snapshotCommentId)
+                .commentMessage(snapshotCommentMsg)
+                .communityId(snapshotCommunityId)
+                .communityName(snapshotCommunityName)
+                .communityDescription(snapshotCommunityDesc)
+                .targetAuthor(targetAuthor)
+                .reportedBy(mapUserToResponse(savedReport.getReportedBy()))
+                .reason(savedReport.getReason())
+                .description(savedReport.getDescription())
+                .status(savedReport.getStatus())
+                .resolvedBy(mapUserToResponse(savedReport.getResolvedBy()))
+                .createdAt(savedReport.getCreatedAt())
+                .updatedAt(savedReport.getUpdatedAt())
+                .build();
     }
 
     private AbuseReportResponse mapToResponse(AbuseReport report) {
         UserResponse reportedBy = mapUserToResponse(report.getReportedBy());
         UserResponse resolvedBy = report.getResolvedBy() != null ? mapUserToResponse(report.getResolvedBy()) : null;
         
-        Long decisionId = report.getDecision() != null ? report.getDecision().getDecisionId() : null;
-        String decisionTitle = report.getDecision() != null ? report.getDecision().getTitle() : null;
-        String decisionDescription = report.getDecision() != null ? report.getDecision().getDescription() : null;
+        Long decisionId = null;
+        String decisionTitle = null;
+        String decisionDescription = null;
+        try {
+            if (report.getDecision() != null) {
+                decisionId = report.getDecision().getDecisionId();
+                decisionTitle = report.getDecision().getTitle();
+                decisionDescription = report.getDecision().getDescription();
+            }
+        } catch (Exception ignored) {}
         
-        Long commentId = report.getComment() != null ? report.getComment().getCommentId() : null;
-        String commentMessage = report.getComment() != null ? report.getComment().getMessage() : null;
+        Long commentId = null;
+        String commentMessage = null;
+        try {
+            if (report.getComment() != null) {
+                commentId = report.getComment().getCommentId();
+                commentMessage = report.getComment().getMessage();
+            }
+        } catch (Exception ignored) {}
 
-        Long communityId = report.getCommunity() != null
-                ? report.getCommunity().getCommunityId()
-                : (report.getDecision() != null && report.getDecision().getCommunity() != null
-                        ? report.getDecision().getCommunity().getCommunityId() : null);
-        String communityName = report.getCommunity() != null
-                ? report.getCommunity().getName()
-                : (report.getDecision() != null && report.getDecision().getCommunity() != null
-                        ? report.getDecision().getCommunity().getName() : null);
-        String communityDescription = report.getCommunity() != null
-                ? report.getCommunity().getDescription()
-                : (report.getDecision() != null && report.getDecision().getCommunity() != null
-                        ? report.getDecision().getCommunity().getDescription() : null);
+        Long communityId = null;
+        String communityName = null;
+        String communityDescription = null;
+        try {
+            if (report.getCommunity() != null) {
+                communityId = report.getCommunity().getCommunityId();
+                communityName = report.getCommunity().getName();
+                communityDescription = report.getCommunity().getDescription();
+            } else if (report.getDecision() != null && report.getDecision().getCommunity() != null) {
+                communityId = report.getDecision().getCommunity().getCommunityId();
+                communityName = report.getDecision().getCommunity().getName();
+                communityDescription = report.getDecision().getCommunity().getDescription();
+            }
+        } catch (Exception ignored) {}
 
         User targetAuthorUser = null;
-        if (report.getComment() != null) {
-            targetAuthorUser = report.getComment().getUser();
-        } else if (report.getDecision() != null) {
-            targetAuthorUser = report.getDecision().getCreatedBy();
-        } else if (report.getCommunity() != null) {
-            targetAuthorUser = report.getCommunity().getOwner();
-        }
+        try {
+            if (report.getComment() != null && report.getComment().getUser() != null) {
+                targetAuthorUser = report.getComment().getUser();
+            } else if (report.getDecision() != null && report.getDecision().getCreatedBy() != null) {
+                targetAuthorUser = report.getDecision().getCreatedBy();
+            } else if (report.getCommunity() != null && report.getCommunity().getOwner() != null) {
+                targetAuthorUser = report.getCommunity().getOwner();
+            }
+        } catch (Exception ignored) {}
         UserResponse targetAuthor = targetAuthorUser != null ? mapUserToResponse(targetAuthorUser) : null;
 
         return AbuseReportResponse.builder()
@@ -297,16 +359,20 @@ public class AbuseReportServiceImpl implements AbuseReportService {
     
     private UserResponse mapUserToResponse(User user) {
         if (user == null) return null;
-        return UserResponse.builder()
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .profileImage(user.getProfileImage())
-                .role(user.getRole() != null ? user.getRole().getRoleName() : null)
-                .accountStatus(user.getAccountStatus())
-                .createdAt(user.getCreatedAt())
-                .build();
+        try {
+            return UserResponse.builder()
+                    .userId(user.getUserId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .profileImage(user.getProfileImage())
+                    .role(user.getRole() != null ? user.getRole().getRoleName() : null)
+                    .accountStatus(user.getAccountStatus())
+                    .createdAt(user.getCreatedAt())
+                    .build();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
 

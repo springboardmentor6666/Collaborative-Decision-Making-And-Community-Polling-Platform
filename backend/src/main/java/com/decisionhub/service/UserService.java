@@ -7,8 +7,6 @@ import com.decisionhub.dto.response.DecisionResponse;
 import com.decisionhub.dto.response.UserResponse;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface UserService {
 
     UserResponse getUserById(Long id);
@@ -23,7 +21,9 @@ public interface UserService {
 
     PagedResponse<UserResponse> getAllUsers(Pageable pageable);
 
+    UserResponse createAdminUser(com.decisionhub.dto.request.CreateAdminUserRequest request, Long requestingAdminId);
 
+    UserResponse updateUserRole(Long userId, com.decisionhub.common.enums.RoleType newRole, Long requestingAdminId);
 
     void saveDecision(Long userId, Long decisionId);
 

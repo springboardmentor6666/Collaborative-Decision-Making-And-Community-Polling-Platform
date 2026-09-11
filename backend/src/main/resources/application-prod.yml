@@ -1,0 +1,61 @@
+# ==============================================================================
+# Production Profile (application-prod.yml)
+# Hardened for live deployments (Docker / Cloud / Kubernetes)
+# All sensitive values should be injected via environment variables
+# ==============================================================================
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  # Production Database - strictly from environment variables
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 3
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  # Production Schema Safety: never auto-alter tables in production
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+
+# Production Application Settings
+application:
+  frontend:
+    url: ${FRONTEND_URL:https://yourdomain.com}
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+    oauth2:
+      google:
+        client-id: ${GOOGLE_CLIENT_ID:}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://yourdomain.com}
+
+# Production Actuator: Restricted details
+management:
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Production Logging: Reduced noise
+logging:
+  level:
+    root: INFO
+    com.decisionhub: INFO
+    org.hibernate.SQL: WARN
+    org.springframework.security: WARN

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Loader2, AlertCircle, FileText, Settings, Users, ArrowRight, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,16 @@ export default function CommunityDetails() {
   const { data: community, isLoading, isError, refetch } = useCommunity(communityId);
   const { data: membership } = useCommunityMembership(communityId);
   const { data: decisionsData, isLoading: isLoadingDecisions } = useDecisions({ communityId });
+
+  // Ensure decisions are always sorted with the most recently created at top
+  const sortedDecisions = useMemo(() => {
+    if (!decisionsData?.content) return [];
+    return [...decisionsData.content].sort((a: any, b: any) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [decisionsData?.content]);
   
   const isMember = membership?.status === "ACTIVE";
 
@@ -76,7 +86,7 @@ export default function CommunityDetails() {
               )}
             </CardHeader>
             <CardContent className="pt-6">
-              {!decisionsData?.content || decisionsData.content.length === 0 ? (
+              {sortedDecisions.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-[#64748B]">
                     {community.visibility === "PRIVATE" && !isMember
@@ -86,7 +96,7 @@ export default function CommunityDetails() {
                 </div>
               ) : (
                 <div className="flex flex-col space-y-6">
-                  {decisionsData.content.map((decision: any) => (
+                  {sortedDecisions.map((decision: any) => (
                     <DecisionCard 
                       key={decision.decisionId} 
                       decision={decision} 

@@ -8,21 +8,21 @@ export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="h-screen w-full bg-background flex flex-col md:flex-row overflow-hidden">
       {/* Mobile Navigation */}
       <MobileMenu open={sidebarOpen} setOpen={setSidebarOpen} />
       
       {/* Desktop/Tablet Sidebar */}
-      <div className="hidden md:flex w-64 flex-col border-r bg-card h-screen sticky top-0">
+      <aside className="hidden md:flex w-64 flex-col border-r bg-card h-full shrink-0 overflow-hidden">
         <Sidebar />
-      </div>
+      </aside>
 
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Top Navbar */}
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
         
         {/* Main Content Area */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+        <main tabIndex={-1} className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto min-h-0 focus:outline-none overscroll-contain">
           <Outlet />
         </main>
       </div>

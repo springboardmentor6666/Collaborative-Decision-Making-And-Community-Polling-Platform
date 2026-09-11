@@ -14,6 +14,7 @@ import {
   Award, 
   Sparkles
 } from 'lucide-react';
+import { HikeIcon } from '@/components/icons/HikeIcon';
 import { toast } from 'sonner';
 
 interface NotificationSettingsTabProps {
@@ -29,6 +30,7 @@ export const NotificationSettingsTab: React.FC<NotificationSettingsTabProps> = (
   const [notifyVoteDeadlines, setNotifyVoteDeadlines] = useState(preferences?.notifyVoteDeadlines ?? true);
   const [notifyDecisionResults, setNotifyDecisionResults] = useState(preferences?.notifyDecisionResults ?? true);
   const [notifyCommentsAndMentions, setNotifyCommentsAndMentions] = useState(preferences?.notifyCommentsAndMentions ?? true);
+  const [notifyHikes, setNotifyHikes] = useState(preferences?.notifyHikes ?? true);
   const [notifyElections, setNotifyElections] = useState(preferences?.notifyElections ?? true);
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export const NotificationSettingsTab: React.FC<NotificationSettingsTabProps> = (
       setNotifyVoteDeadlines(preferences.notifyVoteDeadlines);
       setNotifyDecisionResults(preferences.notifyDecisionResults);
       setNotifyCommentsAndMentions(preferences.notifyCommentsAndMentions);
+      setNotifyHikes(preferences.notifyHikes ?? true);
       setNotifyElections(preferences.notifyElections);
     }
   }, [preferences]);
@@ -52,6 +55,7 @@ export const NotificationSettingsTab: React.FC<NotificationSettingsTabProps> = (
         notifyVoteDeadlines,
         notifyDecisionResults,
         notifyCommentsAndMentions,
+        notifyHikes,
         notifyElections,
       });
     } catch {
@@ -64,6 +68,7 @@ export const NotificationSettingsTab: React.FC<NotificationSettingsTabProps> = (
     setNotifyVoteDeadlines(enable);
     setNotifyDecisionResults(enable);
     setNotifyCommentsAndMentions(enable);
+    setNotifyHikes(enable);
     setNotifyElections(enable);
     toast.info(enable ? 'All event notifications enabled' : 'All event notifications disabled');
   };
@@ -236,6 +241,26 @@ export const NotificationSettingsTab: React.FC<NotificationSettingsTabProps> = (
               id="notifyCommentsAndMentions"
               checked={notifyCommentsAndMentions}
               onCheckedChange={setNotifyCommentsAndMentions}
+            />
+          </div>
+
+          {/* Decision Hikes */}
+          <div className="flex items-center justify-between py-3.5">
+            <div className="space-y-0.5 pr-4">
+              <div className="flex items-center gap-2">
+                <HikeIcon hiked={true} className="w-3.5 h-3.5 text-emerald-500" />
+                <Label htmlFor="notifyHikes" className="text-sm font-medium cursor-pointer">
+                  Decision Hikes
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Alert me whenever someone hikes one of my decision boards or proposals.
+              </p>
+            </div>
+            <Switch
+              id="notifyHikes"
+              checked={notifyHikes}
+              onCheckedChange={setNotifyHikes}
             />
           </div>
 

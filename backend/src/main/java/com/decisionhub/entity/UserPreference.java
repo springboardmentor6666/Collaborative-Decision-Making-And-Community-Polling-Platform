@@ -58,6 +58,10 @@ public class UserPreference extends BaseEntity {
     @Builder.Default
     private boolean notifyCommentsAndMentions = true;
 
+    @Column(name = "notify_hikes", nullable = false)
+    @Builder.Default
+    private boolean notifyHikes = true;
+
     @Column(name = "notify_elections", nullable = false)
     @Builder.Default
     private boolean notifyElections = true;

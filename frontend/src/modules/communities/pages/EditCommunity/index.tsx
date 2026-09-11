@@ -72,12 +72,16 @@ export default function EditCommunity() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="icon" className="h-10 w-10 rounded-full border-border bg-card text-foreground hover:bg-muted">
-          <Link to={`/communities/${communityId}`}>
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+        <Button 
+          type="button" 
+          variant="outline" 
+          size="icon" 
+          onClick={() => navigate(`/communities/${communityId}`)} 
+          className="h-10 w-10 rounded-full border-border bg-card text-foreground hover:bg-muted cursor-pointer"
+        >
+          <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-3xl font-black text-foreground tracking-tight">Edit Community</h1>
@@ -164,8 +168,13 @@ export default function EditCommunity() {
             </div>
 
             <div className="pt-4 flex justify-end gap-3">
-              <Button type="button" variant="outline" asChild className="border-border bg-card text-foreground hover:bg-muted">
-                <Link to={`/communities/${communityId}`}>Cancel</Link>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate(`/communities/${communityId}`)} 
+                className="border-border bg-card text-foreground hover:bg-muted cursor-pointer"
+              >
+                Cancel
               </Button>
               <Button type="submit" disabled={updateCommunity.isPending} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
                 {updateCommunity.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

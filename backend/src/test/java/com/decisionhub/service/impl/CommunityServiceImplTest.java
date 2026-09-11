@@ -49,6 +49,8 @@ class CommunityServiceImplTest {
     private UserMapper userMapper;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private com.decisionhub.service.AuditLogService auditLogService;
 
     @InjectMocks
     private CommunityServiceImpl communityService;

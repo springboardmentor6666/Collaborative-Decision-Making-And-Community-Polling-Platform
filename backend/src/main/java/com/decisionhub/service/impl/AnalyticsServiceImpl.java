@@ -102,6 +102,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         
         stats.put("totalMembers", totalMembers);
         stats.put("activeMembers", activeMembers);
+        stats.put("totalDecisions", totalDecisions);
         
         // Let's add simulated growth chart data
         List<Map<String, Object>> growth = generateSimulatedTimeline(totalMembers * 3, totalMembers, 10L, "all");

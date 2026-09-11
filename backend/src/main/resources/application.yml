@@ -1,88 +1,60 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /
+# ==============================================================================
+# Common Application Configuration (Base Profile)
+# Shared configuration applied across all active profiles (dev, prod, test)
+# ==============================================================================
 
 spring:
   application:
     name: decisionhub-backend
 
+  profiles:
+    # Activate 'dev' profile by default if SPRING_PROFILES_ACTIVE is not set
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # File upload limits
   servlet:
     multipart:
       enabled: true
       max-file-size: 50MB
       max-request-size: 200MB
-  
-  # Database Configuration (PostgreSQL)
-  datasource:
-    url: jdbc:postgresql://localhost:5432/decisionhub_db
-    username: postgres
-    password: Spring#2327
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 20000
-      max-lifetime: 1200000
 
-  # JPA & Hibernate Settings
+  # Shared Database Driver & JPA settings
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: false
+    open-in-view: false
     properties:
       hibernate:
-        format_sql: true
-        use_sql_comments: true
         jdbc:
           batch_size: 30
         order_inserts: true
         order_updates: true
-    open-in-view: false
 
-  # Flyway Migration Settings
+  # Database Migrations (Flyway)
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
 
-
-
-
-
-# Custom Application Properties
+# Common Security & JWT Properties
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970337336763979244226452948404D635166546A576E5A7234753778214125442A}
-      expiration-ms: 86400000 # 24 hours (1 day)
+      expiration-ms: 86400000 # 24 hours
       refresh-token-expiration-ms: 604800000 # 7 days
       issuer: decisionhub-api
-    oauth2:
-      google:
-        client-id: ${GOOGLE_CLIENT_ID:702442008383-5cuppuqs826ofhvmio3m0k7q53u0m8cu.apps.googleusercontent.com}
 
+  # Automated Administrator Seeding (Configurable via environment variables)
+  initial-admin:
+    enabled: ${ADMIN_SEED_ENABLED:true}
+    email: ${ADMIN_INITIAL_EMAIL:admin@decisionhub.com}
+    password: ${ADMIN_INITIAL_PASSWORD:Admin123!}
+    username: ${ADMIN_INITIAL_USERNAME:admin}
+    full-name: ${ADMIN_INITIAL_FULL_NAME:System Administrator}
 
-  cors:
-    allowed-origins:
-      - "http://localhost:3000"
-      - "http://localhost:5173"
-    allowed-methods:
-      - GET
-      - POST
-      - PUT
-      - PATCH
-      - DELETE
-      - OPTIONS
-    allowed-headers: "*"
-    exposed-headers:
-      - Authorization
-      - Content-Disposition
-    allow-credentials: true
-
-# OpenAPI / Swagger Configuration
+# OpenAPI / Swagger Documentation
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -92,20 +64,9 @@ springdoc:
     tags-sorter: alpha
     display-request-duration: true
 
-# Actuator Endpoint Management
+# Spring Boot Actuator Base Endpoints
 management:
   endpoints:
     web:
       exposure:
         include: health, info, metrics, prometheus
-  endpoint:
-    health:
-      show-details: always
-
-# Logging Levels
-logging:
-  level:
-    root: INFO
-    com.decisionhub: DEBUG
-    org.hibernate.SQL: WARN
-    org.springframework.security: INFO

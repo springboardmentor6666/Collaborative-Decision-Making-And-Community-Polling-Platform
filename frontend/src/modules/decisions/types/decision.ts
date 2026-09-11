@@ -38,6 +38,8 @@ export interface DecisionResponse {
   allowAnonymousVote: boolean;
   viewCount: number;
   likeCount: number;
+  hikeCount?: number;
+  isHiked?: boolean;
   shareCount: number;
   totalVotes: number;
   commentCount?: number;
@@ -45,6 +47,12 @@ export interface DecisionResponse {
   attachments: AttachmentResponse[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface HikeResponse {
+  decisionId: number;
+  isHiked: boolean;
+  hikeCount: number;
 }
 
 export interface OptionRequest {

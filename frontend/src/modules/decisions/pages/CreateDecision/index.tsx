@@ -13,6 +13,7 @@ import { useCommunity } from "@/modules/communities/hooks/useCommunity";
 import { OptionRequest, VoteType, DecisionVisibility } from "../../types/decision";
 import { FileUploadDropzone } from "@/components/common/FileUploadDropzone";
 import { FileUploadResult } from "@/api/fileApi";
+import { toast } from "sonner";
 
 export default function CreateDecision() {
   const navigate = useNavigate();
@@ -110,18 +111,23 @@ export default function CreateDecision() {
     setOptions(newOptions);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!title.trim() || title.length < 3) {
-      setError("Title must be at least 3 characters long.");
+    if (!title.trim() || title.trim().length < 3) {
+      const msg = "Please enter a decision title (at least 3 characters).";
+      setError(msg);
+      toast.error(msg);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     const validOptions = options.filter(opt => opt.title.trim().length > 0);
     if (validOptions.length < 2) {
-      setError("Please provide at least two valid options.");
+      const msg = "Please provide at least two valid poll options.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -129,7 +135,9 @@ export default function CreateDecision() {
     if (deadline) {
       const date = new Date(deadline);
       if (date <= new Date()) {
-        setError("Deadline must be in the future.");
+        const msg = "Deadline must be a future date and time.";
+        setError(msg);
+        toast.error(msg);
         return;
       }
       parsedDeadline = deadline.length === 16 ? `${deadline}:00` : deadline;
@@ -139,34 +147,52 @@ export default function CreateDecision() {
       .map(f => f.attachmentId)
       .filter((id): id is number => typeof id === "number");
 
-    createDecision.mutate({
-      title,
-      description: description || undefined,
-      communityId: communityId !== "none" ? parseInt(communityId, 10) : undefined,
-      voteType,
-      visibility: isSelectedCommunityPrivate ? "PRIVATE" : visibility,
-      deadline: parsedDeadline,
-      allowAnonymousVote,
-      options: validOptions,
-      attachmentIds: attachmentIds.length > 0 ? attachmentIds : undefined,
-    }, {
-      onSuccess: (data) => {
-        navigate(`/decisions/${data.decisionId}`);
-      },
-      onError: (err: any) => {
-        setError(err.response?.data?.message || "Failed to create decision. Please try again.");
+    try {
+      const result: any = await createDecision.mutateAsync({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        communityId: communityId !== "none" ? parseInt(communityId, 10) : undefined,
+        voteType,
+        visibility: isSelectedCommunityPrivate ? "PRIVATE" : visibility,
+        deadline: parsedDeadline,
+        allowAnonymousVote,
+        options: validOptions,
+        attachmentIds: attachmentIds.length > 0 ? attachmentIds : undefined,
+      });
+
+      const newDecisionId = result?.decisionId || result?.data?.decisionId || result?.id;
+      if (newDecisionId) {
+        navigate(`/decisions/${newDecisionId}`);
+      } else {
+        navigate(backUrl);
       }
-    });
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to create decision. Please try again.";
+      setError(msg);
+      toast.error(msg);
+    }
   };
 
   const backUrl = paramCommunityId ? `/communities/${paramCommunityId}` : "/decisions";
 
+  const handleBack = (e?: React.MouseEvent) => {
+    if (window.history.state && window.history.state.idx > 0) {
+      e?.preventDefault();
+      navigate(-1);
+    }
+  };
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Button asChild variant="ghost" className="mb-6 -ml-4 text-muted-foreground hover:text-foreground">
-        <Link to={backUrl}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {paramCommunityId ? "Back to Community" : "Back to Decisions"}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
+      <Button 
+        asChild
+        type="button" 
+        variant="ghost" 
+        className="mb-6 -ml-4 text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-2 font-medium"
+      >
+        <Link to={backUrl} onClick={handleBack}>
+          <ArrowLeft className="w-4 h-4" />
+          <span>{paramCommunityId ? "Back to Community" : "Back to Decisions"}</span>
         </Link>
       </Button>
 
@@ -177,18 +203,21 @@ export default function CreateDecision() {
         </h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-foreground font-semibold">Decision Title <span className="text-red-500">*</span></Label>
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (error) setError("");
+              }}
               placeholder="e.g. Which frontend framework should we adopt?"
               className="bg-background border-border text-foreground focus-visible:ring-blue-500"
               required
@@ -358,8 +387,15 @@ export default function CreateDecision() {
               {createDecision.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Publish Decision
             </Button>
-            <Button type="button" variant="outline" asChild className="flex-1 border-border hover:bg-muted text-foreground">
-              <Link to={backUrl}>Cancel</Link>
+            <Button 
+              asChild
+              type="button" 
+              variant="outline" 
+              className="flex-1 border-border hover:bg-muted text-foreground cursor-pointer"
+            >
+              <Link to={backUrl} onClick={handleBack}>
+                Cancel
+              </Link>
             </Button>
           </div>
         </form>

@@ -1,14 +1,22 @@
 package com.decisionhub.service.impl;
 
+import com.decisionhub.common.enums.AccountStatus;
+import com.decisionhub.common.enums.AuthProvider;
+import com.decisionhub.common.enums.MemberStatus;
+import com.decisionhub.common.enums.NotificationType;
+import com.decisionhub.common.enums.RoleType;
 import com.decisionhub.common.response.PagedResponse;
 import com.decisionhub.dto.request.ChangePasswordRequest;
+import com.decisionhub.dto.request.CreateAdminUserRequest;
 import com.decisionhub.dto.request.UserPreferencesRequest;
 import com.decisionhub.dto.request.UserRequest;
 import com.decisionhub.dto.response.DecisionResponse;
 import com.decisionhub.dto.response.UserDataExportResponse;
 import com.decisionhub.dto.response.UserPreferencesResponse;
 import com.decisionhub.dto.response.UserResponse;
+import com.decisionhub.entity.Community;
 import com.decisionhub.entity.Decision;
+import com.decisionhub.entity.Role;
 import com.decisionhub.entity.SavedDecision;
 import com.decisionhub.entity.User;
 import com.decisionhub.entity.UserPreference;
@@ -20,6 +28,7 @@ import com.decisionhub.mapper.UserMapper;
 import com.decisionhub.repository.CommunityMemberRepository;
 import com.decisionhub.repository.CommunityRepository;
 import com.decisionhub.repository.DecisionRepository;
+import com.decisionhub.repository.RoleRepository;
 import com.decisionhub.repository.SavedDecisionRepository;
 import com.decisionhub.repository.UserPreferenceRepository;
 import com.decisionhub.repository.UserRepository;
@@ -41,6 +50,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final DecisionRepository decisionRepository;
     private final SavedDecisionRepository savedDecisionRepository;
     private final CommunityRepository communityRepository;
@@ -93,7 +103,7 @@ public class UserServiceImpl implements UserService {
         String deletedUsername = user.getUsername();
         String deletedEmail = user.getEmail();
 
-        List<com.decisionhub.entity.Community> communities = communityRepository.findAllByOwnerUserId(userId);
+        List<Community> communities = communityRepository.findAllByOwnerUserId(userId);
         if (!communities.isEmpty()) {
             communityRepository.deleteAll(communities);
         }
@@ -104,11 +114,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUserStatus(Long userId, com.decisionhub.common.enums.AccountStatus status, String reason) {
+    public UserResponse updateUserStatus(Long userId, AccountStatus status, String reason) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
 
-        com.decisionhub.common.enums.AccountStatus oldStatus = user.getAccountStatus();
+        AccountStatus oldStatus = user.getAccountStatus();
         user.setAccountStatus(status);
         User saved = userRepository.save(user);
 
@@ -119,16 +129,19 @@ public class UserServiceImpl implements UserService {
             case ACTIVE -> "Account Reactivated";
             default -> "Account Status Updated";
         };
+        String message = (reason != null && !reason.isBlank()) 
+                ? "Your account status has been changed to " + status.name() + ". Reason: " + reason
+                : "Your account status has been changed to " + status.name() + " by an administrator.";
+        
+        notificationService.sendNotification(
+                userId,
+                title,
+                message,
+                NotificationType.SYSTEM
+        );
 
-        String msg = (reason != null && !reason.trim().isEmpty())
-                ? "Your account status has been updated to " + status + ". Reason: " + reason
-                : "Your account status has been updated to " + status + " by administrators.";
-
-        notificationService.sendNotification(userId, title, msg, com.decisionhub.common.enums.NotificationType.SYSTEM);
-
-        String auditDetails = "Changed status of @" + user.getUsername() + " from " + oldStatus + " to " + status +
-                (reason != null && !reason.trim().isEmpty() ? ". Reason: " + reason : "");
-        auditLogService.logAction("USER_STATUS_UPDATED", "USER", userId, auditDetails);
+        auditLogService.logAction("USER_STATUS_UPDATED", "USER", userId, 
+                "Updated status for @" + user.getUsername() + " from " + oldStatus + " to " + status.name() + (reason != null ? " (Reason: " + reason + ")" : ""));
 
         return userMapper.toResponse(saved);
     }
@@ -136,11 +149,87 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<UserResponse> getAllUsers(Pageable pageable) {
-        Page<UserResponse> users = userRepository.findAll(pageable).map(userMapper::toResponse);
+        Page<UserResponse> users = userRepository.findAll(pageable)
+                .map(userMapper::toResponse);
         return PagedResponse.fromPage(users);
     }
 
+    @Override
+    @Transactional
+    public UserResponse createAdminUser(CreateAdminUserRequest request, Long requestingAdminId) {
+        String trimmedUsername = request.getUsername().trim();
+        String trimmedEmail = request.getEmail().trim().toLowerCase();
 
+        if (userRepository.existsByUsername(trimmedUsername)) {
+            throw new DuplicateException("Username '" + trimmedUsername + "' is already taken.");
+        }
+        if (userRepository.existsByEmail(trimmedEmail)) {
+            throw new DuplicateException("Email '" + trimmedEmail + "' is already registered.");
+        }
+
+        RoleType targetRoleType = request.getRole() != null ? request.getRole() : RoleType.ROLE_ADMIN;
+        Role role = roleRepository.findByRoleName(targetRoleType)
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .roleName(targetRoleType)
+                        .description(targetRoleType.name())
+                        .build()));
+
+        User user = User.builder()
+                .username(trimmedUsername)
+                .email(trimmedEmail)
+                .fullName(request.getFullName().trim())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(role)
+                .provider(AuthProvider.LOCAL)
+                .accountStatus(AccountStatus.ACTIVE)
+                .emailVerified(true)
+                .build();
+
+        User saved = userRepository.save(user);
+
+        // Initialize default user preferences
+        userPreferenceRepository.save(UserPreference.builder()
+                .user(saved)
+                .build());
+
+        auditLogService.logAction(requestingAdminId, "ADMIN_USER_CREATED", "USER", saved.getUserId(),
+                "Created staff account @" + saved.getUsername() + " with role " + targetRoleType.name());
+
+        return userMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateUserRole(Long userId, RoleType newRole, Long requestingAdminId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User", "id", userId));
+
+        if (userId.equals(requestingAdminId) && newRole != RoleType.ROLE_ADMIN) {
+            throw new BusinessException("Admins cannot remove their own administrator role.");
+        }
+
+        Role role = roleRepository.findByRoleName(newRole)
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .roleName(newRole)
+                        .description(newRole.name())
+                        .build()));
+
+        RoleType previousRole = user.getRole() != null ? user.getRole().getRoleName() : null;
+        user.setRole(role);
+        User saved = userRepository.save(user);
+
+        auditLogService.logAction(requestingAdminId, "USER_ROLE_CHANGED", "USER", userId,
+                "Updated role of @" + user.getUsername() + " from " + previousRole + " to " + newRole.name());
+
+        notificationService.sendNotification(
+                userId,
+                "Role Updated",
+                "Your platform role has been updated to " + newRole.name().replace("ROLE_", "") + " by a System Administrator.",
+                NotificationType.SYSTEM
+        );
+
+        return userMapper.toResponse(saved);
+    }
 
     @Override
     @Transactional
@@ -181,7 +270,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("New password and confirmation password do not match.");
         }
 
-        if (user.getProvider() == com.decisionhub.common.enums.AuthProvider.LOCAL && user.getPassword() != null && !user.getPassword().isEmpty()) {
+        if (user.getProvider() == AuthProvider.LOCAL && user.getPassword() != null && !user.getPassword().isEmpty()) {
             if (request.getCurrentPassword() == null || request.getCurrentPassword().trim().isEmpty()) {
                 throw new BusinessException("Current password is required.");
             }
@@ -199,7 +288,7 @@ public class UserServiceImpl implements UserService {
 
         notificationService.sendNotification(userId, "Password Changed",
                 "Your account password was successfully updated.",
-                com.decisionhub.common.enums.NotificationType.SYSTEM);
+                NotificationType.SYSTEM);
     }
 
     @Override
@@ -228,6 +317,7 @@ public class UserServiceImpl implements UserService {
         if (request.getNotifyVoteDeadlines() != null) preference.setNotifyVoteDeadlines(request.getNotifyVoteDeadlines());
         if (request.getNotifyDecisionResults() != null) preference.setNotifyDecisionResults(request.getNotifyDecisionResults());
         if (request.getNotifyCommentsAndMentions() != null) preference.setNotifyCommentsAndMentions(request.getNotifyCommentsAndMentions());
+        if (request.getNotifyHikes() != null) preference.setNotifyHikes(request.getNotifyHikes());
         if (request.getNotifyElections() != null) preference.setNotifyElections(request.getNotifyElections());
         if (request.getInAppNotifications() != null) preference.setInAppNotifications(request.getInAppNotifications());
 
@@ -254,7 +344,7 @@ public class UserServiceImpl implements UserService {
 
         long createdDecisionsCount = decisionRepository.countByCreatedByUserId(userId);
         long savedDecisionsCount = savedDecisionRepository.countByUserUserId(userId);
-        long communitiesCount = communityMemberRepository.countByUserUserIdAndStatus(userId, com.decisionhub.common.enums.MemberStatus.ACTIVE);
+        long communitiesCount = communityMemberRepository.countByUserUserIdAndStatus(userId, MemberStatus.ACTIVE);
 
         return UserDataExportResponse.builder()
                 .profile(userResponse)
@@ -276,6 +366,7 @@ public class UserServiceImpl implements UserService {
                 .notifyVoteDeadlines(p.isNotifyVoteDeadlines())
                 .notifyDecisionResults(p.isNotifyDecisionResults())
                 .notifyCommentsAndMentions(p.isNotifyCommentsAndMentions())
+                .notifyHikes(p.isNotifyHikes())
                 .notifyElections(p.isNotifyElections())
                 .inAppNotifications(p.isInAppNotifications())
                 .defaultVotingMode(p.getDefaultVotingMode())

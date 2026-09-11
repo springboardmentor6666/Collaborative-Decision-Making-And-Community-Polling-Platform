@@ -19,6 +19,7 @@ public class UserPreferencesRequest {
     private Boolean notifyVoteDeadlines;
     private Boolean notifyDecisionResults;
     private Boolean notifyCommentsAndMentions;
+    private Boolean notifyHikes;
     private Boolean notifyElections;
     private Boolean inAppNotifications;
 

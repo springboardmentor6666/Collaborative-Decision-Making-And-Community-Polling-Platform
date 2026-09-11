@@ -75,4 +75,9 @@ export const decisionApi = {
   unsaveDecision: async (decisionId: number): Promise<void> => {
     await axiosInstance.delete(`${USER_API_PREFIX}/${decisionId}`);
   },
+
+  toggleHike: async (decisionId: number): Promise<import("../types/decision").HikeResponse> => {
+    const response = await axiosInstance.post(`${API_PREFIX}/${decisionId}/hike`);
+    return response.data.data;
+  },
 };

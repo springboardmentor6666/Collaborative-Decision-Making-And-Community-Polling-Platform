@@ -200,6 +200,7 @@ export function SavedDecisionsPage() {
                 key={decision.decisionId} 
                 decision={decision} 
                 isSaved={true}
+                density="comfortable"
               />
             ))}
           </div>

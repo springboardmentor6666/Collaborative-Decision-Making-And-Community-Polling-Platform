@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDecision } from "../../hooks/useDecision";
@@ -14,6 +14,7 @@ import { CommentSection } from "../../../comments/components/CommentSection";
 export default function DecisionDetails() {
   const { id } = useParams<{ id: string }>();
   const decisionId = parseInt(id || "0", 10);
+  const navigate = useNavigate();
   
   const { user } = useAuth();
   const { data: decision, isLoading, error } = useDecision(decisionId);
@@ -28,10 +29,10 @@ export default function DecisionDetails() {
         <DecisionCardSkeleton />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
           <div className="lg:col-span-2">
-            <DecisionCardSkeleton />
+            <div className="h-64 bg-card border border-border rounded-xl animate-pulse" />
           </div>
-          <div className="lg:col-span-1">
-            <DecisionCardSkeleton />
+          <div>
+            <div className="h-48 bg-card border border-border rounded-xl animate-pulse" />
           </div>
         </div>
       </div>
@@ -42,10 +43,10 @@ export default function DecisionDetails() {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <div className="bg-card border border-border rounded-2xl p-8 max-w-md mx-auto shadow-sm">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Decision Not Found</h2>
-          <p className="text-muted-foreground text-sm mb-6">The decision you're looking for doesn't exist or has been deleted by its author.</p>
-          <Button asChild className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs h-9">
-            <Link to="/decisions">Back to Decisions</Link>
+          <p className="text-red-500 font-semibold mb-2">Error Loading Decision</p>
+          <p className="text-muted-foreground text-sm mb-6">Could not load the requested decision or you don't have access.</p>
+          <Button onClick={() => navigate("/decisions")} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs h-9">
+            Return to Feed
           </Button>
         </div>
       </div>
@@ -54,10 +55,23 @@ export default function DecisionDetails() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Button asChild variant="ghost" className="mb-6 -ml-4 text-muted-foreground hover:text-foreground">
-        <Link to="/decisions">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Decisions
+      <Button 
+        asChild
+        type="button" 
+        variant="ghost" 
+        className="mb-6 -ml-4 text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-2 font-medium"
+      >
+        <Link 
+          to="/decisions" 
+          onClick={(e) => {
+            if (window.history.state && window.history.state.idx > 0) {
+              e.preventDefault();
+              navigate(-1);
+            }
+          }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Decisions</span>
         </Link>
       </Button>
 
