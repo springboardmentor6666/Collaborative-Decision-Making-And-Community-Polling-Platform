@@ -32,6 +32,7 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         log.error("OAuth2 authentication failed: {}", exception.getMessage(), exception);
-        response.sendRedirect(frontendUrl + "/login?error=oauth_failed");
+        String cleanFrontendUrl = (frontendUrl != null ? frontendUrl.replaceAll("/+$", "") : "http://localhost:3000");
+        response.sendRedirect(cleanFrontendUrl + "/login?error=oauth_failed");
     }
 }

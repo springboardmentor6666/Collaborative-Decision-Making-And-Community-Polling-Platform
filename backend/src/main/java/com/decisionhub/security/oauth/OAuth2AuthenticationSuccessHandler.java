@@ -52,8 +52,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         String fullName = resolveName(oauth2User, provider);
         String profileImage = resolveAvatar(oauth2User, provider);
 
+        String cleanFrontendUrl = (frontendUrl != null ? frontendUrl.replaceAll("/+$", "") : "http://localhost:3000");
+
         if (email == null || email.isBlank()) {
-            response.sendRedirect(frontendUrl + "/login?error=oauth_email_missing");
+            response.sendRedirect(cleanFrontendUrl + "/login?error=oauth_email_missing");
             return;
         }
 
@@ -72,7 +74,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
         String targetPath = (returnTo != null && returnTo.contains("/profile")) ? "/profile?google_connected=true&" : "/login?";
 
-        String redirectUrl = frontendUrl + targetPath + "token=" + URLEncoder.encode(authResponse.getToken(), StandardCharsets.UTF_8)
+        String redirectUrl = cleanFrontendUrl + targetPath + "token=" + URLEncoder.encode(authResponse.getToken(), StandardCharsets.UTF_8)
                 + "&provider=" + provider.toLowerCase()
                 + "&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
                 + "&name=" + URLEncoder.encode(fullName == null ? email : fullName, StandardCharsets.UTF_8)

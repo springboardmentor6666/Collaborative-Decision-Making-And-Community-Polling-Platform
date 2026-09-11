@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import kidsStudyingIllustration from '../assets/kids-studying-from-home.svg';
 
@@ -31,6 +31,24 @@ export default function LoginPage() {
 
   const { login, loginWithGoogle, user, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err) {
+      if (err === 'oauth_failed') {
+        setFormError('Google sign-in could not be completed. Please try again or log in with your email/password.');
+      } else if (err === 'oauth_email_missing') {
+        setFormError('Your Google account did not share an email address. Please allow email permissions.');
+      } else if (err === 'oauth_invalid') {
+        setFormError('OAuth authentication was invalid. Please try again.');
+      } else {
+        setFormError('Authentication error: ' + err);
+      }
+    } else if (searchParams.get('expired') === 'true') {
+      setFormError('Your session has expired. Please sign in again.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isLoading && user) {

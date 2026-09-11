@@ -27,10 +27,17 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*", "*"));
-        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With", "X-Forwarded-For"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "https://*.vercel.app",
+            "https://*.onrender.com",
+            "*"
+        ));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition", "X-Total-Count"));
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

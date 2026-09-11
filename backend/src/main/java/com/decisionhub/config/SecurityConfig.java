@@ -62,6 +62,9 @@ public class SecurityConfig {
                 // Allow all CORS preflight OPTIONS requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                // Health check probes and root endpoint
+                .requestMatchers("/", "/health", "/api/health").permitAll()
+
                 // Password change endpoints require active authentication
                 .requestMatchers("/api/auth/change-password", "/api/auth/set-password").authenticated()
                 .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**", "/h2-console/**").permitAll()

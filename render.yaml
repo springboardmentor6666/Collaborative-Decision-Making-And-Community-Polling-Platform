@@ -13,7 +13,7 @@ services:
     dockerContext: .
     plan: free
     region: oregon
-    healthCheckPath: /api/decisions
+    healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: PORT
@@ -26,16 +26,18 @@ services:
         sync: false
       - key: SPRING_DATASOURCE_DRIVER
         value: org.postgresql.Driver
-      - key: SPRING_JPA_DATABASE_PLATFORM
-        value: org.hibernate.dialect.PostgreSQLDialect
-      - key: HIBERNATE_DIALECT
-        value: org.hibernate.dialect.PostgreSQLDialect
       - key: JWT_SECRET
         sync: false
       - key: FRONTEND_URL
         sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
       - key: JAVA_TOOL_OPTIONS
-        value: -XX:MaxRAMPercentage=75.0 -Xmx384m
+        value: -XX:+UseSerialGC -Xss512k -XX:MaxRAMPercentage=70.0 -Xmx320m
       - key: H2_CONSOLE_ENABLED
         value: "false"
       - key: HIKARI_KEEPALIVE_TIME

@@ -19,4 +19,4 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/decisionhub-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS:--XX:MaxRAMPercentage=75.0 -Xmx384m} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS:--XX:+UseSerialGC -Xss512k -XX:MaxRAMPercentage=70.0 -Xmx320m} -jar app.jar"]
