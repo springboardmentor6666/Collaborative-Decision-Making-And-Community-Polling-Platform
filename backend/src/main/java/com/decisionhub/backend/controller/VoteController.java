@@ -1,56 +1,40 @@
 package com.decisionhub.backend.controller;
 
-import com.decisionhub.backend.dto.VoteRequest;
+import com.decisionhub.backend.dto.VoteDTO;
 import com.decisionhub.backend.service.VoteService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/decisions/{decisionId}/vote")
+@RequestMapping("/api/votes")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class VoteController {
 
-    @Autowired private VoteService voteService;
+    @Autowired
+    private VoteService voteService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> castVote(@PathVariable Long decisionId, @Valid @RequestBody VoteRequest req) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        voteService.castVote(decisionId, req, email);
-        return ResponseEntity.ok().body("Vote registered successfully");
+    @PostMapping("/decision/{decisionId}/option/{optionId}")
+    public ResponseEntity<VoteDTO> castVote(
+            @PathVariable Long decisionId,
+            @PathVariable Long optionId,
+            @RequestBody(required = false) Map<String, String> body,
+            Authentication authentication) {
+
+        String username = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : "user";
+        String voteType = (body != null && body.containsKey("voteType")) ? body.get("voteType") : "SINGLE";
+
+        return ResponseEntity.ok(voteService.castVote(decisionId, optionId, username, voteType));
     }
 
-    @DeleteMapping
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> deleteVote(@PathVariable Long decisionId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        voteService.deleteVote(decisionId, email);
-        return ResponseEntity.ok().body("Vote removed successfully");
-    }
-
-    @GetMapping("/status")
-    public ResponseEntity<?> getVoteStatus(@PathVariable Long decisionId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        
-        // Handle anonymous or unauthenticated users
-        if ("anonymousUser".equals(email)) {
-            Map<String, Object> anonymousRes = new HashMap<>();
-            anonymousRes.put("voted", false);
-            anonymousRes.put("votedOptionId", null);
-            return ResponseEntity.ok(anonymousRes);
+    @GetMapping("/decision/{decisionId}/my-vote")
+    public ResponseEntity<VoteDTO> getMyVote(@PathVariable Long decisionId, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.ok(null);
         }
-        
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Map<String, Object> res = new HashMap<>();
-        res.put("voted", voteService.hasUserVoted(decisionId, userEmail));
-        res.put("votedOptionId", voteService.getUserVotedOptionId(decisionId, userEmail));
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(voteService.getUserVoteForDecision(decisionId, authentication.getName()));
     }
 }

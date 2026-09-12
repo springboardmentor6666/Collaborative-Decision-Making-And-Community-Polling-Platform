@@ -1,52 +1,39 @@
 package com.decisionhub.backend.controller;
 
-import com.decisionhub.backend.dto.OptionRequest;
-import com.decisionhub.backend.dto.OptionResponse;
+import com.decisionhub.backend.dto.OptionDTO;
 import com.decisionhub.backend.service.OptionService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/options")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class OptionController {
 
-    @Autowired private OptionService optionService;
+    @Autowired
+    private OptionService optionService;
 
-    @PostMapping("/decisions/{decisionId}/options")
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<OptionResponse> addOption(
-            @PathVariable Long decisionId, 
-            @Valid @RequestBody OptionRequest req) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(optionService.addOption(decisionId, req, email));
+    @GetMapping("/decision/{decisionId}")
+    public ResponseEntity<List<OptionDTO>> getOptionsByDecision(@PathVariable Long decisionId) {
+        return ResponseEntity.ok(optionService.getOptionsByDecisionId(decisionId));
     }
 
-    @GetMapping("/decisions/{decisionId}/options")
-    public ResponseEntity<List<OptionResponse>> getOptionsByDecision(@PathVariable Long decisionId) {
-        return ResponseEntity.ok(optionService.getOptionsByDecision(decisionId));
+    @PostMapping("/decision/{decisionId}")
+    public ResponseEntity<OptionDTO> addOption(@PathVariable Long decisionId, @RequestBody OptionDTO dto) {
+        return ResponseEntity.ok(optionService.addOption(decisionId, dto));
     }
 
-    @PutMapping("/options/{optionId}")
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<OptionResponse> updateOption(
-            @PathVariable Long optionId, 
-            @Valid @RequestBody OptionRequest req) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(optionService.updateOption(optionId, req, email));
+    @PutMapping("/{id}")
+    public ResponseEntity<OptionDTO> updateOption(@PathVariable Long id, @RequestBody OptionDTO dto) {
+        return ResponseEntity.ok(optionService.updateOption(id, dto));
     }
 
-    @DeleteMapping("/options/{optionId}")
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> deleteOption(@PathVariable Long optionId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        optionService.deleteOption(optionId, email);
-        return ResponseEntity.ok().body("Option deleted successfully");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOption(@PathVariable Long id) {
+        optionService.deleteOption(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,19 +1,13 @@
 package com.decisionhub.backend.service;
 
-import com.decisionhub.backend.dto.OptionRequest;
-import com.decisionhub.backend.dto.OptionResponse;
+import com.decisionhub.backend.dto.OptionDTO;
 import com.decisionhub.backend.entity.Decision;
 import com.decisionhub.backend.entity.Option;
-import com.decisionhub.backend.entity.User;
-import com.decisionhub.backend.exception.CustomException;
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.OptionRepository;
-import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,79 +15,68 @@ import java.util.stream.Collectors;
 @Service
 public class OptionService {
 
-    @Autowired private OptionRepository optionRepository;
-    @Autowired private DecisionRepository decisionRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private VoteRepository voteRepository;
+    @Autowired
+    private OptionRepository optionRepository;
 
-    @Transactional
-    public OptionResponse addOption(Long decisionId, OptionRequest req, String userEmail) {
-        Decision decision = decisionRepository.findById(decisionId)
-                .orElseThrow(() -> new CustomException("Decision not found", HttpStatus.NOT_FOUND));
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
+    @Autowired
+    private DecisionRepository decisionRepository;
 
-        if (!decision.getUser().getId().equals(user.getId())) {
-            throw new CustomException("You are not authorized to add options to this decision", HttpStatus.FORBIDDEN);
-        }
+    @Autowired
+    private VoteRepository voteRepository;
 
-        Option option = new Option(decision, req.getOptionTitle(), req.getDescription(), req.getPros(), req.getCons());
-        Option saved = optionRepository.save(option);
-        return toResponse(saved);
-    }
-
-    public List<OptionResponse> getOptionsByDecision(Long decisionId) {
+    public List<OptionDTO> getOptionsByDecisionId(Long decisionId) {
         return optionRepository.findByDecisionId(decisionId).stream()
-                .map(this::toResponse)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public OptionResponse updateOption(Long optionId, OptionRequest req, String userEmail) {
-        Option option = optionRepository.findById(optionId)
-                .orElseThrow(() -> new CustomException("Option not found", HttpStatus.NOT_FOUND));
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
+    public OptionDTO addOption(Long decisionId, OptionDTO dto) {
+        Decision decision = decisionRepository.findById(decisionId)
+                .orElseThrow(() -> new RuntimeException("Decision not found: " + decisionId));
 
-        if (!option.getDecision().getUser().getId().equals(user.getId())) {
-            throw new CustomException("You are not authorized to update options for this decision", HttpStatus.FORBIDDEN);
-        }
+        Option option = new Option();
+        option.setDecision(decision);
+        option.setOptionTitle(dto.getOptionTitle());
+        option.setDescription(dto.getDescription());
+        option.setPros(dto.getPros());
+        option.setCons(dto.getCons());
+        option.setScore(dto.getScore() != null ? dto.getScore() : 0);
 
-        option.setOptionTitle(req.getOptionTitle());
-        option.setDescription(req.getDescription());
-        option.setPros(req.getPros());
-        option.setCons(req.getCons());
-        
         Option saved = optionRepository.save(option);
-        return toResponse(saved);
+        return convertToDTO(saved);
     }
 
-    @Transactional
-    public void deleteOption(Long optionId, String userEmail) {
+    public OptionDTO updateOption(Long optionId, OptionDTO dto) {
         Option option = optionRepository.findById(optionId)
-                .orElseThrow(() -> new CustomException("Option not found", HttpStatus.NOT_FOUND));
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException("Option not found: " + optionId));
 
-        if (!option.getDecision().getUser().getId().equals(user.getId())) {
-            throw new CustomException("You are not authorized to delete options from this decision", HttpStatus.FORBIDDEN);
-        }
+        if (dto.getOptionTitle() != null) option.setOptionTitle(dto.getOptionTitle());
+        if (dto.getDescription() != null) option.setDescription(dto.getDescription());
+        if (dto.getPros() != null) option.setPros(dto.getPros());
+        if (dto.getCons() != null) option.setCons(dto.getCons());
+        if (dto.getScore() != null) option.setScore(dto.getScore());
+        if (dto.getRanking() != null) option.setRanking(dto.getRanking());
 
-        optionRepository.delete(option);
+        Option updated = optionRepository.save(option);
+        return convertToDTO(updated);
     }
 
-    private OptionResponse toResponse(Option o) {
-        OptionResponse r = new OptionResponse();
-        r.setId(o.getId());
-        r.setDecisionId(o.getDecision().getId());
-        r.setOptionTitle(o.getOptionTitle());
-        r.setDescription(o.getDescription());
-        r.setPros(o.getPros());
-        r.setCons(o.getCons());
-        r.setScore(o.getScore());
-        r.setRanking(o.getRanking());
-        r.setVoteCount(voteRepository.countByOptionId(o.getId()));
-        r.setCreatedAt(o.getCreatedAt());
-        return r;
+    public void deleteOption(Long optionId) {
+        optionRepository.deleteById(optionId);
+    }
+
+    private OptionDTO convertToDTO(Option option) {
+        long votes = voteRepository.countByOptionId(option.getId());
+        return new OptionDTO(
+                option.getId(),
+                option.getDecision().getId(),
+                option.getOptionTitle(),
+                option.getDescription(),
+                option.getPros(),
+                option.getCons(),
+                option.getScore(),
+                option.getRanking(),
+                votes
+        );
     }
 }

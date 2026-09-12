@@ -10,4 +10,6 @@ import java.util.List;
 public interface DecisionRepository extends JpaRepository<Decision, Long> {
     List<Decision> findByVisibility(String visibility);
     List<Decision> findByUserId(Long userId);
+    List<Decision> findByCategory(String category);
+    long countByUserId(Long userId);
 }

@@ -1,105 +1,70 @@
 package com.decisionhub.backend.service;
 
-import com.decisionhub.backend.dto.VoteRequest;
+import com.decisionhub.backend.dto.VoteDTO;
 import com.decisionhub.backend.entity.Decision;
 import com.decisionhub.backend.entity.Option;
 import com.decisionhub.backend.entity.User;
 import com.decisionhub.backend.entity.Vote;
-import com.decisionhub.backend.exception.CustomException;
 import com.decisionhub.backend.repository.DecisionRepository;
 import com.decisionhub.backend.repository.OptionRepository;
 import com.decisionhub.backend.repository.UserRepository;
 import com.decisionhub.backend.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
 public class VoteService {
 
-    @Autowired private VoteRepository voteRepository;
-    @Autowired private DecisionRepository decisionRepository;
-    @Autowired private OptionRepository optionRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private NotificationService notificationService;
+    @Autowired
+    private VoteRepository voteRepository;
 
-    @Transactional
-    public void castVote(Long decisionId, VoteRequest req, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
-        
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DecisionRepository decisionRepository;
+
+    @Autowired
+    private OptionRepository optionRepository;
+
+    public VoteDTO castVote(Long decisionId, Long optionId, String username, String voteType) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
         Decision decision = decisionRepository.findById(decisionId)
-                .orElseThrow(() -> new CustomException("Decision not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException("Decision not found: " + decisionId));
 
-        Option option = optionRepository.findById(req.getOptionId())
-                .orElseThrow(() -> new CustomException("Option not found", HttpStatus.NOT_FOUND));
+        Option option = optionRepository.findById(optionId)
+                .orElseThrow(() -> new RuntimeException("Option not found: " + optionId));
 
-        if (!option.getDecision().getId().equals(decisionId)) {
-            throw new CustomException("Option does not belong to this decision", HttpStatus.BAD_REQUEST);
-        }
-
-        // Check if user already voted on this decision
+        // Check if user already voted on this decision; if so, update their vote to the new option
         Optional<Vote> existingVote = voteRepository.findByUserIdAndDecisionId(user.getId(), decisionId);
+        Vote vote;
         if (existingVote.isPresent()) {
-            Vote vote = existingVote.get();
-            // Update option
+            vote = existingVote.get();
             vote.setOption(option);
-            vote.setVoteType(req.getVoteType());
-            voteRepository.save(vote);
+            vote.setVoteType(voteType != null ? voteType : "SINGLE");
         } else {
-            Vote vote = new Vote(user, decision, option, req.getVoteType());
-            voteRepository.save(vote);
+            vote = new Vote(user, decision, option, voteType != null ? voteType : "SINGLE");
         }
 
-        // Optional: Recalculate options scores if desired
-        updateOptionScores(decisionId);
+        Vote saved = voteRepository.save(vote);
 
-        // Notify decision creator if someone else votes
-        if (decision.getUser() != null && !decision.getUser().getId().equals(user.getId())) {
-            notificationService.sendNotification(
-                    decision.getUser(),
-                    decision,
-                    null,
-                    "NEW_VOTE",
-                    user.getUsername() + " voted on your decision: '" + decision.getTitle() + "' (" + option.getOptionTitle() + ")"
-            );
-        }
+        // Update score of the option
+        option.setScore((int) voteRepository.countByOptionId(option.getId()));
+        optionRepository.save(option);
+
+        return new VoteDTO(saved.getId(), user.getId(), decision.getId(), option.getId(), saved.getVoteType(), saved.getCreatedAt());
     }
 
-    @Transactional
-    public void deleteVote(Long decisionId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
-        
-        Vote vote = voteRepository.findByUserIdAndDecisionId(user.getId(), decisionId)
-                .orElseThrow(() -> new CustomException("Vote not found for this decision", HttpStatus.NOT_FOUND));
+    public VoteDTO getUserVoteForDecision(Long decisionId, String username) {
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) return null;
 
-        voteRepository.delete(vote);
-        updateOptionScores(decisionId);
-    }
-
-    public boolean hasUserVoted(Long decisionId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
-        return voteRepository.findByUserIdAndDecisionId(user.getId(), decisionId).isPresent();
-    }
-
-    public Long getUserVotedOptionId(Long decisionId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
         return voteRepository.findByUserIdAndDecisionId(user.getId(), decisionId)
-                .map(vote -> vote.getOption().getId())
+                .map(v -> new VoteDTO(v.getId(), v.getUser().getId(), v.getDecision().getId(), v.getOption().getId(), v.getVoteType(), v.getCreatedAt()))
                 .orElse(null);
-    }
-
-    private void updateOptionScores(Long decisionId) {
-        for (Option o : optionRepository.findByDecisionId(decisionId)) {
-            long votes = voteRepository.countByOptionId(o.getId());
-            o.setScore((int) votes);
-            optionRepository.save(o);
-        }
     }
 }

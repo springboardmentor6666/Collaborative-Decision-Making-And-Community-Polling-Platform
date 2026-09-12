@@ -44,6 +44,12 @@ public class Comment {
     public Comment() {
     }
 
+    public Comment(User user, Decision decision, String commentText) {
+        this.user = user;
+        this.decision = decision;
+        this.commentText = commentText;
+    }
+
     public Comment(User user, Decision decision, Comment parentComment, String commentText) {
         this.user = user;
         this.decision = decision;

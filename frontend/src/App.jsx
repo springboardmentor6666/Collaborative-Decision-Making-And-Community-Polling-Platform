@@ -1,52 +1,50 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Stats from "./components/Stats";
-import Features from "./components/Features";
-import HowItWorks from "./components/HowItWorks";
-import Community from "./components/Community";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Dashboard from "./components/Dashboard";
-import Decisions from "./components/Decisions";
-import DecisionDetail from "./components/DecisionDetail";
-import OptionComparison from "./components/OptionComparison";
-import Reports from "./components/Reports";
-import Profile from "./components/Profile";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import About from "./components/About";
+import Services from "./components/Services";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
 import DatabaseOverview from "./components/DatabaseOverview";
+import Dashboard from "./components/Dashboard";
+import DecisionList from "./components/DecisionList";
+import CreateDecision from "./components/CreateDecision";
+import DecisionDetail from "./components/DecisionDetail";
+import CommunityList from "./components/CommunityList";
+import UserProfile from "./components/UserProfile";
+import AnalyticsView from "./components/AnalyticsView";
 import "./App.css";
-
-function Home() {
-  return (
-    <>
-      <Navbar />
-      <Hero />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <Community />
-      <Contact />
-      <Footer />
-    </>
-  );
-}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <Navbar />
+              <Hero />
+              <About />
+              <Services />
+              <Contact />
+              <Footer />
+            </>
+          }
+        />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/decisions" element={<Decisions />} />
-        <Route path="/decisions/:id" element={<DecisionDetail />} />
-        <Route path="/option-comparison" element={<OptionComparison />} />
-        <Route path="/community" element={<><Navbar /><Community /><Footer /></>} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/profile" element={<Profile />} />
+        
+        <Route path="/dashboard" element={<><Navbar /><Dashboard /><Footer /></>} />
+        <Route path="/decisions" element={<><Navbar /><DecisionList /><Footer /></>} />
+        <Route path="/decisions/create" element={<><Navbar /><CreateDecision /><Footer /></>} />
+        <Route path="/decisions/:id" element={<><Navbar /><DecisionDetail /><Footer /></>} />
+        <Route path="/communities" element={<><Navbar /><CommunityList /><Footer /></>} />
+        <Route path="/profile" element={<><Navbar /><UserProfile /><Footer /></>} />
+        <Route path="/analytics" element={<><Navbar /><AnalyticsView /><Footer /></>} />
         <Route path="/database" element={<><Navbar /><DatabaseOverview /><Footer /></>} />
       </Routes>
     </BrowserRouter>

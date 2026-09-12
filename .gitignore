@@ -24,3 +24,6 @@ yarn-error.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# Local JDK builds
+oracleJdk-26/
