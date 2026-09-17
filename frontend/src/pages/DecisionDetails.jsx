@@ -39,7 +39,9 @@ import CategoryBadge from '../components/CategoryBadge';
 import ComparisonMatrix from '../components/ComparisonMatrix';
 import CommentSection from '../components/CommentSection';
 import ReportModal from '../components/ReportModal';
+import MediaAttachmentPreview from '../components/MediaAttachmentPreview';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 
 export default function DecisionDetails() {
   const { id } = useParams();
@@ -49,15 +51,18 @@ export default function DecisionDetails() {
   const { showError, showConfirm } = useAlert();
   const { triggerRefresh } = useRefresh();
 
-  const [decision, setDecision] = useState(null);
-  const [userVote, setUserVote] = useState(null);
-  const [attachments, setAttachments] = useState([]);
+  const cacheKey = ['decision_details', id];
+  const cachedData = getQueryData(cacheKey);
+
+  const [decision, setDecision] = useState(() => cachedData?.decision || null);
+  const [userVote, setUserVote] = useState(() => cachedData?.userVote || null);
+  const [attachments, setAttachments] = useState(() => cachedData?.attachments || []);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cachedData);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(() => Boolean(cachedData?.decision?.isSaved));
   const [savingBookmark, setSavingBookmark] = useState(false);
 
   // Post-creation option addition & decision close states
@@ -77,18 +82,21 @@ export default function DecisionDetails() {
   });
 
   useEffect(() => {
-    fetchData();
+    const hasCached = Boolean(getQueryData(['decision_details', id]));
+    fetchData(hasCached);
 
     const handleRefresh = () => {
-      fetchData();
+      fetchData(false);
     };
     window.addEventListener('decisionhub:refresh', handleRefresh);
     return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
   }, [id, accessToken]);
 
-  const fetchData = async () => {
+  const fetchData = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) {
+        setLoading(true);
+      }
       const [dec, files] = await Promise.all([
         fetchDecisionById(id, accessToken),
         getDecisionFilesApi(id, accessToken).catch(() => []),
@@ -97,23 +105,33 @@ export default function DecisionDetails() {
       setIsSaved(Boolean(dec?.isSaved));
       setAttachments(files || []);
 
-      // Record a view impression
-      await recordImpressionApi(id, 'VIEW', accessToken);
-
+      let voteData = null;
       // Check if current user has already voted
       if (accessToken) {
         try {
           const votesAnalysis = await getMyVotesAnalysisApi(accessToken);
           const vote = votesAnalysis.find(v => String(v.decisionId) === String(id));
           if (vote) {
-            setUserVote({ optionId: vote.userChoice?.optionId, optionText: vote.userChoice?.optionText });
+            voteData = { optionId: vote.userChoice?.optionId, optionText: vote.userChoice?.optionText };
+            setUserVote(voteData);
           }
         } catch (e) {
           // ignore error fetching votes
         }
       }
+
+      setQueryData(cacheKey, {
+        decision: dec,
+        attachments: files || [],
+        userVote: voteData,
+      });
+
+      // Record a view impression in background
+      recordImpressionApi(id, 'VIEW', accessToken).catch(() => {});
     } catch {
-      setError('Decision not found or could not be loaded.');
+      if (!isSilent) {
+        setError('Decision not found or could not be loaded.');
+      }
     } finally {
       setLoading(false);
     }
@@ -519,61 +537,11 @@ export default function DecisionDetails() {
                     {attachments.length === 0 ? (
                       <p className="text-xs text-muted">No files or documents attached.</p>
                     ) : (
-                      <div className="grid gap-2.5 sm:grid-cols-2">
-                        {attachments.map((att) => {
-                          const isImg = att.fileType?.startsWith('image/') || att.filename?.match(/\.(jpeg|jpg|png|gif|webp)$/i);
-                          return (
-                            <div
-                              key={att.id}
-                              className="flex items-center justify-between rounded-xl border border-border-default bg-surface-alt p-2.5 text-xs"
-                            >
-                              <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface text-sm font-bold text-primary shadow-xs">
-                                  {isImg ? '🖼️' : '📄'}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <a
-                                    href={att.fileUrl || `/api/files/download/${att.filename}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="font-bold text-text-primary hover:underline truncate block"
-                                    title={att.filename}
-                                  >
-                                    {att.filename}
-                                  </a>
-                                  <span className="text-[10px] text-muted">
-                                    {att.fileSize ? `${Math.round(att.fileSize / 1024)} KB` : 'Attachment'}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-1 shrink-0 ml-2">
-                                <a
-                                  href={`/api/files/download/${att.filename}`}
-                                  download
-                                  className="rounded-lg p-1 text-primary hover:bg-surface transition"
-                                  title="Download"
-                                >
-                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                </a>
-                                {isCreator && (
-                                  <button
-                                    onClick={() => handleDeleteAttachment(att.id)}
-                                    className="rounded-lg p-1 text-red-500 hover:bg-red-50 transition"
-                                    title="Delete attachment"
-                                  >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <MediaAttachmentPreview
+                        attachments={attachments}
+                        canDelete={isCreator}
+                        onDelete={(att) => handleDeleteAttachment(att.id)}
+                      />
                     )}
                   </div>
                 </div>

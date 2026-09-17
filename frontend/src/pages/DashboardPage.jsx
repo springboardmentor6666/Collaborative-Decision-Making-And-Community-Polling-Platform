@@ -25,6 +25,7 @@ import IconSidebar from '../components/IconSidebar';
 import RecentActivityFeed from '../components/activity/RecentActivityFeed';
 import SkeletonCard from '../components/ui/SkeletonCard';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 const BAR_ACCENTS = [
@@ -33,42 +34,52 @@ const BAR_ACCENTS = [
   'bg-purple-500',
   'bg-emerald-500',
   'bg-amber-500',
-  'bg-rose-500',
 ];
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, accessToken } = useAuth();
-  const [decisions, setDecisions] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [popularCategories, setPopularCategories] = useState([]);
-  const [decisionTrends, setDecisionTrends] = useState([]);
+  const cachedDashboard = getQueryData('dashboard_data');
+  const [decisions, setDecisions] = useState(() => cachedDashboard?.decisions || []);
+  const [categories, setCategories] = useState(() => cachedDashboard?.categories || []);
+  const [popularCategories, setPopularCategories] = useState(() => cachedDashboard?.popularCategories || []);
+  const [decisionTrends, setDecisionTrends] = useState(() => cachedDashboard?.decisionTrends || []);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loadingDecisions, setLoadingDecisions] = useState(true);
+  const [loadingDecisions, setLoadingDecisions] = useState(() => !cachedDashboard);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
-  const loadDashboardData = () => {
-    setLoadingDecisions(true);
+  const loadDashboardData = (isSilent = false) => {
+    if (!isSilent) {
+      setLoadingDecisions(true);
+    }
     Promise.all([
       fetchDecisions(accessToken).catch(() => []),
       getCategoriesApi(accessToken).catch(() => []),
       getPopularCategoriesApi(accessToken).catch(() => []),
       getDecisionTrendsApi(accessToken).catch(() => []),
     ]).then(([decData, catData, popCatData, trendsData]) => {
-      setDecisions(decData || []);
-      setCategories(catData || []);
-      setPopularCategories(popCatData || []);
-      setDecisionTrends(trendsData || []);
+      const payload = {
+        decisions: decData || [],
+        categories: catData || [],
+        popularCategories: popCatData || [],
+        decisionTrends: trendsData || [],
+      };
+      setQueryData('dashboard_data', payload);
+      setDecisions(payload.decisions);
+      setCategories(payload.categories);
+      setPopularCategories(payload.popularCategories);
+      setDecisionTrends(payload.decisionTrends);
       setLoadingDecisions(false);
     });
   };
 
   useEffect(() => {
-    loadDashboardData();
+    const hasCached = Boolean(getQueryData('dashboard_data'));
+    loadDashboardData(hasCached);
 
     const handleRefresh = () => {
-      loadDashboardData();
+      loadDashboardData(false);
     };
     window.addEventListener('decisionhub:refresh', handleRefresh);
     return () => window.removeEventListener('decisionhub:refresh', handleRefresh);

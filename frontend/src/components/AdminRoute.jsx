@@ -12,6 +12,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Loader from './Loader';
+import NavigationGuard from './NavigationGuard';
 
 export default function AdminRoute({ children }) {
   const { user, isLoading } = useAuth();
@@ -33,5 +34,5 @@ export default function AdminRoute({ children }) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  return <NavigationGuard>{children}</NavigationGuard>;
 }

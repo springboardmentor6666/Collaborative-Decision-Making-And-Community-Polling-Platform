@@ -20,6 +20,7 @@ import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
 import CategorySelector from '../components/CategorySelector';
 import MarkdownEditor from '../components/ui/MarkdownEditor';
+import MediaAttachmentPreview from '../components/MediaAttachmentPreview';
 
 export default function CreateDecision() {
   const navigate = useNavigate();
@@ -47,6 +48,27 @@ export default function CreateDecision() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const mapped = files.map((file) => ({
+      file,
+      name: file.name,
+      filename: file.name,
+      size: file.size,
+      fileSize: file.size,
+      type: file.type,
+      fileType: file.type,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+    }));
+    setSelectedFiles((prev) => [...prev, ...mapped]);
+    e.target.value = '';
+  };
+
+  const handleRemoveFile = (targetFile) => {
+    setSelectedFiles((prev) => prev.filter((f) => f !== targetFile && f.name !== targetFile.name));
+  };
 
   const handleAddOption = () => {
     if (pollOptions.length < 8) {
@@ -144,9 +166,10 @@ export default function CreateDecision() {
 
       // Upload selected file attachments if any
       if (created?.id && selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
+        for (const item of selectedFiles) {
           try {
-            await uploadDecisionFileApi(created.id, file, accessToken);
+            const rawFile = item.file || item;
+            await uploadDecisionFileApi(created.id, rawFile, accessToken);
           } catch (fileErr) {
             console.error('Failed to attach file:', fileErr);
           }
@@ -534,6 +557,42 @@ export default function CreateDecision() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              {/* Media & Document Attachments Card */}
+              <div className="rounded-[2rem] border border-default bg-surface p-6 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-lg font-black tracking-tight text-primary">Media & Document Attachments</h2>
+                    <p className="mt-1 text-sm text-secondary">
+                      Upload supporting screenshots, diagrams, PDFs, or research files. Images render with direct visual previews.
+                    </p>
+                  </div>
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border-default bg-surface px-3.5 py-2 text-xs font-bold text-primary transition hover:bg-surface-alt shadow-xs">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    <span>+ Add Files</span>
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+
+                {selectedFiles.length > 0 ? (
+                  <div className="pt-2">
+                    <MediaAttachmentPreview
+                      attachments={selectedFiles}
+                      canDelete={true}
+                      onDelete={handleRemoveFile}
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border-2 border-dashed border-border-default p-6 text-center text-xs text-muted">
+                    <span>No attachments added yet. Click "+ Add Files" to select images or documents.</span>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

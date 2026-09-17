@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
 import { renderMarkdown } from './ui/MarkdownEditor';
 import ReportModal from './ReportModal';
+import MediaAttachmentPreview from './MediaAttachmentPreview';
 
 function formatRelativeTime(dateString) {
   if (!dateString) return '';
@@ -185,12 +186,13 @@ export default function CommentItem({
                   {author.role}
                 </span>
               )}
-              {comment.isExpert && (
+              {(comment.isExpert || author.role === 'EXPERT' || comment.author?.role === 'EXPERT') && (
                 <span
-                  className="rounded-md bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 inline-flex items-center gap-0.5"
-                  title="Structured Expert Recommendation"
+                  className="rounded-md bg-amber-500/15 border border-amber-500/35 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 inline-flex items-center gap-1 shadow-xs"
+                  title="Verified Domain Expert"
                 >
-                  🏅 Expert Advice
+                  <span>🏅</span>
+                  <span>Verified Expert</span>
                 </span>
               )}
               {isDecisionCreator && (
@@ -307,22 +309,8 @@ export default function CommentItem({
 
             {/* Comment Attachments */}
             {attachments.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2 pt-1">
-                {attachments.map((att) => {
-                  const isImg = att.fileType?.startsWith('image/') || att.filename?.match(/\.(jpeg|jpg|png|gif|webp)$/i);
-                  return (
-                    <a
-                      key={att.id}
-                      href={att.fileUrl || `/api/files/download/${att.filename}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-alt px-2.5 py-1 text-[11px] font-medium text-text-primary hover:border-primary transition"
-                    >
-                      <span>{isImg ? '🖼️' : '📄'}</span>
-                      <span className="truncate max-w-[130px]">{att.filename}</span>
-                    </a>
-                  );
-                })}
+              <div className="mt-2 pt-1">
+                <MediaAttachmentPreview attachments={attachments} compact={true} />
               </div>
             )}
           </div>

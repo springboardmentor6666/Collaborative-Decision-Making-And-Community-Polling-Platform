@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { getMyVotesAnalysisApi } from '../api/axiosClient';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -41,8 +42,16 @@ export default function AnalysisPage() {
     loadData();
   }, [user?.email]);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent = false) => {
+    const cacheKey = `analysis:${user?.id || user?.email || 'me'}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      setVotedDecisions(cached);
+      setLoading(false);
+    } else if (!silent) {
+      setLoading(true);
+    }
     try {
       const data = await getMyVotesAnalysisApi(localStorage.getItem('decisionhub_token'));
       const mapped = data.map(dto => {
@@ -87,6 +96,7 @@ export default function AnalysisPage() {
         };
       });
       setVotedDecisions(mapped);
+      setQueryData(cacheKey, mapped);
     } catch (err) {
       console.error('Failed to load analysis data:', err);
     } finally {

@@ -22,6 +22,7 @@ import {
   exportSingleDecisionAnalyticsPDF,
   exportSingleDecisionAnalyticsCSV,
 } from '../utils/exportUtils';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -87,8 +88,17 @@ export default function AnalyticsPage() {
     }
   };
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent = false) => {
+    const cacheKey = `analytics:${user?.id || user?.email || 'me'}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      setAnalyticsData(cached);
+      setLoading(false);
+    } else if (!silent) {
+      setLoading(true);
+    }
+
     try {
       const data = await getCreatorAnalyticsApi(accessToken || localStorage.getItem('decisionhub_token'));
       const mapped = {
@@ -114,6 +124,7 @@ export default function AnalyticsPage() {
         }))
       };
       setAnalyticsData(mapped);
+      setQueryData(cacheKey, mapped);
     } catch (err) {
       console.error('Failed to load creator analytics:', err);
     } finally {

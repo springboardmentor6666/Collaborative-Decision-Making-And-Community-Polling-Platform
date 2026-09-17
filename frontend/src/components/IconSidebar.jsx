@@ -298,15 +298,53 @@ export default function IconSidebar() {
         <div className="mt-auto mb-3" />
       </aside>
 
+      {/* Mobile Bottom Quick-Actions Bar (Visible on mobile viewports < 640px) */}
+      <nav
+        aria-label="Mobile Quick Tools"
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-border-default bg-surface/95 py-2 px-3 backdrop-blur-xl sm:hidden shadow-lg"
+      >
+        {sidebarItems.map((item) => {
+          const isNotif = item.id === 'notifications';
+          const hasActiveNotifs = isNotif && unreadCount > 0;
+          return (
+            <button
+              key={`mobile-${item.id}`}
+              onClick={() => {
+                if (item.id === 'theme') {
+                  cycleTheme();
+                  return;
+                }
+                openPanel(item.id);
+              }}
+              className="relative flex flex-col items-center justify-center p-1.5 rounded-xl text-muted hover:text-text-primary hover:bg-surface-alt transition active:scale-95"
+              title={item.label}
+              aria-label={item.label}
+            >
+              <div className="relative">
+                {item.icon}
+                {hasActiveNotifs && (
+                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[8px] font-black text-white shadow-xs">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-semibold mt-0.5 tracking-tight text-text-secondary">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
       {isOpen && (
         <div className="fixed inset-0 z-40 backdrop-blur-sm" style={{ backgroundColor: 'var(--overlay)' }} onClick={closePanel} />
       )}
 
       <motion.aside
-        initial={{ x: 340, opacity: 0 }}
-        animate={{ x: isOpen ? 0 : 340, opacity: isOpen ? 1 : 0 }}
+        initial={{ x: 360, opacity: 0 }}
+        animate={{ x: isOpen ? 0 : 360, opacity: isOpen ? 1 : 0 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="fixed right-0 top-0 z-50 h-screen w-[340px] sm:w-[360px] overflow-y-auto border-l border-border-default p-5 shadow-2xl backdrop-blur-xl"
+        className="fixed right-0 top-0 z-50 h-screen w-full sm:w-[360px] max-w-[360px] overflow-y-auto border-l border-border-default p-5 shadow-2xl backdrop-blur-xl"
         style={{ backgroundColor: 'var(--surface)', color: 'var(--text-primary)' }}
       >
         <div className="flex items-center justify-between border-b border-border-default pb-4">

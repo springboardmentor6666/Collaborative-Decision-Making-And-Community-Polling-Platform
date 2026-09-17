@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAdminStatsOverviewApi, getAdminStatsTimeSeriesApi } from '../api/axiosClient';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -39,12 +40,22 @@ export default function AdminStatisticsPage() {
     loadTimeSeries();
   }, [timeRange, accessToken]);
 
-  const loadOverview = async () => {
+  const loadOverview = async (silent = false) => {
     if (!accessToken) return;
-    try {
+    const cacheKey = 'admin:stats:overview';
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      setOverview(cached);
+      setLoading(false);
+    } else if (!silent) {
       setLoading(true);
+    }
+
+    try {
       const data = await getAdminStatsOverviewApi(accessToken);
       setOverview(data);
+      setQueryData(cacheKey, data);
     } catch (err) {
       console.error('Failed to load stats overview:', err);
     } finally {
@@ -52,10 +63,19 @@ export default function AdminStatisticsPage() {
     }
   };
 
-  const loadTimeSeries = async () => {
+  const loadTimeSeries = async (silent = false) => {
     if (!accessToken) return;
-    try {
+    const cacheKey = `admin:stats:timeseries:${timeRange}:${customStart}:${customEnd}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      setTimeSeries(cached);
+      setTsLoading(false);
+    } else if (!silent) {
       setTsLoading(true);
+    }
+
+    try {
       const data = await getAdminStatsTimeSeriesApi(
         {
           range: timeRange,
@@ -65,6 +85,7 @@ export default function AdminStatisticsPage() {
         accessToken
       );
       setTimeSeries(data);
+      setQueryData(cacheKey, data);
     } catch (err) {
       console.error('Failed to load time series stats:', err);
     } finally {

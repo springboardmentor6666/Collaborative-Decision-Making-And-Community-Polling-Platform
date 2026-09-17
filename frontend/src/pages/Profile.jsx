@@ -36,6 +36,13 @@ import DecisionCard from '../components/DecisionCard';
 import Loader from '../components/Loader';
 import RecentActivityFeed from '../components/activity/RecentActivityFeed';
 import { Link } from 'react-router-dom';
+import { getQueryData, setQueryData } from '../utils/queryCache';
+import {
+  EXPERT_DOMAINS,
+  EXPERIENCE_LEVELS,
+  submitExpertApplicationApi,
+  getMyExpertApplicationApi,
+} from '../api/expertApi';
 
 const UI_MODE_COLORS = {
   black: '#0f172a',
@@ -62,7 +69,23 @@ export default function Profile() {
 
   const [currentUser, setCurrentUser] = useState(user);
   const [activeTab, setActiveTab] = useState('account');
-  const [savedDecisions, setSavedDecisions] = useState([]);
+  const [activitySubTab, setActivitySubTab] = useState('timeline');
+  const [expertApp, setExpertApp] = useState(null);
+  const [loadingExpert, setLoadingExpert] = useState(false);
+  const [submittingExpert, setSubmittingExpert] = useState(false);
+  const [expertForm, setExpertForm] = useState({
+    specialization: EXPERT_DOMAINS[0],
+    customSpecialization: '',
+    experienceYears: EXPERIENCE_LEVELS[1],
+    qualifications: '',
+    portfolioUrl: '',
+    documentName: '',
+    documentDataUrl: '',
+    documentSize: '',
+  });
+
+  const cachedSaved = getQueryData(['profile_saved', user?.id]);
+  const [savedDecisions, setSavedDecisions] = useState(() => cachedSaved || []);
   const [loadingSaved, setLoadingSaved] = useState(false);
 
   // User Reports & Moderation Notices State
@@ -114,24 +137,93 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'saved') {
+    if (activeTab === 'saved' || (activeTab === 'activity' && activitySubTab === 'saved')) {
       loadSavedDecisions();
     } else if (activeTab === 'moderation') {
       loadModerationData();
     } else if (activeTab === 'notifications') {
       loadPreferences();
+    } else if (activeTab === 'expert') {
+      loadExpertStatus();
     }
-  }, [activeTab, accessToken]);
+  }, [activeTab, activitySubTab, accessToken]);
 
   useEffect(() => {
     const handleRefresh = () => {
-      if (activeTab === 'saved') loadSavedDecisions();
+      if (activeTab === 'saved' || (activeTab === 'activity' && activitySubTab === 'saved')) loadSavedDecisions(true);
       else if (activeTab === 'moderation') loadModerationData();
       else if (activeTab === 'notifications') loadPreferences();
+      else if (activeTab === 'expert') loadExpertStatus();
     };
     window.addEventListener('decisionhub:refresh', handleRefresh);
     return () => window.removeEventListener('decisionhub:refresh', handleRefresh);
-  }, [activeTab, accessToken]);
+  }, [activeTab, activitySubTab, accessToken]);
+
+  const loadExpertStatus = async () => {
+    if (!user) return;
+    try {
+      setLoadingExpert(true);
+      const app = await getMyExpertApplicationApi(user);
+      setExpertApp(app);
+    } catch (e) {
+      console.error('Failed to load expert status:', e);
+    } finally {
+      setLoadingExpert(false);
+    }
+  };
+
+  const handleExpertDocUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setExpertForm((prev) => ({
+        ...prev,
+        documentName: file.name,
+        documentDataUrl: event.target.result,
+        documentSize: `${Math.round(file.size / 1024)} KB`,
+      }));
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSubmitExpertApplication = async (e) => {
+    e.preventDefault();
+    const domain =
+      expertForm.specialization === 'Other' && expertForm.customSpecialization.trim()
+        ? expertForm.customSpecialization.trim()
+        : expertForm.specialization;
+
+    if (!expertForm.qualifications.trim()) {
+      showError(null, 'Please provide a statement of qualifications and background.');
+      return;
+    }
+
+    try {
+      setSubmittingExpert(true);
+      const created = await submitExpertApplicationApi({
+        user,
+        specialization: domain,
+        experienceYears: expertForm.experienceYears,
+        qualifications: expertForm.qualifications.trim(),
+        portfolioUrl: expertForm.portfolioUrl.trim(),
+        documentName: expertForm.documentName || 'resume_certificate.pdf',
+        documentDataUrl: expertForm.documentDataUrl,
+        documentSize: expertForm.documentSize || '150 KB',
+      });
+      setExpertApp(created);
+      showAlert({
+        title: 'Application Submitted',
+        message: 'Your expert verification request has been sent for review. You will receive an alert once processed.',
+        type: 'success',
+      });
+    } catch (err) {
+      showError(err, 'Failed to submit expert application.');
+    } finally {
+      setSubmittingExpert(false);
+    }
+  };
 
   const loadPreferences = async () => {
     if (!accessToken) return;
@@ -189,12 +281,20 @@ export default function Profile() {
     }
   };
 
-  const loadSavedDecisions = async () => {
+  const loadSavedDecisions = async (silent = false) => {
     if (!accessToken) return;
-    try {
+    const cached = getQueryData(['profile_saved', user?.id]);
+    if (cached && !silent) {
+      setSavedDecisions(cached);
+      setLoadingSaved(false);
+    } else if (!silent) {
       setLoadingSaved(true);
+    }
+    try {
       const data = await getSavedDecisionsApi(accessToken);
-      setSavedDecisions(data);
+      const list = Array.isArray(data) ? data : [];
+      setSavedDecisions(list);
+      setQueryData(['profile_saved', user?.id], list);
     } catch {
       setSavedDecisions([]);
     } finally {
@@ -419,10 +519,9 @@ export default function Profile() {
               <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
                 {[
                   { id: 'account', label: 'Account & Display', icon: '👤' },
+                  { id: 'activity', label: 'Activity & Interests', icon: '⚡' },
+                  { id: 'expert', label: 'Expert Verification', icon: '🏅' },
                   { id: 'notifications', label: 'Notifications', icon: '🔔' },
-                  { id: 'interests', label: 'Topic Interests', icon: '🏷️' },
-                  { id: 'saved', label: 'Saved Decisions', icon: '🔖' },
-                  { id: 'activity', label: 'My Activity', icon: '⚡' },
                   { id: 'moderation', label: 'Reports & Notices', icon: '🛡️' },
                 ].map((t) => (
                   <button
@@ -1043,85 +1142,355 @@ export default function Profile() {
               </div>
             )}
 
-            {/* Tab 2: Topic Interests Editor */}
-            {activeTab === 'interests' && (
-              <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-4">
-                <div>
-                  <h2 className="text-lg font-black text-text-primary">Your Topic Interests</h2>
-                  <p className="text-xs text-muted mt-0.5">
-                    Select the categories and domains you are most interested in participating in.
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-border-default">
-                  <InterestTaxonomyEditor autoSave={false} />
-                </div>
-              </div>
-            )}
-
-            {/* Tab 3: Saved / Bookmarked Decisions */}
-            {activeTab === 'saved' && (
+            {/* Tab: Unified Activity, Saved Decisions & Interests Hub */}
+            {activeTab === 'activity' && (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-black text-text-primary">Bookmarked Decisions</h2>
-                  <p className="text-xs text-muted">
-                    Quickly access decisions you have saved for later review or follow-up.
-                  </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-4">
+                  <div>
+                    <h2 className="text-xl font-black tracking-tight text-text-primary">Activity & Interests Hub</h2>
+                    <p className="text-xs text-muted">
+                      Your unified workspace for personal timeline, bookmarked decisions, and topic preferences.
+                    </p>
+                  </div>
+                  {/* Segmented sub-tabs */}
+                  <div className="flex items-center gap-1 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
+                    {[
+                      { id: 'timeline', label: 'Timeline', icon: '⚡' },
+                      { id: 'saved', label: `Saved Decisions (${savedDecisions.length})`, icon: '🔖' },
+                      { id: 'interests', label: 'Topic Interests', icon: '🏷️' },
+                    ].map((sub) => (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        onClick={() => {
+                          setActivitySubTab(sub.id);
+                          if (sub.id === 'saved') loadSavedDecisions();
+                        }}
+                        className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                          activitySubTab === sub.id
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-alt'
+                        }`}
+                      >
+                        <span>{sub.icon}</span>
+                        <span>{sub.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {loadingSaved ? (
-                  <Loader message="Loading saved bookmarks..." />
-                ) : savedDecisions.length === 0 ? (
-                  <div className="rounded-[2rem] border border-dashed border-border-default bg-surface p-12 text-center space-y-4">
-                    <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-amber-500/10 text-2xl">
-                      🔖
-                    </div>
+                {/* Sub-tab 1: Activity Timeline */}
+                {activitySubTab === 'timeline' && (
+                  <div className="h-[600px]">
+                    <RecentActivityFeed
+                      feedType="USER"
+                      targetId={user.id}
+                      showHeader={false}
+                      limit={25}
+                    />
+                  </div>
+                )}
+
+                {/* Sub-tab 2: Saved Decisions */}
+                {activitySubTab === 'saved' && (
+                  <div className="space-y-4">
+                    {loadingSaved ? (
+                      <Loader message="Loading saved bookmarks..." />
+                    ) : savedDecisions.length === 0 ? (
+                      <div className="rounded-[2rem] border border-dashed border-border-default bg-surface p-12 text-center space-y-4">
+                        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-amber-500/10 text-2xl">
+                          🔖
+                        </div>
+                        <div>
+                          <p className="text-base font-bold text-text-primary">No Saved Decisions Yet</p>
+                          <p className="text-xs text-muted mt-1 max-w-sm mx-auto">
+                            Click the bookmark icon on any decision card across your dashboard or communities to pin it here.
+                          </p>
+                        </div>
+                        <Link
+                          to="/dashboard"
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-hover transition"
+                        >
+                          Browse Decision Stream →
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {savedDecisions.map((decision) => (
+                          <DecisionCard
+                            key={decision.id}
+                            decision={decision}
+                            isSavedInitially={true}
+                            onBookmarkToggled={handleBookmarkToggled}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Sub-tab 3: Topic Interests */}
+                {activitySubTab === 'interests' && (
+                  <div className="rounded-[2rem] border border-border-default bg-surface p-6 shadow-sm space-y-4">
                     <div>
-                      <p className="text-base font-bold text-text-primary">No Saved Decisions Yet</p>
-                      <p className="text-xs text-muted mt-1 max-w-sm mx-auto">
-                        Click the bookmark icon on any decision card across your dashboard or communities to pin it here.
+                      <h3 className="text-base font-bold text-text-primary">Customize Your Topic Interests</h3>
+                      <p className="text-xs text-muted mt-0.5">
+                        Choose your preferred community domains to personalize trending decisions and recommendation feeds.
                       </p>
                     </div>
-                    <Link
-                      to="/dashboard"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-primary-hover transition"
-                    >
-                      Browse Decision Stream →
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {savedDecisions.map((decision) => (
-                      <DecisionCard
-                        key={decision.id}
-                        decision={decision}
-                        isSavedInitially={true}
-                        onBookmarkToggled={handleBookmarkToggled}
-                      />
-                    ))}
+                    <div className="pt-2 border-t border-border-default">
+                      <InterestTaxonomyEditor autoSave={false} />
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Tab 4: My Activity Timeline */}
-            {activeTab === 'activity' && (
+            {/* Tab: Expert Verification & Credentials */}
+            {activeTab === 'expert' && (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-black text-text-primary">My Activity Timeline</h2>
-                  <p className="text-xs text-muted">
-                    Track all your poll votes, decisions created, and community contributions.
-                  </p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-black tracking-tight text-text-primary flex items-center gap-2">
+                      <span>🏅</span> Expert Verification & Credentials
+                    </h2>
+                    <p className="text-xs text-muted">
+                      Apply to become a recognized domain expert. Verified experts provide official recommendations, advisory commentary, and carry verified badges.
+                    </p>
+                  </div>
+                  {(user?.role === 'EXPERT' || expertApp?.status === 'APPROVED') && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-300 shadow-xs">
+                      <span>✓</span> Active Verified Expert
+                    </span>
+                  )}
                 </div>
 
-                <div className="h-[600px]">
-                  <RecentActivityFeed
-                    feedType="USER"
-                    targetId={user.id}
-                    showHeader={true}
-                    limit={25}
-                  />
-                </div>
+                {loadingExpert ? (
+                  <Loader message="Loading verification status..." />
+                ) : (user?.role === 'EXPERT' || expertApp?.status === 'APPROVED') ? (
+                  /* Verified Expert Status Card */
+                  <div className="rounded-[2rem] border border-amber-500/30 bg-surface p-8 shadow-sm space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-2xl text-amber-600 dark:text-amber-400">
+                        🏅
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-black text-text-primary">
+                            {user.name || user.fullName || 'User'}
+                          </h3>
+                          <span className="rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-xs px-2 py-0.5 border border-amber-500/30">
+                            Verified Expert
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-primary">
+                          Domain: {expertApp?.specialization || 'Decision & Policy Advisor'}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {expertApp?.experienceYears || 'Senior Specialist'} • Verified credentials on file
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-2">
+                      <div className="rounded-2xl border border-border-default bg-surface-alt p-4">
+                        <span className="text-xs font-bold text-muted uppercase">Badge in Comments</span>
+                        <p className="mt-1 text-sm font-bold text-text-primary">🏅 Verified Expert</p>
+                      </div>
+                      <div className="rounded-2xl border border-border-default bg-surface-alt p-4">
+                        <span className="text-xs font-bold text-muted uppercase">Recommendation Tab</span>
+                        <p className="mt-1 text-sm font-bold text-text-primary">Structured Expert Advice</p>
+                      </div>
+                      <div className="rounded-2xl border border-border-default bg-surface-alt p-4">
+                        <span className="text-xs font-bold text-muted uppercase">Verification Status</span>
+                        <p className="mt-1 text-sm font-bold text-emerald-600">Active & Certified</p>
+                      </div>
+                    </div>
+
+                    {expertApp?.documentName && (
+                      <div className="flex items-center justify-between rounded-xl border border-border-default bg-surface-alt p-3 text-xs">
+                        <span className="font-semibold text-muted">Verified Document: {expertApp.documentName}</span>
+                        {expertApp.documentDataUrl && (
+                          <a
+                            href={expertApp.documentDataUrl}
+                            download={expertApp.documentName}
+                            className="font-bold text-primary hover:underline"
+                          >
+                            Download Credentials ↗
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : expertApp?.status === 'PENDING' ? (
+                  /* Pending Application Card */
+                  <div className="rounded-[2rem] border border-amber-500/30 bg-surface p-8 shadow-sm space-y-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-2xl">
+                        ⏳
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-text-primary">Application Under Administrative Review</h3>
+                        <p className="text-xs text-muted">
+                          Submitted on {new Date(expertApp.appliedAt).toLocaleDateString()}. Platform administrators review credentials within 1-2 business days.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 rounded-2xl border border-border-default bg-surface-alt/50 p-4 text-xs">
+                      <div>
+                        <span className="font-bold text-muted uppercase text-[10px]">Domain Specialization:</span>
+                        <p className="font-bold text-text-primary text-sm mt-0.5">{expertApp.specialization}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-muted uppercase text-[10px]">Experience Level:</span>
+                        <p className="font-semibold text-text-primary mt-0.5">{expertApp.experienceYears}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-muted uppercase text-[10px]">Qualification Statement:</span>
+                        <p className="text-secondary mt-0.5 whitespace-pre-wrap">{expertApp.qualifications}</p>
+                      </div>
+                      {expertApp.documentName && (
+                        <div>
+                          <span className="font-bold text-muted uppercase text-[10px]">Attached Verification Document:</span>
+                          <p className="font-mono text-primary font-bold mt-0.5">{expertApp.documentName} ({expertApp.documentSize})</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  /* Application Form */
+                  <form onSubmit={handleSubmitExpertApplication} className="rounded-[2rem] border border-border-default bg-surface p-6 sm:p-8 shadow-sm space-y-6">
+                    {expertApp?.status === 'REJECTED' && (
+                      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-700 dark:text-rose-300 space-y-1">
+                        <p className="font-bold">Previous Application Not Approved</p>
+                        <p>{expertApp.reviewNote || 'Credentials did not meet current verification standards. You may submit updated credentials below.'}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
+                          Domain of Expertise *
+                        </label>
+                        <select
+                          value={expertForm.specialization}
+                          onChange={(e) => setExpertForm({ ...expertForm, specialization: e.target.value })}
+                          className="app-input px-4 py-2.5 text-xs sm:text-sm font-semibold w-full"
+                        >
+                          {EXPERT_DOMAINS.map((domain) => (
+                            <option key={domain} value={domain}>{domain}</option>
+                          ))}
+                          <option value="Other">Other Custom Domain</option>
+                        </select>
+                      </div>
+
+                      {expertForm.specialization === 'Other' && (
+                        <div>
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
+                            Specify Your Domain *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Distributed Consensus Systems"
+                            value={expertForm.customSpecialization}
+                            onChange={(e) => setExpertForm({ ...expertForm, customSpecialization: e.target.value })}
+                            className="app-input px-4 py-2.5 text-xs sm:text-sm w-full"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
+                          Years of Practical Experience *
+                        </label>
+                        <select
+                          value={expertForm.experienceYears}
+                          onChange={(e) => setExpertForm({ ...expertForm, experienceYears: e.target.value })}
+                          className="app-input px-4 py-2.5 text-xs sm:text-sm font-semibold w-full"
+                        >
+                          {EXPERIENCE_LEVELS.map((lvl) => (
+                            <option key={lvl} value={lvl}>{lvl}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
+                          Professional Portfolio / LinkedIn / Academic Profile
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://linkedin.com/in/username or https://orcid.org/..."
+                          value={expertForm.portfolioUrl}
+                          onChange={(e) => setExpertForm({ ...expertForm, portfolioUrl: e.target.value })}
+                          className="app-input px-4 py-2.5 text-xs sm:text-sm w-full"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">
+                          Qualifications & Domain Background Statement *
+                        </label>
+                        <textarea
+                          rows={4}
+                          required
+                          placeholder="Summarize your professional qualifications, relevant certifications, major projects, degrees, or advisory positions..."
+                          value={expertForm.qualifications}
+                          onChange={(e) => setExpertForm({ ...expertForm, qualifications: e.target.value })}
+                          className="app-input px-4 py-3 text-xs sm:text-sm w-full resize-none leading-relaxed"
+                        />
+                      </div>
+
+                      {/* Resume / Certification Document Upload */}
+                      <div className="sm:col-span-2 space-y-2">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-muted">
+                          Upload Resume / Certificate / Credential Proof *
+                        </label>
+                        <div className="flex flex-col sm:flex-row items-center gap-4 rounded-2xl border-2 border-dashed border-border-default p-5 bg-surface-alt/30">
+                          <label className="cursor-pointer inline-flex items-center gap-2 rounded-xl bg-primary text-white px-4 py-2 text-xs font-bold shadow-xs hover:bg-primary-hover transition">
+                            <span>📄 Select Document</span>
+                            <input
+                              type="file"
+                              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                              className="hidden"
+                              onChange={handleExpertDocUpload}
+                            />
+                          </label>
+                          <div className="text-xs text-muted text-center sm:text-left flex-1">
+                            {expertForm.documentName ? (
+                              <div className="flex items-center gap-2 text-text-primary font-bold">
+                                <span className="rounded-md bg-primary-soft text-primary px-2 py-0.5 text-xs">Selected</span>
+                                <span>{expertForm.documentName}</span>
+                                <span className="text-muted text-[10px]">({expertForm.documentSize})</span>
+                              </div>
+                            ) : (
+                              <span>Upload a PDF, document, or certificate scan to verify your expertise (Max 15MB).</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end pt-4 border-t border-border-default">
+                      <button
+                        type="submit"
+                        disabled={submittingExpert}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-app hover:bg-primary-hover transition disabled:opacity-50"
+                      >
+                        {submittingExpert ? (
+                          <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            <span>Submitting Application...</span>
+                          </>
+                        ) : (
+                          <span>🏅 Submit for Expert Verification</span>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
 

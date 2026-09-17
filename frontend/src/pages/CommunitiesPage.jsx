@@ -16,6 +16,7 @@ import {
   getPendingCommunityInvitesApi,
   respondToCommunityInviteApi,
 } from '../api/axiosClient';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import CommunityCard from '../components/CommunityCard';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
@@ -50,14 +51,19 @@ export default function CommunitiesPage() {
 
   const handleRespondInvite = async (inviteId, response) => {
     setRespondingInviteId(inviteId);
+    // Optimistic removal
+    setPendingInvites((prev) => prev.filter((inv) => inv.id !== inviteId));
     try {
       await respondToCommunityInviteApi(inviteId, response, accessToken);
-      await fetchInvites();
-      // Refresh communities list
+      fetchInvites();
+      // Refresh communities list silently
       const commData = await getCommunitiesApi(searchQuery, accessToken);
-      setCommunities(Array.isArray(commData) ? commData : []);
+      const safeData = Array.isArray(commData) ? commData : [];
+      setCommunities(safeData);
+      setQueryData(`communities:${searchQuery || 'all'}`, safeData);
     } catch (err) {
       showError(err, `Failed to ${response.toLowerCase()} invitation`);
+      fetchInvites();
     } finally {
       setRespondingInviteId(null);
     }
@@ -65,7 +71,17 @@ export default function CommunitiesPage() {
 
   useEffect(() => {
     let isSubscribed = true;
-    setLoading(true);
+    const cacheKey = `communities:${searchQuery || 'all'}`;
+    const cachedComm = getQueryData(cacheKey);
+    const cachedCat = getQueryData('categories');
+
+    if (cachedComm) {
+      setCommunities(cachedComm);
+      if (cachedCat) setCategories(cachedCat);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     const timer = setTimeout(() => {
@@ -76,13 +92,17 @@ export default function CommunitiesPage() {
       ])
         .then(([commData, catData, invitesData]) => {
           if (isSubscribed) {
-            setCommunities(Array.isArray(commData) ? commData : []);
-            setCategories(Array.isArray(catData) ? catData : []);
+            const safeComm = Array.isArray(commData) ? commData : [];
+            const safeCat = Array.isArray(catData) ? catData : [];
+            setCommunities(safeComm);
+            setCategories(safeCat);
             setPendingInvites(Array.isArray(invitesData) ? invitesData : []);
+            setQueryData(cacheKey, safeComm);
+            setQueryData('categories', safeCat);
           }
         })
         .catch((err) => {
-          if (isSubscribed) setError(err.message || 'Failed to load communities.');
+          if (isSubscribed && !cachedComm) setError(err.message || 'Failed to load communities.');
         })
         .finally(() => {
           if (isSubscribed) setLoading(false);
@@ -96,9 +116,13 @@ export default function CommunitiesPage() {
         accessToken ? getPendingCommunityInvitesApi(accessToken).catch(() => []) : Promise.resolve([]),
       ]).then(([commData, catData, invitesData]) => {
         if (isSubscribed) {
-          setCommunities(Array.isArray(commData) ? commData : []);
-          setCategories(Array.isArray(catData) ? catData : []);
+          const safeComm = Array.isArray(commData) ? commData : [];
+          const safeCat = Array.isArray(catData) ? catData : [];
+          setCommunities(safeComm);
+          setCategories(safeCat);
           setPendingInvites(Array.isArray(invitesData) ? invitesData : []);
+          setQueryData(cacheKey, safeComm);
+          setQueryData('categories', safeCat);
         }
       });
     };

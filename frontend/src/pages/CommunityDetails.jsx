@@ -27,6 +27,7 @@ import {
   getCommunityDecisionsApi,
   inviteUserToCommunityApi,
 } from '../api/axiosClient';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import DecisionCard from '../components/DecisionCard';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -90,8 +91,26 @@ export default function CommunityDetails() {
     }
   };
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    const cacheKey = `community:${id}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      if (cached.community) {
+        setCommunity(cached.community);
+        setEditFormData({
+          name: cached.community.name || '',
+          description: cached.community.description || '',
+          visibility: cached.community.visibility || 'PUBLIC',
+        });
+      }
+      if (cached.members) setMembers(cached.members);
+      if (cached.decisions) setDecisions(cached.decisions);
+      setLoading(false);
+    } else if (!silent) {
+      setLoading(true);
+    }
+
     setError(null);
     setIsAccessDenied(false);
     try {
@@ -100,29 +119,34 @@ export default function CommunityDetails() {
       setEditFormData({
         name: commData.name || '',
         description: commData.description || '',
-        visibility: commData.visibility || 'PUBLIC'
+        visibility: commData.visibility || 'PUBLIC',
       });
 
-      // If user has access, fetch members & group decisions
+      let membersData = [];
       try {
-        const membersData = await getCommunityMembersApi(id, accessToken);
+        membersData = await getCommunityMembersApi(id, accessToken);
         setMembers(membersData);
       } catch (e) {
-        // Members list may be empty or protected
         setMembers([]);
       }
 
+      let groupDecisions = [];
       try {
-        const groupDecisions = await getCommunityDecisionsApi(id, accessToken);
+        groupDecisions = await getCommunityDecisionsApi(id, accessToken);
         setDecisions(groupDecisions);
       } catch (e) {
         setDecisions([]);
       }
 
+      setQueryData(cacheKey, {
+        community: commData,
+        members: membersData,
+        decisions: groupDecisions,
+      });
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('denied')) {
         setIsAccessDenied(true);
-      } else {
+      } else if (!cached) {
         setError(err.message || 'Failed to load community details.');
       }
     } finally {
@@ -146,7 +170,7 @@ export default function CommunityDetails() {
         currentUserRole: res?.currentUserRole || 'MEMBER',
         memberCount: (prev?.memberCount || 0) + 1,
       }));
-      await fetchData();
+      await fetchData(true);
     } catch (err) {
       showError(err, 'Failed to join community.');
     } finally {
@@ -172,7 +196,7 @@ export default function CommunityDetails() {
         currentUserRole: null,
         memberCount: Math.max((prev?.memberCount || 1) - 1, 0),
       }));
-      await fetchData();
+      await fetchData(true);
     } catch (err) {
       showError(err, 'Failed to leave community.');
     } finally {
@@ -186,7 +210,7 @@ export default function CommunityDetails() {
     try {
       await updateCommunityApi(id, editFormData, accessToken);
       setShowEditModal(false);
-      await fetchData();
+      await fetchData(true);
     } catch (err) {
       setEditError(err.message || 'Failed to update community.');
     }
@@ -222,7 +246,7 @@ export default function CommunityDetails() {
     try {
       await transferOwnershipApi(id, Number(selectedNewOwner), accessToken);
       setShowTransferModal(false);
-      await fetchData();
+      await fetchData(true);
     } catch (err) {
       setTransferError(err.message || 'Failed to transfer ownership.');
     }

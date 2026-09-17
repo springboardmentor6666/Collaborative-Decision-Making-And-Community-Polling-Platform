@@ -30,6 +30,12 @@ import {
   permanentDeleteUserAdminApi,
   cancelUserDeletionAdminApi,
 } from '../api/axiosClient';
+import {
+  getAllExpertApplicationsAdminApi,
+  approveExpertApplicationAdminApi,
+  rejectExpertApplicationAdminApi,
+} from '../api/expertApi';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -40,13 +46,16 @@ export default function AdminPage() {
   const { showError, showConfirm, showAlert } = useAlert();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab');
-  const activeTab = ['users', 'moderation', 'audit', 'settings'].includes(currentTab) ? currentTab : 'users';
+  const validTabs = ['users', 'experts', 'moderation', 'audit', 'settings'];
+  const activeTab = validTabs.includes(currentTab) ? currentTab : 'users';
   const setActiveTab = (tab) => {
     setSearchParams({ tab });
   };
 
   // State
   const [users, setUsers] = useState([]);
+  const [expertApplications, setExpertApplications] = useState([]);
+  const [expertFilter, setExpertFilter] = useState('ALL');
   const [reports, setReports] = useState([]);
   const [flags, setFlags] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
@@ -66,38 +75,71 @@ export default function AdminPage() {
     loadData();
   }, [activeTab, accessToken]);
 
-  const loadData = async () => {
-    setLoading(true);
-    setStatusMessage({ text: '', type: '' });
+  const loadData = async (silent = false) => {
+    const cacheKey = `admin:${activeTab}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      if (activeTab === 'users') setUsers(cached);
+      else if (activeTab === 'experts') setExpertApplications(cached);
+      else if (activeTab === 'moderation') {
+        setReports(cached.reports || []);
+        setFlags(cached.flags || []);
+      } else if (activeTab === 'audit') setAuditLogs(cached);
+      else if (activeTab === 'settings') setSettings(cached);
+
+      setLoading(false);
+    } else if (!silent) {
+      setLoading(true);
+    }
+
     try {
       if (activeTab === 'users') {
         const data = await getAllUsersAdminApi(accessToken);
         setUsers(data);
+        setQueryData(cacheKey, data);
+      } else if (activeTab === 'experts') {
+        const apps = await getAllExpertApplicationsAdminApi(accessToken);
+        setExpertApplications(apps);
+        setQueryData(cacheKey, apps);
       } else if (activeTab === 'moderation') {
         const [repData, flagData] = await Promise.allSettled([
           getReportsAdminApi(accessToken),
           getModerationFlagsApi(accessToken),
         ]);
-        setReports(repData.status === 'fulfilled' ? repData.value : []);
-        setFlags(flagData.status === 'fulfilled' ? flagData.value : []);
+        const rList = repData.status === 'fulfilled' ? repData.value : [];
+        const fList = flagData.status === 'fulfilled' ? flagData.value : [];
+        setReports(rList);
+        setFlags(fList);
+        setQueryData(cacheKey, { reports: rList, flags: fList });
       } else if (activeTab === 'audit') {
         const logs = await getAuditLogsAdminApi(accessToken);
         setAuditLogs(logs);
+        setQueryData(cacheKey, logs);
       } else if (activeTab === 'settings') {
         const st = await getAdminSettingsApi(accessToken);
         setSettings(st);
+        setQueryData(cacheKey, st);
       }
     } catch (err) {
-      setStatusMessage({ text: 'Failed to load administrative data.', type: 'error' });
+      if (!cached) {
+        setStatusMessage({ text: 'Failed to load administrative data.', type: 'error' });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // User Actions
+  // User Actions (Optimistic & Silent Refresh)
   const handleToggleUserBan = async (targetUser) => {
     const isCurrentlyActive = targetUser.isActive !== false;
     setActionLoading(`ban-${targetUser.id}`);
+    
+    // Optimistic local state update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: !isCurrentlyActive } : u))
+    );
+
     try {
       if (isCurrentlyActive) {
         await banUserAdminApi(targetUser.id, accessToken);
@@ -106,10 +148,12 @@ export default function AdminPage() {
         await unbanUserAdminApi(targetUser.id, accessToken);
         setStatusMessage({ text: `User ${targetUser.name || targetUser.email} has been reactivated.`, type: 'success' });
       }
-      // Refresh user list
-      const updated = await getAllUsersAdminApi(accessToken);
-      setUsers(updated);
+      loadData(true);
     } catch (err) {
+      // Revert on error
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: isCurrentlyActive } : u))
+      );
       showError(err, 'Failed to update user status.');
       setStatusMessage({ text: 'Action failed.', type: 'error' });
     } finally {
@@ -119,26 +163,33 @@ export default function AdminPage() {
 
   const handleRoleChange = async (userId, newRole) => {
     setActionLoading(`role-${userId}`);
+    const originalUsers = [...users];
+
+    // Optimistic update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
+
     try {
       await updateUserRoleAdminApi(userId, newRole, accessToken);
       setStatusMessage({ text: `User role successfully updated to ${newRole}.`, type: 'success' });
-      const updated = await getAllUsersAdminApi(accessToken);
-      setUsers(updated);
+      loadData(true);
     } catch (err) {
+      setUsers(originalUsers);
       showError(err, 'Failed to update user role.');
       setStatusMessage({ text: 'Failed to update user role.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
-  };
-
   const handleCancelDeletionAdmin = async (userId) => {
     setActionLoading(`cancel-del-${userId}`);
     try {
       await cancelUserDeletionAdminApi(userId, accessToken);
       setStatusMessage({ text: 'Scheduled deletion successfully cancelled. User restored to Active.', type: 'success' });
-      const updated = await getAllUsersAdminApi(accessToken);
-      setUsers(updated);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, accountStatus: 'ACTIVE' } : u))
+      );
+      loadData(true);
     } catch (err) {
       showError(err, 'Failed to cancel deletion request.');
       setStatusMessage({ text: 'Action failed.', type: 'error' });
@@ -162,11 +213,84 @@ export default function AdminPage() {
     try {
       await permanentDeleteUserAdminApi(targetUser.id, accessToken);
       setStatusMessage({ text: `User ${targetUser.name || targetUser.email} has been permanently deleted and anonymized.`, type: 'success' });
-      const updated = await getAllUsersAdminApi(accessToken);
-      setUsers(updated);
+      setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
+      loadData(true);
     } catch (err) {
       showError(err, 'Failed to permanently delete user.');
       setStatusMessage({ text: 'Permanent deletion failed.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Expert Application Actions
+  const handleApproveExpert = async (application) => {
+    setActionLoading(`expert-approve-${application.id}`);
+    try {
+      await approveExpertApplicationAdminApi(application.id, accessToken);
+      // Also update role in backend if not already set
+      if (application.userId) {
+        try {
+          await updateUserRoleAdminApi(application.userId, 'EXPERT', accessToken);
+        } catch (_) {}
+      }
+
+      setExpertApplications((prev) =>
+        prev.map((app) =>
+          app.id === application.id ? { ...app, status: 'APPROVED', reviewedAt: new Date().toISOString() } : app
+        )
+      );
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === application.userId ? { ...u, role: 'EXPERT' } : u
+        )
+      );
+
+      setStatusMessage({
+        text: `Application for ${application.applicantName} approved! User has been granted the EXPERT role.`,
+        type: 'success',
+      });
+      loadData(true);
+    } catch (err) {
+      showError(err, 'Failed to approve expert application.');
+      setStatusMessage({ text: 'Failed to approve application.', type: 'error' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectExpert = async (application) => {
+    const confirmed = await showConfirm({
+      title: 'Reject Expert Application',
+      message: `Are you sure you want to reject the application submitted by ${application.applicantName}?`,
+      confirmText: 'Reject Application',
+      isDangerous: true,
+    });
+    if (!confirmed) return;
+
+    setActionLoading(`expert-reject-${application.id}`);
+    try {
+      await rejectExpertApplicationAdminApi(
+        application.id,
+        'Application does not meet current verification requirements.',
+        accessToken
+      );
+
+      setExpertApplications((prev) =>
+        prev.map((app) =>
+          app.id === application.id ? { ...app, status: 'REJECTED', reviewedAt: new Date().toISOString() } : app
+        )
+      );
+
+      setStatusMessage({
+        text: `Application for ${application.applicantName} has been rejected.`,
+        type: 'success',
+      });
+      loadData(true);
+    } catch (err) {
+      showError(err, 'Failed to reject expert application.');
+      setStatusMessage({ text: 'Failed to reject application.', type: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -296,6 +420,7 @@ export default function AdminPage() {
                 <div className="flex items-center gap-1 rounded-2xl bg-surface p-1 border border-border-default shadow-xs">
                   {[
                     { id: 'users', label: 'Users', icon: '👥' },
+                    { id: 'experts', label: 'Expert Apps', icon: '🏅' },
                     { id: 'moderation', label: 'Quick Flags', icon: '⚡' },
                     { id: 'audit', label: 'Audit Logs', icon: '📋' },
                     { id: 'settings', label: 'Settings', icon: '⚙️' },
@@ -409,6 +534,7 @@ export default function AdminPage() {
                                       className="rounded-xl border border-border-default bg-surface px-2.5 py-1 text-xs font-bold text-text-primary focus:border-primary disabled:opacity-50"
                                     >
                                       <option value="USER">USER</option>
+                                      <option value="EXPERT">EXPERT</option>
                                       <option value="MODERATOR">MODERATOR</option>
                                       <option value="ADMIN">ADMIN</option>
                                     </select>
@@ -512,6 +638,224 @@ export default function AdminPage() {
                         </tbody>
                       </table>
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab: Expert Verification Applications */}
+            {activeTab === 'experts' && (
+              <div className="space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-black text-text-primary flex items-center gap-2">
+                      <span>🏅</span>
+                      <span>Expert Role Applications</span>
+                    </h2>
+                    <p className="text-xs text-secondary mt-0.5">
+                      Review credentials, certifications, domain experience, and approve qualified platform contributors as Experts.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 rounded-xl border border-border-default bg-surface p-1 shadow-xs">
+                    {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setExpertFilter(filter)}
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
+                          expertFilter === filter
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-surface-alt'
+                        }`}
+                      >
+                        {filter.charAt(0) + filter.slice(1).toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {loading ? (
+                  <Loader message="Loading expert verification applications..." />
+                ) : (
+                  <div className="space-y-4">
+                    {expertApplications.filter((app) => {
+                      if (expertFilter === 'PENDING') return app.status === 'PENDING';
+                      if (expertFilter === 'APPROVED') return app.status === 'APPROVED';
+                      if (expertFilter === 'REJECTED') return app.status === 'REJECTED';
+                      return true;
+                    }).length === 0 ? (
+                      <div className="rounded-[2rem] border border-border-default bg-surface p-12 text-center shadow-sm">
+                        <span className="text-4xl">🏅</span>
+                        <h3 className="mt-3 text-base font-black text-text-primary">No Applications Found</h3>
+                        <p className="mt-1 text-xs text-muted max-w-sm mx-auto">
+                          {expertFilter === 'PENDING'
+                            ? 'There are currently no pending expert applications requiring review.'
+                            : 'No expert applications match the selected status filter.'}
+                        </p>
+                      </div>
+                    ) : (
+                      expertApplications
+                        .filter((app) => {
+                          if (expertFilter === 'PENDING') return app.status === 'PENDING';
+                          if (expertFilter === 'APPROVED') return app.status === 'APPROVED';
+                          if (expertFilter === 'REJECTED') return app.status === 'REJECTED';
+                          return true;
+                        })
+                        .map((app) => {
+                          const isPending = app.status === 'PENDING';
+                          const isApproved = app.status === 'APPROVED';
+                          const isRejected = app.status === 'REJECTED';
+                          const isLoadingApprove = actionLoading === `expert-approve-${app.id}`;
+                          const isLoadingReject = actionLoading === `expert-reject-${app.id}`;
+
+                          return (
+                            <div
+                              key={app.id}
+                              className="rounded-2xl border border-border-default bg-surface p-5 shadow-sm transition hover:border-primary/40 space-y-4"
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-default/60 pb-3.5">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-700 font-bold text-base border border-amber-500/20">
+                                    {(app.applicantName || 'E').charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="font-black text-text-primary text-sm sm:text-base">
+                                        {app.applicantName || 'Anonymous Applicant'}
+                                      </h4>
+                                      <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                                        {app.specialization || 'General Expert'}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-muted mt-0.5">{app.applicantEmail}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border ${
+                                      isApproved
+                                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                                        : isRejected
+                                        ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30'
+                                        : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                                    }`}
+                                  >
+                                    <span
+                                      className={`h-2 w-2 rounded-full ${
+                                        isApproved ? 'bg-emerald-500' : isRejected ? 'bg-rose-500' : 'bg-amber-500 animate-pulse'
+                                      }`}
+                                    />
+                                    {app.status || 'PENDING'}
+                                  </span>
+                                  <span className="text-[11px] text-muted">
+                                    {app.submittedAt
+                                      ? new Date(app.submittedAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                        })
+                                      : 'Recently'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Details Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div className="rounded-xl bg-surface-alt p-3 border border-border-default/60">
+                                  <span className="font-bold text-muted uppercase text-[10px] tracking-wider block mb-1">
+                                    Experience & Track Record
+                                  </span>
+                                  <p className="font-bold text-text-primary text-sm">
+                                    {app.yearsExperience ? `${app.yearsExperience} Years Experience` : 'Not specified'}
+                                  </p>
+                                </div>
+
+                                <div className="rounded-xl bg-surface-alt p-3 border border-border-default/60">
+                                  <span className="font-bold text-muted uppercase text-[10px] tracking-wider block mb-1">
+                                    Portfolio / Verification Link
+                                  </span>
+                                  {app.portfolioUrl ? (
+                                    <a
+                                      href={app.portfolioUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-bold text-primary hover:underline truncate block"
+                                    >
+                                      🔗 {app.portfolioUrl}
+                                    </a>
+                                  ) : (
+                                    <span className="text-muted">No external portfolio link provided</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Statement */}
+                              <div className="rounded-xl bg-surface-alt/70 p-3.5 border border-border-default/60 text-xs">
+                                <span className="font-bold text-muted uppercase text-[10px] tracking-wider block mb-1.5">
+                                  Qualification Statement & Domain Authority
+                                </span>
+                                <p className="text-text-primary font-medium whitespace-pre-wrap leading-relaxed">
+                                  {app.statement || 'No statement provided.'}
+                                </p>
+                              </div>
+
+                              {/* Document / Resume Attachment Preview */}
+                              {(app.documentUrl || app.documentName) && (
+                                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold text-sm shrink-0">
+                                      📄
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="font-bold text-xs text-text-primary truncate">
+                                        {app.documentName || 'Verification_Credential.pdf'}
+                                      </p>
+                                      <p className="text-[11px] text-muted">
+                                        Uploaded Certification / Resume Proof
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {app.documentUrl && (
+                                    <a
+                                      href={app.documentUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      download={app.documentName || 'credential'}
+                                      className="rounded-lg bg-surface border border-border-default px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-alt shrink-0 transition flex items-center gap-1 shadow-xs"
+                                    >
+                                      <span>📥</span>
+                                      <span>Inspect / Download</span>
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Actions */}
+                              {isPending && (
+                                <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-default/60">
+                                  <button
+                                    onClick={() => handleRejectExpert(app)}
+                                    disabled={isLoadingReject || isLoadingApprove}
+                                    className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-800 transition disabled:opacity-50"
+                                  >
+                                    {isLoadingReject ? 'Rejecting...' : '✕ Reject Application'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleApproveExpert(app)}
+                                    disabled={isLoadingApprove || isLoadingReject}
+                                    className="rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50 shadow-xs flex items-center gap-1.5"
+                                  >
+                                    <span>✓</span>
+                                    <span>{isLoadingApprove ? 'Approving...' : 'Approve as Verified Expert'}</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                    )}
                   </div>
                 )}
               </div>

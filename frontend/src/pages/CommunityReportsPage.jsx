@@ -18,6 +18,7 @@ import {
   getCommunityMembersApi,
 } from '../api/axiosClient';
 import { exportAnalyticsToPDF, exportAnalyticsToCSV } from '../utils/exportUtils';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -35,8 +36,20 @@ export default function CommunityReportsPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
+    async function loadData(silent = false) {
+      const cacheKey = `community:report:${id}`;
+      const cached = getQueryData(cacheKey);
+
+      if (cached) {
+        setCommunity(cached.community);
+        setDecisions(cached.decisions || []);
+        setAnalytics(cached.analytics);
+        setMembersCount(cached.membersCount || 0);
+        setLoading(false);
+      } else if (!silent) {
+        setLoading(true);
+      }
+
       try {
         const [commData, decData, analData, memData] = await Promise.all([
           getCommunityByIdApi(id, accessToken),
@@ -45,12 +58,20 @@ export default function CommunityReportsPage() {
           getCommunityMembersApi(id, accessToken).catch(() => []),
         ]);
 
+        const safeMembersCount = Array.isArray(memData) ? memData.length : (commData?.memberCount || 0);
         setCommunity(commData);
         setDecisions(decData || []);
         setAnalytics(analData);
-        setMembersCount(Array.isArray(memData) ? memData.length : (commData?.memberCount || 0));
+        setMembersCount(safeMembersCount);
+
+        setQueryData(cacheKey, {
+          community: commData,
+          decisions: decData || [],
+          analytics: analData,
+          membersCount: safeMembersCount,
+        });
       } catch (err) {
-        setError(err.message || 'Failed to load community report');
+        if (!cached) setError(err.message || 'Failed to load community report');
       } finally {
         setLoading(false);
       }

@@ -20,6 +20,7 @@ import {
   moderateReportApi,
   deleteReportApi,
 } from '../api/axiosClient';
+import { getQueryData, setQueryData } from '../utils/queryCache';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import IconSidebar from '../components/IconSidebar';
@@ -51,10 +52,21 @@ export default function AdminReportsPage() {
     loadReports();
   }, [statusFilter, contentTypeFilter, currentPage, accessToken]);
 
-  const loadReports = async () => {
+  const loadReports = async (silent = false) => {
     if (!accessToken) return;
-    try {
+    const cacheKey = `admin:reports:${statusFilter}:${contentTypeFilter}:${searchQuery}:${currentPage}`;
+    const cached = getQueryData(cacheKey);
+
+    if (cached) {
+      setReports(cached.reports || []);
+      setTotalElements(cached.totalElements || 0);
+      setTotalPages(cached.totalPages || 0);
+      setLoading(false);
+    } else if (!silent) {
       setLoading(true);
+    }
+
+    try {
       const data = await getAdminReportsPagedApi(
         {
           status: statusFilter === 'ALL' ? undefined : statusFilter,
@@ -67,9 +79,17 @@ export default function AdminReportsPage() {
         },
         accessToken
       );
-      setReports(data?.content || []);
-      setTotalElements(data?.totalElements || 0);
-      setTotalPages(data?.totalPages || 0);
+      const safeReports = data?.content || [];
+      const safeTotalEl = data?.totalElements || 0;
+      const safeTotalPages = data?.totalPages || 0;
+      setReports(safeReports);
+      setTotalElements(safeTotalEl);
+      setTotalPages(safeTotalPages);
+      setQueryData(cacheKey, {
+        reports: safeReports,
+        totalElements: safeTotalEl,
+        totalPages: safeTotalPages,
+      });
     } catch (err) {
       console.error('Failed to load reports:', err);
     } finally {
@@ -130,9 +150,14 @@ export default function AdminReportsPage() {
         type: 'success',
       });
 
-      setSelectedReport(updated);
-      // Refresh list
-      loadReports();
+      // Update local report in list immediately
+      if (updated && updated.id) {
+        setReports((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)));
+      }
+      // Close the modal cleanly
+      setSelectedReport(null);
+      // Refresh list silently without full-page loading state
+      await loadReports(true);
     } catch (err) {
       showError(err, 'Failed to apply moderation action.');
     } finally {
@@ -153,8 +178,11 @@ export default function AdminReportsPage() {
       setActionLoading(true);
       await deleteReportApi(reportId, accessToken);
       showAlert({ title: 'Report Deleted', message: 'The report was deleted successfully.', type: 'success' });
-      setSelectedReport(null);
-      await loadReports();
+      if (selectedReport?.id === reportId) {
+        setSelectedReport(null);
+      }
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+      await loadReports(true);
     } catch (err) {
       showError(err, 'Failed to delete report.');
     } finally {

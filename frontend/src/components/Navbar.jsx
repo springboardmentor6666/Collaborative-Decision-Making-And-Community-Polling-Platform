@@ -14,6 +14,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/useTheme';
+import { FONT_FAMILIES, FONT_SIZES } from '../theme/themes';
 import CommandMenu from './CommandMenu';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 
