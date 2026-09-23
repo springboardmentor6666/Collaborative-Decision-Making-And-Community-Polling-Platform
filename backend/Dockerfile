@@ -25,4 +25,15 @@ COPY --from=build /app/target/decisionhub-backend-*.jar app.jar
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-XX:+UseSerialGC", \
+  "-Xss256k", \
+  "-Xms96m", \
+  "-Xmx256m", \
+  "-XX:MaxMetaspaceSize=144m", \
+  "-XX:ReservedCodeCacheSize=32m", \
+  "-XX:MaxDirectMemorySize=16m", \
+  "-jar", "app.jar"]
+
+
+

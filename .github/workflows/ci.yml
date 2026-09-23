@@ -1,14 +1,14 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, team-two ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master, team-two ]
+    branches: [ main ]
 
 jobs:
   # ============================================================================
-  # 1. Backend CI: Test & Package Spring Boot Application
+  # 1. Backend CI: Test & Package Spring Boot Application (Java 21)
   # ============================================================================
   backend-ci:
     name: Backend (Java 21 / Maven)
@@ -41,7 +41,7 @@ jobs:
           retention-days: 7
 
   # ============================================================================
-  # 2. Frontend CI: Typecheck & Build React SPA Bundle
+  # 2. Frontend CI: Typecheck & Build React SPA Bundle (Node 22 / Vite)
   # ============================================================================
   frontend-ci:
     name: Frontend (Node 22 / Vite)
@@ -104,3 +104,26 @@ jobs:
           build-args: |
             VITE_API_URL=/api
             VITE_WS_URL=/ws
+
+  # ============================================================================
+  # 4. Continuous Deployment: Orchestrate Production Deployments
+  # ============================================================================
+  deploy:
+    name: Trigger Production Deployment
+    needs: [backend-ci, frontend-ci, docker-validation]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Backend Deployment via Deploy Hook
+        if: env.RENDER_DEPLOY_HOOK_URL != ''
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          echo "🚀 Triggering Render backend deployment after verified CI..."
+          response=$(curl -s -w "%{http_code}" -o /dev/null -X POST "$RENDER_DEPLOY_HOOK_URL")
+          if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+            echo "✅ Render deployment hook triggered successfully (HTTP $response)."
+          else
+            echo "⚠️ Render deploy hook responded with HTTP $response"
+          fi

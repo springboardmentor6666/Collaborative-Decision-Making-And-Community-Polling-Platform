@@ -44,11 +44,19 @@ import java.util.UUID;
 @Slf4j
 public class LocalStorageServiceImpl implements StorageService {
 
-    private final Path rootLocation = Paths.get("uploads");
+    private final Path rootLocation = resolveRootLocation();
     private final AttachmentRepository attachmentRepository;
     private final UserRepository userRepository;
     private final DecisionRepository decisionRepository;
     private final CommentRepository commentRepository;
+
+    private static Path resolveRootLocation() {
+        Path parentUploads = Paths.get("..", "uploads");
+        if (Files.exists(parentUploads) && Files.isDirectory(parentUploads)) {
+            return parentUploads.toAbsolutePath().normalize();
+        }
+        return Paths.get("uploads").toAbsolutePath().normalize();
+    }
 
     private static final long MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
     private static final long MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
@@ -79,6 +87,7 @@ public class LocalStorageServiceImpl implements StorageService {
             Files.createDirectories(rootLocation.resolve("avatars"));
             Files.createDirectories(rootLocation.resolve("decisions"));
             Files.createDirectories(rootLocation.resolve("comments"));
+            Files.createDirectories(rootLocation.resolve("communities"));
             Files.createDirectories(rootLocation.resolve("docs"));
             Files.createDirectories(rootLocation.resolve("general"));
             log.info("Storage directory initialized successfully at: {}", rootLocation.toAbsolutePath());

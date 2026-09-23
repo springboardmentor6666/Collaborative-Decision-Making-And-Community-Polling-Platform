@@ -31,7 +31,7 @@ public class CorsConfig {
                 .filter(StringUtils::hasText)
                 .toList();
 
-        configuration.setAllowedOrigins(resolvedOrigins.isEmpty() ? List.of("http://localhost:3000", "http://localhost:5173") : resolvedOrigins);
+        configuration.setAllowedOriginPatterns(resolvedOrigins.isEmpty() ? List.of("http://localhost:3000", "http://localhost:5173", "https://*.vercel.app") : resolvedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));

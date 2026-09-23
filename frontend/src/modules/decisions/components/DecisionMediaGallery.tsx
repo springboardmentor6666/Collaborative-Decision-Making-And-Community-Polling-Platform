@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { AttachmentResponse } from "../types/decision";
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/utils";
 
 interface DecisionMediaGalleryProps {
   attachments?: AttachmentResponse[];
@@ -128,14 +129,14 @@ export function DecisionMediaGallery({ attachments = [], title = "Media", classN
                     >
                       {/* Blurred background image for full aspect aesthetic */}
                       <img
-                        src={media.fileUrl}
+                        src={getImageUrl(media.fileUrl)}
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 scale-110"
                       />
                       {/* Crisp Foreground Image */}
                       <img
-                        src={media.fileUrl}
+                        src={getImageUrl(media.fileUrl)}
                         alt={media.fileName || title}
                         className="relative max-h-full max-w-full w-auto h-auto object-contain mx-auto z-10 transition-transform duration-300 hover:scale-[1.01]"
                       />
@@ -155,7 +156,7 @@ export function DecisionMediaGallery({ attachments = [], title = "Media", classN
                         preload="metadata"
                         className="w-full max-h-full object-contain rounded-xl"
                       >
-                        <source src={media.fileUrl} type={media.fileType} />
+                        <source src={getImageUrl(media.fileUrl)} type={media.fileType} />
                         Your browser does not support video playback.
                       </video>
                     </div>
@@ -290,7 +291,7 @@ export function DecisionMediaGallery({ attachments = [], title = "Media", classN
                 className="text-white/80 hover:text-white hover:bg-white/10 rounded-full h-9 px-3 gap-1.5"
               >
                 <a
-                  href={images[lightboxIndex]?.fileUrl}
+                  href={getImageUrl(images[lightboxIndex]?.fileUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   download
@@ -347,7 +348,7 @@ export function DecisionMediaGallery({ attachments = [], title = "Media", classN
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              src={images[lightboxIndex]?.fileUrl}
+              src={getImageUrl(images[lightboxIndex]?.fileUrl)}
               alt={images[lightboxIndex]?.fileName || "Enlarged view"}
               className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl transition-all duration-300 select-none"
             />

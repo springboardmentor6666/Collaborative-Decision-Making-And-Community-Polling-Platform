@@ -63,13 +63,20 @@
         <discardingThreshold>0</discardingThreshold>
     </appender>
 
-    <!-- Root Logger Configuration for all profiles -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ASYNC_FILE_INFO"/>
-        <appender-ref ref="ASYNC_FILE_ERROR"/>
-    </root>
+    <!-- Root Logger Configuration by Profile -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.decisionhub" level="INFO"/>
+    </springProfile>
 
-    <logger name="com.decisionhub" level="DEBUG"/>
-
+    <springProfile name="!prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE_INFO"/>
+            <appender-ref ref="ASYNC_FILE_ERROR"/>
+        </root>
+        <logger name="com.decisionhub" level="DEBUG"/>
+    </springProfile>
 </configuration>
