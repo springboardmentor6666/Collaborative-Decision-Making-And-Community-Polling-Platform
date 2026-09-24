@@ -9,4 +9,6 @@ import java.util.List;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     List<Activity> findByUserOrderByAtDesc(User user);
+    void deleteByUserId(Long userId);
+    void deleteByUserIdIn(List<Long> userIds);
 }

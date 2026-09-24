@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Toast from "../components/Toast";
+import { API } from "../config/api";
 
 function Signup() {
   const navigate = useNavigate();
@@ -106,7 +107,7 @@ function Signup() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/auth/signup",
+        `${API}/api/auth/signup`,
         {
           method: "POST",
           headers: {
@@ -151,7 +152,7 @@ function Signup() {
 
   const handleGoogleSignup = () => {
     window.location.href =
-      "http://localhost:8080/oauth2/authorization/google";
+      `${API}/oauth2/authorization/google`;
   };
 
   // Check if password requirement is unfulfilled while typing

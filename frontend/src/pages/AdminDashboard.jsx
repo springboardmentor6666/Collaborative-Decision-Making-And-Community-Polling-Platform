@@ -8,7 +8,7 @@ import pollsIcon from "../assets/polls-icon.png";
 import analyticsIcon from "../assets/analytics-icon.png";
 import adminIcon from "../assets/admin-icon.png";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null);

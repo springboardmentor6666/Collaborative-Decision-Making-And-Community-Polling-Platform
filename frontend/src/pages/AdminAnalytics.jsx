@@ -23,7 +23,7 @@ import {
 } from "recharts";
 import DashboardLayout from "../components/DashboardLayout";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 const RANGES = [
     { label: "Today", days: 1 },

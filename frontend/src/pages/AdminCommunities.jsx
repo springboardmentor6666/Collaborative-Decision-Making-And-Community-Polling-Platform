@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import { useTheme } from "../context/ThemeContext";
 import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 function AdminCommunities() {
   const { theme } = useTheme();
@@ -14,6 +15,7 @@ function AdminCommunities() {
   const [expandedId, setExpandedId] = useState(null);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const headers = () => ({
     Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -57,13 +59,7 @@ function AdminCommunities() {
     }
   };
 
-  const deleteCommunity = async (id, name) => {
-    const confirmed = window.confirm(
-      `Delete "${name}"? This will also remove its decisions and polls.`
-    );
-
-    if (!confirmed) return;
-
+  const performDeleteCommunity = async (id) => {
     try {
       const response = await fetch(
         `${API}/api/admin/communities/${id}`,
@@ -93,6 +89,14 @@ function AdminCommunities() {
     } catch (err) {
       notify(err.message, true);
     }
+  };
+
+  const deleteCommunity = (id, name) => {
+    setDeleteTarget({
+      id,
+      name,
+      message: "This will also remove its decisions and polls.",
+    });
   };
 
   const toggleCommunity = (id) => {
@@ -150,6 +154,19 @@ function AdminCommunities() {
       pageSubtitle="View members, moderate, and remove communities."
     >
       <Toast message={message} isError={isError} />
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={`Delete "${deleteTarget.name}"?`}
+          message={deleteTarget.message}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            const target = deleteTarget;
+            setDeleteTarget(null);
+            performDeleteCommunity(target.id);
+          }}
+        />
+      )}
 
       <style>{`
         .admin-communities-page {

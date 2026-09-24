@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { API } from "../config/api";
 
 // ==========================================
 // WINNER / RESULT CALCULATION
@@ -101,6 +103,7 @@ function MyDecisions() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
     const [reportDecision, setReportDecision] = useState(null);
     const [revealedResults, setRevealedResults] = useState({});
 
@@ -153,7 +156,7 @@ function MyDecisions() {
                 sessionStorage.getItem("token");
 
             const response = await fetch(
-                "http://localhost:8080/api/decisions/my",
+                `${API}/api/decisions/my`,
                 {
                     headers: {
                         "Authorization":
@@ -200,16 +203,7 @@ function MyDecisions() {
        DELETE DECISION
     ========================= */
 
-    const deleteDecision = async (id) => {
-
-        if (
-            !window.confirm(
-                "Delete this decision?"
-            )
-        ) {
-            return;
-        }
-
+    const performDeleteDecision = async (id) => {
 
         try {
 
@@ -233,7 +227,7 @@ function MyDecisions() {
 
 
             const response = await fetch(
-                `http://localhost:8080/api/decisions/${id}`,
+                `${API}/api/decisions/${id}`,
                 {
                     method: "DELETE",
 
@@ -250,18 +244,6 @@ function MyDecisions() {
 
             const result =
                 await response.text();
-
-
-            console.log(
-                "Delete status:",
-                response.status
-            );
-
-
-            console.log(
-                "Delete response:",
-                result
-            );
 
 
             if (!response.ok) {
@@ -309,6 +291,10 @@ function MyDecisions() {
 
     };
 
+    const deleteDecision = (id) => {
+        setDeleteTarget({ id });
+    };
+
 
     return (
 
@@ -321,6 +307,19 @@ function MyDecisions() {
                 message={message}
                 isError={isError}
             />
+
+            {deleteTarget && (
+                <ConfirmDialog
+                    title="Delete this decision?"
+                    message="This action cannot be undone."
+                    onCancel={() => setDeleteTarget(null)}
+                    onConfirm={() => {
+                        const target = deleteTarget;
+                        setDeleteTarget(null);
+                        performDeleteDecision(target.id);
+                    }}
+                />
+            )}
 
 
             <style>{`

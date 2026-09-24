@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import { useTheme } from "../context/ThemeContext";
 import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 function AdminDecisions() {
   const { theme } = useTheme();
@@ -14,6 +15,7 @@ function AdminDecisions() {
   const [expandedId, setExpandedId] = useState(null);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [comments, setComments] = useState({});
   const [commentsLoading, setCommentsLoading] = useState({});
@@ -109,13 +111,7 @@ function AdminDecisions() {
     });
   };
 
-  const deleteDecision = async (id, title) => {
-    const confirmed = window.confirm(
-      `Delete "${title}"? This will also remove its options, votes, and comments.`
-    );
-
-    if (!confirmed) return;
-
+  const performDeleteDecision = async (id) => {
     try {
       const response = await fetch(`${API}/api/admin/decisions/${id}`, {
         method: "DELETE",
@@ -142,11 +138,7 @@ function AdminDecisions() {
     }
   };
 
-  const deleteComment = async (decisionId, commentId) => {
-    const confirmed = window.confirm("Delete this comment?");
-
-    if (!confirmed) return;
-
+  const performDeleteComment = async (decisionId, commentId) => {
     try {
       const response = await fetch(
         `${API}/api/admin/comments/${commentId}`,
@@ -175,6 +167,26 @@ function AdminDecisions() {
     } catch (err) {
       notify(err.message, true);
     }
+  };
+
+  const deleteDecision = (id, title) => {
+    setDeleteTarget({
+      type: "decision",
+      id,
+      title,
+      message:
+        "This will also remove its options, votes, and comments.",
+    });
+  };
+
+  const deleteComment = (decisionId, commentId) => {
+    setDeleteTarget({
+      type: "comment",
+      decisionId,
+      commentId,
+      title: "Delete this comment?",
+      message: "This action cannot be undone.",
+    });
   };
 
   const filteredDecisions = decisions.filter((d) => {
@@ -304,6 +316,24 @@ function AdminDecisions() {
       pageSubtitle="View, search, and remove decisions across the platform."
     >
       <Toast message={message} isError={isError} />
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={deleteTarget.title}
+          message={deleteTarget.message}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            const target = deleteTarget;
+            setDeleteTarget(null);
+
+            if (target.type === "decision") {
+              performDeleteDecision(target.id);
+            } else {
+              performDeleteComment(target.decisionId, target.commentId);
+            }
+          }}
+        />
+      )}
 
       <style>{`
         /* =====================================================

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CommunityMemberShip{
+public class CommunityMemberShip {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +34,7 @@ public class CommunityMemberShip{
 
     @Column(nullable = false)
     private LocalDateTime joinedAt;
+
     private LocalDateTime leftAt;
 
     @PrePersist

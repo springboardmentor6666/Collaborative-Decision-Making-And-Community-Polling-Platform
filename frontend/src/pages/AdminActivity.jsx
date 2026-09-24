@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 const PAGE_SIZE = 20;
 
 const EVENT_TYPES = [

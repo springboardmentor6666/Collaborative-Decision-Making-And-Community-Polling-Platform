@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
+import { API } from "../config/api";
 
 /* =========================
    ICONS
@@ -247,7 +248,7 @@ const Profile = () => {
         setLoading(true);
 
         const response = await fetch(
-          "http://localhost:8080/api/users/profile",
+          `${API}/api/users/profile`,
           {
             method: "GET",
             headers: headers(),
@@ -291,7 +292,7 @@ const Profile = () => {
       setSaving(true);
 
       const response = await fetch(
-        "http://localhost:8080/api/users/profile",
+        `${API}/api/users/profile`,
         {
           method: "PUT",
           headers: headers(),
@@ -364,7 +365,7 @@ const Profile = () => {
       setChangingPassword(true);
 
       const response = await fetch(
-        "http://localhost:8080/api/users/change-password",
+        `${API}/api/users/change-password`,
         {
           method: "PUT",
           headers: headers(),
@@ -418,7 +419,7 @@ const Profile = () => {
       setDeleting(true);
 
       const response = await fetch(
-        "http://localhost:8080/api/users/delete-account",
+        `${API}/api/users/delete-account`,
         {
           method: "POST",
           headers: headers(),

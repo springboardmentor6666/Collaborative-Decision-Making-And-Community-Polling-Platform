@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
+import { API } from "../config/api";
 
 function CreateDecision() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ function CreateDecision() {
 
     if (!token) return;
 
-    fetch("http://localhost:8080/api/communities", {
+    fetch(`${API}/api/communities`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -317,7 +318,7 @@ function CreateDecision() {
       setSubmitting(true);
 
       const response = await fetch(
-        "http://localhost:8080/api/decisions",
+        `${API}/api/decisions`,
         {
           method: "POST",
 

@@ -59,11 +59,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProfileResponse get() {
         return response(current.get());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getActivity() {
         User user = current.get();
 
@@ -169,63 +171,29 @@ public class UserProfileServiceImpl implements UserProfileService {
         Long id = u.getId();
 
         // Delete communities owned by user
-        communities.findAll().stream()
-                .filter(community -> community.getOwner() != null
-                        && community.getOwner().getId().equals(id))
-                .toList()
-                .forEach(this::deleteCommunityAndDependencies);
+        communities.findByOwnerId(id).forEach(this::deleteCommunityAndDependencies);
 
         // Delete decisions created by user
-        decisions.findAll().stream()
-                .filter(decision -> decision.getCreatedBy() != null
-                        && decision.getCreatedBy().getId().equals(id))
-                .toList()
-                .forEach(this::deleteDecisionAndDependencies);
+        decisions.findByCreatedById(id).forEach(this::deleteDecisionAndDependencies);
 
-        // Delete user comments, votes, reports, notifications, and community messages
-        comments.deleteAll(comments.findAll().stream()
-                .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(id))
-                .toList());
-
-        votes.deleteAll(votes.findAll().stream()
-                .filter(vote -> vote.getUser() != null && vote.getUser().getId().equals(id))
-                .toList());
-
-        reports.deleteAll(reports.findAll().stream()
-                .filter(report -> report.getReportedBy() != null && report.getReportedBy().getId().equals(id))
-                .toList());
-
-        notifications.deleteAll(notifications.findAll().stream()
-                .filter(notification -> notification.getUser() != null && notification.getUser().getId().equals(id))
-                .toList());
-
-        communityMessages.deleteAll(communityMessages.findAll().stream()
-                .filter(message -> message.getUser() != null && message.getUser().getId().equals(id))
-                .toList());
+        // Delete user comments, votes, reports, notifications, and community messages with targeted queries
+        comments.deleteByUserId(id);
+        votes.deleteByUserId(id);
+        reports.deleteByReportedById(id);
+        notifications.deleteByUserId(id);
+        communityMessages.deleteByUserId(id);
 
         // Remove user from community memberships
-        communities.findAll().forEach(community -> {
-            if (community.getMembers().removeIf(member -> member.getId().equals(id))) {
-                communities.save(community);
-            }
-        });
+        memberships.deleteByUserId(id);
 
         users.delete(u);
     }
 
     private void deleteDecisionAndDependencies(Decision decision) {
-        reports.deleteAll(reports.findAll().stream()
-                .filter(report -> report.getDecision() != null
-                        && report.getDecision().getId().equals(decision.getId()))
-                .toList());
-        votes.deleteAll(votes.findAll().stream()
-                .filter(vote -> vote.getDecision() != null
-                        && vote.getDecision().getId().equals(decision.getId()))
-                .toList());
-        comments.deleteAll(comments.findAll().stream()
-                .filter(comment -> comment.getDecision() != null
-                        && comment.getDecision().getId().equals(decision.getId()))
-                .toList());
+        Long decisionId = decision.getId();
+        reports.deleteByDecisionId(decisionId);
+        votes.deleteByDecisionId(decisionId);
+        comments.deleteByDecisionId(decisionId);
         activities.save(
                 Activity.builder()
                         .user(decision.getCreatedBy())
@@ -238,12 +206,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     private void deleteCommunityAndDependencies(Community community) {
-        decisions.findByCommunityId(community.getId()).stream()
-                .toList()
+        decisions.findByCommunityId(community.getId())
                 .forEach(this::deleteDecisionAndDependencies);
-        communityMessages.deleteAll(communityMessages.findByCommunityIdOrderByCreatedAtAsc(community.getId()));
-        community.getMembers().clear();
-        communities.saveAndFlush(community);
+        communityMessages.deleteByCommunityId(community.getId());
+        memberships.deleteByCommunityId(community.getId());
         communities.delete(community);
     }
 
@@ -255,9 +221,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .createdAt(u.getCreatedAt())
                 .decisionsCreated(decisions.countByCreatedBy(u))
                 .votesParticipated(votes.countByUser(u))
-                .joinedCommunities(communities.findAll().stream()
-                        .filter(c -> c.getMembers().stream().anyMatch(m -> m.getId().equals(u.getId())))
-                        .count())
+                .joinedCommunities(memberships.countActiveByUserId(u.getId()))
                 .build();
     }
 }

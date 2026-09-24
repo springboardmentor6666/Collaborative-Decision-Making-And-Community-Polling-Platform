@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 function Communities() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ function Communities() {
 
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const headers = () => ({
     Authorization:
@@ -136,7 +138,12 @@ function Communities() {
           "Community created successfully."
       );
 
-      load();
+      // In-place update: add new community to list
+      if (data && data.id) {
+        setCommunities((prev) => [data, ...prev]);
+      } else {
+        load();
+      }
 
     } catch (error) {
       notify(
@@ -192,7 +199,14 @@ function Communities() {
         setOpened(null);
       }
 
-      load();
+      // Fast in-place state update without full reload
+      if (data && data.id) {
+        setCommunities((prev) =>
+          prev.map((c) => (c.id === community.id ? data : c))
+        );
+      } else {
+        load();
+      }
 
     } catch (error) {
       notify(
@@ -226,15 +240,7 @@ function Communities() {
      DELETE COMMUNITY
   ========================= */
 
-  const deleteCommunity = async (community) => {
-    if (
-        !window.confirm(
-            `Delete ${community.communityName}?`
-        )
-    ) {
-      return;
-    }
-
+  const performDeleteCommunity = async (community) => {
     try {
       const response = await fetch(
           `${API}/api/communities/${community.id}`,
@@ -248,16 +254,6 @@ function Communities() {
           .json()
           .catch(() => ({}));
 
-      console.log(
-          "Delete status:",
-          response.status
-      );
-
-      console.log(
-          "Delete response:",
-          data
-      );
-
       if (!response.ok) {
         throw new Error(
             data.message ||
@@ -269,20 +265,20 @@ function Communities() {
           "Community deleted."
       );
 
-      load();
+      // In-place removal
+      setCommunities((prev) => prev.filter((c) => c.id !== community.id));
 
     } catch (error) {
-      console.error(
-          "Delete community error:",
-          error
-      );
-
       notify(
           error.message ||
           "Unable to delete community.",
           true
       );
     }
+  };
+
+  const deleteCommunity = (community) => {
+    setDeleteTarget(community);
   };
 
 
@@ -296,6 +292,19 @@ function Communities() {
             message={message}
             isError={isError}
         />
+
+        {deleteTarget && (
+          <ConfirmDialog
+            title={`Delete ${deleteTarget.communityName}?`}
+            message="This action cannot be undone."
+            onCancel={() => setDeleteTarget(null)}
+            onConfirm={() => {
+              const community = deleteTarget;
+              setDeleteTarget(null);
+              performDeleteCommunity(community);
+            }}
+          />
+        )}
 
 
         <style>{`

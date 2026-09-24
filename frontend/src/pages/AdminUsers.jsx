@@ -3,8 +3,9 @@ import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 const ROLES = ["USER", "MODERATOR", "ADMIN"];
 
 function AdminUsers() {
@@ -15,6 +16,7 @@ function AdminUsers() {
   const [savingId, setSavingId] = useState(null);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const myEmail = (sessionStorage.getItem("userEmail") || "").toLowerCase();
 
@@ -97,13 +99,7 @@ function AdminUsers() {
     }
   };
 
-  const deleteUser = async (id, name) => {
-    const confirmed = window.confirm(
-      `Delete ${name}? This cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
+  const deleteUser = async (id) => {
     try {
       const response = await fetch(`${API}/api/admin/users/${id}`, {
         method: "DELETE",
@@ -124,6 +120,10 @@ function AdminUsers() {
     }
   };
 
+  const requestDeleteUser = (id, name) => {
+    setDeleteTarget({ id, name });
+  };
+
   const filteredUsers = users.filter((u) => {
     const term = search.trim().toLowerCase();
 
@@ -141,6 +141,19 @@ function AdminUsers() {
       pageSubtitle="View, search, promote/demote, and remove platform users."
     >
       <Toast message={message} isError={isError} />
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title={`Delete ${deleteTarget.name}?`}
+          message="This action cannot be undone."
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            const target = deleteTarget;
+            setDeleteTarget(null);
+            deleteUser(target.id, target.name);
+          }}
+        />
+      )}
 
       <style>{`
         .admin-users-page {
@@ -1096,7 +1109,7 @@ function AdminUsers() {
                               : "Delete user"
                           }
                           onClick={() =>
-                            deleteUser(
+                            requestDeleteUser(
                               user.id,
                               user.name
                             )
@@ -1211,7 +1224,7 @@ function AdminUsers() {
                           : "Delete user"
                       }
                       onClick={() =>
-                        deleteUser(
+                        requestDeleteUser(
                           user.id,
                           user.name
                         )

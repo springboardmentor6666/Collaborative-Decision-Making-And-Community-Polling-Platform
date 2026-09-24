@@ -8,5 +8,8 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByDecisionIdOrderByCreatedAtAsc(Long decisionId);
     void deleteByDecisionId(Long decisionId);
+    void deleteByUserId(Long userId);
+    void deleteByDecisionIdIn(List<Long> decisionIds);
     List<Comment> findByUser(User user);
+    List<Comment> findByDecisionIdIn(List<Long> decisionIds);
 }

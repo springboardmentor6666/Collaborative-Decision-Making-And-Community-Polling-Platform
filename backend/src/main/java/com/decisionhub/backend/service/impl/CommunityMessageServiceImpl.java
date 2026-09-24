@@ -20,15 +20,21 @@ public class CommunityMessageServiceImpl implements CommunityMessageService {
     private final CommunityRepository communities;
     private final CurrentUserService currentUser;
 
-    public CommunityMessageServiceImpl(CommunityMessageRepository messages, CommunityRepository communities, CurrentUserService currentUser) {
+    private final com.decisionhub.backend.repository.CommunityMembershipRepository memberships;
+
+    public CommunityMessageServiceImpl(CommunityMessageRepository messages, CommunityRepository communities, CurrentUserService currentUser, com.decisionhub.backend.repository.CommunityMembershipRepository memberships) {
         this.messages = messages;
         this.communities = communities;
         this.currentUser = currentUser;
+        this.memberships = memberships;
     }
 
     @Override
     public List<CommunityMessageResponse> list(Long communityId) {
-        User user = requireMember(communityId);
+        User user = currentUser.get();
+        if (!memberships.existsActiveByUserIdAndCommunityId(user.getId(), communityId)) {
+            throw new AccessDeniedException("Join this community to participate");
+        }
         return messages.findByCommunityIdOrderByCreatedAtAsc(communityId).stream()
                 .map(message -> response(message, user))
                 .toList();
@@ -36,8 +42,11 @@ public class CommunityMessageServiceImpl implements CommunityMessageService {
 
     @Override
     public CommunityMessageResponse add(Long communityId, CommunityMessageRequest request) {
-        User user = requireMember(communityId);
+        User user = currentUser.get();
         Community community = findCommunity(communityId);
+        if (!memberships.existsActiveByUserIdAndCommunityId(user.getId(), communityId)) {
+            throw new AccessDeniedException("Join this community to participate");
+        }
         CommunityMessage saved = messages.save(CommunityMessage.builder()
                 .content(request.getContent().trim())
                 .community(community)
@@ -55,15 +64,6 @@ public class CommunityMessageServiceImpl implements CommunityMessageService {
             throw new AccessDeniedException("Only the author or community owner can delete this message");
         }
         messages.delete(message);
-    }
-
-    private User requireMember(Long communityId) {
-        User user = currentUser.get();
-        Community community = findCommunity(communityId);
-        if (community.getMembers().stream().noneMatch(member -> member.getId().equals(user.getId()))) {
-            throw new AccessDeniedException("Join this community to participate");
-        }
-        return user;
     }
 
     private Community findCommunity(Long id) {

@@ -15,7 +15,7 @@ import com.decisionhub.backend.service.VoteService;
 import com.decisionhub.backend.service.CurrentUserService;
 import com.decisionhub.backend.service.DecisionService;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -51,16 +51,18 @@ public class VoteServiceImpl implements VoteService {
 
     @Override
     public Map<String, Long> getVoteResults(Long decisionId) {
-
         decisionService.getDecisionById(decisionId);
 
         Map<String, Long> result = new LinkedHashMap<>();
+        List<Option> options = optionRepository.findByDecisionId(decisionId);
 
-        for (Option option : optionRepository.findByDecisionId(decisionId)) {
+        Map<Long, Long> countsByOption = new java.util.HashMap<>();
+        for (Object[] row : voteRepository.countVotesByOptionIdForDecision(decisionId)) {
+            countsByOption.put((Long) row[0], (Long) row[1]);
+        }
 
-            long count = voteRepository.countByOptionId(option.getId());
-
-            result.put(option.getOptionText(), count);
+        for (Option option : options) {
+            result.put(option.getOptionText(), countsByOption.getOrDefault(option.getId(), 0L));
         }
 
         return result;

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 function CommunityDetail() {
   const { communityId } = useParams();
@@ -55,12 +55,9 @@ function CommunityDetail() {
 
   const load = async () => {
     try {
-      const [communityData, decisionsData, messagesData] =
-        await Promise.all([
-          request(`/api/communities/${communityId}`),
-          request(`/api/communities/${communityId}/decisions`),
-          request(`/api/communities/${communityId}/messages`),
-        ]);
+      const communityData = await request(
+        `/api/communities/${communityId}`
+      );
 
       if (!communityData.joined) {
         navigate("/communities");
@@ -68,8 +65,33 @@ function CommunityDetail() {
       }
 
       setCommunity(communityData);
-      setDecisions(Array.isArray(decisionsData) ? decisionsData : []);
-      setMessages(Array.isArray(messagesData) ? messagesData : []);
+
+      const [decisionsResult, messagesResult] = await Promise.allSettled([
+        request(`/api/communities/${communityId}/decisions`),
+        request(`/api/communities/${communityId}/messages`),
+      ]);
+
+      if (decisionsResult.status === "fulfilled") {
+        setDecisions(
+          Array.isArray(decisionsResult.value)
+            ? decisionsResult.value
+            : []
+        );
+      }
+
+      if (messagesResult.status === "fulfilled") {
+        setMessages(
+          Array.isArray(messagesResult.value)
+            ? messagesResult.value
+            : []
+        );
+      }
+
+      if (decisionsResult.status === "rejected") {
+        notify("Unable to load community polls.", true);
+      } else if (messagesResult.status === "rejected") {
+        notify("Unable to load community messages.", true);
+      }
     } catch (error) {
       notify(
         error.message || "Unable to load this community.",

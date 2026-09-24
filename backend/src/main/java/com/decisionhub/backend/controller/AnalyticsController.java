@@ -77,10 +77,8 @@ public class AnalyticsController {
         List<Vote> myVotes = votes.findByUser(user);
         List<Comment> myComments = comments.findByUser(user);
         Set<Long> myDecisionIds = myDecisions.stream().map(Decision::getId).collect(Collectors.toSet());
-        List<Vote> receivedVotes = votes.findAll().stream()
-                .filter(vote -> vote.getDecision() != null && myDecisionIds.contains(vote.getDecision().getId())).toList();
-        List<Comment> receivedComments = comments.findAll().stream()
-                .filter(comment -> comment.getDecision() != null && myDecisionIds.contains(comment.getDecision().getId())).toList();
+        List<Vote> receivedVotes = myDecisionIds.isEmpty() ? List.of() : votes.findByDecisionIdIn(new ArrayList<>(myDecisionIds));
+        List<Comment> receivedComments = myDecisionIds.isEmpty() ? List.of() : comments.findByDecisionIdIn(new ArrayList<>(myDecisionIds));
         LocalDateTime since = LocalDateTime.now().minusDays(selectedDays);
 
         Map<String, Object> result = new LinkedHashMap<>();

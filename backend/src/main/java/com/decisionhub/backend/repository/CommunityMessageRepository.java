@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface CommunityMessageRepository extends JpaRepository<CommunityMessage, Long> {
     List<CommunityMessage> findByCommunityIdOrderByCreatedAtAsc(Long communityId);
+    void deleteByUserId(Long userId);
+    void deleteByCommunityId(Long communityId);
 }

@@ -2,11 +2,12 @@ package com.decisionhub.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "communities")
@@ -33,20 +34,24 @@ public class Community {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToMany
-    @JoinTable(
-            name = "community_members",
-            joinColumns = @JoinColumn(name = "community_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"),
-            uniqueConstraints = @UniqueConstraint(
-                    name = "uk_community_member",
-                    columnNames = {"community_id", "user_id"}
-            )
+    /*
+     * Community memberships.
+     *
+     * Uses CommunityMemberShip instead of @ManyToMany.
+     * This prevents Hibernate from creating the old
+     * community_members table without a primary key.
+     */
+    @OneToMany(
+            mappedBy = "community",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    private Set<User> members = new HashSet<>();
+    private Set<CommunityMemberShip> members = new HashSet<>();
 
-    // ADD THIS
+    /*
+     * Decisions belonging to this community.
+     */
     @OneToMany(
             mappedBy = "community",
             cascade = CascadeType.ALL,
@@ -57,8 +62,8 @@ public class Community {
 
     @PrePersist
     void onCreate() {
-                if (createdAt == null) {
-                        createdAt = LocalDateTime.now();
-                }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 }

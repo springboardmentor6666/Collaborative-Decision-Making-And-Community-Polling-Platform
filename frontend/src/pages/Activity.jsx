@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
+import { API } from "../config/api";
 function Activity() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11,7 +12,7 @@ function Activity() {
                 setLoading(true);
 
                 const response = await fetch(
-                    "http://localhost:8080/api/users/activity",
+                    `${API}/api/users/activity`,
                     {
                         headers: {
                             Authorization: `Bearer ${sessionStorage.getItem("token")}`,

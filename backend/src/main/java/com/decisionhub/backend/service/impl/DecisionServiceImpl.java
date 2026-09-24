@@ -46,6 +46,7 @@ public class DecisionServiceImpl implements DecisionService {
     private final com.decisionhub.backend.service.NotificationService notificationService;
     private final com.decisionhub.backend.repository.CommentRepository commentRepository;
     private final com.decisionhub.backend.repository.ReportRepository reportRepository;
+    private final com.decisionhub.backend.repository.CommunityMembershipRepository membershipRepository;
 
     public DecisionServiceImpl(
             DecisionRepository decisionRepository,
@@ -55,7 +56,8 @@ public class DecisionServiceImpl implements DecisionService {
             VoteRepository voteRepository, CommunityRepository communityRepository, CurrentUserService currentUser,
             com.decisionhub.backend.service.NotificationService notificationService,
             com.decisionhub.backend.repository.CommentRepository commentRepository,
-            com.decisionhub.backend.repository.ReportRepository reportRepository) {
+            com.decisionhub.backend.repository.ReportRepository reportRepository,
+            com.decisionhub.backend.repository.CommunityMembershipRepository membershipRepository) {
 
         this.decisionRepository = decisionRepository;
         this.activityRepository = activityRepository;
@@ -67,6 +69,7 @@ public class DecisionServiceImpl implements DecisionService {
         this.notificationService = notificationService;
         this.commentRepository = commentRepository;
         this.reportRepository = reportRepository;
+        this.membershipRepository = membershipRepository;
     }
 
     // =========================================================
@@ -83,7 +86,9 @@ public class DecisionServiceImpl implements DecisionService {
         Community community = null;
         if (request.getCommunityId() != null) {
             community = communityRepository.findById(request.getCommunityId()).orElseThrow(() -> new java.util.NoSuchElementException("Community not found"));
-            if (community.getMembers().stream().noneMatch(member -> member.getId().equals(user.getId()))) throw new AccessDeniedException("Join the community before creating a decision there");
+            if (!membershipRepository.existsActiveByUserIdAndCommunityId(user.getId(), community.getId())) {
+                throw new AccessDeniedException("Join the community before creating a decision there");
+            }
         }
         Decision decision = Decision.builder()
                 .title(request.getTitle())
@@ -99,22 +104,20 @@ public class DecisionServiceImpl implements DecisionService {
         Decision savedDecision =
                 decisionRepository.save(decision);
 
-        // Save options
+        // Save options in batch
         if (request.getOptions() != null) {
-
+            List<Option> optionsToSave = new java.util.ArrayList<>();
             for (String optionText : request.getOptions()) {
-
-                if (optionText == null ||
-                        optionText.trim().isEmpty()) {
+                if (optionText == null || optionText.trim().isEmpty()) {
                     continue;
                 }
-
-                Option option = Option.builder()
+                optionsToSave.add(Option.builder()
                         .optionText(optionText.trim())
                         .decision(savedDecision)
-                        .build();
-
-                optionRepository.save(option);
+                        .build());
+            }
+            if (!optionsToSave.isEmpty()) {
+                optionRepository.saveAll(optionsToSave);
             }
         }
 
@@ -126,13 +129,11 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<DecisionResponse> getMyDecisions() {
-
         User user = getCurrentUser();
-
         return decisionRepository
-                .findByCreatedBy(user)
+                .findByCreatedByIdWithAssociations(user.getId())
                 .stream()
                 .map(this::buildDecisionResponse)
                 .collect(Collectors.toList());
@@ -143,18 +144,11 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
+    @Transactional(readOnly = true)
     public List<DecisionResponse> getActivePublicDecisions() {
-
-        LocalDateTime today = LocalDateTime.now();
-
         return decisionRepository
-                .findAll()
+                .findActivePublicDecisions(LocalDateTime.now())
                 .stream()
-                .filter(this::canView)
-                .filter(decision ->
-                        decision.getDeadline() == null ||
-                                !decision.getDeadline().isBefore(today)
-                )
                 .map(this::buildDecisionResponse)
                 .collect(Collectors.toList());
     }
@@ -164,6 +158,7 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override
+    @Transactional(readOnly = true)
     public DecisionResponse getDecisionById(Long id) {
 
         Decision decision =
@@ -351,60 +346,53 @@ public class DecisionServiceImpl implements DecisionService {
     // =========================================================
 
     @Override public DecisionResponse toResponse(Decision decision) { return buildDecisionResponse(decision); }
-    private DecisionResponse buildDecisionResponse(
-            Decision decision) {
 
+    private DecisionResponse buildDecisionResponse(Decision decision) {
         User currentUser = null;
-
         try {
             currentUser = getCurrentUser();
         } catch (Exception ignored) {
             // Allows response creation even if no user exists
         }
-
         final User loggedInUser = currentUser;
 
-        List<OptionResponse> options =
-                optionRepository
-                        .findByDecisionId(decision.getId())
-                        .stream()
-                        .map(option -> {
+        // Fetch options once
+        List<Option> decisionOptions = optionRepository.findByDecisionId(decision.getId());
 
-                            boolean selected = false;
+        // Batch fetch vote counts for all options in one single GROUP BY query
+        java.util.Map<Long, Long> optionVoteCounts = new java.util.HashMap<>();
+        List<Object[]> countResults = voteRepository.countVotesByOptionIdForDecision(decision.getId());
+        long totalDecisionVotes = 0;
+        for (Object[] row : countResults) {
+            Long optId = (Long) row[0];
+            Long cnt = (Long) row[1];
+            optionVoteCounts.put(optId, cnt);
+            totalDecisionVotes += cnt;
+        }
 
-                            if (loggedInUser != null) {
+        // Single query to check which option current user voted on
+        final Long votedOptionId = (loggedInUser != null)
+                ? voteRepository.findVotedOptionIdByUserIdAndDecisionId(loggedInUser.getId(), decision.getId()).orElse(null)
+                : null;
 
-                                selected =
-                                        voteRepository
-                                                .findByUserIdAndDecisionId(
-                                                        loggedInUser.getId(),
-                                                        decision.getId()
-                                                )
-                                                .map(vote ->
-                                                        vote.getOption()
-                                                                .getId()
-                                                                .equals(
-                                                                        option.getId()
-                                                                )
-                                                )
-                                                .orElse(false);
-                            }
+        List<OptionResponse> options = decisionOptions.stream().map(option -> {
+            boolean selected = votedOptionId != null && votedOptionId.equals(option.getId());
+            long count = optionVoteCounts.getOrDefault(option.getId(), 0L);
+            return OptionResponse.builder()
+                    .id(option.getId())
+                    .optionText(option.getOptionText())
+                    .voteCount(count)
+                    .selected(selected)
+                    .build();
+        }).collect(Collectors.toList());
 
-                            return OptionResponse.builder()
-                                    .id(option.getId())
-                                    .optionText(
-                                            option.getOptionText()
-                                    )
-                                    .voteCount(
-                                            voteRepository
-                                                    .countByOptionId(
-                                                            option.getId()
-                                                    )
-                                    )
-                                    .selected(selected)
-                                    .build();
-                        })
-                        .collect(Collectors.toList());
+        String createdByName = "Anonymous";
+        if (!decision.isAnonymous() && decision.getCreatedBy() != null) {
+            createdByName = decision.getCreatedBy().getName();
+        }
+
+        Long communityId = (decision.getCommunity() == null) ? null : decision.getCommunity().getId();
+        String communityName = (decision.getCommunity() == null) ? null : decision.getCommunity().getCommunityName();
 
         return DecisionResponse.builder()
                 .id(decision.getId())
@@ -415,21 +403,27 @@ public class DecisionServiceImpl implements DecisionService {
                 .deadline(decision.getDeadline())
                 .anonymous(decision.isAnonymous())
                 .createdAt(decision.getCreatedAt())
-                .createdByName(decision.isAnonymous() ? "Anonymous" : decision.getCreatedBy().getName())
-                .communityId(decision.getCommunity() == null ? null : decision.getCommunity().getId())
-                .communityName(decision.getCommunity() == null ? null : decision.getCommunity().getCommunityName())
-                .totalVotes(voteRepository.countByDecisionId(decision.getId()))
-                .alreadyVoted(options.stream().anyMatch(OptionResponse::isSelected))
+                .createdByName(createdByName)
+                .communityId(communityId)
+                .communityName(communityName)
+                .totalVotes(totalDecisionVotes)
+                .alreadyVoted(votedOptionId != null)
                 .status(decision.getDeadline() != null && decision.getDeadline().isBefore(LocalDateTime.now()) ? "COMPLETED" : "ACTIVE")
                 .options(options)
                 .build();
     }
 
     private boolean canView(Decision decision) {
+        User user = null;
+        try {
+            user = getCurrentUser();
+        } catch (Exception ignored) {}
+
         if (decision.getCommunity() != null) {
-            User user = getCurrentUser();
-            return decision.getCommunity().getMembers().stream().anyMatch(member -> member.getId().equals(user.getId()));
+            if (user == null) return false;
+            return membershipRepository.existsActiveByUserIdAndCommunityId(user.getId(), decision.getCommunity().getId());
         }
-        return "PUBLIC".equalsIgnoreCase(decision.getVisibility()) || decision.getCreatedBy().getId().equals(getCurrentUser().getId());
+        if ("PUBLIC".equalsIgnoreCase(decision.getVisibility())) return true;
+        return user != null && decision.getCreatedBy() != null && decision.getCreatedBy().getId().equals(user.getId());
     }
 }

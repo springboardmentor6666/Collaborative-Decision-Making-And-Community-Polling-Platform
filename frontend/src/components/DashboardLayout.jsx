@@ -16,6 +16,7 @@ import manageDecisionsIcon from "../assets/manage-decisions-icon.png";
 import manageCommunitiesIcon from "../assets/manage-communities-icon.png";
 import notificationIcon from "../assets/notification-icon.png";
 import logoutIcon from "../assets/logout-icon.png";
+import { API } from "../config/api";
 
 function DashboardLayout({ children, pageTitle, pageSubtitle }) {
   const navigate = useNavigate();
@@ -157,7 +158,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       const token = sessionStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:8080/api/notifications",
+        `${API}/api/notifications`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -214,7 +215,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       const token = sessionStorage.getItem("token");
 
       await fetch(
-        `http://localhost:8080/api/notifications/${id}/read`,
+        `${API}/api/notifications/${id}/read`,
         {
           method: "PATCH",
           headers: {
@@ -240,7 +241,7 @@ function DashboardLayout({ children, pageTitle, pageSubtitle }) {
       const token = sessionStorage.getItem("token");
 
       await fetch(
-        "http://localhost:8080/api/notifications/read-all",
+        `${API}/api/notifications/read-all`,
         {
           method: "PATCH",
           headers: {

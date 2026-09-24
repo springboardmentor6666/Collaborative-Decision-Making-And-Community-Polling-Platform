@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,12 +57,12 @@ public class CommunityServiceImpl implements CommunityService {
         this.users = users;
     }
 
-
     /* =========================
        CREATE COMMUNITY
     ========================= */
 
     @Override
+    @Transactional
     public CommunityResponse createCommunity(
             CommunityRequest request
     ) {
@@ -69,27 +70,42 @@ public class CommunityServiceImpl implements CommunityService {
         User user = currentUser.get();
 
         Community community = Community.builder()
-                .communityName(
-                        request.getCommunityName()
-                )
-                .description(
-                        request.getDescription()
-                )
+                .communityName(request.getCommunityName())
+                .description(request.getDescription())
                 .owner(user)
                 .build();
 
-        community.getMembers().add(user);
+        Community saved = repository.save(community);
 
-        Community saved =
-                repository.save(community);
+        /*
+         * The creator automatically becomes
+         * a member of the community.
+         */
+        CommunityMemberShip membership = CommunityMemberShip.builder()
+                .community(saved)
+                .user(user)
+                .build();
 
-        // Notify every admin that a new community has been created
+        membershipRepository.save(membership);
+
+        /*
+         * Keep the relationship synchronized.
+         */
+        saved.getMembers().add(membership);
+
+        /*
+         * Notify every admin.
+         */
         users.findByRole(Role.ADMIN)
-                .forEach(admin -> notificationService.notifyUser(
-                        admin,
-                        "New community created: \"" + saved.getCommunityName()
-                                + "\" by " + user.getName()
-                ));
+                .forEach(admin ->
+                        notificationService.notifyUser(
+                                admin,
+                                "New community created: \""
+                                        + saved.getCommunityName()
+                                        + "\" by "
+                                        + user.getName()
+                        )
+                );
 
         return response(saved, user);
     }
@@ -100,23 +116,15 @@ public class CommunityServiceImpl implements CommunityService {
     ========================= */
 
     @Override
-    public List<CommunityResponse>
-    getAllCommunities() {
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> getAllCommunities() {
 
         User user = currentUser.get();
 
         return repository.findAll()
                 .stream()
-                .map(
-                        community ->
-                                response(
-                                        community,
-                                        user
-                                )
-                )
-                .collect(
-                        Collectors.toList()
-                );
+                .map(community -> response(community, user))
+                .collect(Collectors.toList());
     }
 
 
@@ -132,8 +140,9 @@ public class CommunityServiceImpl implements CommunityService {
 
         User user = currentUser.get();
 
-
-        // Only the owner can delete
+        /*
+         * Only owner can delete.
+         */
         if (
                 community.getOwner() == null ||
                         !community.getOwner()
@@ -144,27 +153,16 @@ public class CommunityServiceImpl implements CommunityService {
             throw new AccessDeniedException(
                     "Only the community owner can delete it"
             );
-
         }
 
-
-        // Delete all community messages first
-        messages.deleteAll(
-                messages.findByCommunityIdOrderByCreatedAtAsc(id)
-        );
-
+        /*
+         * Delete all community messages first using targeted delete.
+         */
+        messages.deleteByCommunityId(id);
 
         /*
-         * The Community entity has:
-         *
-         * @OneToMany(
-         *     mappedBy = "community",
-         *     cascade = CascadeType.ALL,
-         *     orphanRemoval = true
-         * )
-         *
-         * Therefore, deleting the community
-         * will also delete its decisions.
+         * Community has cascade = ALL and orphanRemoval = true
+         * for memberships and decisions.
          */
         repository.delete(community);
     }
@@ -175,9 +173,8 @@ public class CommunityServiceImpl implements CommunityService {
     ========================= */
 
     @Override
-    public CommunityResponse getCommunity(
-            Long id
-    ) {
+    @Transactional(readOnly = true)
+    public CommunityResponse getCommunity(Long id) {
 
         User user = currentUser.get();
 
@@ -193,27 +190,49 @@ public class CommunityServiceImpl implements CommunityService {
     ========================= */
 
     @Override
+    @Transactional
     public CommunityResponse join(Long id) {
 
         User user = currentUser.get();
 
-        Community community =
-                find(id);
+        Community community = find(id);
 
-        community.getMembers()
-                .add(user);
+        /*
+         * Check whether user already has
+         * an active membership.
+         */
+        boolean alreadyMember = community.getMembers()
+                .stream()
+                .anyMatch(member ->
+                        member.getUser() != null &&
+                                member.getUser()
+                                        .getId()
+                                        .equals(user.getId()) &&
+                                member.getLeftAt() == null
+                );
 
-        Community saved =
-                repository.save(community);
+        if (alreadyMember) {
+            return response(community, user);
+        }
 
-        membershipRepository.save(
+        /*
+         * Create membership.
+         */
+        CommunityMemberShip membership =
                 CommunityMemberShip.builder()
                         .community(community)
                         .user(user)
-                        .build()
-        );
+                        .build();
 
+        membershipRepository.save(membership);
 
+        community.getMembers().add(membership);
+
+        Community saved = repository.save(community);
+
+        /*
+         * Notify owner.
+         */
         if (
                 community.getOwner() != null &&
                         !community.getOwner()
@@ -228,7 +247,6 @@ public class CommunityServiceImpl implements CommunityService {
                             + community.getCommunityName()
                             + "\""
             );
-
         }
 
         return response(
@@ -243,16 +261,16 @@ public class CommunityServiceImpl implements CommunityService {
     ========================= */
 
     @Override
+    @Transactional
     public CommunityResponse leave(Long id) {
 
-        User user =
-                currentUser.get();
+        User user = currentUser.get();
 
-        Community community =
-                find(id);
+        Community community = find(id);
 
-
-        // Owner cannot leave their own community
+        /*
+         * Owner cannot leave.
+         */
         if (
                 community.getOwner() != null &&
                         community.getOwner()
@@ -263,31 +281,42 @@ public class CommunityServiceImpl implements CommunityService {
             throw new IllegalStateException(
                     "The owner cannot leave their community"
             );
-
         }
 
+        /*
+         * Find active membership.
+         */
+        CommunityMemberShip membership =
+                community.getMembers()
+                        .stream()
+                        .filter(member ->
+                                member.getUser() != null &&
+                                        member.getUser()
+                                                .getId()
+                                                .equals(user.getId()) &&
+                                        member.getLeftAt() == null
+                        )
+                        .findFirst()
+                        .orElse(null);
 
-        community.getMembers()
-                .removeIf(
-                        member ->
-                                member.getId()
-                                        .equals(user.getId())
-                );
+        if (membership != null) {
 
+            /*
+             * Mark membership as left.
+             */
+            membership.setLeftAt(
+                    LocalDateTime.now()
+            );
 
-        Community saved =
-                repository.save(community);
+            membershipRepository.save(membership);
 
-        membershipRepository.findByUser(user)
-                .stream()
-                .filter(membership ->
-                        membership.getCommunity().getId().equals(community.getId())
-                )
-                .findFirst()
-                .ifPresent(membership -> {
-                    membership.setLeftAt(java.time.LocalDateTime.now());
-                    membershipRepository.save(membership);
-                });
+            /*
+             * Remove from active collection.
+             */
+            community.getMembers().remove(membership);
+        }
+
+        Community saved = repository.save(community);
 
         return response(
                 saved,
@@ -301,47 +330,47 @@ public class CommunityServiceImpl implements CommunityService {
     ========================= */
 
     @Override
-    public List<DecisionResponse>
-    getCommunityDecisions(Long id) {
+    @Transactional(readOnly = true)
+    public List<DecisionResponse> getCommunityDecisions(Long id) {
 
-        Community community =
-                find(id);
+        Community community = find(id);
 
-        User user =
-                currentUser.get();
+        User user = currentUser.get();
 
+        /*
+         * Check active membership.
+         */
+        boolean isMember = community.getMembers()
+                .stream()
+                .anyMatch(member ->
+                        member.getUser() != null &&
+                                member.getUser()
+                                        .getId()
+                                        .equals(user.getId()) &&
+                                member.getLeftAt() == null
+                );
 
-        // Only community members can view decisions
-        boolean isMember =
-                community.getMembers()
-                        .stream()
-                        .anyMatch(
-                                member ->
-                                        member.getId()
-                                                .equals(
-                                                        user.getId()
-                                                )
-                        );
+        /*
+         * Owner is also allowed.
+         */
+        boolean isOwner =
+                community.getOwner() != null &&
+                        community.getOwner()
+                                .getId()
+                                .equals(user.getId());
 
-
-        if (!isMember) {
+        if (!isMember && !isOwner) {
 
             throw new AccessDeniedException(
                     "Join this community to view its decisions"
             );
-
         }
-
 
         return decisions
                 .findByCommunityId(id)
                 .stream()
-                .map(
-                        decisionService::toResponse
-                )
-                .collect(
-                        Collectors.toList()
-                );
+                .map(decisionService::toResponse)
+                .collect(Collectors.toList());
     }
 
 
@@ -396,35 +425,62 @@ public class CommunityServiceImpl implements CommunityService {
                         community.getCreatedAt()
                 )
 
+                /*
+                 * Count only active members.
+                 */
                 .memberCount(
-                        community.getMembers()
-                                .size()
+                        (int) community.getMembers()
+                                .stream()
+                                .filter(member ->
+                                        member.getLeftAt() == null
+                                )
+                                .count()
                 )
 
+                /*
+                 * Check whether current user is
+                 * an active member.
+                 */
                 .joined(
                         community.getMembers()
                                 .stream()
                                 .anyMatch(
                                         member ->
-                                                member.getId()
-                                                        .equals(
-                                                                user.getId()
-                                                        )
+                                                member.getUser() != null &&
+                                                        member.getUser()
+                                                                .getId()
+                                                                .equals(user.getId()) &&
+                                                        member.getLeftAt() == null
                                 )
                 )
 
+                /*
+                 * Check whether current user
+                 * owns the community.
+                 */
                 .owner(
                         community.getOwner() != null &&
                                 community.getOwner()
                                         .getId()
-                                        .equals(
-                                                user.getId()
-                                        )
+                                        .equals(user.getId())
                 )
 
+                /*
+                 * Get names of active members.
+                 */
                 .memberNames(
                         community.getMembers()
                                 .stream()
+                                .filter(member ->
+                                        member.getLeftAt() == null
+                                )
+                                .map(
+                                        CommunityMemberShip::getUser
+                                )
+                                .filter(
+                                        memberUser ->
+                                                memberUser != null
+                                )
                                 .map(
                                         User::getName
                                 )

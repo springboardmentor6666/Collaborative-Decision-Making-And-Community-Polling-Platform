@@ -78,18 +78,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void markAllAsRead() {
-
         User user = currentUser.get();
-
-        List<Notification> unread = notifications.findByUserIdOrderByCreatedAtDesc(user.getId())
-                .stream()
-                .filter(n -> !n.isReadStatus())
-                .collect(Collectors.toList());
-
-        unread.forEach(n -> n.setReadStatus(true));
-
-        notifications.saveAll(unread);
+        notifications.markAllReadByUserId(user.getId());
     }
 
     private NotificationResponse toResponse(Notification n) {

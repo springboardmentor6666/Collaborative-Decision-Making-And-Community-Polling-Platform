@@ -31,7 +31,7 @@ import {
   YAxis,
 } from "recharts";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 const COLORS = [
   "#8b5cf6",

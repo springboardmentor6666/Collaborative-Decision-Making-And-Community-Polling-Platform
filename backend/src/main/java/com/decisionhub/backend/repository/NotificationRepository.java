@@ -12,4 +12,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     long countByUserIdAndReadStatusFalse(Long userId);
 
+    void deleteByUserId(Long userId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("UPDATE Notification n SET n.readStatus = true WHERE n.user.id = :userId AND n.readStatus = false")
+    int markAllReadByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
+
 }

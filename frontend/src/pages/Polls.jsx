@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import Toast from "../components/Toast";
 
-const API = "http://localhost:8080";
+import { API } from "../config/api";
 
 // ==========================================
 // WINNER / RESULT CALCULATION
@@ -200,6 +200,7 @@ function Polls() {
     decisionId,
     optionId
   ) => {
+    if (votingId) return;
     setVotingId(optionId);
 
     try {
@@ -224,7 +225,23 @@ function Polls() {
         "Your vote has been recorded."
       );
 
-      await loadPolls();
+      // Fast in-place state update without re-fetching all polls from network
+      setDecisions((prev) =>
+        prev.map((dec) => {
+          if (dec.id !== decisionId) return dec;
+          const updatedOptions = (dec.options || []).map((opt) => ({
+            ...opt,
+            selected: opt.id === optionId,
+            voteCount: opt.id === optionId ? (opt.voteCount || 0) + 1 : (opt.voteCount || 0),
+          }));
+          return {
+            ...dec,
+            alreadyVoted: true,
+            totalVotes: (dec.totalVotes || 0) + 1,
+            options: updatedOptions,
+          };
+        })
+      );
 
     } catch (error) {
       notify(

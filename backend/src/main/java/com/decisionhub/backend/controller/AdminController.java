@@ -43,7 +43,9 @@ public class AdminController {
     private final CommentRepository comments;
     private final ReportRepository reports;
     private final NotificationRepository notifications;
+        private final ActivityRepository activities;
     private final CommunityMessageRepository communityMessages;
+    private final CommunityMembershipRepository communityMemberships;
     private final DecisionService decisionService;
     private final CommunityService communityService;
     private final CurrentUserService currentUserService;
@@ -56,7 +58,9 @@ public class AdminController {
             CommentRepository comments,
             ReportRepository reports,
             NotificationRepository notifications,
+            ActivityRepository activities,
             CommunityMessageRepository communityMessages,
+            CommunityMembershipRepository communityMemberships,
             DecisionService decisionService,
             CommunityService communityService,
             CurrentUserService currentUserService
@@ -68,7 +72,9 @@ public class AdminController {
         this.comments = comments;
         this.reports = reports;
         this.notifications = notifications;
+        this.activities = activities;
         this.communityMessages = communityMessages;
+        this.communityMemberships = communityMemberships;
         this.decisionService = decisionService;
         this.communityService = communityService;
         this.currentUserService = currentUserService;
@@ -163,56 +169,29 @@ public class AdminController {
             );
         }
 
-        communities.findAll().stream()
-                .filter(community -> community.getOwner() != null
-                        && community.getOwner().getId().equals(id))
-                .toList()
-                .forEach(community -> deleteCommunityAndDependencies(community));
+        // Delete communities owned by user with targeted lookup
+        communities.findByOwnerId(id).forEach(this::deleteCommunityAndDependencies);
 
-        decisions.findAll().stream()
-                .filter(decision -> decision.getCreatedBy() != null
-                        && decision.getCreatedBy().getId().equals(id))
-                .toList()
-                .forEach(this::deleteDecisionAndDependencies);
+        // Delete decisions created by user with targeted lookup
+        decisions.findByCreatedById(id).forEach(this::deleteDecisionAndDependencies);
 
-        comments.deleteAll(comments.findAll().stream()
-                .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(id))
-                .toList());
-        votes.deleteAll(votes.findAll().stream()
-                .filter(vote -> vote.getUser() != null && vote.getUser().getId().equals(id))
-                .toList());
-        reports.deleteAll(reports.findAll().stream()
-                .filter(report -> report.getReportedBy() != null && report.getReportedBy().getId().equals(id))
-                .toList());
-        notifications.deleteAll(notifications.findAll().stream()
-                .filter(notification -> notification.getUser() != null && notification.getUser().getId().equals(id))
-                .toList());
-        communityMessages.deleteAll(communityMessages.findAll().stream()
-                .filter(message -> message.getUser() != null && message.getUser().getId().equals(id))
-                .toList());
-
-        communities.findAll().forEach(community -> {
-            if (community.getMembers().removeIf(member -> member.getId().equals(id))) {
-                communities.save(community);
-            }
-        });
+        // Targeted batch deletes
+        comments.deleteByUserId(id);
+        votes.deleteByUserId(id);
+        reports.deleteByReportedById(id);
+        notifications.deleteByUserId(id);
+        activities.deleteByUserId(id);
+        communityMessages.deleteByUserId(id);
+        communityMemberships.deleteByUserId(id);
 
         users.delete(target);
     }
 
     private void deleteDecisionAndDependencies(Decision decision) {
-        reports.deleteAll(reports.findAll().stream()
-                .filter(report -> report.getDecision() != null
-                        && report.getDecision().getId().equals(decision.getId()))
-                .toList());
-        votes.deleteAll(votes.findAll().stream()
-                .filter(vote -> vote.getDecision() != null
-                        && vote.getDecision().getId().equals(decision.getId()))
-                .toList());
-        comments.deleteAll(comments.findAll().stream()
-                .filter(comment -> comment.getDecision() != null
-                        && comment.getDecision().getId().equals(decision.getId()))
-                .toList());
+        Long decisionId = decision.getId();
+        reports.deleteByDecisionId(decisionId);
+        votes.deleteByDecisionId(decisionId);
+        comments.deleteByDecisionId(decisionId);
         decisions.delete(decision);
     }
 
@@ -239,6 +218,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/decisions/{id}")
+        @Transactional
     public void deleteDecision(@PathVariable Long id) {
 
         Decision decision = decisions.findById(id)
@@ -278,16 +258,15 @@ public class AdminController {
     }
 
     private void deleteCommunityAndDependencies(Community community) {
-        decisions.findByCommunityId(community.getId()).stream()
-                .toList()
+        decisions.findByCommunityId(community.getId())
                 .forEach(this::deleteDecisionAndDependencies);
-        communityMessages.deleteAll(communityMessages.findByCommunityIdOrderByCreatedAtAsc(community.getId()));
-        community.getMembers().clear();
-        communities.saveAndFlush(community);
+        communityMessages.deleteByCommunityId(community.getId());
+        communityMemberships.deleteByCommunityId(community.getId());
         communities.delete(community);
     }
 
     @GetMapping("/analytics")
+    @Transactional(readOnly = true)
     public Map<String, Object> analytics(
             @RequestParam(defaultValue = "30") int days) {
         int selectedDays = Math.max(1, Math.min(days, 3650));
@@ -449,6 +428,7 @@ public class AdminController {
     // ===================== FULL ACTIVITY LOG (paginated) =====================
 
     @GetMapping("/activity")
+    @Transactional(readOnly = true)
     public Map<String, Object> activityLog(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
