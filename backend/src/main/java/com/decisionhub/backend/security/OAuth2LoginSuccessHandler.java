@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,8 @@ public class OAuth2LoginSuccessHandler
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public OAuth2LoginSuccessHandler(
             UserRepository userRepository,
@@ -99,7 +102,7 @@ public class OAuth2LoginSuccessHandler
 
         // Redirect to React
         String redirectUrl =
-                "http://localhost:5173/oauth2/success"
+                frontendUrl + "/oauth2/success"
                         + "?token=" + token
                         + "&email=" + email
                         + "&role=" + user.getRole().name();
